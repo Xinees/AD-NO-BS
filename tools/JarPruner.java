@@ -338,7 +338,7 @@ public final class JarPruner {
         code.add(new FieldInsnNode(Opcodes.GETSTATIC, ROOT + "common/entity/ADEntityTypes",
             entityField, "L" + ROOT + "util/ResourceSupplier;"));
         code.add(new MethodInsnNode(Opcodes.INVOKESTATIC, rendererOwner, rendererMethod,
-            "()Lnet/minecraft/client/renderer/entity/EntityRendererProvider;", false));
+            "()Lcom/astemir/astemirlib/re/client/model/render/renderer/AstemirEntityRenderer$Provider;", false));
         code.add(new MethodInsnNode(Opcodes.INVOKESTATIC, ROOT + "client/CommonClient", "registerEntityRenderer",
             "(Ljava/util/function/Supplier;Lnet/minecraft/client/renderer/entity/EntityRendererProvider;)V", false));
     }

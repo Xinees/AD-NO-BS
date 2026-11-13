@@ -1,4 +1,4 @@
-name: Direct Legacy JAR Prune - build 4
+name: Direct Legacy JAR Prune - build 5
 
 on:
   push:
@@ -32,12 +32,9 @@ jobs:
           set -euo pipefail
           test -s ec_ad-forge-1.20.1-1.0.4.jar
           ORIGINAL_SHA="$(sha256sum ec_ad-forge-1.20.1-1.0.4.jar | cut -d' ' -f1)"
-          ASTEMIR_SHA="$(sha256sum astemirlib_re-1.20.1-forge-1.2.98-SNAPSHOT.jar | cut -d' ' -f1)"
           test "$ORIGINAL_SHA" = "8df20e08d46f778a6e975b60b0cc7e19ff674264834812015537d7ef0fb121b1"
-          test "$ASTEMIR_SHA" = "906198b220958f352c308ec9a2178342b7af90198ade206d1596eb336a89a0a3"
-          echo "Immutable original input hashes verified."
+          echo "Immutable original input hash verified."
           echo "Original JAR SHA-256: $ORIGINAL_SHA"
-          echo "Astemir RE input SHA-256: $ASTEMIR_SHA"
 
       - name: Download ASM bytecode tools
         shell: bash
@@ -76,14 +73,25 @@ jobs:
             build/classes-pruned.jar \
             build/libs/ec_ad-legacy-forge-1.20.1.jar
 
-      - name: Embed untouched Astemir RE as Jar-in-Jar
+      - name: Verify retained renderer method descriptors
         shell: bash
         run: |
           set -euo pipefail
-          python3 tools/embed_astemir_jar.py \
-            build/libs/ec_ad-legacy-forge-1.20.1.jar \
-            astemirlib_re-1.20.1-forge-1.2.98-SNAPSHOT.jar \
-            build/libs/ec_ad-legacy-forge-1.20.1.jar
+          PROVIDER_DESC='()Lcom/astemir/astemirlib/re/client/model/render/renderer/AstemirEntityRenderer$Provider;'
+          for class_name in \
+            com.eternal_creations.archies_dino_mod.client.model.render.entity.mob.LushsaurClient \
+            com.eternal_creations.archies_dino_mod.client.model.render.entity.mob.ChorusoatlClient \
+            com.eternal_creations.archies_dino_mod.client.model.render.entity.mob.SculksaurClient
+          do
+            javap -classpath build/classes-pruned.jar -p -s "$class_name" | grep -F "descriptor: $PROVIDER_DESC"
+          done
+          RENDER_CALLS="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.client.CommonClient)"
+          COUNT="$(printf '%s\\n' "$RENDER_CALLS" | grep -F -c "createRenderProvider:$PROVIDER_DESC" || true)"
+          test "$COUNT" -eq 3
+          if printf '%s\\n' "$RENDER_CALLS" | grep -F "createRenderProvider:()Lnet/minecraft/client/renderer/entity/EntityRendererProvider;"; then
+            echo "Found stale renderer descriptor in CommonClient."
+            exit 1
+          fi
 
       - name: Verify Legacy JAR structure and retained content
         shell: bash
@@ -113,7 +121,7 @@ jobs:
 
               required = {
                   "META-INF/jarjar/metadata.json",
-                  "META-INF/jarjar/astemirlib_re-1.20.1-forge-1.2.98-SNAPSHOT.jar",
+                  "META-INF/jarjar/mixinextras-forge-0.4.1.jar",
                   "META-INF/mods.toml",
                   "ec_ad.mixins.json",
                   "ec_ad.forge.mixins.json",
@@ -133,21 +141,23 @@ jobs:
                   "assets/ec_ad/models/block/lushsaur_egg.json",
                   "assets/ec_ad/models/block/chorusoatl_egg.json",
               }
-              nested_library = "META-INF/jarjar/astemirlib_re-1.20.1-forge-1.2.98-SNAPSHOT.jar"
-              expected_library_hash = "906198b220958f352c308ec9a2178342b7af90198ade206d1596eb336a89a0a3"
               metadata = json.loads(z.read("META-INF/jarjar/metadata.json"))
-              matches = [
-                  entry for entry in metadata.get("jars", [])
-                  if entry.get("path") == nested_library
+              nested_astemir = [
+                  name for name in names
+                  if name.startswith("META-INF/jarjar/astemirlib_re-")
               ]
-              if len(matches) != 1:
-                  raise SystemExit("Astemir RE Jar-in-Jar metadata entry is missing or duplicated")
-              embedded_hash = hashlib.sha256(z.read(nested_library)).hexdigest()
-              if embedded_hash != expected_library_hash:
-                  raise SystemExit(f"Embedded Astemir RE hash mismatch: {embedded_hash}")
+              if nested_astemir:
+                  raise SystemExit("Astemir RE must be installed separately, not bundled: " + ", ".join(nested_astemir))
+              for dependency in metadata.get("jars", []):
+                  if dependency.get("identifier", {}).get("artifact") == "astemirlib_re":
+                      raise SystemExit("Astemir RE must not be declared as a Jar-in-Jar dependency")
+                  dependency_path = dependency.get("path")
+                  if dependency_path not in names:
+                      raise SystemExit(f"Jar-in-Jar metadata references missing file: {dependency_path}")
               mods_toml = z.read("META-INF/mods.toml").decode("utf-8")
-              if 'modId = "astemirlib_re"' not in mods_toml:
-                  raise SystemExit("Parent mod no longer declares its Astemir RE dependency")
+              astemir_dependency = 'modId = "astemirlib_re"'
+              if astemir_dependency not in mods_toml or 'mandatory = true' not in mods_toml:
+                  raise SystemExit("Parent mod must keep Astemir RE as an external required dependency")
 
               missing = sorted(required - names)
               if missing:
