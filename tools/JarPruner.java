@@ -152,6 +152,7 @@ public final class JarPruner {
         patchNoOpMethod(nodes.get(ROOT + "ArchiesDinosaurs"), "init",
             "(Lnet/minecraftforge/fml/event/lifecycle/FMLCommonSetupEvent;)V");
         patchCommonClient(nodes.get(ROOT + "client/CommonClient"));
+        patchClientModBus(nodes.get(ROOT + "client/ADClientModBus"));
         patchSpawnPlacements(nodes.get(ROOT + "ArchiesDinosaurs$ModBusEvents"));
         patchPlayerAnimations(nodes.get(ROOT + "client/animation/player/ADPlayerAnimations"));
         patchCreativeTab(nodes.get(ROOT + "common/tab/ADCreativeTabs"), nodes.get(ROOT + "common/items/ADItems"));
@@ -351,6 +352,18 @@ public final class JarPruner {
             "(Ljava/util/function/Supplier;Lnet/minecraft/client/renderer/blockentity/BlockEntityRenderer;)V", false));
     }
 
+    private static void patchClientModBus(ClassNode owner) {
+        if (owner == null) return;
+        for (MethodNode method : owner.methods) {
+            if (method.name.equals("modifyBakingResult") &&
+                method.desc.equals("(Lnet/minecraftforge/client/event/ModelEvent$ModifyBakingResult;)V")) {
+                clearMethod(method);
+                method.instructions.add(new InsnNode(Opcodes.RETURN));
+                method.maxLocals = 2;
+            }
+        }
+    }
+
     private static void patchSpawnPlacements(ClassNode owner) {
         if (owner == null) return;
         for (MethodNode method : owner.methods) {
@@ -373,13 +386,24 @@ public final class JarPruner {
     private static void patchParticleEmitters(ClassNode owner) {
         if (owner == null) return;
         for (MethodNode method : owner.methods) {
-            if (!method.name.equals("<clinit>")) continue;
-            clearMethod(method);
-            addParticleEmitter(method, "CHORUSOATL_SPIT_0", "chorusoatl/spit/chorusoatl_spit");
-            addParticleEmitter(method, "CHORUSOATL_SPIT_1", "chorusoatl/spit/chorusoatl_spit_2");
-            addParticleEmitter(method, "CHORUSOATL_SPIT_AOE", "chorusoatl/spit/chorusoatl_spit_aoe");
-            addParticleEmitter(method, "CHORUSOATL_SPIT_PROJECTILE", "chorusoatl/spit/chorusoatl_spit_projectile");
-            method.instructions.add(new InsnNode(Opcodes.RETURN));
+            if (method.name.equals("<clinit>")) {
+                clearMethod(method);
+                addParticleEmitter(method, "CHORUSOATL_SPIT_0", "chorusoatl/spit/chorusoatl_spit");
+                addParticleEmitter(method, "CHORUSOATL_SPIT_1", "chorusoatl/spit/chorusoatl_spit_2");
+                addParticleEmitter(method, "CHORUSOATL_SPIT_AOE", "chorusoatl/spit/chorusoatl_spit_aoe");
+                addParticleEmitter(method, "CHORUSOATL_SPIT_PROJECTILE", "chorusoatl/spit/chorusoatl_spit_projectile");
+                method.instructions.add(new InsnNode(Opcodes.RETURN));
+                method.maxLocals = 0;
+            } else if (method.name.equals("init") && method.desc.equals("()V")) {
+                clearMethod(method);
+                InsnList code = method.instructions;
+                for (String effect : List.of("LushsaurEffects", "ChorusoatlEffects", "SculksaurEffects")) {
+                    code.add(new MethodInsnNode(Opcodes.INVOKESTATIC, ROOT + "client/particle/effect/" + effect,
+                        "init", "()V", false));
+                }
+                code.add(new InsnNode(Opcodes.RETURN));
+                method.maxLocals = 0;
+            }
         }
     }
 
@@ -448,13 +472,18 @@ public final class JarPruner {
         if (owner == null) return;
         for (MethodNode method : owner.methods) {
             if (!method.name.equals("init") || !method.desc.equals("()V")) continue;
-            for (AbstractInsnNode insn : method.instructions.toArray()) {
-                if (insn instanceof MethodInsnNode call &&
-                    call.getOpcode() == Opcodes.INVOKESTATIC &&
-                    call.owner.equals(ROOT + "client/animation/player/attachable/LushsaurMaceAnimations")) {
-                    method.instructions.remove(call);
-                }
-            }
+            clearMethod(method);
+            InsnList code = method.instructions;
+            code.add(new InsnNode(Opcodes.ICONST_1));
+            code.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
+                ROOT + "client/animation/player/riding/OnLushsaurPlayerAnimations",
+                "init", "(I)V", false));
+            code.add(new InsnNode(Opcodes.ICONST_1));
+            code.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
+                ROOT + "client/animation/player/riding/OnChorusoatlPlayerAnimations",
+                "init", "(I)V", false));
+            code.add(new InsnNode(Opcodes.RETURN));
+            method.maxLocals = 0;
         }
     }
 
