@@ -1,0 +1,190 @@
+plugins {
+    id 'eclipse'
+    id 'idea'
+    id 'maven-publish'
+    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+}
+
+group = project.mod_group_id
+version = project.mod_version
+
+base {
+    archivesName = project.mod_id
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+    withSourcesJar()
+}
+
+minecraft {
+    mappings channel: project.mapping_channel, version: project.mapping_version
+    copyIdeResources = true
+
+    runs {
+        configureEach {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'info'
+            mods {
+                ec_ad {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        client {
+            property 'forge.enabledGameTestNamespaces', project.mod_id
+        }
+
+        server {
+            property 'forge.enabledGameTestNamespaces', project.mod_id
+            args '--nogui'
+        }
+
+        gameTestServer {
+            property 'forge.enabledGameTestNamespaces', project.mod_id
+        }
+
+        data {
+            workingDirectory project.file('run-data')
+            args '--mod', project.mod_id,
+                 '--all',
+                 '--output', file('src/generated/resources/'),
+                 '--existing', file('src/main/resources/')
+        }
+    }
+}
+
+sourceSets.main.resources {
+    srcDir 'src/generated/resources'
+}
+
+repositories {
+    mavenCentral()
+    maven { url = 'https://maven.minecraftforge.net/' }
+    maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
+}
+
+configurations {
+    decompileTarget
+}
+
+dependencies {
+    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+
+    // Local runtime dependency supplied with the original project.
+    implementation fg.deobf(files('astemirlib_re-1.20.1-forge-1.2.98-SNAPSHOT.jar'))
+
+    // The original Forge JAR is resolved through ForgeGradle so CFR sees
+    // development (official/Mojmap) names instead of production SRG names.
+    decompileTarget fg.deobf(files('transfer/ec_ad-forge-1.20.1-1.0.4.jar'))
+
+    compileOnly 'org.spongepowered:mixin:0.8.5'
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+}
+
+tasks.register('recoverSources') {
+    group = 'recovery'
+    description = 'Deobfuscates and decompiles the original mod JAR, then extracts its resources.'
+
+    onlyIf {
+        !file('src/main/java/com/eternal_creations/archies_dino_mod/ArchiesDinosaurs.java').exists()
+    }
+
+    doLast {
+        File inputJar = file('transfer/ec_ad-forge-1.20.1-1.0.4.jar')
+        File sourceOutput = file('src/main/java')
+        File resourceOutput = file('src/main/resources')
+        File cfrJar = file("${buildDir}/tools/cfr-0.152.jar")
+        File mappedJar = configurations.decompileTarget.singleFile
+
+        if (!inputJar.isFile()) {
+            throw new GradleException("Missing original mod JAR: ${inputJar}")
+        }
+        if (!file('astemirlib_re-1.20.1-forge-1.2.98-SNAPSHOT.jar').isFile()) {
+            throw new GradleException('Missing Astemir Re Lib 1.2.98 local dependency.')
+        }
+
+        logger.lifecycle("Decompiling remapped input: ${mappedJar}")
+        cfrJar.parentFile.mkdirs()
+        if (!cfrJar.isFile()) {
+            new URL('https://repo.maven.apache.org/maven2/org/benf/cfr/0.152/cfr-0.152.jar').withInputStream { stream ->
+                cfrJar.withOutputStream { output -> output << stream }
+            }
+        }
+
+        sourceOutput.mkdirs()
+        javaexec {
+            classpath = files(cfrJar)
+            mainClass = 'org.benf.cfr.reader.Main'
+            args mappedJar.absolutePath,
+                 '--outputdir', sourceOutput.absolutePath,
+                 '--silent', 'true'
+        }
+
+        resourceOutput.mkdirs()
+        copy {
+            from zipTree(inputJar)
+            into resourceOutput
+            exclude '**/*.class'
+            exclude 'META-INF/MANIFEST.MF'
+            exclude 'META-INF/*.SF'
+            exclude 'META-INF/*.RSA'
+            exclude 'META-INF/*.DSA'
+        }
+
+        delete fileTree(sourceOutput) {
+            include 'summary.txt'
+        }
+
+        logger.lifecycle("Recovered Java sources: ${fileTree(sourceOutput).matching { include '**/*.java' }.files.size()}")
+        logger.lifecycle("Extracted resources: ${fileTree(resourceOutput).files.size()}")
+    }
+}
+
+tasks.named('processResources', ProcessResources).configure {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    inputs.properties([
+        version: project.version,
+        mod_id: project.mod_id,
+        mod_name: project.mod_name
+    ])
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 17
+}
+
+jar {
+    manifest {
+        attributes([
+            'Specification-Title'     : project.mod_name,
+            'Specification-Vendor'    : project.mod_authors,
+            'Specification-Version'   : '1',
+            'Implementation-Title'    : project.name,
+            'Implementation-Version'  : project.version,
+            'Implementation-Vendor'   : project.mod_authors,
+            'Built-On-Minecraft'      : project.minecraft_version,
+            'MixinConfigs'            : 'ec_ad.mixins.json,ec_ad.forge.mixins.json'
+        ])
+    }
+}
+
+jar.finalizedBy('reobfJar')
+
+publishing {
+    publications {
+        register('mavenJava', MavenPublication) {
+            artifact jar
+        }
+    }
+    repositories {
+        maven {
+            url = layout.buildDirectory.dir('repo')
+        }
+    }
+}
