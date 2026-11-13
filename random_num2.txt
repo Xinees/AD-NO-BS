@@ -1,0 +1,466 @@
+PineconeMC version: 11.1.2 (official)
+
+Launched instance in online mode
+
+meta.pineconemc.ru resolves to:
+  178.205.101.112
+
+ely.by resolves to:
+  90.156.156.11
+
+account.ely.by resolves to:
+  90.156.156.11
+
+skinsystem.ely.by resolves to:
+  90.156.156.11
+
+Minecraft folder is:
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/instances/1.20.1(1)/minecraft
+
+Java path is:
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/java/java-runtime-gamma/bin/javaw.exe
+Java is version 17.0.15, using 64 (amd64) architecture, from Microsoft
+
+OS: Windows 10 Version 22H2 | winnt | 10.0.19045
+CPU: 11th Gen Intel(R) Core(TM) i5-11400H @ 2.70GHz
+RAM: 16085 MiB (available: 6475 MiB)
+GPU: NVIDIA GeForce RTX 3050 Laptop GPU
+GPU: Intel(R) UHD Graphics
+GPU: Microsoft Basic Render Driver
+GPU: Intel(R) UHD Graphics
+
+Components:
+  1) LWJGL 3 (org.lwjgl3) 3.3.1
+  2) Minecraft (net.minecraft) 1.20.1
+  3) Forge (net.minecraftforge) 47.4.28
+
+Launcher: standard
+Main class: io.github.zekerzhayard.forgewrapper.installer.Main
+
+Mods:
+  [✔] astemirlib_re-1.20.1-forge-1.2.98-SNAPSHOT
+  [✔] BadOptimizations-2.4.1-1.20.1
+  [✔] ec-ad-legacy-forge-1.20.1-fixed4 (1)
+  [✔] embeddium-0.3.31+mc1.20.1
+  [✔] entityculling-forge-1.12.0-mc1.20.1
+  [✔] ferritecore-6.0.1-forge
+  [✔] jei-1.20.1-forge-15.74.0.234
+  [✔] mezz_config-1.20.1-forge-0.7.1
+  [✔] modernfix-forge-5.27.92+mc1.20.1
+
+Traits:
+  FirstThreadOnMacOS
+  feature:is_quick_play_singleplayer
+  feature:is_quick_play_multiplayer
+  XR:Initial
+
+Libraries:
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/org/lwjgl/lwjgl-glfw-natives-windows-arm64/3.3.1/lwjgl-glfw-natives-windows-arm64-3.3.1.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/org/lwjgl/lwjgl-glfw-natives-windows-x86/3.3.1/lwjgl-glfw-natives-windows-x86-3.3.1.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/org/lwjgl/lwjgl-glfw-natives-windows/3.3.1/lwjgl-glfw-natives-windows-3.3.1.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/org/lwjgl/lwjgl-glfw/3.3.1/lwjgl-glfw-3.3.1.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/org/lwjgl/lwjgl-jemalloc-natives-windows-arm64/3.3.1/lwjgl-jemalloc-natives-windows-arm64-3.3.1.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/org/lwjgl/lwjgl-jemalloc-natives-windows-x86/3.3.1/lwjgl-jemalloc-natives-windows-x86-3.3.1.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/org/lwjgl/lwjgl-jemalloc-natives-windows/3.3.1/lwjgl-jemalloc-natives-windows-3.3.1.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/org/lwjgl/lwjgl-jemalloc/3.3.1/lwjgl-jemalloc-3.3.1.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/org/lwjgl/lwjgl-natives-windows-arm64/3.3.1/lwjgl-natives-windows-arm64-3.3.1.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/org/lwjgl/lwjgl-natives-windows-x86/3.3.1/lwjgl-natives-windows-x86-3.3.1.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/org/lwjgl/lwjgl-natives-windows/3.3.1/lwjgl-natives-windows-3.3.1.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/org/lwjgl/lwjgl-openal-natives-windows-arm64/3.3.1/lwjgl-openal-natives-windows-arm64-3.3.1.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/org/lwjgl/lwjgl-openal-natives-windows-x86/3.3.1/lwjgl-openal-natives-windows-x86-3.3.1.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/org/lwjgl/lwjgl-openal-natives-windows/3.3.1/lwjgl-openal-natives-windows-3.3.1.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/org/lwjgl/lwjgl-openal/3.3.1/lwjgl-openal-3.3.1.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/org/lwjgl/lwjgl-opengl-natives-windows-arm64/3.3.1/lwjgl-opengl-natives-windows-arm64-3.3.1.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/org/lwjgl/lwjgl-opengl-natives-windows-x86/3.3.1/lwjgl-opengl-natives-windows-x86-3.3.1.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/org/lwjgl/lwjgl-opengl-natives-windows/3.3.1/lwjgl-opengl-natives-windows-3.3.1.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/org/lwjgl/lwjgl-opengl/3.3.1/lwjgl-opengl-3.3.1.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/org/lwjgl/lwjgl-stb-natives-windows-arm64/3.3.1/lwjgl-stb-natives-windows-arm64-3.3.1.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/org/lwjgl/lwjgl-stb-natives-windows-x86/3.3.1/lwjgl-stb-natives-windows-x86-3.3.1.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/org/lwjgl/lwjgl-stb-natives-windows/3.3.1/lwjgl-stb-natives-windows-3.3.1.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/org/lwjgl/lwjgl-stb/3.3.1/lwjgl-stb-3.3.1.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/org/lwjgl/lwjgl-tinyfd-natives-windows-arm64/3.3.1/lwjgl-tinyfd-natives-windows-arm64-3.3.1.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/org/lwjgl/lwjgl-tinyfd-natives-windows-x86/3.3.1/lwjgl-tinyfd-natives-windows-x86-3.3.1.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/org/lwjgl/lwjgl-tinyfd-natives-windows/3.3.1/lwjgl-tinyfd-natives-windows-3.3.1.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/org/lwjgl/lwjgl-tinyfd/3.3.1/lwjgl-tinyfd-3.3.1.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/org/lwjgl/lwjgl/3.3.1/lwjgl-3.3.1.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/com/github/oshi/oshi-core/6.2.2/oshi-core-6.2.2.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/com/google/code/gson/gson/2.10/gson-2.10.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/com/google/guava/failureaccess/1.0.1/failureaccess-1.0.1.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/com/google/guava/guava/31.1-jre/guava-31.1-jre.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/com/ibm/icu/icu4j/71.1/icu4j-71.1.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/com/mojang/blocklist/1.0.10/blocklist-1.0.10.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/com/mojang/brigadier/1.1.8/brigadier-1.1.8.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/com/mojang/datafixerupper/6.0.8/datafixerupper-6.0.8.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/com/mojang/logging/1.1.1/logging-1.1.1.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/com/mojang/patchy/2.2.10/patchy-2.2.10.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/com/mojang/text2speech/1.17.9/text2speech-1.17.9.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/commons-codec/commons-codec/1.15/commons-codec-1.15.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/commons-io/commons-io/2.11.0/commons-io-2.11.0.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/commons-logging/commons-logging/1.2/commons-logging-1.2.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/io/netty/netty-buffer/4.1.82.Final/netty-buffer-4.1.82.Final.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/io/netty/netty-codec/4.1.82.Final/netty-codec-4.1.82.Final.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/io/netty/netty-common/4.1.82.Final/netty-common-4.1.82.Final.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/io/netty/netty-handler/4.1.82.Final/netty-handler-4.1.82.Final.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/io/netty/netty-resolver/4.1.82.Final/netty-resolver-4.1.82.Final.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/io/netty/netty-transport-classes-epoll/4.1.82.Final/netty-transport-classes-epoll-4.1.82.Final.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/io/netty/netty-transport-native-unix-common/4.1.82.Final/netty-transport-native-unix-common-4.1.82.Final.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/io/netty/netty-transport/4.1.82.Final/netty-transport-4.1.82.Final.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/it/unimi/dsi/fastutil/8.5.9/fastutil-8.5.9.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/net/java/dev/jna/jna-platform/5.12.1/jna-platform-5.12.1.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/net/java/dev/jna/jna/5.12.1/jna-5.12.1.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/net/sf/jopt-simple/jopt-simple/5.0.4/jopt-simple-5.0.4.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/org/apache/commons/commons-compress/1.21/commons-compress-1.21.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/org/apache/commons/commons-lang3/3.12.0/commons-lang3-3.12.0.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/org/apache/httpcomponents/httpclient/4.5.13/httpclient-4.5.13.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/org/apache/httpcomponents/httpcore/4.4.15/httpcore-4.4.15.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/org/apache/logging/log4j/log4j-api/2.19.0/log4j-api-2.19.0.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/org/apache/logging/log4j/log4j-core/2.19.0/log4j-core-2.19.0.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/org/apache/logging/log4j/log4j-slf4j2-impl/2.19.0/log4j-slf4j2-impl-2.19.0.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/org/joml/joml/1.10.5/joml-1.10.5.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/org/slf4j/slf4j-api/2.0.1/slf4j-api-2.0.1.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/io/github/zekerzhayard/ForgeWrapper/prism-2026-08-01/ForgeWrapper-prism-2026-08-01.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/cpw/mods/securejarhandler/2.1.10/securejarhandler-2.1.10.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/org/ow2/asm/asm/9.9.1/asm-9.9.1.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/org/ow2/asm/asm-commons/9.9.1/asm-commons-9.9.1.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/org/ow2/asm/asm-tree/9.9.1/asm-tree-9.9.1.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/org/ow2/asm/asm-util/9.9.1/asm-util-9.9.1.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/org/ow2/asm/asm-analysis/9.9.1/asm-analysis-9.9.1.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/net/minecraftforge/accesstransformers/8.0.4/accesstransformers-8.0.4.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/org/antlr/antlr4-runtime/4.9.1/antlr4-runtime-4.9.1.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/net/minecraftforge/eventbus/6.2.33/eventbus-6.2.33.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/net/minecraftforge/forgespi/7.0.1/forgespi-7.0.1.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/net/minecraftforge/coremods/5.2.4/coremods-5.2.4.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/cpw/mods/modlauncher/10.0.9/modlauncher-10.0.9.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/net/minecraftforge/unsafe/0.2.0/unsafe-0.2.0.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/net/minecraftforge/mergetool/1.1.5/mergetool-1.1.5-api.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/com/electronwill/night-config/core/3.6.4/core-3.6.4.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/com/electronwill/night-config/toml/3.6.4/toml-3.6.4.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/org/apache/maven/maven-artifact/3.8.5/maven-artifact-3.8.5.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/net/jodah/typetools/0.6.3/typetools-0.6.3.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/net/minecrell/terminalconsoleappender/1.2.0/terminalconsoleappender-1.2.0.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/org/jline/jline-reader/3.12.1/jline-reader-3.12.1.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/org/jline/jline-terminal/3.12.1/jline-terminal-3.12.1.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/org/spongepowered/mixin/0.8.5/mixin-0.8.5.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/org/openjdk/nashorn/nashorn-core/15.4/nashorn-core-15.4.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/net/minecraftforge/JarJarSelector/0.3.19/JarJarSelector-0.3.19.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/net/minecraftforge/JarJarMetadata/0.3.19/JarJarMetadata-0.3.19.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/cpw/mods/bootstraplauncher/1.1.2/bootstraplauncher-1.1.2.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/net/minecraftforge/JarJarFileSystems/0.3.19/JarJarFileSystems-0.3.19.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/net/minecraftforge/fmlloader/1.20.1-47.4.28/fmlloader-1.20.1-47.4.28.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/net/minecraftforge/fmlearlydisplay/1.20.1-47.4.28/fmlearlydisplay-1.20.1-47.4.28.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/by/ely/authlib/4.0.43-ely.5/authlib-4.0.43-ely.5.jar
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/com/mojang/minecraft/1.20.1/minecraft-1.20.1-client.jar
+
+Native libraries:
+
+Natives path:
+  C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/instances/1.20.1(1)/natives
+
+Minecraft arguments:
+  --username  --version 1.20.1 --gameDir C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/instances/1.20.1(1)/minecraft --assetsDir C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/assets --assetIndex 5 --uuid  --accessToken  --userType  --versionType release --launchTarget forgeclient --fml.forgeVersion 47.4.28 --fml.mcVersion 1.20.1 --fml.forgeGroup net.minecraftforge --fml.mcpVersion 20230612.114412
+
+Window size: 854 x 480
+
+Java arguments:
+  -Duser.language=en -XX:HeapDumpPath=MojangTricksIntelDriversForPerformance_javaw.exe_minecraft.exe.heapdump -Xms512m -Xmx4096m -XX:+ParallelRefProcEnabled -XX:+AlwaysPreTouch -XX:+PerfDisableSharedMem -XX:+UseZGC -XX:-ZUncommit
+
+Minecraft process ID: 12436
+
+
+JVM info: Microsoft - 17.0.15 - 17.0.15+6-LTS
+java.net.preferIPv4Stack=true
+Current Time: 13/11/2026 20:54:15
+Created Temporary Directory: C:\Users\********\AppData\Local\Temp\forge_installer13433132973176405995
+  Extracting: /data/client.lzma
+Building Processors
+===============================================================================
+  Cache: 
+    C:\Users\********\Desktop\Новая папка\ПАРОЛ\Games\ElyPrismLauncher\libraries\de\oceanlabs\mcp\mcp_config\1.20.1-20230612.114412\mcp_config-1.20.1-20230612.114412-mappings.txt Validated: 5b05a5cc0c8ed6df427fb7671a703c1a008bbf92
+  Cache Hit!
+===============================================================================
+  Cache: 
+    C:\Users\********\Desktop\Новая папка\ПАРОЛ\Games\ElyPrismLauncher\libraries\net\minecraft\client\1.20.1-20230612.114412\client-1.20.1-20230612.114412-mappings.txt Validated: 6c48521eed01fe2e8ecdadbd5ae348415f3c47da
+  Cache Hit!
+===============================================================================
+  Cache: 
+    C:\Users\********\Desktop\Новая папка\ПАРОЛ\Games\ElyPrismLauncher\libraries\net\minecraft\client\1.20.1-20230612.114412\client-1.20.1-20230612.114412-mappings.txt Validated: 6c48521eed01fe2e8ecdadbd5ae348415f3c47da
+    C:\Users\********\Desktop\Новая папка\ПАРОЛ\Games\ElyPrismLauncher\libraries\de\oceanlabs\mcp\mcp_config\1.20.1-20230612.114412\mcp_config-1.20.1-20230612.114412-mappings-merged.txt Validated: 3cfe626ce201d90a54486de5f3ce1b05ac04b9a1
+    C:\Users\********\Desktop\Новая папка\ПАРОЛ\Games\ElyPrismLauncher\libraries\de\oceanlabs\mcp\mcp_config\1.20.1-20230612.114412\mcp_config-1.20.1-20230612.114412-mappings.txt Validated: 5b05a5cc0c8ed6df427fb7671a703c1a008bbf92
+  Cache Hit!
+===============================================================================
+  Cache: 
+    C:\Users\********\Desktop\Новая папка\ПАРОЛ\Games\ElyPrismLauncher\libraries\net\minecraft\client\1.20.1-20230612.114412\client-1.20.1-20230612.114412-slim.jar Validated: de86b035d2da0f78940796bb95c39a932ed84834
+    C:\Users\********\Desktop\Новая папка\ПАРОЛ\Games\ElyPrismLauncher\libraries\net\minecraft\client\1.20.1-20230612.114412\client-1.20.1-20230612.114412-extra.jar Validated: 8c5a95cbce940cfdb304376ae9fea47968d02587
+  Cache Hit!
+===============================================================================
+  Cache: 
+    C:\Users\********\Desktop\Новая папка\ПАРОЛ\Games\ElyPrismLauncher\libraries\net\minecraft\client\1.20.1-20230612.114412\client-1.20.1-20230612.114412-srg.jar Validated: 3c8aa19b710a3a68f721210eb69b74594d13e218
+    C:\Users\********\Desktop\Новая папка\ПАРОЛ\Games\ElyPrismLauncher\libraries\de\oceanlabs\mcp\mcp_config\1.20.1-20230612.114412\mcp_config-1.20.1-20230612.114412-mappings-merged.txt Validated: 3cfe626ce201d90a54486de5f3ce1b05ac04b9a1
+    C:\Users\********\Desktop\Новая папка\ПАРОЛ\Games\ElyPrismLauncher\libraries\net\minecraft\client\1.20.1-20230612.114412\client-1.20.1-20230612.114412-slim.jar Validated: de86b035d2da0f78940796bb95c39a932ed84834
+  Cache Hit!
+===============================================================================
+  Cache: 
+    C:\Users\********\Desktop\Новая папка\ПАРОЛ\Games\ElyPrismLauncher\libraries\net\minecraft\client\1.20.1-20230612.114412\client-1.20.1-20230612.114412-srg.jar Validated: 3c8aa19b710a3a68f721210eb69b74594d13e218
+    C:\Users\********\Desktop\Новая папка\ПАРОЛ\Games\ElyPrismLauncher\libraries\net\minecraftforge\forge\1.20.1-47.4.28\forge-1.20.1-47.4.28-client.jar Validated: 6b7afd53defb7b518a53a39f4ac8bffe6545fa0b
+  Cache Hit!
+2026-11-13 20:54:17,604 main WARN Advanced terminal features are not available in this environment
+[20:54:17] [main/INFO] [cp.mo.mo.Launcher/MODLAUNCHER]: ModLauncher running: args [--username, Morplin, --version, 1.20.1, --gameDir, C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/instances/1.20.1(1)/minecraft, --assetsDir, C:/Users/********/Desktop/Новая папка/ПАРОЛ/Games/ElyPrismLauncher/assets, --assetIndex, 5, --uuid, <PROFILE ID>, --accessToken, ????????, --userType, msa, --versionType, release, --launchTarget, forgeclient, --fml.forgeVersion, 47.4.28, --fml.mcVersion, 1.20.1, --fml.forgeGroup, net.minecraftforge, --fml.mcpVersion, 20230612.114412, --width, 854, --height, 480]
+[20:54:17] [main/INFO] [cp.mo.mo.Launcher/MODLAUNCHER]: ModLauncher 10.0.9+10.0.9+main.dcd20f30 starting: java version 17.0.15 by Microsoft; OS Windows 10 arch amd64 version 10.0
+[20:54:17] [main/INFO] [ne.mi.fm.lo.ImmediateWindowHandler/]: Loading ImmediateWindowProvider fmlearlywindow
+[20:54:18] [main/INFO] [EARLYDISPLAY/]: Trying GL version 4.6
+[20:54:18] [main/INFO] [EARLYDISPLAY/]: Requested GL version 4.6 got version 4.6
+[20:54:18] [main/INFO] [mixin/]: SpongePowered MIXIN Subsystem Version=0.8.5 Source=union:/C:/Users/********/Desktop/Новая%20папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/org/spongepowered/mixin/0.8.5/mixin-0.8.5.jar%23149!/ Service=ModLauncher Env=CLIENT
+[20:54:18] [pool-2-thread-1/INFO] [EARLYDISPLAY/]: GL info: Intel(R) UHD Graphics GL version 4.6.0 - Build 32.0.101.7088, Intel
+[20:54:18] [main/WARN] [ne.mi.fm.lo.mo.ModFileParser/LOADING]: Mod file C:\Users\********\Desktop\Новая папка\ПАРОЛ\Games\ElyPrismLauncher\libraries\net\minecraftforge\fmlcore\1.20.1-47.4.28\fmlcore-1.20.1-47.4.28.jar is missing mods.toml file
+[20:54:18] [main/WARN] [ne.mi.fm.lo.mo.ModFileParser/LOADING]: Mod file C:\Users\********\Desktop\Новая папка\ПАРОЛ\Games\ElyPrismLauncher\libraries\net\minecraftforge\javafmllanguage\1.20.1-47.4.28\javafmllanguage-1.20.1-47.4.28.jar is missing mods.toml file
+[20:54:18] [main/WARN] [ne.mi.fm.lo.mo.ModFileParser/LOADING]: Mod file C:\Users\********\Desktop\Новая папка\ПАРОЛ\Games\ElyPrismLauncher\libraries\net\minecraftforge\lowcodelanguage\1.20.1-47.4.28\lowcodelanguage-1.20.1-47.4.28.jar is missing mods.toml file
+[20:54:18] [main/WARN] [ne.mi.fm.lo.mo.ModFileParser/LOADING]: Mod file C:\Users\********\Desktop\Новая папка\ПАРОЛ\Games\ElyPrismLauncher\libraries\net\minecraftforge\mclanguage\1.20.1-47.4.28\mclanguage-1.20.1-47.4.28.jar is missing mods.toml file
+[20:54:18] [main/WARN] [ne.mi.ja.se.JarSelector/]: Attempted to select a dependency jar for JarJar which was passed in as source: mezz_config. Using Mod File: C:\Users\********\Desktop\Новая папка\ПАРОЛ\Games\ElyPrismLauncher\instances\1.20.1(1)\minecraft\mods\mezz_config-1.20.1-forge-0.7.1.jar
+[20:54:18] [main/INFO] [ne.mi.fm.lo.mo.JarInJarDependencyLocator/]: Found 4 dependencies adding them to mods collection
+[20:54:20] [main/INFO] [mixin/]: Compatibility level set to JAVA_17
+[20:54:20] [main/INFO] [cp.mo.mo.LaunchServiceHandler/MODLAUNCHER]: Launching target 'forgeclient' with arguments [--version, 1.20.1, --gameDir, C:\Users\********\Desktop\Новая папка\ПАРОЛ\Games\ElyPrismLauncher\instances\1.20.1(1)\minecraft, --assetsDir, C:\Users\********\Desktop\Новая папка\ПАРОЛ\Games\ElyPrismLauncher\assets, --uuid, <PROFILE ID>, --username, Morplin, --assetIndex, 5, --accessToken, ????????, --userType, msa, --versionType, release, --width, 854, --height, 480]
+[20:54:20] [main/INFO] [BadOptimizations/]: Config version: 6
+[20:54:20] [main/INFO] [BadOptimizations/]: BadOptimizations config dump:
+[20:54:20] [main/INFO] [BadOptimizations/]: enable_toast_optimizations: true
+[20:54:20] [main/INFO] [BadOptimizations/]: ignore_mod_incompatibilities: false
+[20:54:20] [main/INFO] [BadOptimizations/]: lightmap_time_change_needed_for_update: 80
+[20:54:20] [main/INFO] [BadOptimizations/]: enable_lightmap_caching: true
+[20:54:20] [main/INFO] [BadOptimizations/]: enable_particle_manager_optimization: true
+[20:54:20] [main/INFO] [BadOptimizations/]: enable_entity_renderer_caching: true
+[20:54:20] [main/INFO] [BadOptimizations/]: log_config: true
+[20:54:20] [main/INFO] [BadOptimizations/]: enable_remove_redundant_fov_calculations: true
+[20:54:20] [main/INFO] [BadOptimizations/]: config_version: 6
+[20:54:20] [main/INFO] [BadOptimizations/]: enable_sky_angle_caching_in_worldrenderer: true
+[20:54:20] [main/INFO] [BadOptimizations/]: enable_block_entity_renderer_caching: true
+[20:54:20] [main/INFO] [BadOptimizations/]: skycolor_time_change_needed_for_update: 3
+[20:54:20] [main/INFO] [BadOptimizations/]: enable_entity_flag_caching: true
+[20:54:20] [main/INFO] [BadOptimizations/]: ignore_mod_cache_hooks: false
+[20:54:20] [main/INFO] [BadOptimizations/]: enable_debug_renderer_disable_if_not_needed: true
+[20:54:20] [main/INFO] [BadOptimizations/]: enable_sky_color_caching: true
+[20:54:20] [main/INFO] [BadOptimizations/]: enable_remove_tutorial_if_not_demo: true
+[20:54:20] [main/INFO] [BadOptimizations/]: show_f3_text: true
+[20:54:20] [main/INFO] [Embeddium/]: Loaded configuration file for Embeddium: 59 options available, 0 override(s) found
+[20:54:20] [main/INFO] [Embeddium-GraphicsAdapterProbe/]: Searching for graphics cards...
+[20:54:20] [main/INFO] [Embeddium-GraphicsAdapterProbe/]: Found graphics card: GraphicsAdapterInfo[vendor=UNKNOWN, name=Meta Virtual Monitor, version=DriverVersion=15.52.32.370]
+[20:54:20] [main/INFO] [Embeddium-GraphicsAdapterProbe/]: Found graphics card: GraphicsAdapterInfo[vendor=INTEL, name=Intel(R) UHD Graphics, version=DriverVersion=32.0.101.7088]
+[20:54:20] [main/INFO] [Embeddium-GraphicsAdapterProbe/]: Found graphics card: GraphicsAdapterInfo[vendor=NVIDIA, name=NVIDIA GeForce RTX 3050 Laptop GPU, version=DriverVersion=32.0.16.1088]
+[20:54:20] [main/WARN] [Embeddium-Workarounds/]: Embeddium has applied one or more workarounds to prevent crashes or other issues on your system: [NVIDIA_THREADED_OPTIMIZATIONS]
+[20:54:20] [main/WARN] [Embeddium-Workarounds/]: This is not necessarily an issue, but it may result in certain features or optimizations being disabled. You can sometimes fix these issues by upgrading your graphics driver.
+[20:54:20] [main/INFO] [ModernFix/]: Loaded configuration file for ModernFix 5.27.92+mc1.20.1: 110 options available, 0 override(s) found
+[20:54:20] [main/INFO] [ModernFix/]: Applying Nashorn fix
+[20:54:20] [main/INFO] [ModernFix/]: Applied Forge config corruption patch
+[20:54:20] [main/INFO] [ModernFix/]: Configuring Minecraft's max.bg.threads option with 9 threads
+[20:54:21] [main/INFO] [MixinExtras|Service/]: Initializing MixinExtras via com.llamalad7.mixinextras.service.MixinExtrasServiceImpl(version=0.4.1).
+[20:54:22] [pool-4-thread-1/INFO] [minecraft/Bootstrap]: ModernFix reached bootstrap stage (7.762 s after launch)
+[20:54:22] [pool-4-thread-1/WARN] [mixin/]: @Final field delegatesByName:Ljava/util/Map; in modernfix-modernfix.mixins.json:perf.forge_registry_alloc.ForgeRegistryMixin should be final
+[20:54:22] [pool-4-thread-1/WARN] [mixin/]: @Final field delegatesByValue:Ljava/util/Map; in modernfix-modernfix.mixins.json:perf.forge_registry_alloc.ForgeRegistryMixin should be final
+[20:54:23] [pool-4-thread-1/INFO] [minecraft/Bootstrap]: Vanilla bootstrap took 1109 milliseconds
+[20:54:25] [Render thread/WARN] [minecraft/VanillaPackResourcesBuilder]: Assets URL 'union:/C:/Users/********/Desktop/Новая%20папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/net/minecraft/client/1.20.1-20230612.114412/client-1.20.1-20230612.114412-srg.jar%23174!/assets/.mcassetsroot' uses unexpected schema
+[20:54:25] [Render thread/WARN] [minecraft/VanillaPackResourcesBuilder]: Assets URL 'union:/C:/Users/********/Desktop/Новая%20папка/ПАРОЛ/Games/ElyPrismLauncher/libraries/net/minecraft/client/1.20.1-20230612.114412/client-1.20.1-20230612.114412-srg.jar%23174!/data/.mcassetsroot' uses unexpected schema
+[20:54:25] [Render thread/INFO] [mojang/YggdrasilAuthenticationService]: Environment: authHost='https://authserver.ely.by/auth', accountsHost='https://account.ely.by/api/mojang', sessionHost='https://account.ely.by/api/authlib-injector/sessionserver', servicesHost='https://account.ely.by/api/mojang/services', name='ELY'
+[20:54:25] [Render thread/INFO] [minecraft/Minecraft]: Setting user: Morplin
+[20:54:26] [Render thread/INFO] [ModernFix/]: Bypassed Mojang DFU
+[20:54:26] [Render thread/INFO] [minecraft/Minecraft]: Backend library: LWJGL version 3.3.1 build 7
+[20:54:26] [Render thread/WARN] [Embeddium-NvidiaWorkarounds/]: Applying workaround: Prevent the NVIDIA OpenGL driver from using broken optimizations (NVIDIA_THREADED_OPTIMIZATIONS)
+[20:54:26] [Render thread/INFO] [Embeddium-PostlaunchChecks/]: OpenGL Vendor: Intel
+[20:54:26] [Render thread/INFO] [Embeddium-PostlaunchChecks/]: OpenGL Renderer: Intel(R) UHD Graphics
+[20:54:26] [Render thread/INFO] [Embeddium-PostlaunchChecks/]: OpenGL Version: 4.6.0 - Build 32.0.101.7088
+[20:54:26] [modloading-worker-0/INFO] [STDOUT/]: [dev.tr7zw.trender.gui.impl.client.LibGuiClient:onInitializeClient:37]: [TRender] Initializing Client...
+[20:54:26] [modloading-worker-0/INFO] [ne.mi.co.ForgeMod/FORGEMOD]: Forge mod loading, version 47.4.28, for MC 1.20.1 with MCP 20230612.114412
+[20:54:26] [modloading-worker-0/INFO] [ne.mi.co.MinecraftForge/FORGE]: MinecraftForge v47.4.28 Initialized
+[20:54:26] [modloading-worker-0/INFO] [me.je.li.lo.PluginCaller/]: Sending ConfigManager...
+[20:54:26] [modloading-worker-0/INFO] [me.je.li.lo.PluginCaller/]: Sending ConfigManager took 1.919 milliseconds
+[20:54:26] [Render thread/INFO] [ModernFix/]: Instantiating Mojang DFU
+[20:54:27] [Datafixer Bootstrap/INFO] [mojang/DataFixerBuilder]: 188 Datafixer optimizations took 94 milliseconds
+[20:54:27] [Render thread/INFO] [ModernFix/]: Replacing search trees with 'JEI' provider
+[20:54:27] [Render thread/INFO] [minecraft/ReloadableResourceManager]: Reloading ResourceManager: vanilla, mod_resources, file/Archie's Dino Legacy Pack.zip
+[20:54:28] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [forge] Starting version check at https://files.minecraftforge.net/net/minecraftforge/forge/promotions_slim.json
+[20:54:28] [Worker-ResourceReload-9/INFO] [minecraft/UnihexProvider]: Found unifont_all_no_pua-15.0.06.hex, loading
+[20:54:29] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [forge] Found status: UP_TO_DATE Current: 47.4.28 Target: null
+[20:54:29] [Render thread/INFO] [AstemirLib Re/]: Shaders are loaded. Total: 11
+[20:54:29] [Render thread/INFO] [AstemirLib Re/]: Models are loaded successfully. Total: 9
+[20:54:29] [Render thread/INFO] [AstemirLib Re/]: Loading virtual animations, registered count: 1
+[20:54:29] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 2048x4096x0 astemirlib_re:textures/atlas/particles_0.png-atlas
+[20:54:29] [Render thread/INFO] [AstemirLib Re/]: Particles loaded successfully! Total configs: 52, Atlas Pages: 1
+[20:54:29] [Render thread/WARN] [minecraft/SoundEngine]: Missing sound for event: minecraft:item.goat_horn.play
+[20:54:29] [Render thread/WARN] [minecraft/SoundEngine]: Missing sound for event: minecraft:entity.goat.screaming.horn_break
+[20:54:29] [Render thread/INFO] [mojang/Library]: OpenAL initialized on device OpenAL Soft on Наушники (G435 Bluetooth Gaming Headset Stereo)
+[20:54:29] [Render thread/INFO] [minecraft/SoundEngine]: Sound engine started
+[20:54:30] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 1024x512x4 minecraft:textures/atlas/blocks.png-atlas
+[20:54:30] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 256x256x4 minecraft:textures/atlas/signs.png-atlas
+[20:54:30] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 512x512x4 minecraft:textures/atlas/shield_patterns.png-atlas
+[20:54:30] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 512x512x4 minecraft:textures/atlas/banner_patterns.png-atlas
+[20:54:30] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 1024x1024x4 minecraft:textures/atlas/armor_trims.png-atlas
+[20:54:30] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 128x64x4 minecraft:textures/atlas/decorated_pot.png-atlas
+[20:54:30] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 256x256x4 minecraft:textures/atlas/chest.png-atlas
+[20:54:30] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 512x256x4 minecraft:textures/atlas/shulker_boxes.png-atlas
+[20:54:30] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 512x256x4 minecraft:textures/atlas/beds.png-atlas
+[20:54:30] [Render thread/WARN] [minecraft/ShaderInstance]: Shader rendertype_entity_translucent_emissive could not find sampler named Sampler2 in the specified shader program.
+[20:54:30] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 256x256x0 minecraft:textures/atlas/particles.png-atlas
+[20:54:30] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 256x256x0 minecraft:textures/atlas/paintings.png-atlas
+[20:54:30] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 128x128x0 minecraft:textures/atlas/mob_effects.png-atlas
+[20:54:30] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 512x256x0 jei:textures/atlas/gui.png-atlas
+[20:54:30] [Realms Notification Availability checker #1/INFO] [mojang/RealmsClient]: Could not authorize you against Realms server: java.lang.NullPointerException
+[20:54:32] [Render thread/WARN] [ModernFix/]: Game took 17.796 seconds to start
+[20:54:37] [Render thread/INFO] [minecraft/RecipeManager]: Loaded 7 recipes
+[20:54:37] [Render thread/INFO] [minecraft/AdvancementList]: Loaded 1280 advancements
+[20:54:37] [Render thread/WARN] [ModernFix/]: Initial datapack load took 1.076 s
+[20:54:38] [Server thread/INFO] [minecraft/IntegratedServer]: Starting integrated minecraft server version 1.20.1
+[20:54:38] [Server thread/INFO] [minecraft/MinecraftServer]: Generating keypair
+[20:54:38] [Server thread/INFO] [minecraft/MinecraftServer]: Preparing start region for dimension minecraft:overworld
+[20:54:38] [Render thread/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 0%
+[20:54:38] [Server thread/INFO] [ne.mi.se.pe.PermissionAPI/]: Successfully initialized permission handler forge:default_handler
+[20:54:39] [Render thread/INFO] [minecraft/LoggerChunkProgressListener]: Time elapsed: 112 ms
+[20:54:39] [Server thread/INFO] [minecraft/IntegratedServer]: Changing view distance to 12, from 10
+[20:54:39] [Server thread/INFO] [minecraft/IntegratedServer]: Changing simulation distance to 12, from 0
+[20:54:39] [Render thread/WARN] [io.ne.ut.in.SystemPropertyUtil/]: Unable to parse the boolean system property 'java.net.preferIPv6Addresses':system - using the default value: false
+[20:54:39] [Netty Local Client IO #0/INFO] [ne.mi.ne.NetworkHooks/]: Connected to a modded server.
+[20:54:39] [Server thread/INFO] [minecraft/PlayerList]: Morplin[local:E:ec2add09] logged in with entity id 2 at (4.5, -55.30000019073486, 7.5)
+[20:54:39] [Server thread/INFO] [ModernFix/]: Using enhanced recipe sync for player Morplin
+[20:54:39] [Server thread/INFO] [minecraft/MinecraftServer]: Morplin joined the game
+[20:54:39] [Render thread/WARN] [mixin/]: Error loading class: net/fabricmc/fabric/api/blockview/v2/FabricBlockView (java.lang.ClassNotFoundException: net.fabricmc.fabric.api.blockview.v2.FabricBlockView)
+[20:54:39] [Render thread/WARN] [mixin/]: Error loading class: net/fabricmc/fabric/api/rendering/data/v1/RenderAttachedBlockView (java.lang.ClassNotFoundException: net.fabricmc.fabric.api.rendering.data.v1.RenderAttachedBlockView)
+[20:54:39] [Render thread/INFO] [ChunkBuilder/]: Started 6 worker threads
+[20:54:39] [Render thread/INFO] [me.je.co.ut.LoggedTimer/]: Starting JEI...
+[20:54:39] [Render thread/INFO] [me.je.li.lo.PluginCaller/]: Configuring JEI...
+[20:54:39] [Render thread/INFO] [me.je.li.lo.PluginCaller/]: Configuring JEI took 811.3 microseconds
+[20:54:39] [Render thread/INFO] [me.je.li.lo.PluginCaller/]: Registering item subtypes...
+[20:54:39] [Render thread/INFO] [me.je.li.lo.PluginCaller/]: Registering item subtypes took 2.325 milliseconds
+[20:54:39] [Render thread/INFO] [me.je.li.lo.PluginCaller/]: Registering fluid subtypes...
+[20:54:39] [Render thread/INFO] [me.je.li.lo.PluginCaller/]: Registering fluid subtypes took 222.8 microseconds
+[20:54:39] [Render thread/INFO] [me.je.li.lo.PluginCaller/]: Registering ingredients...
+[20:54:39] [Render thread/INFO] [me.je.li.lo.PluginCallerTimerRunnable/]: Registering ingredients: jei:minecraft took 90.93 milliseconds
+[20:54:39] [Render thread/INFO] [me.je.li.lo.PluginCaller/]: Registering ingredients took 91.56 milliseconds
+[20:54:39] [Render thread/INFO] [me.je.li.lo.PluginCaller/]: Registering extra ingredients...
+[20:54:39] [Render thread/INFO] [me.je.li.lo.PluginCaller/]: Registering extra ingredients took 236.9 microseconds
+[20:54:39] [Render thread/INFO] [me.je.li.lo.PluginCaller/]: Registering search ingredient aliases...
+[20:54:39] [Render thread/INFO] [me.je.li.lo.PluginCaller/]: Registering search ingredient aliases took 182.4 microseconds
+[20:54:39] [Render thread/INFO] [me.je.li.lo.PluginCaller/]: Registering Mod Info...
+[20:54:39] [Render thread/INFO] [me.je.li.lo.PluginCaller/]: Registering Mod Info took 397.4 microseconds
+[20:54:39] [Render thread/INFO] [me.je.li.lo.PluginCaller/]: Registering categories...
+[20:54:39] [Render thread/INFO] [me.je.li.lo.PluginCallerTimerRunnable/]: Registering categories: jei:minecraft took 19.37 milliseconds
+[20:54:39] [Render thread/INFO] [me.je.li.lo.PluginCaller/]: Registering categories took 26.15 milliseconds
+[20:54:39] [Render thread/INFO] [me.je.li.lo.PluginCaller/]: Registering vanilla category extensions...
+[20:54:39] [Render thread/INFO] [me.je.li.lo.PluginCaller/]: Registering vanilla category extensions took 5.057 milliseconds
+[20:54:39] [Render thread/INFO] [me.je.li.lo.PluginCaller/]: Registering recipe catalysts...
+[20:54:39] [Render thread/INFO] [me.je.li.lo.PluginCaller/]: Registering recipe catalysts took 2.565 milliseconds
+[20:54:39] [Render thread/INFO] [me.je.co.ut.LoggedTimer/]: Building recipe registry...
+[20:54:39] [Render thread/INFO] [me.je.co.ut.LoggedTimer/]: Building recipe registry took 16.27 milliseconds
+[20:54:39] [Render thread/INFO] [me.je.li.lo.PluginCaller/]: Registering advanced plugins...
+[20:54:39] [Render thread/INFO] [me.je.li.lo.re.AdvancedRegistration/]: Added typed recipe manager plugin: class mezz.jei.library.plugins.vanilla.crafting.FireworkStarRecipeManagerPlugin
+[20:54:39] [Render thread/INFO] [me.je.li.lo.re.AdvancedRegistration/]: Added typed recipe manager plugin: class mezz.jei.library.plugins.vanilla.crafting.FireworkRocketRecipeManagerPlugin
+[20:54:39] [Render thread/INFO] [me.je.li.lo.PluginCaller/]: Registering advanced plugins took 4.593 milliseconds
+[20:54:39] [Render thread/INFO] [me.je.li.lo.PluginCaller/]: Registering recipes...
+[20:54:40] [Render thread/INFO] [me.je.li.lo.PluginCallerTimerRunnable/]: Registering recipes: jei:minecraft took 352.0 milliseconds
+[20:54:40] [Render thread/INFO] [me.je.li.lo.PluginCallerTimerRunnable/]: Registering recipes: jei:internal took 21.25 milliseconds
+[20:54:40] [Render thread/INFO] [me.je.li.lo.PluginCaller/]: Registering recipes took 374.1 milliseconds
+[20:54:40] [Render thread/INFO] [me.je.li.lo.PluginCaller/]: Registering recipes transfer handlers...
+[20:54:40] [Render thread/INFO] [me.je.li.lo.PluginCaller/]: Registering recipes transfer handlers took 2.678 milliseconds
+[20:54:40] [Render thread/INFO] [me.je.co.ut.LoggedTimer/]: Building runtime...
+[20:54:40] [Render thread/INFO] [me.je.li.lo.PluginCaller/]: Registering gui handlers...
+[20:54:40] [Render thread/INFO] [me.je.li.lo.PluginCaller/]: Registering gui handlers took 8.560 milliseconds
+[20:54:40] [Render thread/INFO] [me.je.li.lo.PluginCaller/]: Registering advanced search...
+[20:54:40] [Render thread/INFO] [me.je.li.lo.PluginCaller/]: Registering advanced search took 284.0 microseconds
+[20:54:40] [Render thread/INFO] [me.je.li.lo.PluginCaller/]: Registering Runtime...
+[20:54:40] [Render thread/INFO] [me.je.gu.st.JeiGuiStarter/]: Starting JEI GUI
+[20:54:40] [Render thread/INFO] [me.je.co.ut.LoggedTimer/]: Building ingredient list...
+[20:54:40] [Render thread/INFO] [me.je.co.ut.LoggedTimer/]: Building ingredient list took 20.41 milliseconds
+[20:54:40] [Render thread/INFO] [me.je.co.ut.LoggedTimer/]: Building ingredient filter...
+[20:54:40] [Render thread/INFO] [me.je.gu.in.IngredientFilter/]: Adding 1569 ingredients
+[20:54:40] [Render thread/INFO] [me.je.gu.in.IngredientFilter/]: Added 1569 ingredients
+[20:54:40] [Render thread/INFO] [me.je.co.ut.LoggedTimer/]: Building ingredient filter took 339.8 milliseconds
+[20:54:40] [Render thread/INFO] [me.je.li.lo.PluginCallerTimerRunnable/]: Registering Runtime: jei:forge_gui took 440.2 milliseconds
+[20:54:40] [Render thread/INFO] [me.je.li.lo.PluginCaller/]: Registering Runtime took 440.8 milliseconds
+[20:54:40] [Render thread/INFO] [me.je.co.ut.LoggedTimer/]: Building runtime took 459.0 milliseconds
+[20:54:40] [Render thread/INFO] [me.je.li.lo.PluginCaller/]: Sending Runtime...
+[20:54:40] [Render thread/INFO] [me.je.li.lo.PluginCaller/]: Sending Runtime took 244.7 microseconds
+[20:54:40] [Render thread/INFO] [me.je.co.ut.LoggedTimer/]: Starting JEI took 1.037 seconds
+[20:54:40] [Render thread/INFO] [minecraft/AdvancementList]: Loaded 42 advancements
+[20:54:40] [Render thread/WARN] [ModernFix/]: Time from main menu to in-game was 3.621552 seconds
+[20:54:40] [Render thread/WARN] [ModernFix/]: Total time to load game and open world was 21.417551 seconds
+[20:55:28] [Server thread/INFO] [minecraft/MinecraftServer]: [Morplin: Set own game mode to Survival Mode]
+[20:55:28] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] Set own game mode to Survival Mode
+[20:56:18] [Server thread/INFO] [minecraft/MinecraftServer]: Morplin was slain by Chorusoatl
+[20:56:18] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] Morplin was slain by Chorusoatl
+[20:56:20] [Server thread/INFO] [minecraft/MinecraftServer]: [Morplin: Set own game mode to Creative Mode]
+[20:56:20] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] Set own game mode to Creative Mode
+[20:57:14] [Server thread/INFO] [minecraft/MinecraftServer]: Morplin was killed
+[20:57:14] [Server thread/INFO] [minecraft/MinecraftServer]: [Morplin: Killed 10 entities]
+[20:57:14] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] Chorusoatl was killed
+[20:57:14] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] Morplin was killed
+[20:57:14] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] Chorusoatl was killed
+[20:57:14] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] Killed 10 entities
+[20:58:33] [Server thread/INFO] [minecraft/MinecraftServer]: Morplin has made the advancement [The Parrots and the Bats]
+[20:58:33] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] Morplin has made the advancement [The Parrots and the Bats]
+[20:58:33] [Render thread/INFO] [minecraft/AdvancementList]: Loaded 44 advancements
+[20:58:39] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] [Debug]: Hitboxes: shown
+[20:58:39] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] [Debug]: Hitboxes: hidden
+[20:59:17] [Render thread/INFO] [minecraft/AdvancementList]: Loaded 47 advancements
+[21:00:00] [Server thread/INFO] [minecraft/MinecraftServer]: [Morplin: Set own game mode to Survival Mode]
+[21:00:00] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] Set own game mode to Survival Mode
+[21:00:23] [Server thread/INFO] [minecraft/MinecraftServer]: [Morplin: Set the time to 19059]
+[21:00:23] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] Set the time to 19059
+[21:00:28] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] Lushsaur fell out of the world
+[21:00:34] [Server thread/INFO] [minecraft/MinecraftServer]: [Morplin: Set the time to 11282]
+[21:00:34] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] Set the time to 11282
+[21:00:53] [Server thread/INFO] [minecraft/MinecraftServer]: [Morplin: Set own game mode to Creative Mode]
+[21:00:53] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] Set own game mode to Creative Mode
+[21:00:58] [Server thread/INFO] [minecraft/MinecraftServer]: Morplin was killed
+[21:00:58] [Server thread/INFO] [minecraft/MinecraftServer]: [Morplin: Killed 8 entities]
+[21:00:58] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] Morplin was killed
+[21:00:58] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] Chorusoatl was killed
+[21:00:58] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] Chorusoatl was killed
+[21:00:58] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] Chorusoatl was killed
+[21:00:58] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] Lushsaur was killed
+[21:00:58] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] Lushsaur was killed
+[21:00:58] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] Lushsaur was killed
+[21:00:58] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] Killed 8 entities
+[21:01:00] [Server thread/INFO] [minecraft/MinecraftServer]: [Morplin: Set own game mode to Survival Mode]
+[21:01:00] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] Set own game mode to Survival Mode
+[21:01:00] [Server thread/INFO] [minecraft/MinecraftServer]: [Morplin: Set own game mode to Creative Mode]
+[21:01:00] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] Set own game mode to Creative Mode
+[21:01:07] [Server thread/INFO] [minecraft/MinecraftServer]: [Morplin: Killed 3 entities]
+[21:01:07] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] Killed 3 entities
+[21:01:14] [Server thread/INFO] [minecraft/MinecraftServer]: [Morplin: Set the time to 12078]
+[21:01:14] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] Set the time to 12078
+[21:01:22] [Server thread/INFO] [minecraft/MinecraftServer]: [Morplin: Set the time to 12247]
+[21:01:22] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] Set the time to 12247
+[21:01:27] [Server thread/INFO] [minecraft/MinecraftServer]: [Morplin: Set the time to 1000]
+[21:01:27] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] Set the time to 1000
+[21:01:32] [Server thread/INFO] [minecraft/MinecraftServer]: [Morplin: Set the time to 19090]
+[21:01:32] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] Set the time to 19090
+[21:01:37] [Server thread/INFO] [minecraft/MinecraftServer]: [Morplin: Set the time to 1000]
+[21:01:37] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] Set the time to 1000
+[21:01:58] [Render thread/INFO] [minecraft/AdvancementList]: Loaded 52 advancements
+[21:02:21] [Server thread/INFO] [minecraft/MinecraftServer]: Morplin has made the advancement [Stone Age]
+[21:02:21] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] Morplin has made the advancement [Stone Age]
+[21:02:21] [Render thread/INFO] [minecraft/AdvancementList]: Loaded 70 advancements
+[21:06:28] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] [Debug]: Hitboxes: shown
+[21:06:34] [Render thread/INFO] [minecraft/AdvancementList]: Loaded 84 advancements
+[21:06:39] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] [Debug]: Hitboxes: hidden
+[21:06:58] [Server thread/INFO] [minecraft/IntegratedServer]: Saving and pausing game...
+[21:06:58] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[New World]'/minecraft:overworld
+[21:06:58] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[New World]'/minecraft:the_nether
+[21:06:58] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[New World]'/minecraft:the_end
+[21:07:03] [Render thread/INFO] [me.je.li.st.JeiStarter/]: Stopping JEI
+[21:07:03] [Render thread/INFO] [me.je.li.lo.PluginCaller/]: Sending Runtime Unavailable...
+[21:07:03] [Render thread/INFO] [me.je.fo.pl.fo.ForgeGuiPlugin/]: Stopping JEI GUI
+[21:07:03] [Render thread/INFO] [me.je.li.lo.PluginCaller/]: Sending Runtime Unavailable took 2.092 milliseconds
+[21:07:03] [Server thread/INFO] [minecraft/ServerGamePacketListenerImpl]: Morplin lost connection: Disconnected
+[21:07:03] [Server thread/INFO] [minecraft/MinecraftServer]: Morplin left the game
+[21:07:03] [Server thread/INFO] [minecraft/ServerGamePacketListenerImpl]: Stopping singleplayer server as player logged out
+[21:07:03] [Server thread/INFO] [minecraft/MinecraftServer]: Stopping server
+[21:07:03] [Server thread/INFO] [minecraft/MinecraftServer]: Saving players
+[21:07:03] [Server thread/INFO] [minecraft/MinecraftServer]: Saving worlds
+[21:07:03] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[New World]'/minecraft:overworld
+[21:07:03] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[New World]'/minecraft:the_nether
+[21:07:03] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[New World]'/minecraft:the_end
+[21:07:03] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage (New World (2)): All chunks are saved
+[21:07:03] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
+[21:07:03] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage (DIM1): All chunks are saved
+[21:07:03] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage: All dimensions are saved
+[21:07:03] [Render thread/INFO] [ChunkBuilder/]: Stopping worker threads
+[21:07:04] [Render thread/INFO] [minecraft/Minecraft]: Stopping!
+[21:07:04] [CullThread/INFO] [STDOUT/]: [dev.tr7zw.entityculling.CullTask:run:90]: Shutting down culling task!
+Process exited with code 0.
+Clipboard copy at: 13 Nov 2026 21:07:06 +0300
