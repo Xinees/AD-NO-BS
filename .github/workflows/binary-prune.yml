@@ -241,6 +241,7 @@ jobs:
                               "BreedGoalAccessor",
                               "EntityAccessor",
                               "PlayerListMixin",
+                              "PlayerMixin",
                               "sculksaur.PrimaryLevelDataMixin",
                           ]
                           config["client"] = []
@@ -255,7 +256,7 @@ jobs:
               Path(temp_name).unlink(missing_ok=True)
               raise
 
-          print("Diagnostic-only smoke copy: CriteriaTriggers, BreedGoal/Entity, PlayerList and Sculksaur PrimaryLevelData mixins; Astemir RE MixinConfigs disabled")
+          print("Diagnostic-only smoke copy: CriteriaTriggers, BreedGoal/Entity, PlayerList, Player and Sculksaur PrimaryLevelData mixins; Astemir RE MixinConfigs disabled")
           PY
           printf 'eula=true\n' > build/smoke/eula.txt
           python3 - <<'PY'
