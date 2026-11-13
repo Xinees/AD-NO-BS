@@ -22,7 +22,7 @@ public final class JarPruner {
             "SPAWN_INFO", "LUSHSAUR", "CHORUSOATL", "SCULKSAUR", "CHORUSOATL_SPIT"
         )),
         Map.entry(ROOT + "common/entity/ADSensorTypes", Set.of("SCULKSAUR_SENSOR")),
-        Map.entry(ROOT + "common/entity/ADActivities", Set.of("CHASE")),
+        Map.entry(ROOT + "common/entity/ADActivities", Set.of("CHASE", "SCREAM", "FLEE")),
         Map.entry(ROOT + "common/entity/ADMemoryModuleTypes", Set.of("IS_ENRAGED", "WALK_COMMAND")),
         Map.entry(ROOT + "common/effect/ADMobEffects", Set.of("DAZED")),
         Map.entry(ROOT + "common/ADGameEvents", Set.of()),
@@ -326,8 +326,9 @@ public final class JarPruner {
                         ? method.instructions.getFirst()
                         : previousAdd.getNext();
                     removeInclusive(method.instructions, start, add);
+                } else {
+                    previousAdd = add;
                 }
-                previousAdd = add;
             }
         }
     }
@@ -433,7 +434,7 @@ public final class JarPruner {
         method.tryCatchBlocks.clear();
         if (method.localVariables != null) method.localVariables.clear();
         method.maxStack = 0;
-        method.maxLocals = 0;
+        method.maxLocals = (method.access & Opcodes.ACC_STATIC) == 0 ? 1 : 0;
     }
 
     private static void removeInclusive(InsnList list, AbstractInsnNode first, AbstractInsnNode last) {
