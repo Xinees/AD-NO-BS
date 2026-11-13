@@ -232,9 +232,8 @@ jobs:
           try:
               with zipfile.ZipFile(temp_name, "w", zipfile.ZIP_DEFLATED) as changed:
                   for info, content in entries:
-                      if info.filename == "META-INF/MANIFEST.MF":
-                          content = strip_manifest(content)
-                      elif info.filename == nested_name:
+                      # Keep parent mod mixins active; disable only Astemir RE mixins for diagnosis.
+                      if info.filename == nested_name:
                           content = strip_nested_mixins(content)
                       changed.writestr(info, content)
               os.replace(temp_name, smoke_jar)
@@ -242,7 +241,7 @@ jobs:
               Path(temp_name).unlink(missing_ok=True)
               raise
 
-          print("Diagnostic-only smoke copy: disabled parent and Astemir MixinConfigs")
+          print("Diagnostic-only smoke copy: parent MixinConfigs enabled, Astemir RE MixinConfigs disabled")
           PY
           printf 'eula=true\n' > build/smoke/eula.txt
           python3 - <<'PY'
