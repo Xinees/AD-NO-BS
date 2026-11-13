@@ -1267,15 +1267,12 @@ public final class JarPruner {
         p.add(new InsnNode(Opcodes.DMUL));
         p.add(new VarInsnNode(Opcodes.DSTORE, 16));
 
-        LabelNode trailingLayer = new LabelNode();
-        LabelNode offsetReady = new LabelNode();
-        p.add(new VarInsnNode(Opcodes.ILOAD, 19));
-        p.add(new JumpInsnNode(Opcodes.IFNE, trailingLayer));
         p.add(new LdcInsnNode(0.30d));
-        p.add(new JumpInsnNode(Opcodes.GOTO, offsetReady));
-        p.add(trailingLayer);
-        p.add(new LdcInsnNode(0.06d));
-        p.add(offsetReady);
+        p.add(new VarInsnNode(Opcodes.ILOAD, 19));
+        p.add(new InsnNode(Opcodes.I2D));
+        p.add(new LdcInsnNode(0.24d));
+        p.add(new InsnNode(Opcodes.DMUL));
+        p.add(new InsnNode(Opcodes.DSUB));
         p.add(new VarInsnNode(Opcodes.DSTORE, 20));
 
         p.add(new VarInsnNode(Opcodes.ALOAD, 0));
