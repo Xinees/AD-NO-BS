@@ -58,7 +58,8 @@ public final class JarPruner {
         Map.entry(ROOT + "client/model/registry/ADEntityModels", Set.of(
             "LUSHSAUR", "LUSHSAUR_BABY", "CHORUSOATL", "CHORUSOATL_BABY", "SCULKSAUR"
         )),
-        Map.entry(ROOT + "client/model/registry/ADBlockEntityModels", Set.of("LUSHSAUR_EGG", "CHORUSOATL_EGG"))
+        Map.entry(ROOT + "client/model/registry/ADBlockEntityModels", Set.of("LUSHSAUR_EGG", "CHORUSOATL_EGG")),
+        Map.entry(ROOT + "client/model/registry/ADAttachableModels", Set.of())
     );
 
     private static final Set<String> CREATIVE_ITEMS = Set.of(
@@ -154,6 +155,10 @@ public final class JarPruner {
         patchSpawnPlacements(nodes.get(ROOT + "ArchiesDinosaurs$ModBusEvents"));
         patchPlayerAnimations(nodes.get(ROOT + "client/animation/player/ADPlayerAnimations"));
         patchCreativeTab(nodes.get(ROOT + "common/tab/ADCreativeTabs"), nodes.get(ROOT + "common/items/ADItems"));
+        patchParticleEmitters(nodes.get(ROOT + "client/particle/ADParticleEmitters"));
+        patchTemptItems(nodes.get(ROOT + "common/entity/mob/lushsaur/ai/LushsaurAI"), "LUSH_CORE");
+        patchTemptItems(nodes.get(ROOT + "common/entity/mob/chorusoatl/ai/ChorusoatlAI"), "CHORUS_FOSSIL");
+        patchDazedEffect(nodes.get(ROOT + "common/effect/MobEffectDazed"));
         patchNetworkHelper(nodes.get(ROOT + "platform/ForgeNetworkHelper"));
         patchAbstractArrowMixin(nodes.get(ROOT + "mixin/AbstractArrowMixin"));
         patchPlayerMixin(nodes.get(ROOT + "mixin/PlayerMixin"));
@@ -365,6 +370,80 @@ public final class JarPruner {
         }
     }
 
+    private static void patchParticleEmitters(ClassNode owner) {
+        if (owner == null) return;
+        for (MethodNode method : owner.methods) {
+            if (!method.name.equals("<clinit>")) continue;
+            clearMethod(method);
+            addParticleEmitter(method, "CHORUSOATL_SPIT_0", "chorusoatl/spit/chorusoatl_spit");
+            addParticleEmitter(method, "CHORUSOATL_SPIT_1", "chorusoatl/spit/chorusoatl_spit_2");
+            addParticleEmitter(method, "CHORUSOATL_SPIT_AOE", "chorusoatl/spit/chorusoatl_spit_aoe");
+            addParticleEmitter(method, "CHORUSOATL_SPIT_PROJECTILE", "chorusoatl/spit/chorusoatl_spit_projectile");
+            method.instructions.add(new InsnNode(Opcodes.RETURN));
+        }
+    }
+
+    private static void addParticleEmitter(MethodNode method, String fieldName, String path) {
+        InsnList code = method.instructions;
+        code.add(new FieldInsnNode(Opcodes.GETSTATIC, ROOT + "common/particle/ADParticles",
+            fieldName, "L" + ROOT + "util/ResourceSupplier;"));
+        code.add(new LdcInsnNode(path));
+        code.add(new MethodInsnNode(Opcodes.INVOKESTATIC, ROOT + "client/particle/ADParticleEmitters",
+            "register", "(L" + ROOT + "util/ResourceSupplier;Ljava/lang/String;)Lcom/astemir/astemirlib/re/client/particle/ParticleEmitterConfig;", false));
+        code.add(new InsnNode(Opcodes.POP));
+    }
+
+    private static void patchTemptItems(ClassNode owner, String retainedItemField) {
+        if (owner == null) return;
+        int replaced = 0;
+        for (MethodNode method : owner.methods) {
+            for (AbstractInsnNode insn : method.instructions.toArray()) {
+                if (insn instanceof FieldInsnNode field &&
+                    field.getOpcode() == Opcodes.GETSTATIC &&
+                    field.owner.equals(ROOT + "common/items/ADItems") &&
+                    field.name.equals("AMBER")) {
+                    method.instructions.set(field, new FieldInsnNode(Opcodes.GETSTATIC,
+                        ROOT + "common/items/ADItems", retainedItemField, "L" + ROOT + "util/ResourceSupplier;"));
+                    replaced++;
+                }
+            }
+        }
+        if (replaced == 0) {
+            throw new IllegalStateException("No Amber temptation reference found in " + owner.name);
+        }
+    }
+
+    private static void patchDazedEffect(ClassNode owner) {
+        if (owner == null) return;
+        for (MethodNode method : owner.methods) {
+            if (!method.name.equals("m_6385_")) continue;
+
+            TypeInsnNode check = null;
+            JumpInsnNode skip = null;
+            MethodInsnNode soundCall = null;
+            for (AbstractInsnNode insn : method.instructions.toArray()) {
+                if (insn instanceof TypeInsnNode type &&
+                    type.getOpcode() == Opcodes.INSTANCEOF &&
+                    type.desc.equals("net/minecraft/server/level/ServerPlayer")) {
+                    check = type;
+                }
+                if (check != null && skip == null && insn instanceof JumpInsnNode jump &&
+                    jump.getOpcode() == Opcodes.IFEQ) {
+                    skip = jump;
+                }
+                if (skip != null && insn instanceof MethodInsnNode call &&
+                    call.owner.equals("net/minecraft/server/level/ServerPlayer") &&
+                    call.name.equals("m_6330_")) {
+                    soundCall = call;
+                    break;
+                }
+            }
+            if (check != null && skip != null && soundCall != null) {
+                removeInclusive(method.instructions, check, soundCall);
+            }
+        }
+    }
+
     private static void patchPlayerAnimations(ClassNode owner) {
         if (owner == null) return;
         for (MethodNode method : owner.methods) {
@@ -420,6 +499,24 @@ public final class JarPruner {
             }
             method.instructions.add(new InsnNode(Opcodes.RETURN));
             method.maxLocals = 2;
+        }
+
+        for (MethodNode method : owner.methods) {
+            if (method.desc.equals("()Lnet/minecraft/world/item/ItemStack;")) {
+                clearMethod(method);
+                InsnList code = method.instructions;
+                code.add(new TypeInsnNode(Opcodes.NEW, "net/minecraft/world/item/ItemStack"));
+                code.add(new InsnNode(Opcodes.DUP));
+                code.add(new FieldInsnNode(Opcodes.GETSTATIC, items.name, "LUSH_CORE",
+                    itemDescriptors.get("LUSH_CORE")));
+                code.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, ROOT + "util/ResourceSupplier",
+                    "get", "()Ljava/lang/Object;", true));
+                code.add(new TypeInsnNode(Opcodes.CHECKCAST, "net/minecraft/world/level/ItemLike"));
+                code.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, "net/minecraft/world/item/ItemStack",
+                    "<init>", "(Lnet/minecraft/world/level/ItemLike;)V", false));
+                code.add(new InsnNode(Opcodes.ARETURN));
+                method.maxLocals = 0;
+            }
         }
     }
 
