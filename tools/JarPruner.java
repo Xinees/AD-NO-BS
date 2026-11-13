@@ -170,6 +170,7 @@ public final class JarPruner {
         addServiceRoots(allEntries, roots);
 
         Set<String> retained = dependencyClosure(roots, nodes);
+        verifyNoRemovedRegistryReferences(retained, nodes);
         List<String> missingRoots = new ArrayList<>();
         for (String root : roots) {
             if (!nodes.containsKey(root)) missingRoots.add(root);
@@ -529,6 +530,27 @@ public final class JarPruner {
             list.remove(cursor);
             if (cursor == last) break;
             cursor = next;
+        }
+    }
+
+    private static void verifyNoRemovedRegistryReferences(Set<String> retained, Map<String, ClassNode> nodes) {
+        List<String> invalid = new ArrayList<>();
+        for (String name : retained) {
+            ClassNode owner = nodes.get(name);
+            if (owner == null) continue;
+            for (MethodNode method : owner.methods) {
+                for (AbstractInsnNode insn : method.instructions.toArray()) {
+                    if (!(insn instanceof FieldInsnNode field)) continue;
+                    Set<String> allowed = REGISTRY_FIELDS.get(field.owner);
+                    if (allowed != null && !allowed.contains(field.name)) {
+                        invalid.add(name + "." + method.name + " -> " + field.owner + "." + field.name);
+                    }
+                }
+            }
+        }
+        if (!invalid.isEmpty()) {
+            throw new IllegalStateException("Retained classes still reference pruned registry fields:\n" +
+                String.join("\n", invalid));
         }
     }
 
