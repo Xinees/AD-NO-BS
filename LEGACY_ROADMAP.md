@@ -8,26 +8,29 @@ This file is the explicit task list for the next Legacy work. The order below is
 
 ## Current baseline and test status
 
-### Build 94 — latest CI-verified JAR
+### Build 99 — latest CI-verified JAR
 
-- Animation patch implementation: [commit 338f774](https://github.com/Xinees/AD-NO-BS/commit/338f774b613ff886accb50b2438bc1e57a3a01a6); ASM invokedynamic node correction: [commit ff48c64](https://github.com/Xinees/AD-NO-BS/commit/ff48c64b91a56998d9742049c7ab66d791b44a51).
-- Sonic Boom visual patch: [commit 642be30](https://github.com/Xinees/AD-NO-BS/commit/642be309f50e8330ff24f48b3ce08d6abd3d6f64).
-- CI verification: [run #94 — success](https://github.com/Xinees/AD-NO-BS/actions/runs/43516535668).
-- Artifact ID: `14080273953`; artifact ZIP digest: `sha256:1862f5120d2d95167f856fd05c29e7769c9841ecbc44952fc8558551fcfddc72`.
-- Output JAR SHA-256: `c3ded081be4631e747c26ee1b68261adec81aa0752993e861fdc5b9f9c7d90a8`; size: `2,493,690` bytes.
-- The user's current report confirms that Ctrl and double-tap W both activate mounted sprint. Build 94 corrects the delayed run-animation transition by making the mounted Lushsaur's locomotion run condition read the controlling passenger's `isSprinting()`. The rider's own run animation uses the same condition. When the Lushsaur has no controlling passenger, its pre-existing AI locomotion test is retained.
-- The Sculksaur Sonic Boom final visual event now spawns a hollow shell of 1,536 vanilla `SCULK_SOUL` particles, distributed over a sphere and moving radially outward at 0.72 blocks/tick. The sphere is centered at the Sculksaur's body center. The old post-process `Shockwave` and `ColoredLight`, jaw emitter fallback, and old ground-wave emitters are removed from the attack's event methods.
-- The camera shake `ShakeUtil.shakeExplosion(entity, 1.0f, 20.0f)` is intentionally preserved; it is separate from the screen-space distortion that was removed.
-- Only the two Sonic Boom visual event methods in `SculksaurEffects` were changed. The attack AI, target selection, cooldown, range, damage, knockback, animation event schedule, sounds, listening/vibration behavior, and unrelated Sculksaur particle tracks remain untouched.
-- **Runtime status:** CI verifies the transformed bytecode, helper descriptors, vanilla particle call, retained camera shake, and absence of the old wave calls. Build 94 has not yet been visually tested in-game. Test mounted walking for more than three seconds and sprint activation; test Sonic Boom with post-processing both enabled and disabled.
+- CI: [run #99 — success](https://github.com/Xinees/AD-NO-BS/actions/runs/43520268349); final verification commit: `1514218f5490fc63ca7e5010b68955586ce5f14f`.
+- Artifact ID: `14082851815`; ZIP digest: `sha256:aeac0c5528f0a4c169e07a04d9bdd97b6d9928899eaad7f4b3362f577d18392e`.
+- Output JAR size: `2,493,371` bytes; SHA-256: `02a560d8d761b5690e60657e9ecad261285371172490c6345fec61462bd81970`.
+- Smooth-control implementation: [commit af7de9f](https://github.com/Xinees/AD-NO-BS/commit/af7de9f7f98f5a7918cef45cbf17e402e4587c19); yaw-only correction / frame-layout fix: [commit 81aa652](https://github.com/Xinees/AD-NO-BS/commit/81aa6526ee46b4554af030eee9ab50111a79866f).
+- Build 99 keeps the sprint-animation correction and Sonic Boom sphere from Build 94.
+- It patches the three shared custom control classes used by Lushsaur, Chorusoatl, and Sculksaur. Movement yaw snaps to its target instead of using `smoothRotlerp`; body yaw is assigned directly; look targets are applied immediately with vanilla look limits raised to 360 degrees. The original rotation-lock conditions remain, including the ridden-player exception for body rotation. In 3D movement only yaw is changed; pitch interpolation remains untouched.
+- **Open audit:** Sculksaur's original `createLocomotion()` also calls `EntityLocomotion.Builder.turnFactor(0.003f)`. This method is implemented in the external Astemir RE dependency, not in the Archie's Dinosaurs JAR. The exact Astemir RE 1.2.98 JAR is not present in this workspace, so the meaning and effects of this parameter have not been verified. I have deliberately left it unchanged rather than guessing at its behavior. Priority 2 is therefore **partially implemented, not closed**.
+- The original mod JAR and the Astemir RE dependency remain untouched; neither was repackaged or bundled.
+- **Runtime status:** Build 99 is CI/bytecode verified only. It has not yet been tested in Minecraft. Confirm mounted Lushsaur turn response, all three mobs' idle/wander/chase/target-switch turns, locked actions, and the Sculksaur turn behavior after the `turnFactor` audit.
+
+### Previous completed visual change — Build 94
+
+Build 94 removed the Sculksaur Sonic Boom post-process distortion and old attack-wave emitters, replacing them with a vanilla `SCULK_SOUL` sphere while preserving the camera shake and the existing gameplay attack. Its CI run #94 succeeded. The effect has not yet received visual in-game confirmation.
 
 ### Previous sprint baseline — Build 81
 
-Build 81 added the Lushsaur-only vanilla mounted-sprint permission path in `LocalPlayerMixin` and changed the mounted movement-speed callback to read the controlling passenger's sprint state while retaining the feeding speed boost. Build 94 preserves that behavior and corrects only the animation predicates.
+Build 81 added the Lushsaur-only vanilla mounted-sprint permission path in `LocalPlayerMixin` and changed the mounted movement-speed callback to read the controlling passenger's sprint state while retaining the feeding speed boost. Build 99 preserves that behavior and corrects the mounted run-animation predicates.
 
 ### Build 78 — user-reported historical test
 
-The player mounted the Lushsaur and held W. The Lushsaur began with its walking animation; after roughly three seconds the running animation appeared, but actual movement speed did not increase. Build 78 was not correct. The user's newer report confirms that sprint input is now accepted through Ctrl and double-tap W; only the run-animation timing remained to be fixed.
+The player mounted the Lushsaur and held W. The Lushsaur began with its walking animation; after roughly three seconds the running animation appeared, but actual movement speed did not increase. Build 78 was not correct. The user's newer report confirms that sprint input is now accepted through Ctrl and double-tap W; Build 99 contains the animation synchronization change, which still requires runtime confirmation.
 
 ## Priority 1 — replace the Sculksaur Sonic Boom visual effect
 
@@ -87,7 +90,9 @@ Do not remove or rewrite the entire `SculksaurEffects` system. Keep unrelated id
 
 ## Priority 2 — remove smooth turning from all retained mobs
 
-**The smooth turning currently looks bad. The request is to remove it, not to make it slightly faster.** Do not respond by merely adjusting the interpolation values.
+**Build 99 implements the main control-path change; this task is not yet closed.** The slow interpolation in the custom movement, body, and look controls has been replaced with direct yaw/look targeting for all three retained mobs. Do not call the work complete until the separate Sculksaur `turnFactor(0.003f)` setting is understood and checked, and the result has been tested in-game.
+
+The smooth turning currently looks bad. The request is to remove it, not to make it slightly faster. Do not respond by merely adjusting the interpolation values.
 
 This applies to all three retained mobs:
 
@@ -95,7 +100,21 @@ This applies to all three retained mobs:
 - Chorusoatl
 - Sculksaur
 
-The original classes for all three override `m_7560_()` and construct the custom `SmoothBodyControl`. Its parameters include a low body interpolation factor (`0.07`) and a stable-head timing window. This is the known common source to inspect first.
+The original classes for all three override `m_7560_()` and construct the custom `SmoothBodyControl`. They also use the custom `SmoothMoveControl` and `SmoothLookControl`. These shared controls are the primary source of the slow interpolation.
+
+### Build 99 implementation
+
+- `SmoothMoveControl`: replaced the yaw interpolation call in grounded walking, climbing, and aerial movement with a direct target-yaw return. The separate pitch interpolation in aerial movement is preserved.
+- `SmoothBodyControl`: body yaw is assigned directly from the mob's current yaw when `canRotate` permits it. Its original action rotation lock and the exception while the mob is being controlled by a Player passenger remain.
+- `SmoothLookControl`: look target coordinates are applied directly and vanilla maximum yaw/pitch changes are set to 360 degrees while `canRotate` and the target timer allow rotation. Existing getter-level `canRotate` guards remain.
+- CI run #99 verifies the replaced bytecode, direct yaw helper, preserved aerial pitch easing, body/player lock branches, and look-control rotation gates.
+
+### Unresolved Sculksaur locomotion parameter
+
+The original Sculksaur has a separate `EntityLocomotion.Builder.turnFactor(0.003f)` call in `createLocomotion()`. This call does not appear in Lushsaur or Chorusoatl's corresponding builders. The implementation of `turnFactor` lives inside the separate Astemir RE JAR, which is intentionally not modified or bundled and is not available in the current workspace. The parameter's precise effect cannot be proved from the call site alone.
+
+**Do not remove the call, change its value, or treat it as harmless without checking the exact Astemir RE 1.2.98 JAR.** The change is intentionally left untouched in Build 99. Once the dependency is available for read-only inspection, determine whether `turnFactor` applies any additional turn interpolation or controls a separate locomotion property. Only then decide whether it belongs in this task.
+
 
 ### Required result
 
