@@ -150,6 +150,7 @@ public final class JarPruner {
         patchNoOpMethod(nodes.get(ROOT + "ArchiesDinosaurs"), "init",
             "(Lnet/minecraftforge/fml/event/lifecycle/FMLCommonSetupEvent;)V");
         patchCommonClient(nodes.get(ROOT + "client/CommonClient"));
+        patchSpawnPlacements(nodes.get(ROOT + "ArchiesDinosaurs$ModBusEvents"));
         patchPlayerAnimations(nodes.get(ROOT + "client/animation/player/ADPlayerAnimations"));
         patchCreativeTab(nodes.get(ROOT + "common/tab/ADCreativeTabs"), nodes.get(ROOT + "common/items/ADItems"));
         patchNetworkHelper(nodes.get(ROOT + "platform/ForgeNetworkHelper"));
@@ -268,6 +269,7 @@ public final class JarPruner {
 
     private static void patchCommonClient(ClassNode owner) {
         if (owner == null) return;
+
         for (MethodNode method : owner.methods) {
             if (method.name.equals("init") && method.desc.equals("()V")) {
                 clearMethod(method);
@@ -279,11 +281,82 @@ public final class JarPruner {
                 code.add(new MethodInsnNode(Opcodes.INVOKESTATIC, owner.name, "registerEntityRenderers", "()V", false));
                 code.add(new MethodInsnNode(Opcodes.INVOKESTATIC, owner.name, "registerBlockEntityRenderers", "()V", false));
                 code.add(new InsnNode(Opcodes.RETURN));
+                method.maxLocals = 0;
             }
+
             if (method.name.equals("registerEntityRenderers") && method.desc.equals("()V")) {
-                removeFieldRegistrationBlock(method, ROOT + "common/entity/ADEntityTypes", "PUS_TIPPED_ARROW",
-                    owner.name, "registerEntityRenderer");
+                clearMethod(method);
+                addEntityRenderer(method, "LUSHSAUR",
+                    ROOT + "client/model/render/entity/mob/LushsaurClient", "createRenderProvider");
+                addEntityRenderer(method, "CHORUSOATL",
+                    ROOT + "client/model/render/entity/mob/ChorusoatlClient", "createRenderProvider");
+                addEntityRenderer(method, "SCULKSAUR",
+                    ROOT + "client/model/render/entity/mob/SculksaurClient", "createRenderProvider");
+
+                InsnList code = method.instructions;
+                code.add(new FieldInsnNode(Opcodes.GETSTATIC, ROOT + "common/entity/ADEntityTypes",
+                    "CHORUSOATL_SPIT", "L" + ROOT + "util/ResourceSupplier;"));
+                code.add(new InvokeDynamicInsnNode("get", "()Lnet/minecraft/client/renderer/entity/EntityRendererProvider;",
+                    new Handle(Opcodes.H_INVOKESTATIC, "java/lang/invoke/LambdaMetafactory", "metafactory",
+                        "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;", false),
+                    Type.getMethodType("(Lnet/minecraft/client/renderer/entity/EntityRendererProvider$Context;)Lnet/minecraft/client/renderer/entity/EntityRenderer;"),
+                    new Handle(Opcodes.H_NEWINVOKESPECIAL, "net/minecraft/client/renderer/entity/NoopRenderer", "<init>",
+                        "(Lnet/minecraft/client/renderer/entity/EntityRendererProvider$Context;)V", false),
+                    Type.getMethodType("(Lnet/minecraft/client/renderer/entity/EntityRendererProvider$Context;)Lnet/minecraft/client/renderer/entity/NoopRenderer;")));
+                code.add(new MethodInsnNode(Opcodes.INVOKESTATIC, owner.name, "registerEntityRenderer",
+                    "(Ljava/util/function/Supplier;Lnet/minecraft/client/renderer/entity/EntityRendererProvider;)V", false));
+                code.add(new InsnNode(Opcodes.RETURN));
+                method.maxLocals = 0;
             }
+
+            if (method.name.equals("registerBlockEntityRenderers") && method.desc.equals("()V")) {
+                clearMethod(method);
+                addBlockEntityRenderer(method, "LUSHSAUR_EGG", "LUSHSAUR_EGG");
+                addBlockEntityRenderer(method, "CHORUSOATL_EGG", "CHORUSOATL_EGG");
+                method.instructions.add(new InsnNode(Opcodes.RETURN));
+                method.maxLocals = 0;
+            }
+        }
+    }
+
+    private static void addEntityRenderer(MethodNode method, String entityField, String rendererOwner, String rendererMethod) {
+        InsnList code = method.instructions;
+        code.add(new FieldInsnNode(Opcodes.GETSTATIC, ROOT + "common/entity/ADEntityTypes",
+            entityField, "L" + ROOT + "util/ResourceSupplier;"));
+        code.add(new MethodInsnNode(Opcodes.INVOKESTATIC, rendererOwner, rendererMethod,
+            "()Lnet/minecraft/client/renderer/entity/EntityRendererProvider;", false));
+        code.add(new MethodInsnNode(Opcodes.INVOKESTATIC, ROOT + "client/CommonClient", "registerEntityRenderer",
+            "(Ljava/util/function/Supplier;Lnet/minecraft/client/renderer/entity/EntityRendererProvider;)V", false));
+    }
+
+    private static void addBlockEntityRenderer(MethodNode method, String blockEntityField, String modelField) {
+        InsnList code = method.instructions;
+        code.add(new FieldInsnNode(Opcodes.GETSTATIC, ROOT + "common/block/entity/ADBlockEntityTypes",
+            blockEntityField, "L" + ROOT + "util/ResourceSupplier;"));
+        code.add(new FieldInsnNode(Opcodes.GETSTATIC, ROOT + "client/model/registry/ADBlockEntityModels",
+            modelField, "Lcom/astemir/astemirlib/re/client/model/AstemirModel;"));
+        code.add(new MethodInsnNode(Opcodes.INVOKESTATIC, ROOT + "client/model/render/block/DinoEggClient",
+            "createRenderer", "(Lcom/astemir/astemirlib/re/client/model/AstemirModel;)Lnet/minecraft/client/renderer/blockentity/BlockEntityRenderer;", false));
+        code.add(new MethodInsnNode(Opcodes.INVOKESTATIC, ROOT + "client/CommonClient", "registerBlockEntityRenderer",
+            "(Ljava/util/function/Supplier;Lnet/minecraft/client/renderer/blockentity/BlockEntityRenderer;)V", false));
+    }
+
+    private static void patchSpawnPlacements(ClassNode owner) {
+        if (owner == null) return;
+        for (MethodNode method : owner.methods) {
+            if (!method.name.equals("registerSpawnPlacements") ||
+                !method.desc.equals("(Lnet/minecraftforge/event/entity/SpawnPlacementRegisterEvent;)V")) continue;
+            clearMethod(method);
+            InsnList code = method.instructions;
+            for (String entity : List.of("LUSHSAUR", "CHORUSOATL", "SCULKSAUR")) {
+                code.add(new VarInsnNode(Opcodes.ALOAD, 0));
+                code.add(new FieldInsnNode(Opcodes.GETSTATIC, ROOT + "common/entity/ADEntityTypes",
+                    entity, "L" + ROOT + "util/ResourceSupplier;"));
+                code.add(new MethodInsnNode(Opcodes.INVOKESTATIC, owner.name, "ground",
+                    "(Lnet/minecraftforge/event/entity/SpawnPlacementRegisterEvent;Ljava/util/function/Supplier;)V", false));
+            }
+            code.add(new InsnNode(Opcodes.RETURN));
+            method.maxLocals = 1;
         }
     }
 
@@ -557,28 +630,38 @@ public final class JarPruner {
     private static Set<String> dependencyClosure(Set<String> roots, Map<String, ClassNode> nodes) {
         Set<String> retained = new LinkedHashSet<>();
         Deque<String> queue = new ArrayDeque<>(roots);
+        Map<String, Set<String>> extraMethods = new HashMap<>();
+        Map<String, Set<String>> processedMethods = new HashMap<>();
 
         while (!queue.isEmpty()) {
             String name = queue.removeFirst();
-            if (!retained.add(name)) continue;
             ClassNode node = nodes.get(name);
             if (node == null) continue;
+            retained.add(name);
 
             Set<String> refs = new LinkedHashSet<>();
             addType(refs, node.superName);
             if (node.interfaces != null) refs.addAll(node.interfaces);
             if (node.fields != null) {
-                for (FieldNode field : node.fields) {
-                    addDescriptor(refs, field.desc);
-                }
+                for (FieldNode field : node.fields) addDescriptor(refs, field.desc);
             }
+
+            Set<String> processed = processedMethods.computeIfAbsent(name, k -> new HashSet<>());
+            Set<String> selectedSynthetic = extraMethods.computeIfAbsent(name, k -> new HashSet<>());
             for (MethodNode method : node.methods) {
+                String key = method.name + method.desc;
+                boolean isInitializer = method.name.equals("<clinit>");
+                boolean isSynthetic = (method.access & Opcodes.ACC_SYNTHETIC) != 0;
+                if (isSynthetic && !selectedSynthetic.contains(key)) continue;
+                if (!processed.add(key)) continue;
+
                 addDescriptor(refs, method.desc);
                 if (method.exceptions != null) refs.addAll(method.exceptions);
 
                 for (AbstractInsnNode insn : method.instructions.toArray()) {
-                    if (insn instanceof TypeInsnNode type) addType(refs, type.desc);
-                    else if (insn instanceof FieldInsnNode field) {
+                    if (insn instanceof TypeInsnNode type) {
+                        addType(refs, type.desc);
+                    } else if (insn instanceof FieldInsnNode field) {
                         addType(refs, field.owner);
                         addDescriptor(refs, field.desc);
                     } else if (insn instanceof MethodInsnNode call) {
@@ -587,11 +670,13 @@ public final class JarPruner {
                     } else if (insn instanceof MultiANewArrayInsnNode multi) {
                         addDescriptor(refs, multi.desc);
                     } else if (insn instanceof LdcInsnNode ldc) {
-                        addConstant(refs, ldc.cst);
+                        addConstantWithMethodRefs(refs, ldc.cst, nodes, extraMethods, queue, retained);
                     } else if (insn instanceof InvokeDynamicInsnNode indy) {
                         addDescriptor(refs, indy.desc);
-                        addConstant(refs, indy.bsm);
-                        for (Object arg : indy.bsmArgs) addConstant(refs, arg);
+                        addConstantWithMethodRefs(refs, indy.bsm, nodes, extraMethods, queue, retained);
+                        for (Object arg : indy.bsmArgs) {
+                            addConstantWithMethodRefs(refs, arg, nodes, extraMethods, queue, retained);
+                        }
                     }
                 }
             }
@@ -603,6 +688,32 @@ public final class JarPruner {
             }
         }
         return retained;
+    }
+
+    private static void addConstantWithMethodRefs(
+        Set<String> refs, Object value, Map<String, ClassNode> nodes,
+        Map<String, Set<String>> extraMethods, Deque<String> queue, Set<String> retained
+    ) {
+        if (value instanceof Handle handle) {
+            addType(refs, handle.getOwner());
+            addDescriptor(refs, handle.getDesc());
+            if (handle.getOwner().startsWith(ROOT) && nodes.containsKey(handle.getOwner())) {
+                String key = handle.getName() + handle.getDesc();
+                Set<String> selected = extraMethods.computeIfAbsent(handle.getOwner(), k -> new HashSet<>());
+                if (selected.add(key) && retained.contains(handle.getOwner())) {
+                    queue.addLast(handle.getOwner());
+                }
+            }
+        } else if (value instanceof Type type) {
+            if (type.getSort() == Type.OBJECT) addType(refs, type.getInternalName());
+            else if (type.getSort() == Type.ARRAY) addDescriptor(refs, type.getDescriptor());
+        } else if (value instanceof ConstantDynamic dynamic) {
+            addDescriptor(refs, dynamic.getDescriptor());
+            addConstantWithMethodRefs(refs, dynamic.getBootstrapMethod(), nodes, extraMethods, queue, retained);
+            for (int i = 0; i < dynamic.getBootstrapMethodArgumentCount(); i++) {
+                addConstantWithMethodRefs(refs, dynamic.getBootstrapMethodArgument(i), nodes, extraMethods, queue, retained);
+            }
+        }
     }
 
     private static void addServiceRoots(Map<String, byte[]> entries, Set<String> roots) {
