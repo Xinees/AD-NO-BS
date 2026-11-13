@@ -9,6 +9,7 @@ import java.util.zip.*;
 
 public final class JarPruner {
     private static final String ROOT = "com/eternal_creations/archies_dino_mod/";
+    private static final Map<String, Set<String>> PROCESSED_METHODS = new HashMap<>();
 
     private static final Map<String, Set<String>> REGISTRY_FIELDS = Map.ofEntries(
         Map.entry(ROOT + "common/items/ADItems", Set.of(
@@ -159,19 +160,23 @@ public final class JarPruner {
         removeMethods(nodes.get(ROOT + "mixin/client/LevelRendererMixin"),
             Set.of("archiesDinoMod$onEntityRender"));
 
-        Map<String, byte[]> transformedClasses = new HashMap<>();
-        for (Map.Entry<String, ClassNode> entry : nodes.entrySet()) {
-            ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS);
-            entry.getValue().accept(writer);
-            transformedClasses.put(entry.getKey() + ".class", writer.toByteArray());
-        }
-
         Set<String> roots = new LinkedHashSet<>(ROOT_CLASSES);
         roots.addAll(MIXIN_ROOTS);
         addServiceRoots(allEntries, roots);
 
         Set<String> retained = dependencyClosure(roots, nodes);
+        stripUnreferencedSyntheticMethods(retained, nodes);
         verifyNoRemovedRegistryReferences(retained, nodes);
+
+        Map<String, byte[]> transformedClasses = new HashMap<>();
+        for (String internalName : retained) {
+            ClassNode node = nodes.get(internalName);
+            if (node == null) continue;
+            ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS);
+            node.accept(writer);
+            transformedClasses.put(internalName + ".class", writer.toByteArray());
+        }
+
         List<String> missingRoots = new ArrayList<>();
         for (String root : roots) {
             if (!nodes.containsKey(root)) missingRoots.add(root);
@@ -606,6 +611,17 @@ public final class JarPruner {
         }
     }
 
+    private static void stripUnreferencedSyntheticMethods(Set<String> retained, Map<String, ClassNode> nodes) {
+        for (String name : retained) {
+            ClassNode owner = nodes.get(name);
+            if (owner == null) continue;
+            Set<String> processed = PROCESSED_METHODS.getOrDefault(name, Set.of());
+            owner.methods.removeIf(method ->
+                (method.access & Opcodes.ACC_SYNTHETIC) != 0 &&
+                !processed.contains(method.name + method.desc));
+        }
+    }
+
     private static void verifyNoRemovedRegistryReferences(Set<String> retained, Map<String, ClassNode> nodes) {
         List<String> invalid = new ArrayList<>();
         for (String name : retained) {
@@ -628,6 +644,7 @@ public final class JarPruner {
     }
 
     private static Set<String> dependencyClosure(Set<String> roots, Map<String, ClassNode> nodes) {
+        PROCESSED_METHODS.clear();
         Set<String> retained = new LinkedHashSet<>();
         Deque<String> queue = new ArrayDeque<>(roots);
         Map<String, Set<String>> extraMethods = new HashMap<>();
@@ -654,6 +671,7 @@ public final class JarPruner {
                 boolean isSynthetic = (method.access & Opcodes.ACC_SYNTHETIC) != 0;
                 if (isSynthetic && !selectedSynthetic.contains(key)) continue;
                 if (!processed.add(key)) continue;
+                PROCESSED_METHODS.computeIfAbsent(name, k -> new HashSet<>()).add(key);
 
                 addDescriptor(refs, method.desc);
                 if (method.exceptions != null) refs.addAll(method.exceptions);
