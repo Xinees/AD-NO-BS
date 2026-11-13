@@ -1,0 +1,12 @@
+.gradle/
+.gradle-cache/
+build/
+run/
+runs/
+out/
+.idea/
+*.iml
+*.log
+hs_err_pid*
+/transfer/
+/tools/
