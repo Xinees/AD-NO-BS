@@ -49,6 +49,7 @@ KEEP_MIXINS = {
         "client.KeyMappingMixin",
         "client.LevelRendererMixin",
         "client.LivingEntityRendererMixin",
+        "client.LocalPlayerMixin",
     ],
 }
 KEEP_FORGE_MIXINS = {
