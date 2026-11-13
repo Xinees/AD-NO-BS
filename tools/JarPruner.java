@@ -1390,13 +1390,13 @@ public final class JarPruner {
         helper.maxLocals = 4;
         owner.methods.add(helper);
 
-        patchYawCalls(owner, "tick3DMovement", "(DDDDZ)V", 2, 0);
-        patchYawCalls(owner, "tickClimber", "(DDD)V", 1, 0);
-        patchYawCalls(owner, "tickWalker", "(DDDD)V", 1, 0);
+        patchYawCalls(owner, "tick3DMovement", "(DDDDZ)V", 2, 1);
+        patchYawCalls(owner, "tickClimber", "(DDD)V", 1, 1);
+        patchYawCalls(owner, "tickWalker", "(DDDD)V", 1, 1);
     }
 
     private static void patchYawCalls(
-        ClassNode owner, String methodName, String methodDescriptor, int expectedCalls, int keepSmoothCalls
+        ClassNode owner, String methodName, String methodDescriptor, int expectedCalls, int replaceCalls
     ) {
         MethodNode method = owner.methods.stream()
             .filter(candidate -> candidate.name.equals(methodName) &&
@@ -1413,7 +1413,7 @@ public final class JarPruner {
                 !call.name.equals("smoothRotlerp") ||
                 !call.desc.equals("(FFF)F")) continue;
 
-            if (seen >= keepSmoothCalls) {
+            if (seen < replaceCalls) {
                 method.instructions.set(insn, new MethodInsnNode(
                     Opcodes.INVOKESPECIAL,
                     owner.name,
@@ -1426,7 +1426,7 @@ public final class JarPruner {
             seen++;
         }
 
-        if (seen != expectedCalls || replaced != expectedCalls - keepSmoothCalls) {
+        if (seen != expectedCalls || replaced != replaceCalls) {
             throw new IllegalStateException(
                 "Unexpected yaw interpolation calls in " + methodName +
                 ": found " + seen + ", replaced " + replaced);
@@ -1443,7 +1443,6 @@ public final class JarPruner {
 
         clearMethod(tick);
         InsnList code = tick.instructions;
-        LabelNode skipPlayerPassenger = new LabelNode();
         LabelNode snapBody = new LabelNode();
         LabelNode done = new LabelNode();
         String conditionInternal = "com/astemir/astemirlib/re/core/function/Condition";
@@ -1467,11 +1466,8 @@ public final class JarPruner {
         code.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
             mobInternal, "m_6688_", "()Lnet/minecraft/world/entity/LivingEntity;", false));
         code.add(new TypeInsnNode(Opcodes.INSTANCEOF, "net/minecraft/world/entity/player/Player"));
-        code.add(new JumpInsnNode(Opcodes.IFEQ, skipPlayerPassenger));
-        code.add(new JumpInsnNode(Opcodes.GOTO, done));
+        code.add(new JumpInsnNode(Opcodes.IFNE, done));
 
-        code.add(skipPlayerPassenger);
-        code.add(new FrameNode(Opcodes.F_FULL, 1, new Object[] { owner.name }, 0, new Object[0]));
         code.add(snapBody);
         code.add(new FrameNode(Opcodes.F_FULL, 1, new Object[] { owner.name }, 0, new Object[0]));
         code.add(new VarInsnNode(Opcodes.ALOAD, 0));
