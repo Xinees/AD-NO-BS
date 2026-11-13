@@ -46,7 +46,6 @@ KEEP_MIXINS = {
     ],
     "client": [
         "client.CameraMixin",
-        "client.ClientAdvancementsAccessor",
         "client.KeyMappingMixin",
         "client.LevelRendererMixin",
         "client.LivingEntityRendererMixin",
@@ -75,22 +74,45 @@ def filter_mixin_config(data, template, name):
     return dump_json(value)
 
 def key_is_allowed(key):
-    k = key.lower()
-    if any(mob in k for mob in MOBS):
+    if key in {
+        "ec_ad",
+        "category.ec_ad.default",
+        "effect.ec_ad.dazed",
+        "item_group.ec_ad.items",
+        "message.ec_ad.pet_not_found",
+        "message.ec_ad.pet_teleport_success",
+        "message.ec_ad.pet_world_unavailable",
+        "message.ec_ad.status.buried",
+        "ec_ad.mount_primary_attack",
+        "ec_ad.mount_special_attack",
+    }:
         return True
-    if any(item in k for item in ITEMS):
+
+    if key.startswith("advancement.root."):
         return True
-    if "egg" in k and ("lushsaur" in k or "chorusoatl" in k):
+
+    for mob in MOBS:
+        if any(key.startswith(f"advancement.{kind}_{mob}.") for kind in ("kill", "spot", "tame")):
+            return True
+        if key == f"entity.ec_ad.{mob}":
+            return True
+        if key.startswith(f"subtitles.ec_ad.mob.{mob}."):
+            return True
+
+    if key == "entity.ec_ad.chorusoatl_spit":
         return True
-    if k.startswith("item_group.ec_ad.items"):
+    if key.startswith("subtitles.ec_ad.mob.dino."):
         return True
-    if k.startswith("subtitle.ec_ad.mob.dino."):
+    if key in {"block.ec_ad.lushsaur_egg", "block.ec_ad.chorusoatl_egg"}:
         return True
-    if k.startswith("subtitle.ec_ad.mob.lushsaur."):
-        return True
-    if k.startswith("subtitle.ec_ad.mob.chorusoatl."):
-        return True
-    if k.startswith("subtitle.ec_ad.mob.sculksaur."):
+    if key in {
+        "item.ec_ad.lush_core",
+        "item.ec_ad.chorus_fossil",
+        "item.ec_ad.sculk_toxin",
+        "item.ec_ad.lushsaur_spawn_egg",
+        "item.ec_ad.chorusoatl_spawn_egg",
+        "item.ec_ad.sculksaur_spawn_egg",
+    }:
         return True
     return False
 
@@ -145,7 +167,7 @@ def keep_asset(path):
         name = low.rsplit("/", 1)[-1]
         return name.endswith(".png") and name[:-4] in ITEMS
 
-    if low == "textures/gui/dino.png":
+    if low in {"textures/gui/dino.png", "textures/gui/back.png"}:
         return True
 
     if low.startswith("textures/mob_effect/"):
@@ -183,9 +205,8 @@ def keep_data_path(path):
     if low.startswith("advancements/"):
         if base == "root.json":
             return True
-        return any(mob in base for mob in MOBS) and (
-            base.startswith(("kill_", "master_", "spot_", "tame_"))
-        )
+        return any(base == f"{kind}_{mob}.json"
+                   for mob in MOBS for kind in ("kill", "spot", "tame"))
 
     if low.startswith("loot_tables/entities/"):
         return any(base == f"{mob}.json" for mob in MOBS)
@@ -196,8 +217,12 @@ def keep_data_path(path):
     if low.startswith("forge/biome_modifier/"):
         return base == "chorusoatl_spawns.json"
 
-    if low.startswith("recipes/") or low.startswith("advancements/recipes/"):
-        return any(item in base for item in ITEMS)
+    if low.startswith("recipes/archie_trade/"):
+        return False
+    if low.startswith("recipes/"):
+        return any(base == f"{item}.json" for item in ITEMS)
+    if low.startswith("advancements/recipes/"):
+        return False
 
     if low.startswith("tags/blocks/"):
         return base.startswith(("lushsaur_", "chorusoatl_"))
@@ -227,7 +252,7 @@ def keep_data_path(path):
         return base == "lushsaur.json"
 
     if low.startswith("structures/"):
-        return base in {"lushsaur.nbt", "lushsaur_kid.nbt"} or low.startswith("structures/fossil/")
+        return base in {"lushsaur.nbt", "lushsaur_kid.nbt"}
 
     if low.startswith("damage_type/"):
         return False
@@ -247,6 +272,53 @@ def filter_tag_json(data, name):
             or item in allowed_ids
         ]
     return dump_json(value)
+
+def filter_root_advancement(data):
+    value = read_json(data, "data/ec_ad/advancements/root.json")
+    criteria = {}
+    for mob in sorted(MOBS):
+        criteria[f"spot_{mob}"] = {
+            "conditions": {
+                "entity": [
+                    {
+                        "condition": "minecraft:entity_properties",
+                        "entity": "this",
+                        "predicate": {"type": f"ec_ad:{mob}"},
+                    }
+                ]
+            },
+            "trigger": "ec_ad:spotted_entity",
+        }
+    value["criteria"] = criteria
+    value["requirements"] = [list(criteria)]
+    display = value.setdefault("display", {})
+    display["icon"] = {"item": "ec_ad:lush_core"}
+    display["background"] = "ec_ad:textures/gui/back.png"
+    return dump_json(value)
+
+
+def validate_advancement_graph(entries):
+    docs = {}
+    for name, data in entries.items():
+        if name.startswith("data/ec_ad/advancements/") and name.endswith(".json"):
+            docs[name[len("data/ec_ad/advancements/"):-5]] = read_json(data, name)
+    valid_icons = {
+        "ec_ad:lush_core", "ec_ad:chorus_fossil", "ec_ad:sculk_toxin",
+        "ec_ad:lushsaur_egg", "ec_ad:chorusoatl_egg",
+        "ec_ad:lushsaur_spawn_egg", "ec_ad:chorusoatl_spawn_egg",
+        "ec_ad:sculksaur_spawn_egg",
+    }
+    for name, doc in docs.items():
+        parent = doc.get("parent")
+        if parent and parent.startswith("ec_ad:") and parent.split(":", 1)[1] not in docs:
+            raise RuntimeError(f"Advancement {name} references missing parent {parent}")
+        icon = doc.get("display", {}).get("icon", {}).get("item")
+        if icon and icon.startswith("ec_ad:") and icon not in valid_icons:
+            raise RuntimeError(f"Advancement {name} references removed item {icon}")
+    for name in entries:
+        if name.startswith("data/ec_ad/recipes/archie_trade/"):
+            raise RuntimeError(f"Removed Archie trade recipe leaked into output: {name}")
+
 
 kept = {}
 removed = []
@@ -270,6 +342,10 @@ with zipfile.ZipFile(source, "r") as zin:
             if name.startswith(MOD + "lang/"):
                 lang = read_json(data, name)
                 lang = {k: v for k, v in lang.items() if key_is_allowed(k)}
+                if name.endswith("/en_us.json"):
+                    lang["advancement.root.desc"] = "Meet the dinosaurs"
+                elif name.endswith("/ru_ru.json"):
+                    lang["advancement.root.desc"] = "Познакомьтесь с динозаврами"
                 data = dump_json(lang)
             elif name == MOD + "sounds.json":
                 sounds = read_json(data, name)
@@ -280,7 +356,9 @@ with zipfile.ZipFile(source, "r") as zin:
             if not keep_data_path(name):
                 removed.append(name)
                 continue
-            if "/tags/" in name and name.endswith(".json"):
+            if name == "data/ec_ad/advancements/root.json":
+                data = filter_root_advancement(data)
+            elif "/tags/" in name and name.endswith(".json"):
                 data = filter_tag_json(data, name)
 
         elif name.startswith("data/") and not name.startswith("data/ec_ad/"):
@@ -328,6 +406,12 @@ with zipfile.ZipFile(target, "r") as check:
     missing_items = sorted(allowed_item_models - names)
     if missing_items:
         raise SystemExit(f"Required item models missing: {missing_items}")
+    if "assets/ec_ad/textures/gui/back.png" not in names:
+        raise SystemExit("Retained advancement background texture is missing")
+    if "data/ec_ad/advancements/root.json" not in names:
+        raise SystemExit("Retained root advancement is missing")
+
+validate_advancement_graph(kept)
 
 report = Path("build/resource-prune-report.txt")
 report.parent.mkdir(parents=True, exist_ok=True)
