@@ -221,6 +221,48 @@ jobs:
             exit 1
           fi
 
+          SCULK_EFFECTS='com.eternal_creations.archies_dino_mod.client.particle.effect.SculksaurEffects'
+          SCULK_CONTEXT='Lcom/astemir/astemirlib/re/client/model/core/animation/event/AnimationEvent$Context;'
+          verify_method "$SCULK_EFFECTS" \
+            'archiesDinoMod$spawnSculksaurSonicBoomSphere(' \
+            "($SCULK_CONTEXT)V"
+          verify_method "$SCULK_EFFECTS" \
+            'archiesDinoMod$spawnSculksaurSonicBoomParticle(' \
+            '(Lnet/minecraft/world/level/Level;DDDI)V'
+
+          SCULK_FINAL="$(javap -classpath build/classes-pruned.jar -p -c "$SCULK_EFFECTS" | sed -n '/lambda[$]explosionFinalEvent[$]12(/,/^  private /p')"
+          for required_call in 'archiesDinoMod$spawnSculksaurSonicBoomSphere' 'ShakeUtil.shakeExplosion'; do
+            if ! printf '%s\n' "$SCULK_FINAL" | grep -Fq "$required_call"; then
+              echo "Sculksaur Sonic Boom final event is missing required visual/camera behavior: $required_call"
+              printf '%s\n' "$SCULK_FINAL"
+              exit 1
+            fi
+          done
+          for forbidden_call in 'Shockwave.of' 'ColoredLight.of' 'AnimationEvent$Context.spawnParticle'; do
+            if printf '%s\n' "$SCULK_FINAL" | grep -Fq "$forbidden_call"; then
+              echo "Legacy Sculksaur Sonic Boom effect remains in final event: $forbidden_call"
+              printf '%s\n' "$SCULK_FINAL"
+              exit 1
+            fi
+          done
+
+          SCULK_GROUND="$(javap -classpath build/classes-pruned.jar -p -c "$SCULK_EFFECTS" | sed -n '/lambda[$]explosionGroundEvent[$]11(/,/^  private /p')"
+          if printf '%s\n' "$SCULK_GROUND" | grep -Fq 'AnimationEvent$Context.spawnParticle'; then
+            echo "Legacy ground-wave emitters remain connected to Sculksaur Sonic Boom."
+            printf '%s\n' "$SCULK_GROUND"
+            exit 1
+          fi
+
+          SCULK_PARTICLE="$(javap -classpath build/classes-pruned.jar -p -c "$SCULK_EFFECTS" | sed -n '/archiesDinoMod[$]spawnSculksaurSonicBoomParticle(/,/^  private /p')"
+          for required_call in 'ParticleTypes.f_235898_' 'Level.m_7106_' 'Math.cos' 'Math.sin'; do
+            if ! printf '%s\n' "$SCULK_PARTICLE" | grep -Fq "$required_call"; then
+              echo "Sculksaur Sonic Boom sphere particle helper is missing $required_call"
+              printf '%s\n' "$SCULK_PARTICLE"
+              exit 1
+            fi
+          done
+          echo "Verified Sonic Boom is a vanilla SCULK_SOUL expanding sphere; old distortion and ground emitters are absent."
+
           LUSH_MOUNT_SPEED="$(printf '%s\\n' "$LUSH_SPRINT_CONTROL" | sed -n '/lambda[$]createMount[$]21(/,/lambda[$]createMount[$]20(/p')"
           for required_call in 'm_6688_' 'm_20142_' 'getSpeedBoostTicks' 'java/lang/Integer.signum' 'java/lang/Math.max'; do
             if ! printf '%s\\n' "$LUSH_MOUNT_SPEED" | grep -Fq "$required_call"; then
