@@ -172,8 +172,8 @@ jobs:
           done
 
           LOCAL_PLAYER_HANDLER="$(printf '%s\n' "$LOCAL_PLAYER_SPRINT" | awk '
-            /^[[:space:]]+public void archiesDinoMod\\$allowLushsaurSprint\\(/ { capture=1 }
-            capture && /^[[:space:]]+(private|public|protected) / && $0 !~ /archiesDinoMod\\$allowLushsaurSprint\\(/ { exit }
+            /^[[:space:]]+public void archiesDinoMod\$allowLushsaurSprint\(/ { capture=1 }
+            capture && /^[[:space:]]+(private|public|protected) / && $0 !~ /archiesDinoMod\$allowLushsaurSprint\(/ { exit }
             capture { print }
           ')"
           BOX_LINE="$(printf '%s\n' "$LOCAL_PLAYER_HANDLER" | grep -nF 'Boolean.TRUE' | cut -d: -f1 || true)"
