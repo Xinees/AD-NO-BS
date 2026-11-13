@@ -191,6 +191,7 @@ public final class JarPruner {
         patchLushsaurMountSpeed(nodes.get(ROOT + "common/entity/mob/lushsaur/LushsaurEntity"));
         patchLushsaurRunAnimation(nodes.get(ROOT + "client/model/render/entity/mob/LushsaurClient"));
         patchLushsaurRiderRunAnimation(nodes.get(ROOT + "client/animation/player/riding/OnLushsaurPlayerAnimations"));
+        patchSculksaurExplosionEffects(nodes.get(ROOT + "client/particle/effect/SculksaurEffects"));
         patchLushsaurLocalPlayerSprintMixin(nodes.get(ROOT + "mixin/client/LocalPlayerMixin"));
         patchPlayerMixin(nodes.get(ROOT + "mixin/PlayerMixin"));
         removeMethods(nodes.get(ROOT + "mixin/client/LevelRendererMixin"),
@@ -1143,6 +1144,226 @@ public final class JarPruner {
 
         method.maxStack = 1;
         method.maxLocals = 2;
+    }
+
+    private static void patchSculksaurExplosionEffects(ClassNode owner) {
+        if (owner == null) throw new IllegalStateException("SculksaurEffects class is missing");
+
+        String contextInternal =
+            "com/astemir/astemirlib/re/client/model/core/animation/event/AnimationEvent$Context";
+        String entityInternal = "net/minecraft/world/entity/Entity";
+        String levelInternal = "net/minecraft/world/level/Level";
+
+        String finalDescriptor = "(L" + contextInternal + ";)V";
+        MethodNode finalEvent = owner.methods.stream()
+            .filter(method -> method.name.equals("lambda$explosionFinalEvent$12") &&
+                method.desc.equals(finalDescriptor))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("Sculksaur final Sonic Boom event is missing"));
+
+        clearMethod(finalEvent);
+        InsnList finalCode = finalEvent.instructions;
+        finalCode.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        finalCode.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
+            owner.name, "archiesDinoMod$spawnSculksaurSonicBoomSphere",
+            finalDescriptor, false));
+        finalCode.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        finalCode.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
+            contextInternal, "getInstance", "()Ljava/lang/Object;", false));
+        finalCode.add(new TypeInsnNode(Opcodes.CHECKCAST, entityInternal));
+        finalCode.add(new InsnNode(Opcodes.FCONST_1));
+        finalCode.add(new LdcInsnNode(20.0f));
+        finalCode.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
+            "com/eternal_creations/archies_dino_mod/client/util/ShakeUtil",
+            "shakeExplosion", "(L" + entityInternal + ";FF)V", false));
+        finalCode.add(new InsnNode(Opcodes.RETURN));
+        finalEvent.maxStack = 4;
+        finalEvent.maxLocals = 1;
+
+        MethodNode groundEvent = owner.methods.stream()
+            .filter(method -> method.name.equals("lambda$explosionGroundEvent$11") &&
+                method.desc.equals(finalDescriptor))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("Sculksaur ground Sonic Boom event is missing"));
+        clearMethod(groundEvent);
+        groundEvent.instructions.add(new InsnNode(Opcodes.RETURN));
+        groundEvent.maxStack = 0;
+        groundEvent.maxLocals = 1;
+
+        addSculksaurSonicBoomSphereHelpers(owner, contextInternal, entityInternal, levelInternal);
+    }
+
+    private static void addSculksaurSonicBoomSphereHelpers(
+        ClassNode owner, String contextInternal, String entityInternal, String levelInternal
+    ) {
+        String sphereName = "archiesDinoMod$spawnSculksaurSonicBoomSphere";
+        String sphereDescriptor = "(L" + contextInternal + ";)V";
+        String particleName = "archiesDinoMod$spawnSculksaurSonicBoomParticle";
+        String particleDescriptor = "(L" + levelInternal + ";DDDI)V";
+        String consumerInternal = "java/util/function/IntConsumer";
+
+        owner.methods.removeIf(method ->
+            (method.name.equals(sphereName) && method.desc.equals(sphereDescriptor)) ||
+            (method.name.equals(particleName) && method.desc.equals(particleDescriptor)));
+
+        MethodNode particle = new MethodNode(
+            Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC,
+            particleName,
+            particleDescriptor,
+            null,
+            null
+        );
+        InsnList p = particle.instructions;
+
+        p.add(new VarInsnNode(Opcodes.ILOAD, 7));
+        p.add(new InsnNode(Opcodes.I2D));
+        p.add(new LdcInsnNode(0.5d));
+        p.add(new InsnNode(Opcodes.DADD));
+        p.add(new LdcInsnNode(2.0d / 1536.0d));
+        p.add(new InsnNode(Opcodes.DMUL));
+        p.add(new InsnNode(Opcodes.DCONST_1));
+        p.add(new InsnNode(Opcodes.DSUB));
+        p.add(new VarInsnNode(Opcodes.DSTORE, 8));
+
+        p.add(new InsnNode(Opcodes.DCONST_1));
+        p.add(new VarInsnNode(Opcodes.DLOAD, 8));
+        p.add(new VarInsnNode(Opcodes.DLOAD, 8));
+        p.add(new InsnNode(Opcodes.DMUL));
+        p.add(new InsnNode(Opcodes.DSUB));
+        p.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
+            "java/lang/Math", "sqrt", "(D)D", false));
+        p.add(new VarInsnNode(Opcodes.DSTORE, 10));
+
+        p.add(new VarInsnNode(Opcodes.ILOAD, 7));
+        p.add(new InsnNode(Opcodes.I2D));
+        p.add(new LdcInsnNode(2.399963229728653d));
+        p.add(new InsnNode(Opcodes.DMUL));
+        p.add(new VarInsnNode(Opcodes.DSTORE, 12));
+
+        p.add(new VarInsnNode(Opcodes.DLOAD, 12));
+        p.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
+            "java/lang/Math", "cos", "(D)D", false));
+        p.add(new VarInsnNode(Opcodes.DLOAD, 10));
+        p.add(new InsnNode(Opcodes.DMUL));
+        p.add(new VarInsnNode(Opcodes.DSTORE, 14));
+
+        p.add(new VarInsnNode(Opcodes.DLOAD, 12));
+        p.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
+            "java/lang/Math", "sin", "(D)D", false));
+        p.add(new VarInsnNode(Opcodes.DLOAD, 10));
+        p.add(new InsnNode(Opcodes.DMUL));
+        p.add(new VarInsnNode(Opcodes.DSTORE, 16));
+
+        p.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        p.add(new FieldInsnNode(Opcodes.GETSTATIC,
+            "net/minecraft/core/particles/ParticleTypes", "f_235898_",
+            "Lnet/minecraft/core/particles/SimpleParticleType;"));
+
+        p.add(new VarInsnNode(Opcodes.DLOAD, 1));
+        p.add(new VarInsnNode(Opcodes.DLOAD, 14));
+        p.add(new LdcInsnNode(0.15d));
+        p.add(new InsnNode(Opcodes.DMUL));
+        p.add(new InsnNode(Opcodes.DADD));
+
+        p.add(new VarInsnNode(Opcodes.DLOAD, 3));
+        p.add(new VarInsnNode(Opcodes.DLOAD, 8));
+        p.add(new LdcInsnNode(0.15d));
+        p.add(new InsnNode(Opcodes.DMUL));
+        p.add(new InsnNode(Opcodes.DADD));
+
+        p.add(new VarInsnNode(Opcodes.DLOAD, 5));
+        p.add(new VarInsnNode(Opcodes.DLOAD, 16));
+        p.add(new LdcInsnNode(0.15d));
+        p.add(new InsnNode(Opcodes.DMUL));
+        p.add(new InsnNode(Opcodes.DADD));
+
+        p.add(new VarInsnNode(Opcodes.DLOAD, 14));
+        p.add(new LdcInsnNode(0.72d));
+        p.add(new InsnNode(Opcodes.DMUL));
+        p.add(new VarInsnNode(Opcodes.DLOAD, 8));
+        p.add(new LdcInsnNode(0.72d));
+        p.add(new InsnNode(Opcodes.DMUL));
+        p.add(new VarInsnNode(Opcodes.DLOAD, 16));
+        p.add(new LdcInsnNode(0.72d));
+        p.add(new InsnNode(Opcodes.DMUL));
+
+        p.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
+            levelInternal, "m_7106_",
+            "(Lnet/minecraft/core/particles/ParticleOptions;DDDDDD)V", false));
+        p.add(new InsnNode(Opcodes.RETURN));
+        particle.maxStack = 14;
+        particle.maxLocals = 18;
+        owner.methods.add(particle);
+
+        MethodNode sphere = new MethodNode(
+            Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC,
+            sphereName,
+            sphereDescriptor,
+            null,
+            null
+        );
+        InsnList s = sphere.instructions;
+        s.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        s.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
+            contextInternal, "getInstance", "()Ljava/lang/Object;", false));
+        s.add(new TypeInsnNode(Opcodes.CHECKCAST, entityInternal));
+        s.add(new VarInsnNode(Opcodes.ASTORE, 1));
+
+        s.add(new VarInsnNode(Opcodes.ALOAD, 1));
+        s.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
+            entityInternal, "m_9236_", "()L" + levelInternal + ";", false));
+
+        s.add(new VarInsnNode(Opcodes.ALOAD, 1));
+        s.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
+            entityInternal, "m_20185_", "()D", false));
+
+        s.add(new VarInsnNode(Opcodes.ALOAD, 1));
+        s.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
+            entityInternal, "m_20186_", "()D", false));
+
+        s.add(new VarInsnNode(Opcodes.ALOAD, 1));
+        s.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
+            entityInternal, "m_20206_", "()F", false));
+        s.add(new InsnNode(Opcodes.F2D));
+        s.add(new LdcInsnNode(0.5d));
+        s.add(new InsnNode(Opcodes.DMUL));
+        s.add(new InsnNode(Opcodes.DADD));
+
+        s.add(new VarInsnNode(Opcodes.ALOAD, 1));
+        s.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
+            entityInternal, "m_20189_", "()D", false));
+
+        s.add(new InsnNode(Opcodes.ICONST_0));
+        s.add(new IntInsnNode(Opcodes.SIPUSH, 1536));
+        s.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
+            "java/util/stream/IntStream", "range",
+            "(II)Ljava/util/stream/IntStream;", true));
+
+        Handle metafactory = new Handle(
+            Opcodes.H_INVOKESTATIC,
+            "java/lang/invoke/LambdaMetafactory",
+            "metafactory",
+            "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;" +
+                "Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;" +
+                "Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;",
+            false
+        );
+        s.add(new InvokeDynamicInsnNode(
+            "accept",
+            "(L" + levelInternal + ";DDD)L" + consumerInternal + ";",
+            metafactory,
+            Type.getMethodType("(I)V"),
+            new Handle(Opcodes.H_INVOKESTATIC,
+                owner.name, particleName, particleDescriptor, false),
+            Type.getMethodType("(I)V")
+        ));
+        s.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE,
+            "java/util/stream/IntStream", "forEach",
+            "(Ljava/util/function/IntConsumer;)V", true));
+        s.add(new InsnNode(Opcodes.RETURN));
+        sphere.maxStack = 9;
+        sphere.maxLocals = 2;
+        owner.methods.add(sphere);
     }
 
     private static void patchLushsaurLocalPlayerSprintMixin(ClassNode owner) {
