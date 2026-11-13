@@ -861,26 +861,9 @@ public final class JarPruner {
 
         for (MethodNode method : owner.methods) {
             if (!method.name.equals("archiesDinoMod$enforceTwoHanded")) continue;
-            MethodInsnNode spotted = null;
-            for (AbstractInsnNode insn : method.instructions.toArray()) {
-                if (insn instanceof MethodInsnNode call &&
-                    call.name.equals("forEach") &&
-                    call.desc.equals("(Ljava/util/function/Consumer;)V") &&
-                    (call.owner.equals("java/util/stream/Stream") ||
-                     call.owner.equals("java/util/List") ||
-                     call.owner.equals("java/lang/Iterable"))) {
-                    spotted = call;
-                    break;
-                }
-            }
-            if (spotted == null) {
-                throw new IllegalStateException("Could not locate spotted-entity trigger boundary in PlayerMixin");
-            }
-            AbstractInsnNode next = spotted.getNext();
-            if (next != null) removeInclusive(method.instructions, next, method.instructions.getLast());
+            clearMethod(method);
             method.instructions.add(new InsnNode(Opcodes.RETURN));
-            method.tryCatchBlocks.clear();
-            if (method.localVariables != null) method.localVariables.clear();
+            method.maxLocals = 2;
         }
     }
 
