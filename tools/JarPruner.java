@@ -911,7 +911,17 @@ public final class JarPruner {
                 }
 
                 if (messageClass != null && !NETWORK_MESSAGES.contains(messageClass)) {
+                    AbstractInsnNode trailing = registration.getNext();
+                    while (trailing != null &&
+                        (trailing.getType() == AbstractInsnNode.LABEL ||
+                         trailing.getType() == AbstractInsnNode.FRAME ||
+                         trailing.getType() == AbstractInsnNode.LINE)) {
+                        trailing = trailing.getNext();
+                    }
                     removeInclusive(method.instructions, start, registration);
+                    if (trailing != null && trailing.getOpcode() == Opcodes.POP) {
+                        method.instructions.remove(trailing);
+                    }
                 }
             }
         }
