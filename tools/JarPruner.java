@@ -1024,7 +1024,7 @@ public final class JarPruner {
             method.name.equals(helperName) && method.desc.equals(helperDescriptor));
 
         MethodNode helper = new MethodNode(
-            Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC | Opcodes.ACC_SYNTHETIC,
+            Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC,
             helperName,
             helperDescriptor,
             null,
