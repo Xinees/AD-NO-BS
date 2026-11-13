@@ -140,20 +140,39 @@ def keep_asset(path):
         return low.endswith("dust_pillar.json") or any(f"/{mob}/" in f"/{low}" for mob in MOBS)
 
     if low.startswith("textures/block/"):
-        return any(low.rsplit("/", 1)[-1] == f"{egg}.png" for egg in EGGS)
+        return low.rsplit("/", 1)[-1] in {f"{egg}.png" for egg in EGGS}
 
     if low.startswith("textures/item/"):
         name = low.rsplit("/", 1)[-1]
         return name.endswith(".png") and name[:-4] in ITEMS
 
+    if low == "textures/gui/dino.png":
+        return True
+
     if low.startswith("textures/mob_effect/"):
-        return low.endswith("/dazed.png")
+        return low == "textures/mob_effect/dazed.png"
 
     if low.startswith("textures/emitter/"):
-        return low.endswith(".png") or low.endswith(".json")
-
-    if low.startswith("textures/"):
-        return any(mob in low for mob in MOBS)
+        allowed_emitter_textures = {
+            "end_dust.png",
+            "glow_pixel.png",
+            "glow_pixel_rotated.png",
+            "leaves.png",
+            "pixel.png",
+            "ring.png",
+            "ring_4.png",
+            "sculk_charge.png",
+            "sculk_charge_pop.png",
+            "sculk_raptor.png",
+            "sculk_tentacles_1.png",
+            "signal.png",
+            "smoke.png",
+            "sonic_explosion.png",
+            "tail_slash.png",
+            "wind.png",
+            "z.png",
+        }
+        return low.rsplit("/", 1)[-1] in allowed_emitter_textures
 
     return False
 
