@@ -1,3 +1,14 @@
+buildscript {
+    repositories {
+        maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
+    }
+    apply plugin: 'org.spongepowered.mixin'
+
+dependencies {
+        classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
+    }
+}
+
 plugins {
     id 'eclipse'
     id 'idea'
@@ -84,6 +95,13 @@ dependencies {
 
     compileOnly 'org.spongepowered:mixin:0.8.5'
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+}
+
+mixin {
+    add sourceSets.main, 'ec_ad.refmap.json'
+    config 'ec_ad.mixins.json'
+    config 'ec_ad.forge.mixins.json'
+    defaultObfuscationEnv searge
 }
 
 tasks.register('recoverSources') {

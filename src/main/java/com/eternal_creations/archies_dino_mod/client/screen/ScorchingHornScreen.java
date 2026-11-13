@@ -135,7 +135,7 @@ extends Screen {
     }
 
     public class PetList
-    extends ObjectSelectionList<PetEntry> {
+    extends ObjectSelectionList<ScorchingHornScreen.PetList.PetEntry> {
         public PetList(Minecraft mc, int width, int height, int top, int bottom, int itemHeight) {
             super(mc, width, height, top, bottom, itemHeight);
             this.m_93488_(false);

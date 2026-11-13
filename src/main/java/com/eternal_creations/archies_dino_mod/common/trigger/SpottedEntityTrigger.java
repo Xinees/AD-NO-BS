@@ -37,7 +37,7 @@ import net.minecraft.world.level.storage.loot.LootContext;
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public class SpottedEntityTrigger
-extends SimpleCriterionTrigger<TriggerInstance> {
+extends SimpleCriterionTrigger<SpottedEntityTrigger.TriggerInstance> {
     static final ResourceLocation ID = Constants.prefix("spotted_entity");
 
     public ResourceLocation m_7295_() {
