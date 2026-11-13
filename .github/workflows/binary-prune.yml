@@ -331,10 +331,3 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
-      - name: Upload immutable original input for source inspection
-        uses: actions/upload-artifact@v4
-        with:
-          name: ec-ad-original-source-1.0.4-readonly
-          path: ec_ad-forge-1.20.1-1.0.4.jar
-          if-no-files-found: error
-          retention-days: 3
