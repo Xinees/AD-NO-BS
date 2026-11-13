@@ -350,7 +350,7 @@ public final class JarPruner {
         code.add(new FieldInsnNode(Opcodes.GETSTATIC, ROOT + "client/model/registry/ADBlockEntityModels",
             modelField, "Lcom/astemir/astemirlib/re/client/model/AstemirModel;"));
         code.add(new MethodInsnNode(Opcodes.INVOKESTATIC, ROOT + "client/model/render/block/DinoEggClient",
-            "createRenderer", "(Lcom/astemir/astemirlib/re/client/model/AstemirModel;)Lnet/minecraft/client/renderer/blockentity/BlockEntityRenderer;", false));
+            "createRenderer", "(Lcom/astemir/astemirlib/re/client/model/AstemirModel;)Lcom/astemir/astemirlib/re/client/model/render/renderer/AstemirBlockEntityRenderer;", false));
         code.add(new MethodInsnNode(Opcodes.INVOKESTATIC, ROOT + "client/CommonClient", "registerBlockEntityRenderer",
             "(Ljava/util/function/Supplier;Lnet/minecraft/client/renderer/blockentity/BlockEntityRenderer;)V", false));
     }

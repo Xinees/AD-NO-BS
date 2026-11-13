@@ -1,4 +1,4 @@
-name: Direct Legacy JAR Prune - build 5
+name: Direct Legacy JAR Prune - build 6
 
 on:
   push:
@@ -92,6 +92,16 @@ jobs:
             echo "Found stale renderer descriptor in CommonClient."
             exit 1
           fi
+          EGG_RENDERER_DESC='(Lcom/astemir/astemirlib/re/client/model/AstemirModel;)Lcom/astemir/astemirlib/re/client/model/render/renderer/AstemirBlockEntityRenderer;'
+          EGG_CLIENT='com.eternal_creations.archies_dino_mod.client.model.render.block.DinoEggClient'
+          javap -classpath build/classes-pruned.jar -p -s "$EGG_CLIENT" | grep -F "descriptor: $EGG_RENDERER_DESC"
+          BLOCK_RENDER_CALLS="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.client.CommonClient)"
+          BLOCK_COUNT="$(printf '%s\\n' "$BLOCK_RENDER_CALLS" | grep -F -o "createRenderer:$EGG_RENDERER_DESC" | wc -l)"
+          test "$BLOCK_COUNT" -eq 2
+          if printf '%s\\n' "$BLOCK_RENDER_CALLS" | grep -F "createRenderer:(Lcom/astemir/astemirlib/re/client/model/AstemirModel;)Lnet/minecraft/client/renderer/blockentity/BlockEntityRenderer;"; then
+            echo "Found stale egg renderer descriptor in CommonClient."
+            exit 1
+          fi
 
       - name: Verify Legacy JAR structure and retained content
         shell: bash
@@ -132,6 +142,13 @@ jobs:
                   "com/eternal_creations/archies_dino_mod/common/entity/mob/sculksaur/SculksaurEntity.class",
                   "com/eternal_creations/archies_dino_mod/common/block/eggs/LushsaurEggBlock.class",
                   "com/eternal_creations/archies_dino_mod/common/block/eggs/ChorusoatlEggBlock.class",
+                  "assets/ec_ad/models/entity/lushsaur.astemirmodel",
+                  "assets/ec_ad/models/entity/lushsaur_baby.astemirmodel",
+                  "assets/ec_ad/models/entity/chorusoatl.astemirmodel",
+                  "assets/ec_ad/models/entity/chorusoatl_baby.astemirmodel",
+                  "assets/ec_ad/models/entity/sculksaur.astemirmodel",
+                  "assets/ec_ad/models/block/lushsaur_egg.astemirmodel",
+                  "assets/ec_ad/models/block/chorusoatl_egg.astemirmodel",
                   "assets/ec_ad/models/item/lush_core.json",
                   "assets/ec_ad/models/item/chorus_fossil.json",
                   "assets/ec_ad/models/item/sculk_toxin.json",
