@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "I": {
+      "item": "ec_ad:sculk_toxin"
+    },
+    "S": {
+      "item": "ec_ad:obsidian_horn"
+    },
+    "W": {
+      "item": "minecraft:blaze_rod"
+    }
+  },
+  "pattern": [
+    "IW ",
+    "S W",
+    "IW "
+  ],
+  "result": {
+    "item": "ec_ad:sculk_bow"
+  },
+  "show_notification": true
+}

@@ -1,0 +1,22 @@
+{
+  "type": "ec_ad:archie_trade",
+  "input": {
+    "item": "minecraft:emerald",
+    "max": 6,
+    "min": 4
+  },
+  "max_uses": 3,
+  "output": [
+    {
+      "item": "minecraft:compass",
+      "max": 1,
+      "min": 1
+    }
+  ],
+  "reward_exp": 5,
+  "sort": [
+    {
+      "ordinal": 4
+    }
+  ]
+}

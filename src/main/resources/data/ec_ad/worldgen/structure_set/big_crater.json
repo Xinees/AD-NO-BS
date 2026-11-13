@@ -1,0 +1,18 @@
+{
+  "placement": {
+    "type": "minecraft:random_spread",
+    "exclusion_zone": {
+      "chunk_count": 2,
+      "other_set": "ec_ad:crater"
+    },
+    "salt": 654682354,
+    "separation": 18,
+    "spacing": 36
+  },
+  "structures": [
+    {
+      "structure": "ec_ad:big_crater",
+      "weight": 1
+    }
+  ]
+}

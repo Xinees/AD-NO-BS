@@ -1,0 +1,43 @@
+{
+  "parent": "ec_ad:kill_chorusoatl",
+  "criteria": {
+    "tame": {
+      "conditions": {
+        "entity": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "type": "ec_ad:chorusoatl"
+            }
+          }
+        ]
+      },
+      "trigger": "minecraft:tame_animal"
+    }
+  },
+  "display": {
+    "announce_to_chat": true,
+    "description": {
+      "translate": "advancement.tame_chorusoatl.desc"
+    },
+    "frame": "task",
+    "hidden": false,
+    "icon": {
+      "item": "ec_ad:chorusoatl_egg"
+    },
+    "show_toast": true,
+    "title": {
+      "translate": "advancement.tame_chorusoatl.title"
+    }
+  },
+  "requirements": [
+    [
+      "tame"
+    ]
+  ],
+  "rewards": {
+    "experience": 100
+  },
+  "sends_telemetry_event": true
+}

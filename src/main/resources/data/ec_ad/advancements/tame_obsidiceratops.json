@@ -1,0 +1,43 @@
+{
+  "parent": "ec_ad:kill_obsidiceratops",
+  "criteria": {
+    "tame": {
+      "conditions": {
+        "entity": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "type": "ec_ad:obsidiceratops"
+            }
+          }
+        ]
+      },
+      "trigger": "minecraft:tame_animal"
+    }
+  },
+  "display": {
+    "announce_to_chat": true,
+    "description": {
+      "translate": "advancement.tame_obsidiceratops.desc"
+    },
+    "frame": "task",
+    "hidden": false,
+    "icon": {
+      "item": "ec_ad:obsidiceratops_egg"
+    },
+    "show_toast": true,
+    "title": {
+      "translate": "advancement.tame_obsidiceratops.title"
+    }
+  },
+  "requirements": [
+    [
+      "tame"
+    ]
+  ],
+  "rewards": {
+    "experience": 100
+  },
+  "sends_telemetry_event": true
+}

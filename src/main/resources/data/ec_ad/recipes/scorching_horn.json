@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "I": {
+      "tag": "forge:ingots/gold"
+    },
+    "W": {
+      "item": "ec_ad:obsidian_horn"
+    }
+  },
+  "pattern": [
+    "W ",
+    "IW"
+  ],
+  "result": {
+    "item": "ec_ad:scorching_horn"
+  },
+  "show_notification": true
+}

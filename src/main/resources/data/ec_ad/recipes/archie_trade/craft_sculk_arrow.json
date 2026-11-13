@@ -1,0 +1,28 @@
+{
+  "type": "ec_ad:archie_trade",
+  "addition": {
+    "item": "ec_ad:sculk_toxin",
+    "max": 1,
+    "min": 1
+  },
+  "input": {
+    "item": "minecraft:arrow",
+    "max": 1,
+    "min": 1
+  },
+  "max_uses": 3,
+  "output": [
+    {
+      "item": "ec_ad:ooze_tipped_arrow",
+      "max": 1,
+      "min": 1
+    }
+  ],
+  "requirement": "ec_ad:spot_sculksaur",
+  "reward_exp": 5,
+  "sort": [
+    {
+      "ordinal": 6
+    }
+  ]
+}

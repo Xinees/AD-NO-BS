@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "D": {
+      "item": "ec_ad:mossy_claw"
+    },
+    "S": {
+      "item": "ec_ad:coral_rib"
+    },
+    "W": {
+      "tag": "forge:ingots/copper"
+    },
+    "Y": {
+      "tag": "forge:leather"
+    }
+  },
+  "pattern": [
+    "D D",
+    "SWS",
+    " Y "
+  ],
+  "result": {
+    "item": "ec_ad:theri_claw_copper"
+  },
+  "show_notification": true
+}

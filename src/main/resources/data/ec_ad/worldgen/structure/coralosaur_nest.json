@@ -1,0 +1,23 @@
+{
+  "type": "ec_ad:custom_template",
+  "biomes": "#ec_ad:spawns_coralosaurs",
+  "setups": [
+    {
+      "air_pocket_probability": 0.0,
+      "archie_processor": "process_coral",
+      "delta": 0,
+      "depth": -42,
+      "keep_liquids": "force_water",
+      "placement": "sunken",
+      "structure_locations": [
+        {
+          "location": "ec_ad:coralosaur_nest",
+          "weight": 1
+        }
+      ],
+      "weight": 1.0
+    }
+  ],
+  "spawn_overrides": {},
+  "step": "underground_structures"
+}

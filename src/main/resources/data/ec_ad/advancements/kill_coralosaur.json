@@ -1,0 +1,43 @@
+{
+  "parent": "ec_ad:spot_coralosaur",
+  "criteria": {
+    "kill": {
+      "conditions": {
+        "entity": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "type": "ec_ad:coralosaur"
+            }
+          }
+        ]
+      },
+      "trigger": "minecraft:player_killed_entity"
+    }
+  },
+  "display": {
+    "announce_to_chat": true,
+    "description": {
+      "translate": "advancement.kill_coralosaur.desc"
+    },
+    "frame": "task",
+    "hidden": false,
+    "icon": {
+      "item": "ec_ad:coral_rib"
+    },
+    "show_toast": true,
+    "title": {
+      "translate": "advancement.kill_coralosaur.title"
+    }
+  },
+  "requirements": [
+    [
+      "kill"
+    ]
+  ],
+  "rewards": {
+    "experience": 100
+  },
+  "sends_telemetry_event": true
+}

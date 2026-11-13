@@ -1,0 +1,43 @@
+{
+  "parent": "ec_ad:kill_coralosaur",
+  "criteria": {
+    "tame": {
+      "conditions": {
+        "entity": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "type": "ec_ad:coralosaur"
+            }
+          }
+        ]
+      },
+      "trigger": "minecraft:tame_animal"
+    }
+  },
+  "display": {
+    "announce_to_chat": true,
+    "description": {
+      "translate": "advancement.tame_coralosaur.desc"
+    },
+    "frame": "task",
+    "hidden": false,
+    "icon": {
+      "item": "ec_ad:coral_stew"
+    },
+    "show_toast": true,
+    "title": {
+      "translate": "advancement.tame_coralosaur.title"
+    }
+  },
+  "requirements": [
+    [
+      "tame"
+    ]
+  ],
+  "rewards": {
+    "experience": 100
+  },
+  "sends_telemetry_event": true
+}

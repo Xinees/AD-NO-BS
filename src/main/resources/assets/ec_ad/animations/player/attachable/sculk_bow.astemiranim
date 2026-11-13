@@ -1,0 +1,474 @@
+[
+    {
+        "name": "sculk_bow.charge",
+        "length": 0.72,
+        "loop": "hold",
+        "bones": {
+            "waist": {
+                "rotation": [
+                    {
+                        "time": 0,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "time": 0.24,
+                        "value": [
+                            6.75,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "time": 0.72,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    }
+                ]
+            },
+            "head": {
+                "rotation": [
+                    {
+                        "time": 0,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "time": 0.16,
+                        "value": [
+                            -16,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "time": 0.28,
+                        "value": [
+                            4,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "time": 0.48,
+                        "value": [
+                            -3,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "time": 0.6,
+                        "value": [
+                            -5,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "time": 0.72,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    }
+                ]
+            },
+            "rightArm": {
+                "rotation": [
+                    {
+                        "time": 0,
+                        "value": [
+                            0,
+                            0,
+                            "(math.cos(query.life_time * 103.2) * 2.865) + 2.865"
+                        ]
+                    },
+                    {
+                        "time": 0.24,
+                        "value": [
+                            "110.7 - query.target_x_rotation + query.is_sneaking * 15.0 + this",
+                            "6.15 - query.target_y_rotation",
+                            0
+                        ]
+                    },
+                    {
+                        "time": 0.72,
+                        "value": [
+                            "90.0 - query.target_x_rotation + query.is_sneaking * 15.0 + this",
+                            "5.0 - query.target_y_rotation",
+                            0
+                        ]
+                    }
+                ],
+                "position": [
+                    {
+                        "time": 0,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "time": 0.16,
+                        "value": [
+                            0,
+                            -1.775,
+                            0
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.36,
+                        "value": [
+                            0,
+                            1.855,
+                            0
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.6,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.72,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    }
+                ]
+            },
+            "leftArm": {
+                "rotation": [
+                    {
+                        "time": 0,
+                        "value": [
+                            0,
+                            0,
+                            "-((math.cos(query.life_time * 103.2) * 2.865) + 2.865)"
+                        ]
+                    },
+                    {
+                        "time": 0.24,
+                        "value": [
+                            "110.7 - query.target_x_rotation + query.is_sneaking * 15.0 + this",
+                            "-33.825 - query.target_y_rotation",
+                            "math.clamp(query.target_y_rotation * 0.5 + query.target_x_rotation * 0.5, -20, 20)"
+                        ]
+                    },
+                    {
+                        "time": 0.72,
+                        "value": [
+                            "90.0 - query.target_x_rotation + query.is_sneaking * 15.0 + this",
+                            "-27.5 - query.target_y_rotation",
+                            0
+                        ]
+                    }
+                ],
+                "position": [
+                    {
+                        "time": 0,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "time": 0.16,
+                        "value": [
+                            0,
+                            -1.05,
+                            0
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.36,
+                        "value": [
+                            0,
+                            1.655,
+                            0
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.6,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.72,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "name": "sculk_bow.release",
+        "length": 0.2917,
+        "loop": "hold",
+        "bones": {
+            "waist": {
+                "rotation": [
+                    {
+                        "time": 0,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "time": 0.08,
+                        "value": [
+                            12.5775,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "time": 0.16,
+                        "value": [
+                            2.25,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "time": 0.28,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    }
+                ]
+            },
+            "head": {
+                "rotation": [
+                    {
+                        "time": 0,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "time": 0.08,
+                        "value": [
+                            -19.35,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "time": 0.16,
+                        "value": [
+                            -3.25,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "time": 0.28,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    }
+                ]
+            },
+            "rightArm": {
+                "rotation": [
+                    {
+                        "time": 0,
+                        "value": [
+                            "90.0 - query.target_x_rotation + query.is_sneaking * 15.0 + this",
+                            "5.0 - query.target_y_rotation",
+                            0
+                        ]
+                    },
+                    {
+                        "time": 0.08,
+                        "value": [
+                            "91.4375 - query.target_x_rotation + query.is_sneaking * 15.0 + this",
+                            "13.41 - query.target_y_rotation",
+                            0
+                        ]
+                    },
+                    {
+                        "time": 0.16,
+                        "value": [
+                            "36.8129 - query.target_x_rotation + query.is_sneaking * 15.0 + this",
+                            "3.8765 - query.target_y_rotation",
+                            -6.7607
+                        ]
+                    },
+                    {
+                        "time": 0.28,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    }
+                ],
+                "position": [
+                    {
+                        "time": 0,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "time": 0.08,
+                        "value": [
+                            0,
+                            0,
+                            1.2578
+                        ]
+                    },
+                    {
+                        "time": 0.16,
+                        "value": [
+                            0,
+                            0,
+                            -0.97
+                        ]
+                    },
+                    {
+                        "time": 0.28,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    }
+                ]
+            },
+            "rightItem": {
+                "rotation": [
+                    {
+                        "time": 0,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "time": 0.0833,
+                        "value": [
+                            7.5,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "time": 0.2917,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    }
+                ]
+            },
+            "leftArm": {
+                "rotation": [
+                    {
+                        "time": 0,
+                        "value": [
+                            "90.0 - query.target_x_rotation + query.is_sneaking * 15.0 + this",
+                            "-27.5 - query.target_y_rotation",
+                            0
+                        ]
+                    },
+                    {
+                        "time": 0.08,
+                        "value": [
+                            "102.725 - query.target_x_rotation + query.is_sneaking * 15.0 + this",
+                            "-28.515 - query.target_y_rotation",
+                            0
+                        ]
+                    },
+                    {
+                        "time": 0.16,
+                        "value": [
+                            "51.216 - query.target_x_rotation + query.is_sneaking * 15.0 + this",
+                            "-20.9837 - query.target_y_rotation",
+                            -5.9913
+                        ]
+                    },
+                    {
+                        "time": 0.28,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    }
+                ],
+                "position": [
+                    {
+                        "time": 0,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "time": 0.08,
+                        "value": [
+                            0,
+                            0,
+                            2.9993
+                        ]
+                    },
+                    {
+                        "time": 0.28,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+]

@@ -1,0 +1,116 @@
+{
+  "parent": "ec_ad:tame_coralosaur",
+  "criteria": {
+    "craft_boots": {
+      "conditions": {
+        "recipe_id": "ec_ad:coralosaur_boots"
+      },
+      "trigger": "minecraft:recipe_crafted"
+    },
+    "craft_chestplate": {
+      "conditions": {
+        "recipe_id": "ec_ad:coralosaur_chestplate"
+      },
+      "trigger": "minecraft:recipe_crafted"
+    },
+    "craft_helmet": {
+      "conditions": {
+        "recipe_id": "ec_ad:coralosaur_helmet"
+      },
+      "trigger": "minecraft:recipe_crafted"
+    },
+    "craft_leggings": {
+      "conditions": {
+        "recipe_id": "ec_ad:coralosaur_leggings"
+      },
+      "trigger": "minecraft:recipe_crafted"
+    },
+    "kill": {
+      "conditions": {
+        "entity": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "type": "ec_ad:coralosaur"
+            }
+          }
+        ]
+      },
+      "trigger": "minecraft:player_killed_entity"
+    },
+    "spot": {
+      "conditions": {
+        "entity": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "type": "ec_ad:coralosaur"
+            }
+          }
+        ]
+      },
+      "trigger": "ec_ad:spotted_entity"
+    },
+    "tame": {
+      "conditions": {
+        "entity": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "type": "ec_ad:coralosaur"
+            }
+          }
+        ]
+      },
+      "trigger": "minecraft:tame_animal"
+    }
+  },
+  "display": {
+    "announce_to_chat": true,
+    "description": {
+      "translate": "advancement.master_coralosaur.desc"
+    },
+    "frame": "challenge",
+    "hidden": false,
+    "icon": {
+      "item": "ec_ad:coralosaur_helmet",
+      "nbt": "{Damage:0}"
+    },
+    "show_toast": true,
+    "title": {
+      "translate": "advancement.master_coralosaur.title"
+    }
+  },
+  "requirements": [
+    [
+      "spot"
+    ],
+    [
+      "kill"
+    ],
+    [
+      "craft_boots"
+    ],
+    [
+      "craft_chestplate"
+    ],
+    [
+      "craft_helmet"
+    ],
+    [
+      "craft_leggings"
+    ],
+    [
+      "tame"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "ec_ad:tidal_totem"
+    ]
+  },
+  "sends_telemetry_event": true
+}

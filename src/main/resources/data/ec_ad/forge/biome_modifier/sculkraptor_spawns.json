@@ -1,0 +1,10 @@
+{
+  "type": "forge:add_spawns",
+  "biomes": "#ec_ad:spawns_sculkraptors",
+  "spawners": {
+    "type": "ec_ad:sculkraptor",
+    "maxCount": 1,
+    "minCount": 1,
+    "weight": 10
+  }
+}

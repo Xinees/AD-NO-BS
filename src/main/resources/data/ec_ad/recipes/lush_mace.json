@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "S": {
+      "item": "minecraft:dripstone_block"
+    },
+    "W": {
+      "item": "ec_ad:lush_core"
+    }
+  },
+  "pattern": [
+    "W",
+    "S",
+    "S"
+  ],
+  "result": {
+    "item": "ec_ad:lush_mace"
+  },
+  "show_notification": true
+}

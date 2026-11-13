@@ -1,0 +1,350 @@
+{
+  "mappings": {
+    "com/eternal_creations/archies_dino_mod/mixin/sculksaur/PrimaryLevelDataMixin": {
+      "setTagData": "Lnet/minecraft/world/level/storage/PrimaryLevelData;m_78545_(Lnet/minecraft/core/RegistryAccess;Lnet/minecraft/nbt/CompoundTag;Lnet/minecraft/nbt/CompoundTag;)V",
+      "parse": "Lnet/minecraft/world/level/storage/PrimaryLevelData;m_78530_(Lcom/mojang/serialization/Dynamic;Lcom/mojang/datafixers/DataFixer;ILnet/minecraft/nbt/CompoundTag;Lnet/minecraft/world/level/LevelSettings;Lnet/minecraft/world/level/storage/LevelVersion;Lnet/minecraft/world/level/storage/PrimaryLevelData$SpecialWorldProperty;Lnet/minecraft/world/level/levelgen/WorldOptions;Lcom/mojang/serialization/Lifecycle;)Lnet/minecraft/world/level/storage/PrimaryLevelData;"
+    },
+    "com/eternal_creations/archies_dino_mod/mixin/LivingEntityMixin": {
+      "causeFallDamage": "Lnet/minecraft/world/entity/LivingEntity;m_142535_(FFLnet/minecraft/world/damagesource/DamageSource;)Z",
+      "getVisibilityPercent": "Lnet/minecraft/world/entity/LivingEntity;m_20968_(Lnet/minecraft/world/entity/Entity;)D",
+      "travel": "Lnet/minecraft/world/entity/LivingEntity;m_7023_(Lnet/minecraft/world/phys/Vec3;)V",
+      "canStandOnFluid": "Lnet/minecraft/world/entity/LivingEntity;m_203441_(Lnet/minecraft/world/level/material/FluidState;)Z"
+    },
+    "com/eternal_creations/archies_dino_mod/mixin/EntityAccessor": {
+      "ENTITY_COUNTER": "f_19843_:Ljava/util/concurrent/atomic/AtomicInteger;"
+    },
+    "com/eternal_creations/archies_dino_mod/mixin/coralosaur/SaveMobMixin": {
+      "addAdditionalSaveData": "Lnet/minecraft/world/entity/Mob;m_7380_(Lnet/minecraft/nbt/CompoundTag;)V",
+      "readAdditionalSaveData": "Lnet/minecraft/world/entity/Mob;m_7378_(Lnet/minecraft/nbt/CompoundTag;)V"
+    },
+    "com/eternal_creations/archies_dino_mod/mixin/DamageSourcesMixin": {
+      "arrow": "Lnet/minecraft/world/damagesource/DamageSources;m_269418_(Lnet/minecraft/world/entity/projectile/AbstractArrow;Lnet/minecraft/world/entity/Entity;)Lnet/minecraft/world/damagesource/DamageSource;"
+    },
+    "com/eternal_creations/archies_dino_mod/mixin/BreedGoalAccessor": {
+      "speedModifier": "f_25119_:D",
+      "loveTime": "f_25118_:I"
+    },
+    "com/eternal_creations/archies_dino_mod/mixin/coralosaur/MobAccessor": {
+      "targetSelector": "f_21346_:Lnet/minecraft/world/entity/ai/goal/GoalSelector;",
+      "goalSelector": "f_21345_:Lnet/minecraft/world/entity/ai/goal/GoalSelector;",
+      "leashHolder": "f_21357_:Lnet/minecraft/world/entity/Entity;",
+      "leashInfoTag": "f_21359_:Lnet/minecraft/nbt/CompoundTag;",
+      "restoreLeashFromSave": "m_21528_()V"
+    },
+    "com/eternal_creations/archies_dino_mod/mixin/EntityMixin": {
+      "fireImmune": "Lnet/minecraft/world/entity/Entity;m_5825_()Z"
+    },
+    "com/eternal_creations/archies_dino_mod/mixin/coralosaur/BoatMixin": {
+      "addAdditionalSaveData": "Lnet/minecraft/world/entity/vehicle/Boat;m_7380_(Lnet/minecraft/nbt/CompoundTag;)V",
+      "interact": "Lnet/minecraft/world/entity/vehicle/Boat;m_6096_(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;",
+      "tick": "Lnet/minecraft/world/entity/vehicle/Boat;m_8119_()V",
+      "readAdditionalSaveData": "Lnet/minecraft/world/entity/vehicle/Boat;m_7378_(Lnet/minecraft/nbt/CompoundTag;)V"
+    },
+    "com/eternal_creations/archies_dino_mod/mixin/client/twohanded/SlotWrapperAccessor": {
+      "net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen$SlotWrapper": "net/minecraft/client/gui/screens/inventory/CreativeModeInventoryScreen$SlotWrapper",
+      "target": "f_98655_:Lnet/minecraft/world/inventory/Slot;"
+    },
+    "com/eternal_creations/archies_dino_mod/mixin/ServerPlayerInterfaceMixin": {
+      "checkFallDamage": "Lnet/minecraft/server/level/ServerPlayer;m_7840_(DZLnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/BlockPos;)V"
+    },
+    "com/eternal_creations/archies_dino_mod/mixin/client/LivingEntityRendererMixin": {
+      "render(Lnet/minecraft/world/entity/LivingEntity;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V": "Lnet/minecraft/client/renderer/entity/LivingEntityRenderer;m_7392_(Lnet/minecraft/world/entity/LivingEntity;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V"
+    },
+    "com/eternal_creations/archies_dino_mod/mixin/PlayerListMixin": {
+      "placeNewPlayer": "Lnet/minecraft/server/players/PlayerList;m_11261_(Lnet/minecraft/network/Connection;Lnet/minecraft/server/level/ServerPlayer;)V"
+    },
+    "com/eternal_creations/archies_dino_mod/mixin/MultiplayerGameModeMixin": {
+      "interact": "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;m_105226_(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;"
+    },
+    "com/eternal_creations/archies_dino_mod/mixin/AbstractArrowMixin": {
+      "addAdditionalSaveData": "Lnet/minecraft/world/entity/projectile/AbstractArrow;m_7380_(Lnet/minecraft/nbt/CompoundTag;)V",
+      "defineSynchedData": "Lnet/minecraft/world/entity/projectile/AbstractArrow;m_8097_()V",
+      "Lnet/minecraft/world/phys/Vec3;horizontalDistance()D": "Lnet/minecraft/world/phys/Vec3;m_165924_()D",
+      "getWaterInertia": "Lnet/minecraft/world/entity/projectile/AbstractArrow;m_6882_()F",
+      "tick": "Lnet/minecraft/world/entity/projectile/AbstractArrow;m_8119_()V",
+      "readAdditionalSaveData": "Lnet/minecraft/world/entity/projectile/AbstractArrow;m_7378_(Lnet/minecraft/nbt/CompoundTag;)V",
+      "onHitEntity": "Lnet/minecraft/world/entity/projectile/AbstractArrow;m_5790_(Lnet/minecraft/world/phys/EntityHitResult;)V"
+    },
+    "com/eternal_creations/archies_dino_mod/mixin/DamageEnchantmentMixin": {
+      "canEnchant": "Lnet/minecraft/world/item/enchantment/DamageEnchantment;m_6081_(Lnet/minecraft/world/item/ItemStack;)Z"
+    },
+    "com/eternal_creations/archies_dino_mod/mixin/sculksaur/WardenMixin": {
+      "Lnet/minecraft/world/level/gameevent/vibrations/VibrationSystem$Ticker;tick(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/level/gameevent/vibrations/VibrationSystem$Data;Lnet/minecraft/world/level/gameevent/vibrations/VibrationSystem$User;)V": "Lnet/minecraft/world/level/gameevent/vibrations/VibrationSystem$Ticker;m_280259_(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/level/gameevent/vibrations/VibrationSystem$Data;Lnet/minecraft/world/level/gameevent/vibrations/VibrationSystem$User;)V",
+      "tick": "Lnet/minecraft/world/entity/monster/warden/Warden;m_8119_()V",
+      "hurt": "Lnet/minecraft/world/entity/monster/warden/Warden;m_6469_(Lnet/minecraft/world/damagesource/DamageSource;F)Z"
+    },
+    "com/eternal_creations/archies_dino_mod/mixin/archie/MerchantMenuMixin": {
+      "moveFromInventoryToPaymentSlot": "Lnet/minecraft/world/inventory/MerchantMenu;m_40060_(ILnet/minecraft/world/item/ItemStack;)V"
+    },
+    "com/eternal_creations/archies_dino_mod/mixin/PlayerAttackDamageBonusMixin": {
+      "attack": "Lnet/minecraft/world/entity/player/Player;m_5706_(Lnet/minecraft/world/entity/Entity;)V",
+      "Lnet/minecraft/world/item/enchantment/EnchantmentHelper;getKnockbackBonus(Lnet/minecraft/world/entity/LivingEntity;)I": "Lnet/minecraft/world/item/enchantment/EnchantmentHelper;m_44894_(Lnet/minecraft/world/entity/LivingEntity;)I"
+    },
+    "com/eternal_creations/archies_dino_mod/mixin/client/LevelRendererMixin": {
+      "renderEntity": "Lnet/minecraft/client/renderer/LevelRenderer;m_109517_(Lnet/minecraft/world/entity/Entity;DDDFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;)V",
+      "levelEvent": "Lnet/minecraft/client/renderer/LevelRenderer;m_234304_(ILnet/minecraft/core/BlockPos;I)V"
+    },
+    "com/eternal_creations/archies_dino_mod/mixin/twohanded/AbstractContainerMenuMixin": {
+      "clicked": "Lnet/minecraft/world/inventory/AbstractContainerMenu;m_150399_(IILnet/minecraft/world/inventory/ClickType;Lnet/minecraft/world/entity/player/Player;)V"
+    },
+    "com/eternal_creations/archies_dino_mod/mixin/sculksaur/SculkShriekerBlockEntityMixin": {
+      "trySummonWarden": "Lnet/minecraft/world/level/block/entity/SculkShriekerBlockEntity;m_222880_(Lnet/minecraft/server/level/ServerLevel;)Z"
+    },
+    "com/eternal_creations/archies_dino_mod/mixin/client/CameraMixin": {
+      "setup": "Lnet/minecraft/client/Camera;m_90575_(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/world/entity/Entity;ZZF)V"
+    },
+    "com/eternal_creations/archies_dino_mod/mixin/BlockMixin": {
+      "playerWillDestroy": "Lnet/minecraft/world/level/block/Block;m_5707_(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/entity/player/Player;)V"
+    },
+    "com/eternal_creations/archies_dino_mod/mixin/client/coralosaur/ClientPacketListenerClass": {
+      "handleEntityLinkPacket": "Lnet/minecraft/client/multiplayer/ClientPacketListener;m_5599_(Lnet/minecraft/network/protocol/game/ClientboundSetEntityLinkPacket;)V"
+    },
+    "com/eternal_creations/archies_dino_mod/mixin/client/MinecraftMixin": {
+      "startAttack": "Lnet/minecraft/client/Minecraft;m_202354_()Z",
+      "Lnet/minecraft/world/phys/HitResult;getType()Lnet/minecraft/world/phys/HitResult$Type;": "Lnet/minecraft/world/phys/HitResult;m_6662_()Lnet/minecraft/world/phys/HitResult$Type;",
+      "Lnet/minecraft/world/phys/BlockHitResult;getDirection()Lnet/minecraft/core/Direction;": "Lnet/minecraft/world/phys/BlockHitResult;m_82434_()Lnet/minecraft/core/Direction;",
+      "continueAttack": "Lnet/minecraft/client/Minecraft;m_91386_(Z)V"
+    },
+    "com/eternal_creations/archies_dino_mod/mixin/client/KeyMappingMixin": {
+      "set": "Lnet/minecraft/client/KeyMapping;m_90837_(Lcom/mojang/blaze3d/platform/InputConstants$Key;Z)V",
+      "same": "Lnet/minecraft/client/KeyMapping;m_90850_(Lnet/minecraft/client/KeyMapping;)Z",
+      "click": "Lnet/minecraft/client/KeyMapping;m_90835_(Lcom/mojang/blaze3d/platform/InputConstants$Key;)V"
+    },
+    "com/eternal_creations/archies_dino_mod/mixin/client/ClientAdvancementsAccessor": {
+      "progress": "f_104390_:Ljava/util/Map;"
+    },
+    "com/eternal_creations/archies_dino_mod/mixin/archie/MerchantOfferMixin": {
+      "isRequiredItem": "Lnet/minecraft/world/item/trading/MerchantOffer;m_45365_(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemStack;)Z"
+    },
+    "com/eternal_creations/archies_dino_mod/mixin/EnchantmentCategoryMixin": {
+      "canEnchant": "Lnet/minecraft/world/item/enchantment/EnchantmentCategory$6;m_7454_(Lnet/minecraft/world/item/Item;)Z",
+      "net.minecraft.world.item.enchantment.EnchantmentCategory$6": "net/minecraft/world/item/enchantment/EnchantmentCategory$6"
+    },
+    "com/eternal_creations/archies_dino_mod/mixin/coralosaur/GuardianSelectorMixin": {
+      "net.minecraft.world.entity.monster.Guardian$GuardianAttackSelector": "net/minecraft/world/entity/monster/Guardian$GuardianAttackSelector",
+      "test(Ljava/lang/Object;)Z": "Lnet/minecraft/world/entity/monster/Guardian$GuardianAttackSelector;test(Ljava/lang/Object;)Z"
+    },
+    "com/eternal_creations/archies_dino_mod/mixin/coralosaur/EnchantmentHelperMixin": {
+      "hasAquaAffinity": "Lnet/minecraft/world/item/enchantment/EnchantmentHelper;m_44934_(Lnet/minecraft/world/entity/LivingEntity;)Z"
+    },
+    "com/eternal_creations/archies_dino_mod/mixin/PlayerMixin": {
+      "Lnet/minecraft/world/food/FoodData;addExhaustion(F)V": "Lnet/minecraft/world/food/FoodData;m_38703_(F)V",
+      "tick": "Lnet/minecraft/world/entity/player/Player;m_8119_()V",
+      "causeFoodExhaustion": "Lnet/minecraft/world/entity/player/Player;m_36399_(F)V"
+    },
+    "com/eternal_creations/archies_dino_mod/mixin/coralosaur/StructureTemplateAccessor": {
+      "palettes": "f_74482_:Ljava/util/List;"
+    },
+    "com/eternal_creations/archies_dino_mod/mixin/archie/PrimaryLevelDataMixin": {
+      "setTagData": "Lnet/minecraft/world/level/storage/PrimaryLevelData;m_78545_(Lnet/minecraft/core/RegistryAccess;Lnet/minecraft/nbt/CompoundTag;Lnet/minecraft/nbt/CompoundTag;)V",
+      "parse": "Lnet/minecraft/world/level/storage/PrimaryLevelData;m_78530_(Lcom/mojang/serialization/Dynamic;Lcom/mojang/datafixers/DataFixer;ILnet/minecraft/nbt/CompoundTag;Lnet/minecraft/world/level/LevelSettings;Lnet/minecraft/world/level/storage/LevelVersion;Lnet/minecraft/world/level/storage/PrimaryLevelData$SpecialWorldProperty;Lnet/minecraft/world/level/levelgen/WorldOptions;Lcom/mojang/serialization/Lifecycle;)Lnet/minecraft/world/level/storage/PrimaryLevelData;"
+    },
+    "com/eternal_creations/archies_dino_mod/mixin/archie/MinecraftServerMixin": {
+      "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V": "Lnet/minecraft/util/profiling/ProfilerFiller;m_6182_(Ljava/lang/String;)V",
+      "tickChildren": "Lnet/minecraft/server/MinecraftServer;m_5703_(Ljava/util/function/BooleanSupplier;)V"
+    },
+    "com/eternal_creations/archies_dino_mod/mixin/client/LocalPlayerMixin": {
+      "openItemGui": "Lnet/minecraft/client/player/LocalPlayer;m_6986_(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/InteractionHand;)V"
+    },
+    "com/eternal_creations/archies_dino_mod/mixin/EnchantmentHelperMixin": {
+      "doPostDamageEffects": "Lnet/minecraft/world/item/enchantment/EnchantmentHelper;m_44896_(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/entity/Entity;)V"
+    },
+    "com/eternal_creations/archies_dino_mod/mixin/PlayerInterfaceMixin": {
+      "causeFallDamage": "Lnet/minecraft/world/entity/player/Player;m_142535_(FFLnet/minecraft/world/damagesource/DamageSource;)Z",
+      "tick": "Lnet/minecraft/world/entity/player/Player;m_8119_()V"
+    },
+    "com/eternal_creations/archies_dino_mod/mixin/VibrationSystemListenerMixin": {
+      "handleGameEvent": "Lnet/minecraft/world/level/gameevent/vibrations/VibrationSystem$Listener;m_214068_(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/level/gameevent/GameEvent;Lnet/minecraft/world/level/gameevent/GameEvent$Context;Lnet/minecraft/world/phys/Vec3;)Z"
+    },
+    "com/eternal_creations/archies_dino_mod/mixin/twohanded/ServerGamePacketListenerImplMixin": {
+      "handlePlayerAction": "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;m_7502_(Lnet/minecraft/network/protocol/game/ServerboundPlayerActionPacket;)V"
+    },
+    "com/eternal_creations/archies_dino_mod/mixin/coralosaur/GuardianMixin": {
+      "defineSynchedData": "Lnet/minecraft/world/entity/monster/Guardian;m_8097_()V"
+    },
+    "com/eternal_creations/archies_dino_mod/mixin/CriteriaTriggersAccessor": {
+      "register": "m_10595_(Lnet/minecraft/advancements/CriterionTrigger;)Lnet/minecraft/advancements/CriterionTrigger;"
+    },
+    "com/eternal_creations/archies_dino_mod/mixin/client/twohanded/AbstractContainerScreenMixin": {
+      "renderSlot": "Lnet/minecraft/client/gui/screens/inventory/AbstractContainerScreen;m_280092_(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/world/inventory/Slot;)V"
+    },
+    "com/eternal_creations/archies_dino_mod/mixin/sculksaur/WalkNodeEvaluatorAccessor": {
+      "collisionCache": "f_77546_:Lit/unimi/dsi/fastutil/objects/Object2BooleanMap;"
+    }
+  },
+  "data": {
+    "searge": {
+      "com/eternal_creations/archies_dino_mod/mixin/sculksaur/PrimaryLevelDataMixin": {
+        "setTagData": "Lnet/minecraft/world/level/storage/PrimaryLevelData;m_78545_(Lnet/minecraft/core/RegistryAccess;Lnet/minecraft/nbt/CompoundTag;Lnet/minecraft/nbt/CompoundTag;)V",
+        "parse": "Lnet/minecraft/world/level/storage/PrimaryLevelData;m_78530_(Lcom/mojang/serialization/Dynamic;Lcom/mojang/datafixers/DataFixer;ILnet/minecraft/nbt/CompoundTag;Lnet/minecraft/world/level/LevelSettings;Lnet/minecraft/world/level/storage/LevelVersion;Lnet/minecraft/world/level/storage/PrimaryLevelData$SpecialWorldProperty;Lnet/minecraft/world/level/levelgen/WorldOptions;Lcom/mojang/serialization/Lifecycle;)Lnet/minecraft/world/level/storage/PrimaryLevelData;"
+      },
+      "com/eternal_creations/archies_dino_mod/mixin/LivingEntityMixin": {
+        "causeFallDamage": "Lnet/minecraft/world/entity/LivingEntity;m_142535_(FFLnet/minecraft/world/damagesource/DamageSource;)Z",
+        "getVisibilityPercent": "Lnet/minecraft/world/entity/LivingEntity;m_20968_(Lnet/minecraft/world/entity/Entity;)D",
+        "travel": "Lnet/minecraft/world/entity/LivingEntity;m_7023_(Lnet/minecraft/world/phys/Vec3;)V",
+        "canStandOnFluid": "Lnet/minecraft/world/entity/LivingEntity;m_203441_(Lnet/minecraft/world/level/material/FluidState;)Z"
+      },
+      "com/eternal_creations/archies_dino_mod/mixin/EntityAccessor": {
+        "ENTITY_COUNTER": "f_19843_:Ljava/util/concurrent/atomic/AtomicInteger;"
+      },
+      "com/eternal_creations/archies_dino_mod/mixin/coralosaur/SaveMobMixin": {
+        "addAdditionalSaveData": "Lnet/minecraft/world/entity/Mob;m_7380_(Lnet/minecraft/nbt/CompoundTag;)V",
+        "readAdditionalSaveData": "Lnet/minecraft/world/entity/Mob;m_7378_(Lnet/minecraft/nbt/CompoundTag;)V"
+      },
+      "com/eternal_creations/archies_dino_mod/mixin/DamageSourcesMixin": {
+        "arrow": "Lnet/minecraft/world/damagesource/DamageSources;m_269418_(Lnet/minecraft/world/entity/projectile/AbstractArrow;Lnet/minecraft/world/entity/Entity;)Lnet/minecraft/world/damagesource/DamageSource;"
+      },
+      "com/eternal_creations/archies_dino_mod/mixin/BreedGoalAccessor": {
+        "speedModifier": "f_25119_:D",
+        "loveTime": "f_25118_:I"
+      },
+      "com/eternal_creations/archies_dino_mod/mixin/coralosaur/MobAccessor": {
+        "targetSelector": "f_21346_:Lnet/minecraft/world/entity/ai/goal/GoalSelector;",
+        "goalSelector": "f_21345_:Lnet/minecraft/world/entity/ai/goal/GoalSelector;",
+        "leashHolder": "f_21357_:Lnet/minecraft/world/entity/Entity;",
+        "leashInfoTag": "f_21359_:Lnet/minecraft/nbt/CompoundTag;",
+        "restoreLeashFromSave": "m_21528_()V"
+      },
+      "com/eternal_creations/archies_dino_mod/mixin/EntityMixin": {
+        "fireImmune": "Lnet/minecraft/world/entity/Entity;m_5825_()Z"
+      },
+      "com/eternal_creations/archies_dino_mod/mixin/coralosaur/BoatMixin": {
+        "addAdditionalSaveData": "Lnet/minecraft/world/entity/vehicle/Boat;m_7380_(Lnet/minecraft/nbt/CompoundTag;)V",
+        "interact": "Lnet/minecraft/world/entity/vehicle/Boat;m_6096_(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;",
+        "tick": "Lnet/minecraft/world/entity/vehicle/Boat;m_8119_()V",
+        "readAdditionalSaveData": "Lnet/minecraft/world/entity/vehicle/Boat;m_7378_(Lnet/minecraft/nbt/CompoundTag;)V"
+      },
+      "com/eternal_creations/archies_dino_mod/mixin/client/twohanded/SlotWrapperAccessor": {
+        "net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen$SlotWrapper": "net/minecraft/client/gui/screens/inventory/CreativeModeInventoryScreen$SlotWrapper",
+        "target": "f_98655_:Lnet/minecraft/world/inventory/Slot;"
+      },
+      "com/eternal_creations/archies_dino_mod/mixin/ServerPlayerInterfaceMixin": {
+        "checkFallDamage": "Lnet/minecraft/server/level/ServerPlayer;m_7840_(DZLnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/BlockPos;)V"
+      },
+      "com/eternal_creations/archies_dino_mod/mixin/client/LivingEntityRendererMixin": {
+        "render(Lnet/minecraft/world/entity/LivingEntity;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V": "Lnet/minecraft/client/renderer/entity/LivingEntityRenderer;m_7392_(Lnet/minecraft/world/entity/LivingEntity;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V"
+      },
+      "com/eternal_creations/archies_dino_mod/mixin/PlayerListMixin": {
+        "placeNewPlayer": "Lnet/minecraft/server/players/PlayerList;m_11261_(Lnet/minecraft/network/Connection;Lnet/minecraft/server/level/ServerPlayer;)V"
+      },
+      "com/eternal_creations/archies_dino_mod/mixin/MultiplayerGameModeMixin": {
+        "interact": "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;m_105226_(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;"
+      },
+      "com/eternal_creations/archies_dino_mod/mixin/AbstractArrowMixin": {
+        "addAdditionalSaveData": "Lnet/minecraft/world/entity/projectile/AbstractArrow;m_7380_(Lnet/minecraft/nbt/CompoundTag;)V",
+        "defineSynchedData": "Lnet/minecraft/world/entity/projectile/AbstractArrow;m_8097_()V",
+        "Lnet/minecraft/world/phys/Vec3;horizontalDistance()D": "Lnet/minecraft/world/phys/Vec3;m_165924_()D",
+        "getWaterInertia": "Lnet/minecraft/world/entity/projectile/AbstractArrow;m_6882_()F",
+        "tick": "Lnet/minecraft/world/entity/projectile/AbstractArrow;m_8119_()V",
+        "readAdditionalSaveData": "Lnet/minecraft/world/entity/projectile/AbstractArrow;m_7378_(Lnet/minecraft/nbt/CompoundTag;)V",
+        "onHitEntity": "Lnet/minecraft/world/entity/projectile/AbstractArrow;m_5790_(Lnet/minecraft/world/phys/EntityHitResult;)V"
+      },
+      "com/eternal_creations/archies_dino_mod/mixin/DamageEnchantmentMixin": {
+        "canEnchant": "Lnet/minecraft/world/item/enchantment/DamageEnchantment;m_6081_(Lnet/minecraft/world/item/ItemStack;)Z"
+      },
+      "com/eternal_creations/archies_dino_mod/mixin/sculksaur/WardenMixin": {
+        "Lnet/minecraft/world/level/gameevent/vibrations/VibrationSystem$Ticker;tick(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/level/gameevent/vibrations/VibrationSystem$Data;Lnet/minecraft/world/level/gameevent/vibrations/VibrationSystem$User;)V": "Lnet/minecraft/world/level/gameevent/vibrations/VibrationSystem$Ticker;m_280259_(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/level/gameevent/vibrations/VibrationSystem$Data;Lnet/minecraft/world/level/gameevent/vibrations/VibrationSystem$User;)V",
+        "tick": "Lnet/minecraft/world/entity/monster/warden/Warden;m_8119_()V",
+        "hurt": "Lnet/minecraft/world/entity/monster/warden/Warden;m_6469_(Lnet/minecraft/world/damagesource/DamageSource;F)Z"
+      },
+      "com/eternal_creations/archies_dino_mod/mixin/archie/MerchantMenuMixin": {
+        "moveFromInventoryToPaymentSlot": "Lnet/minecraft/world/inventory/MerchantMenu;m_40060_(ILnet/minecraft/world/item/ItemStack;)V"
+      },
+      "com/eternal_creations/archies_dino_mod/mixin/PlayerAttackDamageBonusMixin": {
+        "attack": "Lnet/minecraft/world/entity/player/Player;m_5706_(Lnet/minecraft/world/entity/Entity;)V",
+        "Lnet/minecraft/world/item/enchantment/EnchantmentHelper;getKnockbackBonus(Lnet/minecraft/world/entity/LivingEntity;)I": "Lnet/minecraft/world/item/enchantment/EnchantmentHelper;m_44894_(Lnet/minecraft/world/entity/LivingEntity;)I"
+      },
+      "com/eternal_creations/archies_dino_mod/mixin/client/LevelRendererMixin": {
+        "renderEntity": "Lnet/minecraft/client/renderer/LevelRenderer;m_109517_(Lnet/minecraft/world/entity/Entity;DDDFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;)V",
+        "levelEvent": "Lnet/minecraft/client/renderer/LevelRenderer;m_234304_(ILnet/minecraft/core/BlockPos;I)V"
+      },
+      "com/eternal_creations/archies_dino_mod/mixin/twohanded/AbstractContainerMenuMixin": {
+        "clicked": "Lnet/minecraft/world/inventory/AbstractContainerMenu;m_150399_(IILnet/minecraft/world/inventory/ClickType;Lnet/minecraft/world/entity/player/Player;)V"
+      },
+      "com/eternal_creations/archies_dino_mod/mixin/sculksaur/SculkShriekerBlockEntityMixin": {
+        "trySummonWarden": "Lnet/minecraft/world/level/block/entity/SculkShriekerBlockEntity;m_222880_(Lnet/minecraft/server/level/ServerLevel;)Z"
+      },
+      "com/eternal_creations/archies_dino_mod/mixin/client/CameraMixin": {
+        "setup": "Lnet/minecraft/client/Camera;m_90575_(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/world/entity/Entity;ZZF)V"
+      },
+      "com/eternal_creations/archies_dino_mod/mixin/BlockMixin": {
+        "playerWillDestroy": "Lnet/minecraft/world/level/block/Block;m_5707_(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/entity/player/Player;)V"
+      },
+      "com/eternal_creations/archies_dino_mod/mixin/client/coralosaur/ClientPacketListenerClass": {
+        "handleEntityLinkPacket": "Lnet/minecraft/client/multiplayer/ClientPacketListener;m_5599_(Lnet/minecraft/network/protocol/game/ClientboundSetEntityLinkPacket;)V"
+      },
+      "com/eternal_creations/archies_dino_mod/mixin/client/MinecraftMixin": {
+        "startAttack": "Lnet/minecraft/client/Minecraft;m_202354_()Z",
+        "Lnet/minecraft/world/phys/HitResult;getType()Lnet/minecraft/world/phys/HitResult$Type;": "Lnet/minecraft/world/phys/HitResult;m_6662_()Lnet/minecraft/world/phys/HitResult$Type;",
+        "Lnet/minecraft/world/phys/BlockHitResult;getDirection()Lnet/minecraft/core/Direction;": "Lnet/minecraft/world/phys/BlockHitResult;m_82434_()Lnet/minecraft/core/Direction;",
+        "continueAttack": "Lnet/minecraft/client/Minecraft;m_91386_(Z)V"
+      },
+      "com/eternal_creations/archies_dino_mod/mixin/client/KeyMappingMixin": {
+        "set": "Lnet/minecraft/client/KeyMapping;m_90837_(Lcom/mojang/blaze3d/platform/InputConstants$Key;Z)V",
+        "same": "Lnet/minecraft/client/KeyMapping;m_90850_(Lnet/minecraft/client/KeyMapping;)Z",
+        "click": "Lnet/minecraft/client/KeyMapping;m_90835_(Lcom/mojang/blaze3d/platform/InputConstants$Key;)V"
+      },
+      "com/eternal_creations/archies_dino_mod/mixin/client/ClientAdvancementsAccessor": {
+        "progress": "f_104390_:Ljava/util/Map;"
+      },
+      "com/eternal_creations/archies_dino_mod/mixin/archie/MerchantOfferMixin": {
+        "isRequiredItem": "Lnet/minecraft/world/item/trading/MerchantOffer;m_45365_(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemStack;)Z"
+      },
+      "com/eternal_creations/archies_dino_mod/mixin/EnchantmentCategoryMixin": {
+        "canEnchant": "Lnet/minecraft/world/item/enchantment/EnchantmentCategory$6;m_7454_(Lnet/minecraft/world/item/Item;)Z",
+        "net.minecraft.world.item.enchantment.EnchantmentCategory$6": "net/minecraft/world/item/enchantment/EnchantmentCategory$6"
+      },
+      "com/eternal_creations/archies_dino_mod/mixin/coralosaur/GuardianSelectorMixin": {
+        "net.minecraft.world.entity.monster.Guardian$GuardianAttackSelector": "net/minecraft/world/entity/monster/Guardian$GuardianAttackSelector",
+        "test(Ljava/lang/Object;)Z": "Lnet/minecraft/world/entity/monster/Guardian$GuardianAttackSelector;test(Ljava/lang/Object;)Z"
+      },
+      "com/eternal_creations/archies_dino_mod/mixin/coralosaur/EnchantmentHelperMixin": {
+        "hasAquaAffinity": "Lnet/minecraft/world/item/enchantment/EnchantmentHelper;m_44934_(Lnet/minecraft/world/entity/LivingEntity;)Z"
+      },
+      "com/eternal_creations/archies_dino_mod/mixin/PlayerMixin": {
+        "Lnet/minecraft/world/food/FoodData;addExhaustion(F)V": "Lnet/minecraft/world/food/FoodData;m_38703_(F)V",
+        "tick": "Lnet/minecraft/world/entity/player/Player;m_8119_()V",
+        "causeFoodExhaustion": "Lnet/minecraft/world/entity/player/Player;m_36399_(F)V"
+      },
+      "com/eternal_creations/archies_dino_mod/mixin/coralosaur/StructureTemplateAccessor": {
+        "palettes": "f_74482_:Ljava/util/List;"
+      },
+      "com/eternal_creations/archies_dino_mod/mixin/archie/PrimaryLevelDataMixin": {
+        "setTagData": "Lnet/minecraft/world/level/storage/PrimaryLevelData;m_78545_(Lnet/minecraft/core/RegistryAccess;Lnet/minecraft/nbt/CompoundTag;Lnet/minecraft/nbt/CompoundTag;)V",
+        "parse": "Lnet/minecraft/world/level/storage/PrimaryLevelData;m_78530_(Lcom/mojang/serialization/Dynamic;Lcom/mojang/datafixers/DataFixer;ILnet/minecraft/nbt/CompoundTag;Lnet/minecraft/world/level/LevelSettings;Lnet/minecraft/world/level/storage/LevelVersion;Lnet/minecraft/world/level/storage/PrimaryLevelData$SpecialWorldProperty;Lnet/minecraft/world/level/levelgen/WorldOptions;Lcom/mojang/serialization/Lifecycle;)Lnet/minecraft/world/level/storage/PrimaryLevelData;"
+      },
+      "com/eternal_creations/archies_dino_mod/mixin/archie/MinecraftServerMixin": {
+        "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V": "Lnet/minecraft/util/profiling/ProfilerFiller;m_6182_(Ljava/lang/String;)V",
+        "tickChildren": "Lnet/minecraft/server/MinecraftServer;m_5703_(Ljava/util/function/BooleanSupplier;)V"
+      },
+      "com/eternal_creations/archies_dino_mod/mixin/client/LocalPlayerMixin": {
+        "openItemGui": "Lnet/minecraft/client/player/LocalPlayer;m_6986_(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/InteractionHand;)V"
+      },
+      "com/eternal_creations/archies_dino_mod/mixin/EnchantmentHelperMixin": {
+        "doPostDamageEffects": "Lnet/minecraft/world/item/enchantment/EnchantmentHelper;m_44896_(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/entity/Entity;)V"
+      },
+      "com/eternal_creations/archies_dino_mod/mixin/PlayerInterfaceMixin": {
+        "causeFallDamage": "Lnet/minecraft/world/entity/player/Player;m_142535_(FFLnet/minecraft/world/damagesource/DamageSource;)Z",
+        "tick": "Lnet/minecraft/world/entity/player/Player;m_8119_()V"
+      },
+      "com/eternal_creations/archies_dino_mod/mixin/VibrationSystemListenerMixin": {
+        "handleGameEvent": "Lnet/minecraft/world/level/gameevent/vibrations/VibrationSystem$Listener;m_214068_(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/level/gameevent/GameEvent;Lnet/minecraft/world/level/gameevent/GameEvent$Context;Lnet/minecraft/world/phys/Vec3;)Z"
+      },
+      "com/eternal_creations/archies_dino_mod/mixin/twohanded/ServerGamePacketListenerImplMixin": {
+        "handlePlayerAction": "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;m_7502_(Lnet/minecraft/network/protocol/game/ServerboundPlayerActionPacket;)V"
+      },
+      "com/eternal_creations/archies_dino_mod/mixin/coralosaur/GuardianMixin": {
+        "defineSynchedData": "Lnet/minecraft/world/entity/monster/Guardian;m_8097_()V"
+      },
+      "com/eternal_creations/archies_dino_mod/mixin/CriteriaTriggersAccessor": {
+        "register": "m_10595_(Lnet/minecraft/advancements/CriterionTrigger;)Lnet/minecraft/advancements/CriterionTrigger;"
+      },
+      "com/eternal_creations/archies_dino_mod/mixin/client/twohanded/AbstractContainerScreenMixin": {
+        "renderSlot": "Lnet/minecraft/client/gui/screens/inventory/AbstractContainerScreen;m_280092_(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/world/inventory/Slot;)V"
+      },
+      "com/eternal_creations/archies_dino_mod/mixin/sculksaur/WalkNodeEvaluatorAccessor": {
+        "collisionCache": "f_77546_:Lit/unimi/dsi/fastutil/objects/Object2BooleanMap;"
+      }
+    }
+  }
+}

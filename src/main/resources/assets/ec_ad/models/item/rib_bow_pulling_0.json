@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/bow",
+  "textures": {
+    "layer0": "ec_ad:item/rib_bow_pulling_0"
+  }
+}

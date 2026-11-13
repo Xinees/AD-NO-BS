@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "A": {
+      "item": "ec_ad:amber"
+    },
+    "W": {
+      "tag": "ec_ad:burning_totem_fuel"
+    }
+  },
+  "pattern": [
+    "AAA",
+    "AWA",
+    "A A"
+  ],
+  "result": {
+    "item": "ec_ad:burning_totem"
+  },
+  "show_notification": true
+}

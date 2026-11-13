@@ -1,0 +1,876 @@
+<root badges="info">
+    <category id="introduction" no-markers="true">
+        <page src="infos/1">
+            <label x="308" y="32" w="190" color="#573d19">
+                「アーチーの恐竜たち」へようこそ！
+                この本はあなたの世界に生きる
+                新たな古生物たちのすべてを
+                解き明かすためのガイドブックです！
+            </label>
+            <label x="368" y="95" w="120" color="#573d19">
+                白い輪郭が表示されている要素に
+                カーソルを合わせて操作してください。
+            </label>
+            <label x="368" y="165" w="130" color="#573d19">
+                各カテゴリーをクリックすると、
+                知りたい恐竜の個別ページへ
+                直接移動できます！
+            </label>
+            <label x="368" y="230" w="120" color="#573d19">
+                <b><keybind id="key.keyboard.escape"/></b>
+                を押すとガイドブックを閉じます！
+            </label>
+        </page>
+        <page src="infos/2">
+            <label x="75" y="49" w="190" color="#573d19" align="center">
+                あの夜、空から何が落ちてきたのかは誰も知らない。
+                分かっているのは、その破片が温かいことだけだ。
+                まるで、中に何かがまだ生きているかのように。
+            </label>
+            <label x="58" y="168" w="220" color="#573d19">
+                恐竜たちが闊歩する地にある焦げたクレーターや、
+                砂漠・悪地に眠る太古の化石を探そう。
+                琥珀が落ちた場所の近くには、古の存在が潜んでいる。
+            </label>
+            <label x="374" y="50" w="140" color="#573d19">
+                鉱石を採掘し、破片を持ち歩こう。
+                理由は不明だが、恐竜たちはそれに惹きつけられる。
+                琥珀を持つ者が捜索に長居することはない。
+            </label>
+            <label x="304" y="122" w="210" color="#573d19">
+                アーチーは破片を研究用として高値で買い取ってくれる。
+                精製した琥珀は石のように加工・建築に利用可能だ。
+            </label>
+            <label x="304" y="178" w="148" color="#573d19">
+                そしてもう一つ。恐竜を手懐け極めた者は、
+                その姿を琥珀に封じる術を学ぶという。
+            </label>
+            <label x="304" y="230" w="148" color="#573d19">
+                「トーテム」と呼ばれるそれは、狩るでも閉じ込めるでもなく、
+                絆を勝ち取った証なのだ。
+            </label>
+        </page>
+    </category>
+    <category id="lushsaur">
+        <page src="infos/1">
+            <container popup="popups/1" hover-animation="scale" x="63" y="63" w="140" h="70">
+                <image src="images/1" absolute="true" w="576" h="320"/>
+            </container>
+            <label hex="#573d19" x="81" y="48">草食性</label>
+            <label hex="#573d19" x="236" y="48">バイオーム</label>
+            <label hex="#947546" x="243" y="106" align="center" scale="0.7">鍾乳洞</label>
+            <label hex="#947546" x="209" y="166" align="center" scale="0.65">繁茂した洞窟</label>
+            <label hex="#573d19" x="244" y="133">ドロップ</label>
+            <label hex="#947546" x="248" y="170" align="center" scale="0.45" w="28">ラッシュコア</label>
+            <label hex="#573d19" x="60" y="204" w="214">
+                ラッシュサウルスは洞窟にひっそりと暮らす草食恐竜です。
+                警戒心が強く普段は周囲の環境と同化していますが、
+                信頼を勝ち取った者にのみその姿を現します。
+            </label>
+            <label hex="#573d19" x="343" y="70" w="170">休息中に透明化。手懐けるとこの能力は無効化されます。</label>
+            <label hex="#573d19" x="372" y="103" w="130">尻尾の踏みつけで敵をノックバックし距離を保つ。</label>
+            <label hex="#573d19" x="345" y="130" w="155">突進して標的に素早く詰め寄り連続攻撃。</label>
+            <label hex="#573d19" x="370" y="162" w="170">高い確率で飛来する遠距離攻撃を弾き返す。</label>
+            <label hex="#573d19" x="344" y="192" w="170">頭突き攻撃：敵を目眩状態にし周囲のブロックを破壊。</label>
+            <label hex="#573d19" x="369" y="222" w="170">広範囲の尻尾薙ぎ払いで敵を吹き飛ばす。</label>
+        </page>
+        <page src="infos/2">
+            <label hex="#573d19" x="65" y="55" w="165">
+                ラッシュサウルスを手懐けるには
+                根気強い忍耐が必要です。
+            </label>
+            <label hex="#573d19" x="65" y="88" w="125">
+                受け入れてくれるまで
+                グロウベリーを与え続けましょう。
+            </label>
+            <label hex="#573d19" x="65" y="145" w="210">
+                擬態中や危険から逃げている最中は
+                エサを与えても一切反応しません。
+            </label>
+            <label hex="#573d19" x="60" y="230" w="214">
+                手懐けると穏やかで人懐っこくなり、
+                安全に触れ合ったり騎乗できるようになります。
+            </label>
+            <label hex="#573d19" x="305" y="48" w="210">
+                手懐けた大人のラッシュサウルス2頭にグロウベリーを
+                与えると繁殖します。地面に卵を産み落とし、
+                直接拾えます。下に草ブロックか苔ブロックがあれば
+                特別な手入れなしで孵化します。
+            </label>
+            <label hex="#573d19" x="389" y="125" w="130">
+                近くに大人がいると孵化時間が短縮されます。
+                <br/><br/>
+                生まれた子供はグロウベリーで成長を促進できます。
+            </label>
+            <label hex="#573d19" x="320" y="210" w="140">
+                大人に成長する際、ラッシュコアを脱落させます。
+                コアは時間経過で徐々に再生します。
+            </label>
+        </page>
+        <page src="infos/3">
+            <container popup="popups/3" hover-animation="scale" x="317" y="102" w="34" h="34">
+                <image src="images/2"
+                       src-x="317" src-y="102"
+                       texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:lush_mace" x="296" y="97">
+                        <label x="58" scale="0.65"><b>ラッシュメイス</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+            <container popup="popups/4" hover-animation="scale" x="337" y="260" w="142" h="43">
+                <image src="images/2"
+                       src-x="337" src-y="260"
+                       texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:lushsaur_helmet" x="296" y="25">
+                        <label x="58" scale="0.65"><b>ラッシュサウルスのヘルメット</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:lushsaur_chestplate" x="296" y="96">
+                        <label x="58" scale="0.65"><b>ラッシュサウルスのチェストプレート</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:lushsaur_leggings" x="296" y="167">
+                        <label x="58" scale="0.65"><b>ラッシュサウルスのレギンス</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:lushsaur_boots" x="296" y="238">
+                        <label x="58" scale="0.65"><b>ラッシュサウルスのブーツ</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+            <label hex="#573d19" x="60" y="54" w="214">
+                手懐けた個体は透明化しなくなります。
+                周期的に睡眠と覚醒を繰り返しますが、常に可視状態です。
+            </label>
+            <label hex="#573d19" x="60" y="105" w="214">
+                鞍をつければ洞窟探索の頼もしい乗騎になります。
+                攻撃で岩盤以外のブロックを粉砕し道を開拓できます。
+            </label>
+            <label hex="#573d19" x="61" y="165" w="200" align="center">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_primary_attack"/></u> →</color>
+                頭突き
+                <color hex="#947546">(ブロック破壊)</color>
+            </label>
+            <label hex="#573d19" x="61" y="195" w="200" align="center">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_special_attack"/></u> →</color>
+                薙ぎ払い
+                <color hex="#947546">(ノックバック / 雑草刈り)</color>
+            </label>
+            <label hex="#573d19" x="58" y="230" w="224">
+                騎乗中にグロウベリーを与えると
+                一時的にダッシュ加速します。
+            </label>
+            <label hex="#573d19" x="305" y="54" w="210">
+                繁殖時の脱皮や討伐で得られるラッシュコアから、
+                強力なラッシュメイスをクラフトできます。
+            </label>
+            <container x="360" y="100">
+                <label hex="#573d19">回転攻撃 <color hex="#947546">(30秒 ⌚)</color></label>
+                <label hex="#947546" y="10" w="150"><u><keybind id="key.use"/></u> →</label>
+                <label hex="#573d19" align="left" x="75" y="10" w="80">
+                    プレイヤー周囲の敵を
+                    一斉に弾き飛ばす。
+                </label>
+            </container>
+            <label hex="#573d19" x="305" y="156" w="210">
+                ラッシュコアでラッシュサウルス防具を製作可能です。
+            </label>
+            <container x="315" y="180">
+                <label hex="#947546" w="180">→ 一式セット効果:</label>
+                <label hex="#573d19" x="12" y="10">耐性 I を付与</label>
+                <label hex="#947546" y="25" w="180">→ 特殊効果: <color hex="#573d19">カモフラージュ</color></label>
+                <label hex="#573d19" x="12" y="35" w="170">
+                    スニーク移動中は敵に見失われやすくなり、
+                    静止中は完全に探知されなくなります。
+                </label>
+            </container>
+        </page>
+    </category>
+    <category id="therimoss">
+        <page src="infos/1">
+            <container popup="popups/1" hover-animation="scale" x="63" y="63" w="70" h="90">
+                <image src="images/1" absolute="true" w="576" h="320" y="10"/>
+            </container>
+            <label hex="#573d19" x="81" y="58">草食性</label>
+            <label hex="#573d19" x="158" y="58">バイオーム</label>
+            <label hex="#947546" x="172" y="115" align="center" scale="0.75">ジャングル</label>
+            <label hex="#573d19" x="222" y="71">ドロップ</label>
+            <label hex="#947546" x="236" y="90" align="center" scale="0.45" w="28">苔むした鉤爪</label>
+            <label hex="#573d19" x="60" y="180" w="214">
+                テリモスはジャングルの奥深くに棲む動きの鈍い巨獣です。
+                木々の間をのんびり歩き、幹に寄りかかって休んだり、
+                木によじ登って下界を眺める姿が見られます。
+            </label>
+            <label hex="#573d19" x="360" y="59" w="160">
+                地上から樹冠の頂上まで一気に大ジャンプ。
+            </label>
+            <label hex="#573d19" x="376" y="96" w="160">
+                葉を刈り払いながら木をよじ登る。
+            </label>
+            <label hex="#573d19" x="362" y="129" w="160">
+                重い衝撃攻撃で標的を地面に埋める。
+            </label>
+            <label hex="#573d19" x="372" y="164" w="160">
+                近接での激しい3連続かぎ爪攻撃。
+            </label>
+            <label hex="#573d19" x="355" y="198" w="160">
+                土ブロックを投げつけて遠距離ダメージ。
+            </label>
+            <label hex="#573d19" x="358" y="227" w="160">
+                森林伐採を嫌うため、付近での原木破壊には注意。
+            </label>
+        </page>
+        <page src="infos/2">
+            <label hex="#573d19" x="60" y="54" w="214">
+                テリモスは巨大な供物にしか興味を示しません。
+                気を引くには、指定の食料ブロックで4x4ピラミッド
+                <color hex="#947546">（計20ブロック）</color>を組み上げる必要があります。
+            </label>
+            <label hex="#573d19" x="168" y="110" w="130">
+                <color hex="#947546">•</color> スイカ<br/>
+                <color hex="#947546">•</color> カボチャ<br/>
+                <color hex="#947546">•</color> ケーキ<br/>
+                <color hex="#947546">•</color> 竹ブロック<br/>
+                <color hex="#947546">•</color> ツツジの葉<br/>
+                <color hex="#947546">•</color> キノコブロック
+            </label>
+            <label hex="#573d19" x="60" y="212" w="214">
+                ピラミッドを食べ始めたら、竹を与えて手懐けます。
+                成否には確率が絡むため根気が必要です。
+            </label>
+            <label hex="#573d19" x="305" y="54" w="210">
+                手懐けた大人2頭に竹を与えると繁殖します。
+            </label>
+            <label hex="#573d19" x="365" y="154" w="150">
+                地面に産み落とされたテリモスの卵は、
+                特別な管理なしで自然に孵化します。
+            </label>
+            <label hex="#573d19" x="305" y="214" w="150">
+                生まれた子供はピラミッド用ブロックを
+                与えることで急速に成長します。
+            </label>
+        </page>
+        <page src="infos/3">
+            <label hex="#573d19" x="145" y="48" w="130">
+                手懐けると穏やかで従順になります。
+            </label>
+            <label hex="#573d19" x="145" y="88" w="130">
+                悪路走破に優れた優秀な探検用マウントです。
+            </label>
+            <label hex="#573d19" x="60" y="150" w="214" align="center">
+                <color hex="#947546"><u><keybind id="key.jump"/></u> →</color> 樹冠へ飛び移る
+            </label>
+            <label hex="#573d19" x="60" y="170" w="220" align="center">
+                <color hex="#947546"><u>木登り</u> →</color>
+                葉を刈り取りながら幹を登る
+            </label>
+            <label hex="#573d19" x="60" y="200" w="200" align="center">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_primary_attack"/></u> →</color>
+                近接3連撃かぎ爪
+            </label>
+            <label hex="#573d19" x="60" y="230" w="220" align="center">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_special_attack"/></u> →</color>
+                直近の敵へ土ブロック投げ
+            </label>
+            <label hex="#573d19" x="305" y="48" w="210">
+                ハサミでの毛刈りや討伐で採れる苔むした鉤爪から、
+                テリクロー武器をクラフトできます。
+            </label>
+            <label hex="#573d19" x="305" y="148" w="210">
+                壁に沿って落下すると安全に滑り降りられます。
+            </label>
+            <label hex="#573d19" x="305" y="184" w="210">
+                苔むした鉤爪でテリモス防具をクラフト可能です。
+            </label>
+            <container x="315" y="212">
+                <label hex="#947546" w="180">→ 一式セット効果:</label>
+                <label hex="#573d19" x="12" y="10">満腹度消費を大幅に抑制</label>
+                <label hex="#947546" y="25" w="180">→ 特殊効果: <color hex="#573d19">俊足</color> (10秒 ⌚)</label>
+                <label hex="#573d19" x="12" y="35" w="170">
+                    <color hex="#947546"><u><keybind id="ec_ad.armor"/></u></color> を押すと一時的に移動速度上昇。
+                </label>
+            </container>
+            <container popup="popups/3" hover-animation="scale" x="317" y="102" w="180" h="35">
+                <image src="images/2" src-x="317" src-y="102" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:theri_claw_iron" x="296" y="27">
+                        <label x="58" scale="0.65"><b>鉄のテリクロー</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:theri_claw_copper" x="296" y="98">
+                        <label x="58" scale="0.65"><b>銅のテリクロー</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:theri_claw_gold" x="296" y="169">
+                        <label x="58" scale="0.65"><b>金のテリクロー</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:theri_claw_diamond" x="296" y="238">
+                        <label x="58" scale="0.65"><b>ダイヤモンドのテリクロー</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+            <container popup="popups/4" hover-animation="scale" x="337" y="260" w="142" h="43">
+                <image src="images/2" src-x="337" src-y="260" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:therimoss_helmet" x="296" y="27">
+                        <label x="58" scale="0.65"><b>テリモスのヘルメット</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:therimoss_chestplate" x="296" y="98">
+                        <label x="58" scale="0.65"><b>テリモスのチェストプレート</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:therimoss_leggings" x="296" y="169">
+                        <label x="58" scale="0.65"><b>テリモスのレギンス</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:therimoss_boots" x="296" y="240">
+                        <label x="58" scale="0.65"><b>テリモスのブーツ</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+        </page>
+    </category>
+    <category id="coralosaur">
+        <page src="infos/1">
+            <container popup="popups/1" hover-animation="scale" x="63" y="63" w="99" h="99">
+                <image src="images/1" absolute="true" w="576" h="320"/>
+            </container>
+            <label hex="#573d19" x="100" y="56">肉食性</label>
+            <label hex="#573d19" x="186" y="62">バイオーム</label>
+            <label hex="#947546" x="199" y="121" align="center" scale="0.7">暖かい海</label>
+            <label hex="#573d19" x="244" y="62">ドロップ</label>
+            <label hex="#947546" x="238" y="100" align="center" scale="0.45" w="28">サンゴの肋骨</label>
+            <label hex="#573d19" x="64" y="186" w="214">
+                コーラルサウルスは深海を巡回する巨大な守護者です。
+                海底の砂に埋もれて休眠しており、
+                かすかな砂の泡立ちがその巨躯の存在を知らせます。
+            </label>
+            <label hex="#573d19" x="337" y="62" w="190">
+                気泡を放出し酸素を補給してくれる。
+            </label>
+            <label hex="#573d19" x="358" y="88" w="140">
+                敵が遠すぎると砂底に潜って再配置する。
+            </label>
+            <label hex="#573d19" x="348" y="128" w="160">
+                鞍をつけるとリードでボートを牽引可能。
+            </label>
+            <label hex="#573d19" x="335" y="170" w="160">
+                チェストを装着して大容量インベントリを拡張可能。
+            </label>
+            <label hex="#573d19" x="352" y="200" w="160">
+                前方を広角になぎ払う強烈な噛みつき。
+            </label>
+            <label hex="#573d19" x="338" y="238" w="160">
+                周囲の海洋生物を指揮して防衛させる。
+            </label>
+        </page>
+        <page src="infos/2">
+            <label hex="#573d19" x="68" y="52" w="200">
+                海底から立ち上る気泡を追うと砂に埋もれた頭部を発見できます。
+            </label>
+            <label hex="#573d19" x="68" y="172" w="200">
+                受け入れてくれるまでサンゴのシチューを与え続けましょう。
+            </label>
+            <label hex="#573d19" x="162" y="199" w="120">
+                成功するとコーラルサウルスが覚醒し、砂に潜らなくなります。
+            </label>
+            <label hex="#573d19" x="305" y="58" w="218">
+                手懐けた大人2頭にサンゴ各種またはシチューを与えて繁殖。
+            </label>
+            <label hex="#573d19" x="305" y="198" w="210">
+                幼獣は水中で育ちます。魚やサンゴのシチューで
+                成長速度を加速できます。
+            </label>
+        </page>
+        <page src="infos/3">
+            <label hex="#573d19" x="60" y="142" w="214">
+                ボートを牽引でき、チェストを追加して荷物を積載可能。
+                ハサミを使えば鞍を安全に取り外せます。
+            </label>
+            <label hex="#573d19" x="60" y="208" w="214">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_primary_attack"/></u> → </color>
+                前方広角への噛みつき
+            </label>
+            <label hex="#573d19" x="60" y="240" w="214">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_special_attack"/></u> → </color>
+                海の仲間を呼んで自身を防衛
+            </label>
+            <label hex="#573d19" x="305" y="52" w="150">
+                サンゴの肋骨から肋骨の弓を製作可能。
+                <br/><br/>
+                水中でも矢が軌道を落とさず真っ直ぐ飛びます。
+            </label>
+            <container popup="popups/3" hover-animation="scale" x="458" y="72" w="34" h="34">
+                <image src="images/2" src-x="458" src-y="72" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:rib_bow" x="297" y="99">
+                        <label x="58" scale="0.65"><b>肋骨の弓</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+            <label hex="#573d19" x="305" y="150" w="210">
+                サンゴの肋骨でコーラルサウルス防具を製作できます。
+            </label>
+            <container x="315" y="180">
+                <label hex="#947546" w="180">→ 一式セット効果:</label>
+                <label hex="#573d19" x="12" y="10" w="180">水中で泳ぎ速度上昇、水中採掘、コンジットパワーを付与</label>
+                <label hex="#947546" y="50" w="180">→ 特殊効果: <color hex="#573d19">海洋指揮</color> (4秒 ⌚)</label>
+                <label hex="#573d19" x="12" y="62" w="170">
+                    水中で <color hex="#947546"><u><keybind id="ec_ad.armor"/></u></color> を押すと、味方のガーディアンを召喚。
+                </label>
+            </container>
+            <container popup="popups/4" hover-animation="scale" x="337" y="260" w="142" h="43">
+                <image src="images/2" src-x="337" src-y="260" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:coralosaur_helmet" x="296" y="27">
+                        <label x="58" scale="0.65"><b>コーラルサウルスのヘルメット</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:coralosaur_chestplate" x="296" y="98">
+                        <label x="58" scale="0.65"><b>コーラルサウルスのチェストプレート</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:coralosaur_leggings" x="296" y="169">
+                        <label x="58" scale="0.65"><b>コーラルサウルスのレギンス</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:coralosaur_boots" x="296" y="240">
+                        <label x="58" scale="0.65"><b>コーラルサウルスのブーツ</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+        </page>
+    </category>
+    <category id="obsidiceratops">
+        <page src="infos/1">
+            <container popup="popups/1" hover-animation="scale" x="63" y="63" w="104" h="80">
+                <image src="images/1" absolute="true" w="576" h="320"/>
+            </container>
+            <label hex="#573d19" x="98" y="48">草食性</label>
+            <label hex="#573d19" x="189" y="48">バイオーム</label>
+            <label hex="#947546" x="180" y="108" align="center" w="38" scale="0.48">ソウルサンドの谷</label>
+            <label hex="#947546" x="232" y="117" align="center" w="34" scale="0.48">真紅の森</label>
+            <label hex="#573d19" x="198" y="131">ドロップ</label>
+            <label hex="#947546" x="216" y="154" align="center" scale="0.45" w="45">黒曜石の角</label>
+            <label hex="#573d19" x="60" y="194" w="214">
+                オブシディケラトプスは溶岩を喰らう超高熱の重戦車です。
+                ネザーの溶岩海から離れることはめったにありません。
+            </label>
+            <label hex="#573d19" x="60" y="242" w="214">
+                熱が満ちている間は温厚ですが、
+                体内溶岩が不足すると極めて凶暴化します。
+            </label>
+            <label hex="#573d19" x="361" y="74" w="160">
+                溶岩だまりを探して体内熱を補給。
+            </label>
+            <label hex="#573d19" x="368" y="102" w="160">
+                手懐けると溶岩を蓄積しプレイヤーに提供。
+            </label>
+            <label hex="#573d19" x="364" y="130" w="150">
+                チェスト1個分の貨物スペースを内蔵。
+            </label>
+            <label hex="#573d19" x="370" y="166" w="150">
+                強力な近接頭突き攻撃。
+            </label>
+            <label hex="#573d19" x="345" y="194" w="170">
+                強ノックバックのテイルウィップ。
+            </label>
+            <label hex="#573d19" x="352" y="220" w="160">
+                近くで黒曜石の角を吹くと短時間気絶。
+            </label>
+        </page>
+        <page src="infos/2">
+            <label hex="#573d19" x="68" y="62" w="140">
+                穏やかな時のみ手懐け可能で、
+                14〜25個のマグマブロックを消費します。
+            </label>
+            <label hex="#573d19" x="184" y="160" w="95">
+                手懐け中は溶岩量を高く保ってください。
+                熱が尽きると進行度がリセットされます。
+            </label>
+            <label hex="#573d19" x="64" y="244" w="214">
+                手懐け完了後は鞍を付けて騎乗可能になります。
+            </label>
+            <label hex="#573d19" x="305" y="48" w="220">
+                手懐けた大人2頭にマグマブロックを与えて繁殖。<br/><br/>
+                地面に卵を産み落とします。
+            </label>
+            <label hex="#573d19" x="375" y="200" w="140">
+                卵は拾えますが、触れると火傷ダメージを受けます。
+            </label>
+            <label hex="#573d19" x="375" y="238" w="130">
+                溶岩のすぐ隣で保温しなければ卵は割れてしまいます。
+            </label>
+        </page>
+        <page src="infos/3">
+            <label hex="#573d19" x="60" y="54" w="214">
+                ネザー全土でアイテムと溶岩を
+                同時に輸送できる屈強な大型マウントです。
+            </label>
+            <label hex="#573d19" x="60" y="110" w="214" align="center">
+                <color hex="#947546"><u>溶岩タンク</u> →</color> 最大15杯の溶岩を保持可能
+            </label>
+            <label hex="#573d19" x="60" y="140" w="220" align="center">
+                <color hex="#947546"><u>補給</u> →</color>
+                溶岩入りバケツで補給
+            </label>
+            <label hex="#573d19" x="60" y="170" w="200" align="center">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_primary_attack"/></u> →</color>
+                近接頭突き攻撃
+            </label>
+            <label hex="#573d19" x="60" y="200" w="220" align="center">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_special_attack"/></u> →</color>
+                薙ぎ払いテイルウィップ
+            </label>
+            <label hex="#573d19" x="305" y="48" w="210">
+                討伐で得られる黒曜石の角から灼熱の角笛をクラフトできます。
+            </label>
+            <container x="342" y="88">
+                <label hex="#573d19">ペット召喚 <color hex="#947546">(5秒 ⌚)</color></label>
+                <label hex="#947546" y="10" w="150"><u><keybind id="key.use"/></u> →</label>
+                <label hex="#573d19" align="left" x="75" y="10" w="120">
+                    手懐けているすべてのペットを即座に自分の足元へ呼び寄せます。
+                </label>
+            </container>
+            <container popup="popups/3" hover-animation="scale" x="304" y="88" w="34" h="34">
+                <image src="images/2" src-x="447" src-y="88" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:scorching_horn" x="296" y="99">
+                        <label x="58" scale="0.65"><b>灼熱の角笛</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+            <label hex="#573d19" x="305" y="148" w="210">
+                黒曜石の角でオブシディケラトプス防具を作製できます。
+            </label>
+            <container x="315" y="180">
+                <label hex="#947546" w="180">→ 一式セット効果:</label>
+                <label hex="#573d19" x="12" y="10" w="180">溶岩上歩行と火炎・溶岩ダメージ完全無効を付与</label>
+                <label hex="#947546" y="40" w="180">→ 特殊効果: <color hex="#573d19">溶岩ダイブ</color></label>
+                <label hex="#573d19" x="12" y="52" w="170">
+                    <color hex="#947546"><u><keybind id="key.sneak"/></u></color> を押すと溶岩内に潜行。
+                </label>
+            </container>
+            <container popup="popups/4" hover-animation="scale" x="337" y="260" w="142" h="43">
+                <image src="images/2" src-x="337" src-y="260" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:obsidiceratops_helmet" x="296" y="27">
+                        <label x="58" scale="0.65"><b>オブシディケラトプスのヘルメット</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:obsidiceratops_chestplate" x="296" y="98">
+                        <label x="58" scale="0.65"><b>オブシディケラトプスのチェストプレート</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:obsidiceratops_leggings" x="296" y="169">
+                        <label x="58" scale="0.65"><b>オブシディケラトプスのレギンス</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:obsidiceratops_boots" x="296" y="240">
+                        <label x="58" scale="0.65"><b>オブシディケラトプスのブーツ</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+        </page>
+    </category>
+    <category id="sculkraptor">
+        <page src="infos/1">
+            <container popup="popups/1" hover-animation="scale" x="71" y="58" w="85" h="85">
+                <image src="images/1" absolute="true" w="576" h="320"/>
+            </container>
+            <label hex="#573d19" x="98" y="48">肉食性</label>
+            <label hex="#573d19" x="214" y="48">バイオーム</label>
+            <label hex="#947546" x="221" y="106" align="center" scale="0.65">ディープダーク</label>
+            <label hex="#573d19" x="202" y="131">ドロップ</label>
+            <label hex="#947546" x="215" y="150" align="center" scale="0.42" w="28">ラプトルの鉤爪</label>
+            <label hex="#573d19" x="60" y="190" w="214">
+                スカルクラプトルはディープダークを群れで徘徊する俊敏な捕食者です。
+                単体では戦いを避けますが、群れ集まることで極めて凶悪な脅威となります。
+            </label>
+            <label hex="#573d19" x="363" y="66" w="160">
+                群れを形成している時のみ攻撃を仕掛ける。
+            </label>
+            <label hex="#573d19" x="340" y="92" w="160">
+                音と振動を感知して標的を補足。
+            </label>
+            <label hex="#573d19" x="358" y="122" w="160">
+                確率で毒を付与する遠距離弾攻撃。
+            </label>
+            <label hex="#573d19" x="339" y="150" w="160">
+                群れで鼓膜を裂く叫び声を放ち、敵を後退・目眩に追い込む。
+            </label>
+            <label hex="#573d19" x="348" y="192" w="160">
+                標的をマーキングし、地下の怪物をけしかける。
+            </label>
+        </page>
+        <page src="infos/2">
+            <label hex="#573d19" x="60" y="48" w="130">
+                野生の成体は手懐けられません。
+                群れが防衛する巣を探し出してください。
+            </label>
+            <label hex="#573d19" x="165" y="120" w="110">
+                巣に近づくと群れ全体が警戒し、卵を守るため猛然と襲いかかってきます。
+            </label>
+            <label hex="#573d19" x="60" y="196" w="150">
+                全滅させるとスカルクラプトルの卵を回収できます。
+                各巣から孵化可能な卵は1つのみです。
+            </label>
+            <label hex="#573d19" x="308" y="52" w="120">
+                卵は完全な暗所でしか孵化しません。
+            </label>
+            <label hex="#573d19" x="305" y="95" w="175">
+                孵化した幼体は生まれながらに手懐けられており、
+                どこへでもプレイヤーに追従します。
+            </label>
+            <label hex="#573d19" x="305" y="138" w="210">
+                腐肉、クモの目、骨などのモブドロップで
+                成長を大きく促進できます。
+            </label>
+        </page>
+        <page src="infos/3">
+            <label hex="#573d19" x="160" y="48" w="120">
+                ラプトルの鉤爪 <color hex="#947546">(30秒 ⌚)</color>
+                を使えば、手懐けた群れを照準の地点へ一斉召集できます。
+            </label>
+            <label hex="#573d19" x="64" y="134" w="130">
+                スカルクの弓から放たれたスカルクの矢が
+                命中した標的へ群れが一斉に襲いかかります。
+            </label>
+            <label hex="#573d19" x="60" y="222" w="220">
+                野生弾が当たるとプレイヤーがマークされ、
+                他の深闇のモブから標的とされます。
+            </label>
+            <label hex="#573d19" x="305" y="48" w="210">
+                群れでこそ真価を発揮し、合唱叫び声で敵を昏倒させつつ、
+                猛毒弾と噛みつきの波状攻撃を繰り出します。
+            </label>
+        </page>
+    </category>
+    <category id="chorusoatl">
+        <page src="infos/1">
+            <container popup="popups/1" hover-animation="scale" x="63" y="63" w="120" h="70">
+                <image src="images/1" absolute="true" w="576" h="320"/>
+            </container>
+            <label hex="#573d19" x="98" y="48">草食性</label>
+            <label hex="#573d19" x="214" y="48">バイオーム</label>
+            <label hex="#947546" x="229" y="106" align="center" scale="0.65">エンドの離島</label>
+            <label hex="#573d19" x="206" y="121">ドロップ</label>
+            <label hex="#947546" x="221" y="142" align="center" scale="0.42" w="28">コーラスの化石</label>
+            <label hex="#573d19" x="60" y="204" w="214">
+                コーラスコアトルはエンドの島々を群れで優雅に滑空する翼竜です。
+                ひとたび脅威にさらされると、
+                耳を劈く絶叫と怒涛の連続攻撃で反撃します。
+            </label>
+            <label hex="#573d19" x="340" y="66" w="180">野生の群れは一丸となって連携攻撃。</label>
+            <label hex="#573d19" x="354" y="90" w="180">強烈な叫び声で敵を大きく後退させる。</label>
+            <label hex="#573d19" x="339" y="122" w="180">鞍を装着することで大空を自在に飛翔可能。</label>
+            <label hex="#573d19" x="354" y="156" w="180">近接でのクチバシ噛みつき攻撃。</label>
+            <label hex="#573d19" x="344" y="182" w="170">敵を吹き飛ばす遠距離エネルギー波攻撃。</label>
+        </page>
+        <page src="infos/2">
+            <label hex="#573d19" x="60" y="48" w="214">
+                滅多に単体では行動しません。手懐けるには、
+                コーラスフルーツで群れから引き離す必要があります。
+            </label>
+            <label hex="#573d19" x="60" y="84" w="136">
+                実を手に持っていると逃亡を防げます。<br/>持たずに近づくと一度威嚇したのち襲ってきます。
+            </label>
+            <label hex="#573d19" x="174" y="158" w="100">
+                実を与えても拒絶され、
+                叫んで飛び去る場合があります。
+            </label>
+            <label hex="#573d19" x="60" y="238" w="214">
+                手懐け後は鞍をつけて空を翔けることができます。
+            </label>
+            <label hex="#573d19" x="305" y="48" w="210">
+                手懐けた大人2頭にコーラスフルーツを与えて繁殖。
+                コーラスコアトルの卵は脆く、
+                頻繁に移動させると割れてしまいます。
+            </label>
+            <label hex="#573d19" x="368" y="198" w="154">
+                エンドで最もよく孵化しますが他でも可能：
+                完全な暗所、下にエンドストーン、近くに
+                コーラス植物が必要です。雛鳥は実で急速に成長。
+            </label>
+        </page>
+        <page src="infos/3">
+            <label hex="#573d19" x="60" y="128" w="214">
+                鞍を装着すればエンドの離島や虚空の上空を自由自在に飛行できます。
+            </label>
+            <label hex="#573d19" x="60" y="162" w="200" align="center">
+                <color hex="#947546"><u><keybind id="key.jump"/></u> →</color> 離陸 / 着陸
+            </label>
+            <label hex="#573d19" x="61" y="186" w="200" align="center">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_primary_attack"/></u> →</color>
+                近接クチバシ攻撃
+            </label>
+            <label hex="#573d19" x="61" y="216" w="200" align="center">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_special_attack"/></u> →</color>
+                エネルギー弾吐き出し
+            </label>
+            <label hex="#573d19" x="305" y="48" w="210">
+                討伐で得られるコーラスの化石からコーラスの大鎌を製作可能です。
+            </label>
+            <container x="360" y="94">
+                <label hex="#573d19">回転攻撃 <color hex="#947546">(20秒 ⌚)</color></label>
+                <label hex="#947546" y="10" w="150"><u><keybind id="key.use"/></u> →</label>
+                <label hex="#573d19" align="left" x="75" y="10" w="80">
+                    近接の敵にダメージを
+                    与え、空中へ打ち上げる。
+                </label>
+            </container>
+            <container popup="popups/3" hover-animation="scale" x="317" y="98" w="34" h="34">
+                <image src="images/2" src-x="447" src-y="78" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:chorus_scythe" x="296" y="98">
+                        <label x="58" scale="0.65"><b>コーラスの大鎌</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+            <label hex="#573d19" x="305" y="166" w="210">
+                コーラスの化石でコーラスコアトル防具を作製できます。
+            </label>
+            <container x="315" y="192">
+                <label hex="#947546" w="180">→ 一式セット効果:</label>
+                <label hex="#573d19" x="12" y="10" w="180">低速落下を常時付与</label>
+                <label hex="#947546" y="30" w="180">→ 特殊効果: <color hex="#573d19">テレポート</color> (15秒 ⌚)</label>
+                <label hex="#573d19" x="12" y="42" w="170">
+                    <color hex="#947546"><u><keybind id="ec_ad.armor"/></u></color> を長押しチャージして視線先へテレポート。
+                </label>
+            </container>
+            <container popup="popups/4" hover-animation="scale" x="337" y="260" w="142" h="43">
+                <image src="images/2" src-x="337" src-y="260" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:chorusoatl_helmet" x="296" y="28">
+                        <label x="58" scale="0.65"><b>コーラスコアトルのヘルメット</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:chorusoatl_chestplate" x="296" y="98">
+                        <label x="58" scale="0.65"><b>コーラスコアトルのチェストプレート</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:chorusoatl_leggings" x="296" y="169">
+                        <label x="58" scale="0.65"><b>コーラスコアトルのレギンス</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:chorusoatl_boots" x="296" y="240">
+                        <label x="58" scale="0.65"><b>コーラスコアトルのブーツ</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+        </page>
+    </category>
+    <category id="sculksaur">
+        <page src="infos/1">
+            <container popup="popups/1" hover-animation="scale" x="63" y="63" w="115" h="85">
+                <image src="images/1" absolute="true" w="576" h="320"/>
+            </container>
+            <label hex="#573d19" x="98" y="48">肉食性</label>
+            <label hex="#573d19" x="216" y="48">バイオーム</label>
+            <label hex="#947546" x="221" y="106" align="center" scale="0.65">ディープダーク</label>
+            <label hex="#573d19" x="216" y="129">ドロップ</label>
+            <label hex="#947546" x="226" y="151" align="center" scale="0.45" w="28">スカルクの毒素</label>
+            <label hex="#573d19" x="60" y="200" w="214">
+                スカルクサウルスはディープダークの絶対的頂点捕食者です。
+                ウォーデンですらその猛威の前には敵ではありません。
+            </label>
+            <label hex="#573d19" x="300" y="48" w="220">
+                <color hex="#947546">→</color> ウォーデン出現直後に誘引され出現。<br/><br/>
+                <color hex="#947546">→</color> 極めて攻撃的。<br/><br/>
+                <color hex="#947546">→</color> 特にウォーデンに対し強い敵対心を抱く。<br/><br/>
+                <color hex="#947546">→</color> 手懐けおよび繁殖は不可能。
+            </label>
+            <label hex="#573d19" x="305" y="214" w="210">
+                この怪物を呼び覚ますことは破滅を意味します。
+                周囲の環境を喰らい尽くし、感知したすべてを襲撃します。
+            </label>
+            <label hex="#573d19" x="345" y="254" w="210">
+                警告はしましたよ。
+            </label>
+        </page>
+        <page src="infos/2">
+            <label hex="#573d19" x="95" y="74" w="184">
+                出現時に莫大な攻撃力バフを獲得し、ウォーデンを粉砕する。
+            </label>
+            <label hex="#573d19" x="108" y="112" w="165">
+                音、振動、嗅覚を頼りにプレイヤーを追跡。
+            </label>
+            <label hex="#573d19" x="120" y="142" w="160">
+                壊滅的ダメージを与える必殺の噛みつき。
+            </label>
+            <label hex="#573d19" x="148" y="178" w="130">
+                ダメージとノックバックを伴うテイル攻撃。
+            </label>
+            <label hex="#573d19" x="120" y="212" w="150">
+                ソニックダメージを与える耳を劈く咆哮。
+            </label>
+            <label hex="#573d19" x="328" y="48" w="190">
+                側面にあるイボを矢で射抜くと、
+                装備素材となるスカルクの毒素をドロップします。
+            </label>
+            <label hex="#573d19" x="350" y="100" w="165">
+                <color hex="#947546">→ </color>暗闇と毒を付与。
+                <br/>
+                <color hex="#947546">→ </color>ディープダーク系モブに特効ダメージ。
+            </label>
+            <container popup="popups/2" hover-animation="scale" x="307" y="94" w="34" h="34">
+                <image src="images/2" src-x="317" src-y="102" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:ooze_tipped_arrow" x="296" y="98">
+                        <label x="58" scale="0.65"><b>スカルクの矢</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+            <label hex="#573d19" x="305" y="140" w="210">
+                スカルクの毒素からスカルクサウルス防具を製作できます。
+            </label>
+            <container x="315" y="168">
+                <label hex="#947546" w="180">→ 一式セット効果:</label>
+                <label hex="#573d19" x="12" y="10" w="180">攻撃命中時に敵を5秒間毒状態にする</label>
+                <label hex="#947546" y="34" w="180">→ 特殊効果: <color hex="#573d19">スカルクロア</color> (30秒 ⌚)</label>
+                <label hex="#573d19" x="12" y="46" w="170">
+                    <color hex="#947546"><u><keybind id="ec_ad.armor"/></u></color> を長押しして咆哮。周囲の敵に盲目と吐き気を付与し、ディープダークモブを気絶させる。
+                </label>
+            </container>
+            <container popup="popups/3" hover-animation="scale" x="337" y="260" w="142" h="43">
+                <image src="images/2" src-x="337" src-y="260" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:sculksaur_helmet" x="296" y="28">
+                        <label x="58" scale="0.65"><b>スカルクサウルスのヘルメット</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:sculksaur_chestplate" x="296" y="97">
+                        <label x="58" scale="0.65"><b>スカルクサウルスのチェストプレート</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:sculksaur_leggings" x="296" y="169">
+                        <label x="58" scale="0.65"><b>スカルクサウルスのレギンス</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:sculksaur_boots" x="296" y="240">
+                        <label x="58" scale="0.65"><b>スカルクサウルスのブーツ</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+        </page>
+    </category>
+    <category id="credits" no-markers="true">
+        <page src="infos/1">
+            <label x="168" y="41" color="#573d19" align="center"><b>制作者</b></label>
+            <label x="168" y="251" color="#573d19" align="center"><b>ウェブサイト</b></label>
+            <label x="170" y="261" color="#573d19" align="center">
+                <a href="https://www.eternalcreations.games">
+                    www.eternalcreations.games
+                </a>
+            </label>
+            <label x="328" y="32" color="#573d19" w="160" align="center">
+                このModのアップデートや
+                今後のコンテンツ情報をチェック！
+            </label>
+            <label x="346" y="100" w="160" color="#573d19">
+                <b>Discordに参加！</b>
+                <br/>
+                <a href="https://discord.gg/eternalcreations">
+                    <color hex="#947546">discord.gg/</color>eternalcreations
+                </a>
+            </label>
+            <label x="346" y="160" w="160" color="#573d19">
+                <b>X / Twitterをフォロー！</b>
+                <br/>
+                <a href="https://x.com/EternalCrtns">
+                    <color hex="#947546">x.com/</color>EternalCrtns
+                </a>
+            </label>
+            <label x="346" y="220" w="160" color="#573d19">
+                <b>TikTokをチェック！</b>
+                <br/>
+                <a href="https://tiktok.com/@eternalxcreations">
+                    <color hex="#947546">tiktok.com/</color>eternalxcreations
+                </a>
+            </label>
+        </page>
+    </category>
+</root>

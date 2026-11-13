@@ -1,0 +1,99 @@
+{
+  "parent": "ec_ad:kill_sculksaur",
+  "criteria": {
+    "craft_boots": {
+      "conditions": {
+        "recipe_id": "ec_ad:sculksaur_boots"
+      },
+      "trigger": "minecraft:recipe_crafted"
+    },
+    "craft_chestplate": {
+      "conditions": {
+        "recipe_id": "ec_ad:sculksaur_chestplate"
+      },
+      "trigger": "minecraft:recipe_crafted"
+    },
+    "craft_helmet": {
+      "conditions": {
+        "recipe_id": "ec_ad:sculksaur_helmet"
+      },
+      "trigger": "minecraft:recipe_crafted"
+    },
+    "craft_leggings": {
+      "conditions": {
+        "recipe_id": "ec_ad:sculksaur_leggings"
+      },
+      "trigger": "minecraft:recipe_crafted"
+    },
+    "kill": {
+      "conditions": {
+        "entity": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "type": "ec_ad:sculksaur"
+            }
+          }
+        ]
+      },
+      "trigger": "minecraft:player_killed_entity"
+    },
+    "spot": {
+      "conditions": {
+        "entity": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "type": "ec_ad:sculksaur"
+            }
+          }
+        ]
+      },
+      "trigger": "ec_ad:spotted_entity"
+    }
+  },
+  "display": {
+    "announce_to_chat": true,
+    "description": {
+      "translate": "advancement.master_sculksaur.desc"
+    },
+    "frame": "challenge",
+    "hidden": false,
+    "icon": {
+      "item": "ec_ad:sculksaur_helmet",
+      "nbt": "{Damage:0}"
+    },
+    "show_toast": true,
+    "title": {
+      "translate": "advancement.master_sculksaur.title"
+    }
+  },
+  "requirements": [
+    [
+      "spot"
+    ],
+    [
+      "kill"
+    ],
+    [
+      "craft_boots"
+    ],
+    [
+      "craft_chestplate"
+    ],
+    [
+      "craft_helmet"
+    ],
+    [
+      "craft_leggings"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "ec_ad:fearful_totem"
+    ]
+  },
+  "sends_telemetry_event": true
+}

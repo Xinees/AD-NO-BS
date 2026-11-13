@@ -1,0 +1,51 @@
+{
+    "format_version": "1.10.0",
+    "particle_effect": {
+        "description": {
+            "identifier": "ec_ad:totem_on_place_under",
+            "basic_render_parameters": {
+                "material": "particles_add",
+                "texture": "ec_ad:textures/emitter/light_2"
+            }
+        },
+        "components": {
+            "minecraft:emitter_rate_instant": {
+                "num_particles": 1
+            },
+            "minecraft:emitter_lifetime_once": {
+                "active_time": 1
+            },
+            "minecraft:emitter_shape_point": {},
+            "minecraft:particle_lifetime_expression": {
+                "max_lifetime": 0.25
+            },
+            "minecraft:particle_initial_spin": {
+                "rotation_rate": 120
+            },
+            "minecraft:particle_initial_speed": 0,
+            "minecraft:particle_motion_dynamic": {},
+            "minecraft:particle_appearance_billboard": {
+                "size": [
+                    "8 * (v.particle_age) * 4",
+                    "8 * (v.particle_age) * 4"
+                ],
+                "facing_camera_mode": "emitter_transform_xz",
+                "uv": {
+                    "texture_width": 16,
+                    "texture_height": 16,
+                    "uv": [0, 0],
+                    "uv_size": [16, 16]
+                }
+            },
+            "minecraft:particle_appearance_tinting": {
+                "color": {
+                    "interpolant": "v.particle_age / v.particle_lifetime",
+                    "gradient": {
+                        "0.0": "#FFFFDCB5",
+                        "1.0": "#00FFDCB5"
+                    }
+                }
+            }
+        }
+    }
+}

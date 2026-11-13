@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "count": 1,
+  "ingredient": {
+    "item": "ec_ad:raw_amber_block"
+  },
+  "result": "ec_ad:polished_amber"
+}

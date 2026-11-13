@@ -1,0 +1,913 @@
+<root badges="info">
+    <category id="introduction" no-markers="true">
+        <page src="infos/1">
+            <label x="308" y="32" w="190" color="#573d19">
+                Welcome to Archie's Dino Mod!
+                This is your guide to learning anything and everything
+                about the new creatures living in your world!
+            </label>
+            <label x="368" y="95" w="120" color="#573d19">
+                To navigate, hover and interact with
+                anything with a white outline.
+            </label>
+            <label x="368" y="165" w="130" color="#573d19">
+                To open the book to a specific dino's
+                just click on desired categories!
+            </label>
+            <label x="368" y="230" w="120" color="#573d19">
+                Press <b><keybind id="key.keyboard.escape"/></b>
+                to close the guide book!
+            </label>
+        </page>
+        <page src="infos/2">
+            <label x="75" y="49" w="190" color="#573d19" align="center">
+                Nobody knows what fell from the sky that night.
+                What we know: the shards are warm. Always warm.
+                Like something inside them is still alive.
+            </label>
+            <label x="58" y="168" w="220" color="#573d19">
+                Look for scorched craters in the lands where
+                the creatures roam, and for ancient bones resting
+                in the deserts and badlands. Where the amber fell,
+                something old is near.
+            </label>
+            <label x="374" y="50" w="140" color="#573d19">
+                Mine the ore, and keep a shard on you. The
+                creatures are drawn to it. Nobody can say why.
+                But whoever carries amber never searches for long.
+            </label>
+            <label x="304" y="122" w="210" color="#573d19">
+                Archie pays well for every shard you bring him.
+                He says it's for his research. The refined amber
+                can be cut and built like stone, if you can spare it.
+            </label>
+            <label x="304" y="178" w="148" color="#573d19">
+                And one more thing. Those who truly master
+                a creature learn to cast its likeness in amber.
+            </label>
+            <label x="304" y="230" w="148" color="#573d19">
+                A Totem, they call it. Proof that you did not
+                hunt it, did not cage it, but earned it.
+            </label>
+        </page>
+    </category>
+    <category id="lushsaur">
+        <page src="infos/1">
+            <container popup="popups/1" hover-animation="scale" x="63" y="63" w="140" h="70">
+                <image src="images/1" absolute="true" w="576" h="320"/>
+            </container>
+            <label hex="#573d19" x="81" y="48">Herbivore</label>
+            <label hex="#573d19" x="236" y="48">Biome</label>
+            <label hex="#947546" x="243" y="106" align="center" scale="0.7">Dripstone Caves</label>
+            <label hex="#947546" x="209" y="166" align="center" scale="0.7">Lush Caves</label>
+            <label hex="#573d19" x="244" y="133">Drops</label>
+            <label hex="#947546" x="248" y="170" align="center" scale="0.7" w="24">Lush Core</label>
+            <label hex="#573d19" x="60" y="204" w="214">
+                The Lushsaur is a reclusive herbivore of the Lush and Dripstone caves.
+                It blends into its surroundings when undisturbed, revealing itself only
+                to those who earn its trust.
+            </label>
+            <label hex="#573d19" x="343" y="70" w="170">Becomes invisible when resting. When tamed, it disables this ability.</label>
+            <label hex="#573d19" x="372" y="103" w="130">Tail stomp to keep enemies at a distance.</label>
+            <label hex="#573d19" x="345" y="130" w="155">Charge attack to rush targets with follow-up attacks.</label>
+            <label hex="#573d19" x="370" y="162" w="170">High chance to deflect projectiles.</label>
+            <label hex="#573d19" x="344" y="192" w="170">Headbutt attack that dazes and breaks terrain.</label>
+            <label hex="#573d19" x="369" y="222" w="170">Tail swing attack with wide knockback.</label>
+        </page>
+        <page src="infos/2">
+            <label hex="#573d19" x="65" y="55" w="165">
+                The Lushsaur only responds if you are patient.
+            </label>
+            <label hex="#573d19" x="65" y="88" w="125">
+                You must keep offering Glow Berries until it accepts you.
+            </label>
+            <label hex="#573d19" x="65" y="145" w="210">
+                It will not respond while it's camouflaged, or actively avoiding danger.
+            </label>
+            <label hex="#573d19" x="60" y="230" w="214">
+                Once tamed, it becomes calm instead of wary,
+                so you can safely interact with it.
+            </label>
+            <label hex="#573d19" x="305" y="48" w="210">
+                Breeding is done by feeding Glow Berries on two tamed adult Lushsaurs.
+                An egg will then be laid on the ground. You can pick up the egg by
+                interacting with it. Lushsaur Eggs are tough, and doesn't need
+                special care to hatch other than grass or moss blocks under them.
+            </label>
+            <label hex="#573d19" x="389" y="125" w="130">
+                Hatching time can be reduced when there are adult Lushsaurs nearby.
+                <br/><br/>
+                Once hatched, growth can be sped up by feeding it Glow Berries.
+            </label>
+            <label hex="#573d19" x="320" y="210" w="140">
+                Upon growing to adulthood, the Lushsaur will shed
+                its Lush Core. It will slowly grow back over time.
+            </label>
+        </page>
+        <page src="infos/3">
+            <container popup="popups/3" hover-animation="scale" x="317" y="102" w="34" h="34">
+                <image src="images/2"
+                       src-x="317" src-y="102"
+                       texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:lush_mace" x="296" y="97">
+                        <label x="58" scale="0.8"><b>Lush Mace</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+            <container popup="popups/4" hover-animation="scale" x="337" y="260" w="142" h="43">
+                <image src="images/2"
+                       src-x="337" src-y="260"
+                       texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:lushsaur_helmet" x="296" y="25">
+                        <label x="58" scale="0.8"><b>Lushsaur Helmet</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:lushsaur_chestplate" x="296" y="96">
+                        <label x="58" scale="0.8"><b>Lushsaur Chestplate</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:lushsaur_leggings" x="296" y="167">
+                        <label x="58" scale="0.8"><b>Lushsaur Leggings</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:lushsaur_boots" x="296" y="238">
+                        <label x="58" scale="0.8"><b>Lushsaur Boots</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+            <label hex="#573d19" x="60" y="54" w="214">
+                Once tamed, Lushsaurs no longer enter camouflage.
+                Instead, it will sleep and wake up on regular intervals,
+                staying fully visible the whole time.
+            </label>
+            <label hex="#573d19" x="60" y="105" w="214">
+                The Lushsaur can be saddled and ridden through caves.
+                Its attacks can break terrain, letting you carve your own paths.
+            </label>
+            <label hex="#573d19" x="61" y="165" w="200" align="center">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_primary_attack"/></u> →</color>
+                Headbutt
+                <color hex="#947546">(breaks terrain)</color>
+            </label>
+            <label hex="#573d19" x="61" y="195" w="200" align="center">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_special_attack"/></u> →</color>
+                Swing
+                <color hex="#947546">(knockback / breaks vegetation)</color>
+            </label>
+            <label hex="#573d19" x="58" y="230" w="224">
+                You can feed it Glow Berries while
+                riding to give it a momentary speed boost.
+            </label>
+            <label hex="#573d19" x="305" y="54" w="210">
+                The Lush Mace can be crafted using the Lush Core
+                acquired from breeding or defeating the Lushsaur.
+            </label>
+            <container x="360" y="100">
+                <label hex="#573d19">Spin Attack <color hex="#947546">(30s ⌚)</color></label>
+                <label hex="#947546" y="10" w="150"><u><keybind id="key.use"/></u> →</label>
+                <label hex="#573d19" align="left" x="75" y="10" w="80">
+                    Knock away all entities
+                    around the player.
+                </label>
+            </container>
+            <label hex="#573d19" x="305" y="156" w="210">
+                You can craft Lushsaur armor using Lush Cores.
+            </label>
+            <container x="315" y="180">
+                <label hex="#947546" w="180">→ Full Set Bonus:</label>
+                <label hex="#573d19" x="12" y="10">Grants Resistance I</label>
+                <label hex="#947546" y="25" w="180">→ Special: <color hex="#573d19">Camouflage</color></label>
+                <label hex="#573d19" x="12" y="35" w="170">
+                    Sneaking while moving gives mobs
+                    a chance to ignore you. Standing
+                    still makes you completely undetectable.
+                </label>
+            </container>
+        </page>
+    </category>
+    <category id="therimoss">
+        <page src="infos/1">
+            <container popup="popups/1" hover-animation="scale" x="63" y="63" w="70" h="90">
+                <image src="images/1" absolute="true" w="576" h="320" y="10"/>
+            </container>
+            <label hex="#573d19" x="81" y="58">Herbivore</label>
+            <label hex="#573d19" x="158" y="58">Biome</label>
+            <label hex="#947546" x="172" y="115" align="center" scale="0.85">Jungle</label>
+            <label hex="#573d19" x="222" y="71">Drops</label>
+            <label hex="#947546" x="236" y="90" align="center" scale="0.7" w="28">Mossy Claw</label>
+            <label hex="#573d19" x="60" y="180" w="214">
+                The Therimoss is a slow, towering giant that
+                lives deep in the jungle. It calmly makes
+                its way through the vegetation, sometimes seen
+                leaning against tree trunks or climbing partway
+                up to look at the world below.
+            </label>
+            <label hex="#573d19" x="360" y="59" w="160">
+                Can leap from the ground into the treetops.
+            </label>
+            <label hex="#573d19" x="376" y="96" w="160">
+                Can climb trees and break foliage.
+            </label>
+            <label hex="#573d19" x="362" y="129" w="160">
+                A heavy impact attack that buries targets.
+            </label>
+            <label hex="#573d19" x="372" y="164" w="160">
+                A close range triple swipe attack.
+            </label>
+            <label hex="#573d19" x="355" y="198" w="160">
+                Hurls a dirt block, dealing ranged damage.
+            </label>
+            <label hex="#573d19" x="358" y="227" w="160">
+                Be careful when breaking logs, as it hates deforestation.
+            </label>
+        </page>
+        <page src="infos/2">
+            <label hex="#573d19" x="60" y="54" w="214">
+                The Therimoss only takes interest in large offerings.
+                Players must construct a 4x4 pyramid <color hex="#947546">(20 blocks)</color>
+                made entirely of food items to attract its attention.
+            </label>
+            <label hex="#573d19" x="168" y="110" w="130">
+                <color hex="#947546">•</color> Melon<br/>
+                <color hex="#947546">•</color> Pumpkin<br/>
+                <color hex="#947546">•</color> Cake<br/>
+                <color hex="#947546">•</color> Bamboo Block<br/>
+                <color hex="#947546">•</color> Azalea Leaves<br/>
+                <color hex="#947546">•</color> Mushroom Block
+            </label>
+            <label hex="#573d19" x="60" y="212" w="214">
+                Once it begins eating, the player may feed
+                it Bamboo again to tame it. Each interaction has
+                a chance to succeed, requiring patience and preparation.
+            </label>
+            <label hex="#573d19" x="305" y="54" w="210">
+                Breeding is done by feeding
+                Bamboo on two tamed adult Therimoss.
+            </label>
+            <label hex="#573d19" x="365" y="154" w="150">
+                An egg will be laid on the ground,
+                which can be picked up by interacting with it.
+                Therimoss Eggs hatch easily with no special care.
+            </label>
+            <label hex="#573d19" x="305" y="214" w="150">
+                Once hatched, the baby Therimoss can be fed the same
+                food items used in the pyramid to speed up its growth.
+            </label>
+        </page>
+        <page src="infos/3">
+            <label hex="#573d19" x="145" y="48" w="130">
+                When tamed, the Therimoss becomes calm and responsive.
+            </label>
+            <label hex="#573d19" x="145" y="88" w="130">
+                The Therimoss is a powerful exploration mount,
+                improving travel through difficult terrain.
+            </label>
+            <label hex="#573d19" x="60" y="150" w="214" align="center">
+                <color hex="#947546"><u><keybind id="key.jump"/></u> →</color> Leap up onto treetops.
+            </label>
+            <label hex="#573d19" x="60" y="170" w="220" align="center">
+                <color hex="#947546"><u>Climb</u> →</color>
+                Climb up trees breaking foliage upon command.
+            </label>
+            <label hex="#573d19" x="60" y="200" w="200" align="center">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_primary_attack"/></u> →</color>
+                A close range triple swipe attack.
+            </label>
+            <label hex="#573d19" x="60" y="230" w="220" align="center">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_special_attack"/></u> →</color>
+                Hurls a dirt block, dealing ranged damage to the closest enemy.
+            </label>
+            <label hex="#573d19" x="305" y="48" w="210">
+                The Theri Claws can be crafted using Mossy Claws,
+                which can be harvested by shearing Therimoss
+                or obtained by defeating them.
+            </label>
+            <label hex="#573d19" x="305" y="148" w="210">
+                While falling near a wall
+                you can slide down safely.
+            </label>
+            <label hex="#573d19" x="305" y="184" w="210">
+                You can craft the Therimoss armor set with Mossy Claws.
+            </label>
+            <container x="315" y="212">
+                <label hex="#947546" w="180">→ Full Set Bonus:</label>
+                <label hex="#573d19" x="12" y="10">Grants reduced food consumption.</label>
+                <label hex="#947546" y="25" w="180">→ Special: <color hex="#573d19">Swift</color> (10s ⌚)</label>
+                <label hex="#573d19" x="12" y="35" w="170">
+                    Press <color hex="#947546"><u><keybind id="ec_ad.armor"/></u></color> to activate a speed boost.
+                </label>
+            </container>
+            <container popup="popups/3" hover-animation="scale" x="317" y="102" w="180" h="35">
+                <image src="images/2" src-x="317" src-y="102" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:theri_claw_iron" x="296" y="27">
+                        <label x="58" scale="0.8"><b>Iron Theri Claws</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:theri_claw_copper" x="296" y="98">
+                        <label x="58" scale="0.8"><b>Copper Theri Claws</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:theri_claw_gold" x="296" y="169">
+                        <label x="58" scale="0.8"><b>Gold Theri Claws</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:theri_claw_diamond" x="296" y="238">
+                        <label x="58" scale="0.8"><b>Diamond Theri Claws</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+            <container popup="popups/4" hover-animation="scale" x="337" y="260" w="142" h="43">
+                <image src="images/2" src-x="337" src-y="260" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:therimoss_helmet" x="296" y="27">
+                        <label x="58" scale="0.8"><b>Therimoss Helmet</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:therimoss_chestplate" x="296" y="98">
+                        <label x="58" scale="0.8"><b>Therimoss Chestplate</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:therimoss_leggings" x="296" y="169">
+                        <label x="58" scale="0.8"><b>Therimoss Leggings</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:therimoss_boots" x="296" y="240">
+                        <label x="58" scale="0.8"><b>Therimoss Boots</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+        </page>
+    </category>
+    <category id="coralosaur">
+        <page src="infos/1">
+            <container popup="popups/1" hover-animation="scale" x="63" y="63" w="99" h="99">
+                <image src="images/1" absolute="true" w="576" h="320"/>
+            </container>
+            <label hex="#573d19" x="100" y="56">Carnivore</label>
+            <label hex="#573d19" x="186" y="62">Biome</label>
+            <label hex="#947546" x="199" y="121" align="center" scale="0.85">Warm Ocean</label>
+            <label hex="#573d19" x="244" y="62">Drops</label>
+            <label hex="#947546" x="238" y="100" align="center" scale="0.7" w="28">Coral Rib</label>
+            <label hex="#573d19" x="64" y="186" w="214">
+                The Coralosaur is a colossal deep-sea guardian
+                found roaming around the depths of the ocean,
+                sometimes buried beneath the warm seabed.
+                It lies dormant until a faint disturbance in
+                the sand reveals where something enormous rests.
+            </label>
+            <label hex="#573d19" x="337" y="62" w="190">
+                Emits a bubble stream that replenishes oxygen.
+            </label>
+            <label hex="#573d19" x="358" y="88" w="140">
+                Retreats and repositions under the seabed when threats are too far away.
+            </label>
+            <label hex="#573d19" x="348" y="128" w="160">
+                When equipped with a saddle, it allows boats to be attached to it with leads.
+            </label>
+            <label hex="#573d19" x="335" y="170" w="160">
+                Large storage, expandable by interacting with it using chests.
+            </label>
+            <label hex="#573d19" x="352" y="200" w="160">
+                Forward bite that deals damage in a wide arc.
+            </label>
+            <label hex="#573d19" x="338" y="238" w="160">
+                Commands nearby ocean life to defend you.
+            </label>
+        </page>
+        <page src="infos/2">
+            <label hex="#573d19" x="68" y="52" w="200">
+                To tame a Coralosaur, find its buried head by following the bubble trail.
+            </label>
+            <label hex="#573d19" x="68" y="172" w="200">
+                You must keep offering it Coral Stews until it accepts you.
+            </label>
+            <label hex="#573d19" x="162" y="199" w="120">
+                Once you succeed, the Coralosaur then
+                awakens into a bonded state, no longer
+                sleeping under the seabed.
+            </label>
+            <label hex="#573d19" x="305" y="58" w="218">
+                Breeding is done by feeding two tamed
+                adult Coralosaurs with any piece of coral or Coral Stews.
+            </label>
+            <label hex="#573d19" x="305" y="198" w="210">
+                A baby coralosaur will spawn afterwards.
+                Coralosaurs grow underwater, and their
+                growth can be sped up by feeding them
+                Coral Stew or any fish.
+            </label>
+        </page>
+        <page src="infos/3">
+            <label hex="#573d19" x="60" y="142" w="214">
+                The Coralosaur can lead boats, and has an expandable
+                storage system by adding chests to the saddle.
+                You can remove the saddle using shears.
+            </label>
+            <label hex="#573d19" x="60" y="208" w="214">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_primary_attack"/></u> → </color>
+                Forward bite that deals damage in a wide arc.
+            </label>
+            <label hex="#573d19" x="60" y="240" w="214">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_special_attack"/></u> → </color>
+                Commands nearby ocean life to defend you.
+            </label>
+            <label hex="#573d19" x="305" y="52" w="150">
+                The Rib Bow can be crafted using
+                Coral Ribs from defeated Coralosaurs.
+                <br/><br/>
+                Arrows fired from the Rib Bow
+                have very little arrow drop
+                when underwater.
+            </label>
+            <container popup="popups/3" hover-animation="scale" x="458" y="72" w="34" h="34">
+                <image src="images/2" src-x="458" src-y="72" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:rib_bow" x="297" y="99">
+                        <label x="58" scale="0.8"><b>Rib Bow</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+            <label hex="#573d19" x="305" y="150" w="210">
+                You can craft the Coralosaur armor set with Coral Ribs.
+            </label>
+            <container x="315" y="180">
+                <label hex="#947546" w="180">→ Full Set Bonus:</label>
+                <label hex="#573d19" x="12" y="10" w="180">Grants Swim Speed,
+                    Underwater Mining Haste &amp; Conduit Power when underwater</label>
+                <label hex="#947546" y="50" w="180">→ Special: <color hex="#573d19">Marine Command</color> (4s ⌚)</label>
+                <label hex="#573d19" x="12" y="62" w="170">
+                    Press <color hex="#947546"><u><keybind id="ec_ad.armor"/></u></color> to summon sea creatures to fight for you when in water.
+                </label>
+            </container>
+            <container popup="popups/4" hover-animation="scale" x="337" y="260" w="142" h="43">
+                <image src="images/2" src-x="337" src-y="260" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:coralosaur_helmet" x="296" y="27">
+                        <label x="58" scale="0.8"><b>Coralosaur Helmet</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:coralosaur_chestplate" x="296" y="98">
+                        <label x="58" scale="0.8"><b>Coralosaur Chestplate</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:coralosaur_leggings" x="296" y="169">
+                        <label x="58" scale="0.8"><b>Coralosaur Leggings</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:coralosaur_boots" x="296" y="240">
+                        <label x="58" scale="0.8"><b>Coralosaur Boots</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+        </page>
+    </category>
+    <category id="obsidiceratops">
+        <page src="infos/1">
+            <container popup="popups/1" hover-animation="scale" x="63" y="63" w="104" h="80">
+                <image src="images/1" absolute="true" w="576" h="320"/>
+            </container>
+            <label hex="#573d19" x="98" y="48">Herbivore</label>
+            <label hex="#573d19" x="189" y="48">Biome</label>
+            <label hex="#947546" x="170" y="106" align="center" w="60" scale="0.85">Soul Sand Valley</label>
+            <label hex="#947546" x="228" y="112" align="center" w="40" scale="0.85">Crimson Forest</label>
+            <label hex="#573d19" x="198" y="131">Drops</label>
+            <label hex="#947546" x="216" y="151" align="center" scale="0.7" w="28">Obsidian Horn</label>
+            <label hex="#573d19" x="60" y="194" w="214">
+                The Obsidiceratops is a superheated tank with a large appetite for lava.
+                It rarely wanders far from the lava oceans of the Nether.
+            </label>
+            <label hex="#573d19" x="60" y="242" w="214">
+                Be careful if you spot one. It stays calm when full of lava,
+                but gets dangerous when its supply runs low.
+            </label>
+            <label hex="#573d19" x="361" y="74" w="160">
+                Seeks out lava pools to refill its lava supply.
+            </label>
+            <label hex="#573d19" x="368" y="102" w="160">
+                Can store lava and give it to the player once tamed.
+            </label>
+            <label hex="#573d19" x="364" y="130" w="150">
+                Has a built-in, single-chest worth of storage.
+            </label>
+            <label hex="#573d19" x="370" y="166" w="150">
+                Headbutts, dealing a heavy close range attack.
+            </label>
+            <label hex="#573d19" x="345" y="194" w="170">
+                A Tail Whip attack with heavy knockback.
+            </label>
+            <label hex="#573d19" x="352" y="220" w="160">
+                Can be stunned for a short time by blowing an Obsidian Horn near it.
+            </label>
+        </page>
+        <page src="infos/2">
+            <label hex="#573d19" x="68" y="62" w="140">
+                Obsidiceratopses can only be tamed while they are calm,
+                and require 14–25 Magma Blocks to win their trust.
+            </label>
+            <label hex="#573d19" x="184" y="160" w="95">
+                You must keep their lava level high while taming them,
+                as letting it run too low will cause you to lose your progress.
+            </label>
+            <label hex="#573d19" x="64" y="244" w="214">
+                Once tamed, the Obsidiceratops can be saddled and ridden.
+            </label>
+            <label hex="#573d19" x="305" y="48" w="220">
+                Breeding is done by feeding Magma Blocks to two tamed adult Obsidiceratopses.<br/><br/>An
+                Obsidiceratops Egg will then be laid on the ground, which can be picked up.
+            </label>
+            <label hex="#573d19" x="375" y="200" w="140">
+                The egg can be picked up, but deals burn damage on contact.
+            </label>
+            <label hex="#573d19" x="375" y="238" w="130">
+                It must be kept close to lava to incubate, or else it will break.
+            </label>
+        </page>
+        <page src="infos/3">
+            <label hex="#573d19" x="60" y="54" w="214">
+                The Obsidiceratops is a strong mount,
+                able to transport both lava and items
+                throughout your journey in the Nether.
+            </label>
+            <label hex="#573d19" x="60" y="110" w="214" align="center">
+                <color hex="#947546"><u>Lava Storage</u> →</color> Can hold up to 15 buckets of lava.
+            </label>
+            <label hex="#573d19" x="60" y="140" w="220" align="center">
+                <color hex="#947546"><u>Refill</u> →</color>
+                Interact with a lava bucket to replenish lava.
+            </label>
+            <label hex="#573d19" x="60" y="170" w="200" align="center">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_primary_attack"/></u> →</color>
+                Headbutt for a close range attack.
+            </label>
+            <label hex="#573d19" x="60" y="200" w="220" align="center">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_special_attack"/></u> →</color>
+                Tail Whip attack with heavy knockback.
+            </label>
+            <label hex="#573d19" x="305" y="48" w="210">
+                The Scorching Horn can be crafted with Obsidian Horns acquired from defeating Obsidiceratopses.
+            </label>
+            <container x="342" y="88">
+                <label hex="#573d19">Summon Pets <color hex="#947546">(5s ⌚)</color></label>
+                <label hex="#947546" y="10" w="150"><u><keybind id="key.use"/></u> →</label>
+                <label hex="#573d19" align="left" x="75" y="10" w="120">
+                    Using the Scorching Horn allows you to summon your pets.
+                </label>
+            </container>
+            <container popup="popups/3" hover-animation="scale" x="304" y="88" w="34" h="34">
+                <image src="images/2" src-x="447" src-y="88" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:scorching_horn" x="296" y="99">
+                        <label x="58" scale="0.8"><b>Scorching Horn</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+            <label hex="#573d19" x="305" y="148" w="210">
+                You can craft the Obsidiceratops armor set with Obsidian Horns.
+            </label>
+            <container x="315" y="180">
+                <label hex="#947546" w="180">→ Full Set Bonus:</label>
+                <label hex="#573d19" x="12" y="10" w="180">Grants Lava Walking &amp; Fire Resistance.</label>
+                <label hex="#947546" y="40" w="180">→ Special: <color hex="#573d19">Lava Dive</color></label>
+                <label hex="#573d19" x="12" y="52" w="170">
+                    Press <color hex="#947546"><u><keybind id="key.sneak"/></u></color> to sink in lava.
+                </label>
+            </container>
+            <container popup="popups/4" hover-animation="scale" x="337" y="260" w="142" h="43">
+                <image src="images/2" src-x="337" src-y="260" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:obsidiceratops_helmet" x="296" y="27">
+                        <label x="58" scale="0.8"><b>Obsidiceratops Helmet</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:obsidiceratops_chestplate" x="296" y="98">
+                        <label x="58" scale="0.8"><b>Obsidiceratops Chestplate</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:obsidiceratops_leggings" x="296" y="169">
+                        <label x="58" scale="0.8"><b>Obsidiceratops Leggings</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:obsidiceratops_boots" x="296" y="240">
+                        <label x="58" scale="0.8"><b>Obsidiceratops Boots</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+        </page>
+    </category>
+    <category id="sculkraptor">
+        <page src="infos/1">
+            <container popup="popups/1" hover-animation="scale" x="71" y="58" w="85" h="85">
+                <image src="images/1" absolute="true" w="576" h="320"/>
+            </container>
+            <label hex="#573d19" x="98" y="48">Carnivore</label>
+            <label hex="#573d19" x="214" y="48">Biome</label>
+            <label hex="#947546" x="221" y="106" align="center" scale="0.85">Deep Dark</label>
+            <label hex="#573d19" x="202" y="131">Drops</label>
+            <label hex="#947546" x="215" y="150" align="center" scale="0.7" w="28">Raptor Talon</label>
+            <label hex="#573d19" x="60" y="190" w="214">
+                Sculkraptors are restless predators that stalk the Deep Dark
+                in packs, drawn to any sound or movement. Alone, it avoids
+                fighting, but in numbers, it becomes far more dangerous.
+            </label>
+            <label hex="#573d19" x="363" y="66" w="160">
+                Only fights when in groups.
+            </label>
+            <label hex="#573d19" x="340" y="92" w="160">
+                Finds targets through vibrations and sound.
+            </label>
+            <label hex="#573d19" x="358" y="122" w="160">
+                Ranged projectile attack that has a chance to inflict poison.
+            </label>
+            <label hex="#573d19" x="339" y="150" w="160">
+                When in a pack, it emits a deafening scream attack that knocks back and dazes.
+            </label>
+            <label hex="#573d19" x="348" y="192" w="160">
+                Marks targets for other Deep Dark monsters to attack.
+            </label>
+        </page>
+        <page src="infos/2">
+            <label hex="#573d19" x="60" y="48" w="130">
+                Wild Sculkraptors cannot be tamed directly.
+                Instead, you must find their nest, where packs usually gather.
+            </label>
+            <label hex="#573d19" x="165" y="120" w="110">
+                Getting close to the nest alerts nearby Sculkraptors, and
+                they will attack to defend their eggs.
+            </label>
+            <label hex="#573d19" x="60" y="196" w="150">
+                Once you defeat them all, you can now take the Sculkraptor Egg
+                from the nest. Each nest can only give one viable egg good enough to hatch.
+            </label>
+            <label hex="#573d19" x="308" y="52" w="120">
+                Sculkraptor Eggs must be kept somewhere dark to incubate.
+            </label>
+            <label hex="#573d19" x="305" y="95" w="175">
+                A tamed baby Sculkraptor will emerge when
+                the egg hatches, and it will follow you wherever you go.
+            </label>
+            <label hex="#573d19" x="305" y="138" w="210">
+                You can help it grow faster by feeding it monster drops,
+                like rotten flesh, spider eyes, or bones.
+            </label>
+        </page>
+        <page src="infos/3">
+            <label hex="#573d19" x="160" y="48" w="120">
+                You can rally tamed Sculkraptors to wherever you are
+                aiming using a Raptor Talon <color hex="#947546">(30s ⌚)</color>, which is acquired
+                by defeating wild Sculkraptors.
+            </label>
+            <label hex="#573d19" x="64" y="134" w="130">
+                Tamed Sculkraptors will only target enemies hit by a
+                Sculk Tipped Arrow fired from the Sculk Bow.
+                The pack will focus its attacks on marked targets.
+            </label>
+            <label hex="#573d19" x="60" y="222" w="220">
+                The Sculkraptors' projectiles also have a chance
+                to mark players hit, allowing other Deep Dark
+                monsters to target them.
+            </label>
+            <label hex="#573d19" x="305" y="48" w="210">
+                Sculkraptors are strongest in numbers, and only commit
+                to a fight when they have others backing them up. When
+                several of them attack together, they can let out a
+                scream that knocks enemies back and dazes them.
+                Alongside melee bites, they also have a ranged
+                toxic attack that can poison enemies.
+            </label>
+        </page>
+    </category>
+    <category id="chorusoatl">
+        <page src="infos/1">
+            <container popup="popups/1" hover-animation="scale" x="63" y="63" w="120" h="70">
+                <image src="images/1" absolute="true" w="576" h="320"/>
+            </container>
+            <label hex="#573d19" x="98" y="48">Herbivore</label>
+            <label hex="#573d19" x="214" y="48">Biome</label>
+            <label hex="#947546" x="229" y="106" align="center" scale="0.85">End Islands</label>
+            <label hex="#573d19" x="206" y="121">Drops</label>
+            <label hex="#947546" x="221" y="142" align="center" scale="0.7" w="28">Chorus Fossil</label>
+            <label hex="#573d19" x="60" y="204" w="214">
+                The Chorusoatl is a graceful End-dwelling flier that drifts
+                in groups across the outer End Islands. When threatened,
+                the flock fights back with a powerful screech and overwhelming attacks.
+            </label>
+            <label hex="#573d19" x="340" y="66" w="180">Untamed groups attack together.</label>
+            <label hex="#573d19" x="354" y="90" w="180">Has a powerful screech attack that knocks enemies back.</label>
+            <label hex="#573d19" x="339" y="122" w="180">When equipped with a saddle, allows the player to take flight.</label>
+            <label hex="#573d19" x="354" y="156" w="180">A close range bite attack.</label>
+            <label hex="#573d19" x="344" y="182" w="170">A ranged energy attack which can blow away enemies.</label>
+        </page>
+        <page src="infos/2">
+            <label hex="#573d19" x="60" y="48" w="214">
+                Chorusoatls are rarely alone. To tame one,
+                you must first separate it from its flock using a Chorus Fruit.
+            </label>
+            <label hex="#573d19" x="60" y="84" w="136">
+                Holding a Chorus Fruit will prevent it from flying off right away.<br/>If you approach without it, the Chorusoatl will warn you once before attacking.
+            </label>
+            <label hex="#573d19" x="174" y="158" w="100">
+                Although even if you manage to feed it,
+                there's a chance it will reject you,
+                screech, and fly off instead.
+            </label>
+            <label hex="#573d19" x="60" y="238" w="214">
+                Once tamed, the Chorusoatl can be saddled and ridden.
+            </label>
+            <label hex="#573d19" x="305" y="48" w="210">
+                Breeding is done by feeding Chorus Fruits
+                to two tamed adult Chorusoatls. A Chorusoatl
+                Egg will then be laid on the ground, which
+                can be picked up, although it's fragile
+                and will break if handled too often.
+            </label>
+            <label hex="#573d19" x="368" y="198" w="154">
+                The egg incubates best in the End, but can
+                hatch elsewhere too, requiring complete darkness
+                and End Stone below and Chorus Plants nearby.
+                Once hatched, you can feed it Chorus Fruit
+                to speed up growth.
+            </label>
+        </page>
+        <page src="infos/3">
+            <label hex="#573d19" x="60" y="128" w="214">
+                The Chorusoatl can be saddled, which lets you fly freely across the End Islands.
+            </label>
+            <label hex="#573d19" x="60" y="162" w="200" align="center">
+                <color hex="#947546"><u><keybind id="key.jump"/></u> →</color> Take off and land
+            </label>
+            <label hex="#573d19" x="61" y="186" w="200" align="center">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_primary_attack"/></u> →</color>
+                A close range bite attack.
+            </label>
+            <label hex="#573d19" x="61" y="216" w="200" align="center">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_special_attack"/></u> →</color>
+                A ranged energy spit attack.
+            </label>
+            <label hex="#573d19" x="305" y="48" w="210">
+                The Chorus Scythe can be crafted with Chorus Fossils acquired from defeating Chorusoatls.
+            </label>
+            <container x="360" y="94">
+                <label hex="#573d19">Spin Attack <color hex="#947546">(20s ⌚)</color></label>
+                <label hex="#947546" y="10" w="150"><u><keybind id="key.use"/></u> →</label>
+                <label hex="#573d19" align="left" x="75" y="10" w="80">
+                    Damages and knocks nearby enemies up into the air.
+                </label>
+            </container>
+            <container popup="popups/3" hover-animation="scale" x="317" y="98" w="34" h="34">
+                <image src="images/2" src-x="447" src-y="78" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:chorus_scythe" x="296" y="98">
+                        <label x="58" scale="0.8"><b>Chorus Scythe</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+            <label hex="#573d19" x="305" y="166" w="210">
+                You can craft the Chorusoatl armor set using Chorus Fossils.
+            </label>
+            <container x="315" y="192">
+                <label hex="#947546" w="180">→ Full Set Bonus:</label>
+                <label hex="#573d19" x="12" y="10" w="180">Grants Slow Falling.</label>
+                <label hex="#947546" y="30" w="180">→ Special: <color hex="#573d19">Teleport</color> (15s ⌚)</label>
+                <label hex="#573d19" x="12" y="42" w="170">
+                    Press <color hex="#947546"><u><keybind id="ec_ad.armor"/></u></color> to charge up a teleport to where you're looking.
+                </label>
+            </container>
+            <container popup="popups/4" hover-animation="scale" x="337" y="260" w="142" h="43">
+                <image src="images/2" src-x="337" src-y="260" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:chorusoatl_helmet" x="296" y="28">
+                        <label x="58" scale="0.8"><b>Chorusoatl Helmet</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:chorusoatl_chestplate" x="296" y="98">
+                        <label x="58" scale="0.8"><b>Chorusoatl Chestplate</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:chorusoatl_leggings" x="296" y="169">
+                        <label x="58" scale="0.8"><b>Chorusoatl Leggings</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:chorusoatl_boots" x="296" y="240">
+                        <label x="58" scale="0.8"><b>Chorusoatl Boots</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+        </page>
+    </category>
+    <category id="sculksaur">
+        <page src="infos/1">
+            <container popup="popups/1" hover-animation="scale" x="63" y="63" w="115" h="85">
+                <image src="images/1" absolute="true" w="576" h="320"/>
+            </container>
+            <label hex="#573d19" x="98" y="48">Carnivore</label>
+            <label hex="#573d19" x="216" y="48">Biome</label>
+            <label hex="#947546" x="221" y="106" align="center" scale="0.85">Deep Dark</label>
+            <label hex="#573d19" x="216" y="129">Drops</label>
+            <label hex="#947546" x="226" y="151" align="center" scale="0.7" w="28">Sculk Toxin</label>
+            <label hex="#573d19" x="60" y="200" w="214">
+                The Sculksaur is the apex predator of the Deep Dark.
+                Even the Warden is no match for its rampage.
+            </label>
+            <label hex="#573d19" x="300" y="48" w="220">
+                <color hex="#947546">→</color> Spawns shortly after a Warden emerges.<br/><br/>
+                <color hex="#947546">→</color> Extremely aggressive.<br/><br/>
+                <color hex="#947546">→</color> Especially hostile towards the Warden.<br/><br/>
+                <color hex="#947546">→</color> Untameable and cannot be bred.
+            </label>
+            <label hex="#573d19" x="305" y="214" w="210">
+                Waking this monster will end badly for you.
+                It consumes the world around it, attacking
+                anything it can sense.
+            </label>
+            <label hex="#573d19" x="345" y="254" w="210">
+                You have been warned.
+            </label>
+        </page>
+        <page src="infos/2">
+            <label hex="#573d19" x="95" y="74" w="184">
+                Gains a huge damage boost upon spawn, which can overpower Wardens.
+            </label>
+            <label hex="#573d19" x="108" y="112" w="165">
+                Finds players by sound, vibrations, and smell.
+            </label>
+            <label hex="#573d19" x="120" y="142" w="160">
+                A powerful bite attack dealing high damage.
+            </label>
+            <label hex="#573d19" x="148" y="178" w="130">
+                A Tail Whip that deals damage and knockback.
+            </label>
+            <label hex="#573d19" x="120" y="212" w="150">
+                Unleashes a deafening roar that deals sonic damage.
+            </label>
+            <label hex="#573d19" x="328" y="48" w="190">
+                Shooting the warts on the Sculksaur's side with arrows
+                will make it drop Sculk Toxins, a material
+                used to craft Sculk equipment.
+            </label>
+            <label hex="#573d19" x="350" y="100" w="165">
+                <color hex="#947546">→ </color>Inflicts Darkness and Poison.
+                <br/>
+                <color hex="#947546">→ </color>Highly damaging against Deep Dark mobs.
+            </label>
+            <container popup="popups/2" hover-animation="scale" x="307" y="94" w="34" h="34">
+                <image src="images/2" src-x="317" src-y="102" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:ooze_tipped_arrow" x="296" y="98">
+                        <label x="58" scale="0.8"><b>Sculk Tipped Arrow</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+            <label hex="#573d19" x="305" y="140" w="210">
+                You can craft the Sculksaur armor set with Sculk Toxins.
+            </label>
+            <container x="315" y="168">
+                <label hex="#947546" w="180">→ Full Set Bonus:</label>
+                <label hex="#573d19" x="12" y="10" w="180">Your attacks afflict Poison for 5 seconds to enemies hit.</label>
+                <label hex="#947546" y="34" w="180">→ Special: <color hex="#573d19">Sculk Roar</color> (30s ⌚)</label>
+                <label hex="#573d19" x="12" y="46" w="170">
+                    Press <color hex="#947546"><u><keybind id="ec_ad.armor"/></u></color>  to charge a deafening roar,
+                    inflicting Blindness and Nausea to nearby enemies.
+                    Nearby Deep Dark mobs are stunned.
+                </label>
+            </container>
+            <container popup="popups/3" hover-animation="scale" x="337" y="260" w="142" h="43">
+                <image src="images/2" src-x="337" src-y="260" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:sculksaur_helmet" x="296" y="28">
+                        <label x="58" scale="0.8"><b>Sculksaur Helmet</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:sculksaur_chestplate" x="296" y="97">
+                        <label x="58" scale="0.8"><b>Sculksaur Chestplate</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:sculksaur_leggings" x="296" y="169">
+                        <label x="58" scale="0.8"><b>Sculksaur Leggings</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:sculksaur_boots" x="296" y="240">
+                        <label x="58" scale="0.8"><b>Sculksaur Boots</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+        </page>
+    </category>
+    <category id="credits" no-markers="true">
+        <page src="infos/1">
+            <label x="168" y="41" color="#573d19" align="center"><b>Made by</b></label>
+            <label x="168" y="251" color="#573d19" align="center"><b>Website</b></label>
+            <label x="170" y="261" color="#573d19" align="center">
+                <a href="https://www.eternalcreations.games">
+                    www.eternalcreations.games
+                </a>
+            </label>
+            <label x="328" y="32" color="#573d19" w="160" align="center">
+                Follow us for updates on this
+                Mod and future content!
+            </label>
+            <label x="346" y="100" w="160" color="#573d19">
+                <b>Join our Discord!</b>
+                <br/>
+                <a href="https://discord.gg/eternalcreations">
+                    <color hex="#947546">discord.gg/</color>eternalcreations
+                </a>
+            </label>
+            <label x="346" y="160" w="160" color="#573d19">
+                <b>Follow us on X/Twitter!</b>
+                <br/>
+                <a href="https://x.com/EternalCrtns">
+                    <color hex="#947546">x.com/</color>EternalCrtns
+                </a>
+            </label>
+            <label x="346" y="220" w="160" color="#573d19">
+                <b>Follow us on TikTok!</b>
+                <br/>
+                <a href="https://tiktok.com/@eternalxcreations">
+                    <color hex="#947546">tiktok.com/</color>eternalxcreations
+                </a>
+            </label>
+        </page>
+    </category>
+</root>

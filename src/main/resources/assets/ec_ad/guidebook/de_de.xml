@@ -1,0 +1,886 @@
+<root badges="info">
+    <category id="introduction" no-markers="true">
+        <page src="infos/1">
+            <label x="308" y="32" w="190" color="#573d19">
+                Willkommen bei Archies Dinos!
+                Dies ist dein Leitfaden zu allen
+                neuen Kreaturen in deiner Welt!
+            </label>
+            <label x="368" y="95" w="120" color="#573d19">
+                Bewege den Zeiger über Dinge mit
+                weißem Umriss zum Interagieren.
+            </label>
+            <label x="368" y="165" w="130" color="#573d19">
+                Klicke auf Kategorien,
+                um die Seite des gewünschten
+                Dinos zu öffnen!
+            </label>
+            <label x="368" y="230" w="120" color="#573d19">
+                Drücke <b><keybind id="key.keyboard.escape"/></b>,
+                um das Buch zu schließen!
+            </label>
+        </page>
+        <page src="infos/2">
+            <label x="75" y="49" w="190" color="#573d19" align="center">
+                Niemand weiß, was in jener Nacht vom Himmel fiel.
+                Wir wissen nur: Die Splitter sind warm. Immer.
+                Als wäre darin noch Leben gefangen.
+            </label>
+            <label x="58" y="168" w="220" color="#573d19">
+                Suche nach Kratern dort, wo die Tiere streifen,
+                und nach uralten Knochen in Wüsten und Ödland.
+                Wo Bernstein fiel, ist Uraltes nah.
+            </label>
+            <label x="374" y="50" w="140" color="#573d19">
+                Baue das Erz ab und trage einen Splitter bei dir.
+                Kreaturen fühlen sich magisch angezogen.
+                Wer Bernstein trägt, sucht nie lange.
+            </label>
+            <label x="304" y="122" w="210" color="#573d19">
+                Archie zahlt gut für jeden Splitter, den du bringst.
+                Er sagt, es sei für seine Forschung. Veredelter
+                Bernstein lässt sich behauen und wie Stein verbauen.
+            </label>
+            <label x="304" y="178" w="148" color="#573d19">
+                Und noch etwas: Wahre Meister lernen,
+                die Gestalt des Tiers in Bernstein zu gießen.
+            </label>
+            <label x="304" y="230" w="148" color="#573d19">
+                Ein Totem, nennen sie es. Der Beweis,
+                dass du es verdient hast, statt es einzusperren.
+            </label>
+        </page>
+    </category>
+    <category id="lushsaur">
+        <page src="infos/1">
+            <container popup="popups/1" hover-animation="scale" x="63" y="63" w="140" h="70">
+                <image src="images/1" absolute="true" w="576" h="320"/>
+            </container>
+            <label hex="#573d19" x="81" y="48">Herbivor</label>
+            <label hex="#573d19" x="236" y="48">Biom</label>
+            <label hex="#947546" x="243" y="106" align="center" scale="0.55">Tropfsteinhöhlen</label>
+            <label hex="#947546" x="209" y="166" align="center" scale="0.65">Üppige Höhlen</label>
+            <label hex="#573d19" x="244" y="133">Beute</label>
+            <label hex="#947546" x="248" y="170" align="center" scale="0.45" w="28">Üppiger Kern</label>
+            <label hex="#573d19" x="60" y="204" w="214">
+                Der Lushsaur ist ein scheuer Herbivor der Höhlen.
+                Er verschmilzt mit seiner Umgebung und zeigt sich nur jenen,
+                die sein Vertrauen gewinnen.
+            </label>
+            <label hex="#573d19" x="343" y="70" w="170">Wird beim Schlafen unsichtbar. Zähmen deaktiviert dies.</label>
+            <label hex="#573d19" x="372" y="103" w="130">Schweifstampfer hält Gegner auf Distanz.</label>
+            <label hex="#573d19" x="345" y="130" w="155">Sturmangriff mit schnellen Folgeangriffen.</label>
+            <label hex="#573d19" x="370" y="162" w="170">Hohe Chance, Projektile abzuwehren.</label>
+            <label hex="#573d19" x="344" y="192" w="170">Kopfstoß: Betäubt und zerstört Blöcke.</label>
+            <label hex="#573d19" x="369" y="222" w="170">Schweiffeger mit starkem Rückstoß.</label>
+        </page>
+        <page src="infos/2">
+            <label hex="#573d19" x="65" y="55" w="165">
+                Der Lushsaur reagiert nur,
+                wenn du Geduld beweist.
+            </label>
+            <label hex="#573d19" x="65" y="88" w="125">
+                Füttere ihn mit Leuchtbeeren,
+                bis er dich akzeptiert.
+            </label>
+            <label hex="#573d19" x="65" y="145" w="210">
+                Im getarnten Zustand oder auf der Flucht
+                vor Gefahren nimmt er kein Futter an.
+            </label>
+            <label hex="#573d19" x="60" y="230" w="214">
+                Einmal gezähmt, wird er ruhig und zutraulich,
+                sodass du sicher mit ihm interagieren kannst.
+            </label>
+            <label hex="#573d19" x="305" y="48" w="210">
+                Füttere zwei gezähmte erwachsene Lushsaurs mit
+                Leuchtbeeren zur Zucht. Das gelegte Ei kann
+                aufgehoben werden und benötigt zum Schlüpfen
+                lediglich Gras- oder Moosblöcke darunter.
+            </label>
+            <label hex="#573d19" x="389" y="125" w="130">
+                Erwachsene Tiere in der Nähe verkürzen die Brutzeit.
+                <br/><br/>
+                Jungtiere wachsen durch Leuchtbeeren schneller.
+            </label>
+            <label hex="#573d19" x="320" y="210" w="140">
+                Beim Erwachsenwerden wirft er seinen Üppigen Kern ab.
+                Er wächst mit der Zeit langsam nach.
+            </label>
+        </page>
+        <page src="infos/3">
+            <container popup="popups/3" hover-animation="scale" x="317" y="102" w="34" h="34">
+                <image src="images/2"
+                       src-x="317" src-y="102"
+                       texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:lush_mace" x="296" y="97">
+                        <label x="58" scale="0.65"><b>Üppiger Streitkolben</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+            <container popup="popups/4" hover-animation="scale" x="337" y="260" w="142" h="43">
+                <image src="images/2"
+                       src-x="337" src-y="260"
+                       texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:lushsaur_helmet" x="296" y="25">
+                        <label x="58" scale="0.65"><b>Lushsaur-Helm</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:lushsaur_chestplate" x="296" y="96">
+                        <label x="58" scale="0.65"><b>Lushsaur-Brustplatte</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:lushsaur_leggings" x="296" y="167">
+                        <label x="58" scale="0.65"><b>Lushsaur-Beinschutz</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:lushsaur_boots" x="296" y="238">
+                        <label x="58" scale="0.65"><b>Lushsaur-Stiefel</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+            <label hex="#573d19" x="60" y="54" w="214">
+                Gezähmte Lushsaurs tarnen sich nicht mehr.
+                Stattdessen schlafen und wachen sie regelmäßig
+                und bleiben dabei stets sichtbar.
+            </label>
+            <label hex="#573d19" x="60" y="105" w="214">
+                Gesattelt kann er in Höhlen geritten werden.
+                Seine Angriffe brechen Gestein und bahnen Wege.
+            </label>
+            <label hex="#573d19" x="61" y="165" w="200" align="center">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_primary_attack"/></u> →</color>
+                Kopfstoß
+                <color hex="#947546">(bricht Blöcke)</color>
+            </label>
+            <label hex="#573d19" x="61" y="195" w="200" align="center">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_special_attack"/></u> →</color>
+                Schwung
+                <color hex="#947546">(Rückstoß / mäht Pflanzen)</color>
+            </label>
+            <label hex="#573d19" x="58" y="230" w="224">
+                Füttere ihn beim Reiten mit Leuchtbeeren
+                für einen kurzen Temposchub.
+            </label>
+            <label hex="#573d19" x="305" y="54" w="210">
+                Der Streitkolben wird aus Üppigen Kernen gefertigt,
+                die durch Zucht oder Siege gewonnen werden.
+            </label>
+            <container x="360" y="100">
+                <label hex="#573d19">Wirbelangriff <color hex="#947546">(30s ⌚)</color></label>
+                <label hex="#947546" y="10" w="150"><u><keybind id="key.use"/></u> →</label>
+                <label hex="#573d19" align="left" x="75" y="10" w="80">
+                    Schleudert alle
+                    Gegner ringsum zurück.
+                </label>
+            </container>
+            <label hex="#573d19" x="305" y="156" w="210">
+                Die Rüstung wird aus Üppigen Kernen geschmiedet.
+            </label>
+            <container x="315" y="180">
+                <label hex="#947546" w="180">→ Set-Bonus:</label>
+                <label hex="#573d19" x="12" y="10">Verleiht Resistenz I</label>
+                <label hex="#947546" y="25" w="180">→ Spezial: <color hex="#573d19">Tarnung</color></label>
+                <label hex="#573d19" x="12" y="35" w="170">
+                    Schleichen in Bewegung lässt Mobs
+                    dich teils ignorieren. Stillstand
+                    macht dich völlig unauffindbar.
+                </label>
+            </container>
+        </page>
+    </category>
+    <category id="therimoss">
+        <page src="infos/1">
+            <container popup="popups/1" hover-animation="scale" x="63" y="63" w="70" h="90">
+                <image src="images/1" absolute="true" w="576" h="320" y="10"/>
+            </container>
+            <label hex="#573d19" x="81" y="58">Herbivor</label>
+            <label hex="#573d19" x="158" y="58">Biom</label>
+            <label hex="#947546" x="172" y="115" align="center" scale="0.75">Dschungel</label>
+            <label hex="#573d19" x="222" y="71">Beute</label>
+            <label hex="#947546" x="236" y="90" align="center" scale="0.45" w="28">Moosige Klaue</label>
+            <label hex="#573d19" x="60" y="180" w="214">
+                Der Therimoss ist ein gewaltiger Riese des tiefen Dschungels.
+                Er zieht ruhig durchs Dickicht, lehnt an Baumstämmen
+                oder klettert empor, um die Welt zu überblicken.
+            </label>
+            <label hex="#573d19" x="360" y="59" w="160">
+                Springt vom Boden direkt in die Baumkronen.
+            </label>
+            <label hex="#573d19" x="376" y="96" w="160">
+                Klettert auf Bäume und zerbricht Laub.
+            </label>
+            <label hex="#573d19" x="362" y="129" w="160">
+                Schwerer Schlag, der Ziele im Boden vergräbt.
+            </label>
+            <label hex="#573d19" x="372" y="164" w="160">
+                Nahkampf-Dreifachhieb mit den Klauen.
+            </label>
+            <label hex="#573d19" x="355" y="198" w="160">
+                Wirft Erdblöcke für Fernkampfschaden.
+            </label>
+            <label hex="#573d19" x="358" y="227" w="160">
+                Fälle kein Holz in seiner Nähe – er hasst Abholzung.
+            </label>
+        </page>
+        <page src="infos/2">
+            <label hex="#573d19" x="60" y="54" w="214">
+                Der Therimoss verlangt riesige Opfergaben.
+                Errichte eine 4x4-Pyramide <color hex="#947546">(20 Blöcke)</color>
+                aus Nahrung, um seine Aufmerksamkeit zu wecken.
+            </label>
+            <label hex="#573d19" x="168" y="110" w="130">
+                <color hex="#947546">•</color> Melone<br/>
+                <color hex="#947546">•</color> Kürbis<br/>
+                <color hex="#947546">•</color> Kuchen<br/>
+                <color hex="#947546">•</color> Bambusblock<br/>
+                <color hex="#947546">•</color> Azaleenblätter<br/>
+                <color hex="#947546">•</color> Pilzblock
+            </label>
+            <label hex="#573d19" x="60" y="212" w="214">
+                Sobald er frisst, füttere ihn mit Bambus zum Zähmen.
+                Jeder Versuch hat eine Erfolgschance –
+                Geduld ist hier gefragt.
+            </label>
+            <label hex="#573d19" x="305" y="54" w="210">
+                Züchte ihn durch Fütterung zweier gezähmter
+                erwachsener Tiere mit Bambus.
+            </label>
+            <label hex="#573d19" x="365" y="154" w="150">
+                Er legt ein Therimoss-Ei ab, das leicht
+                ohne besondere Pflege schlüpft.
+            </label>
+            <label hex="#573d19" x="305" y="214" w="150">
+                Das Junge kann mit denselben Pyramidenblöcken
+                schneller großgezogen werden.
+            </label>
+        </page>
+        <page src="infos/3">
+            <label hex="#573d19" x="145" y="48" w="130">
+                Gezähmt wird der Therimoss ruhig und gehorsam.
+            </label>
+            <label hex="#573d19" x="145" y="88" w="130">
+                Ein ideales Reittier für schwieriges Gelände.
+            </label>
+            <label hex="#573d19" x="60" y="150" w="214" align="center">
+                <color hex="#947546"><u><keybind id="key.jump"/></u> →</color> Sprung in Baumkronen.
+            </label>
+            <label hex="#573d19" x="60" y="170" w="220" align="center">
+                <color hex="#947546"><u>Klettern</u> →</color>
+                Klettert Stämme hoch und bricht Laub ab.
+            </label>
+            <label hex="#573d19" x="60" y="200" w="200" align="center">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_primary_attack"/></u> →</color>
+                Dreifacher Klauenhieb im Nahkampf.
+            </label>
+            <label hex="#573d19" x="60" y="230" w="220" align="center">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_special_attack"/></u> →</color>
+                Wirft Erdblock auf den nächsten Feind.
+            </label>
+            <label hex="#573d19" x="305" y="48" w="210">
+                Theri-Klauen werden aus Moosigen Klauen gefertigt
+                (durch Scheren oder Besiegen des Tiers erlangt).
+            </label>
+            <label hex="#573d19" x="305" y="148" w="210">
+                An Wänden kannst du sicher hinabgleiten.
+            </label>
+            <label hex="#573d19" x="305" y="184" w="210">
+                Die Rüstung wird aus Moosigen Klauen hergestellt.
+            </label>
+            <container x="315" y="212">
+                <label hex="#947546" w="180">→ Set-Bonus:</label>
+                <label hex="#573d19" x="12" y="10">Senkt den Nahrungsverbrauch deutlich.</label>
+                <label hex="#947546" y="25" w="180">→ Spezial: <color hex="#573d19">Flink</color> (10s ⌚)</label>
+                <label hex="#573d19" x="12" y="35" w="170">
+                    Drücke <color hex="#947546"><u><keybind id="ec_ad.armor"/></u></color> für einen Temposchub.
+                </label>
+            </container>
+            <container popup="popups/3" hover-animation="scale" x="317" y="102" w="180" h="35">
+                <image src="images/2" src-x="317" src-y="102" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:theri_claw_iron" x="296" y="27">
+                        <label x="58" scale="0.65"><b>Eiserne Theri-Klauen</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:theri_claw_copper" x="296" y="98">
+                        <label x="58" scale="0.65"><b>Kupferne Theri-Klauen</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:theri_claw_gold" x="296" y="169">
+                        <label x="58" scale="0.65"><b>Goldene Theri-Klauen</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:theri_claw_diamond" x="296" y="238">
+                        <label x="58" scale="0.65"><b>Diamantene Theri-Klauen</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+            <container popup="popups/4" hover-animation="scale" x="337" y="260" w="142" h="43">
+                <image src="images/2" src-x="337" src-y="260" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:therimoss_helmet" x="296" y="27">
+                        <label x="58" scale="0.65"><b>Therimoss-Helm</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:therimoss_chestplate" x="296" y="98">
+                        <label x="58" scale="0.65"><b>Therimoss-Brustplatte</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:therimoss_leggings" x="296" y="169">
+                        <label x="58" scale="0.65"><b>Therimoss-Beinschutz</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:therimoss_boots" x="296" y="240">
+                        <label x="58" scale="0.65"><b>Therimoss-Stiefel</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+        </page>
+    </category>
+    <category id="coralosaur">
+        <page src="infos/1">
+            <container popup="popups/1" hover-animation="scale" x="63" y="63" w="99" h="99">
+                <image src="images/1" absolute="true" w="576" h="320"/>
+            </container>
+            <label hex="#573d19" x="100" y="56">Karnivor</label>
+            <label hex="#573d19" x="186" y="62">Biom</label>
+            <label hex="#947546" x="199" y="121" align="center" scale="0.7">Warmer Ozean</label>
+            <label hex="#573d19" x="244" y="62">Beute</label>
+            <label hex="#947546" x="238" y="100" align="center" scale="0.4" w="28">Korallenrippe</label>
+            <label hex="#573d19" x="64" y="186" w="214">
+                Der Coralosaur ist ein gewaltiger Wächter der Meere.
+                Oft schlummert er tief im warmen Meeresboden vergraben,
+                bis feine Sandwirbel seine Ruhestätte verraten.
+            </label>
+            <label hex="#573d19" x="337" y="62" w="190">
+                Bläschenstrahl füllt deinen Atemvorrat auf.
+            </label>
+            <label hex="#573d19" x="358" y="88" w="140">
+                Gräbt sich bei fernen Zielen im Meeresgrund neu ein.
+            </label>
+            <label hex="#573d19" x="348" y="128" w="160">
+                Ermöglicht mit Sattel das Ziehen von Booten an Leinen.
+            </label>
+            <label hex="#573d19" x="335" y="170" w="160">
+                Großes Inventar, mit Truhen erweiterbar.
+            </label>
+            <label hex="#573d19" x="352" y="200" w="160">
+                Nach vorn gerichteter Biss in weitem Bogen.
+            </label>
+            <label hex="#573d19" x="338" y="238" w="160">
+                Befiehlt Meereskreaturen, dich zu verteidigen.
+            </label>
+        </page>
+        <page src="infos/2">
+            <label hex="#573d19" x="68" y="52" w="200">
+                Folge den Bläschen am Meeresgrund, um seinen Kopf zu finden.
+            </label>
+            <label hex="#573d19" x="68" y="172" w="200">
+                Füttere ihn mit Koralleneintopf, bis er dich annimmt.
+            </label>
+            <label hex="#573d19" x="162" y="199" w="120">
+                Gezähmt erwacht er fest gebunden und schläft nicht mehr im Sand.
+            </label>
+            <label hex="#573d19" x="305" y="58" w="218">
+                Züchte ihn mit Korallenblöcken oder Koralleneintopf
+                bei zwei erwachsenen Tieren.
+            </label>
+            <label hex="#573d19" x="305" y="198" w="210">
+                Das Junge wächst unter Wasser heran.
+                Fisch oder Koralleneintopf beschleunigen das Wachstum.
+            </label>
+        </page>
+        <page src="infos/3">
+            <label hex="#573d19" x="60" y="142" w="214">
+                Er zieht Boote und trägt Truhen am Sattel.
+                Der Sattel kann mit Scheren abgenommen werden.
+            </label>
+            <label hex="#573d19" x="60" y="208" w="214">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_primary_attack"/></u> → </color>
+                Weiter Biss nach vorn.
+            </label>
+            <label hex="#573d19" x="60" y="240" w="214">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_special_attack"/></u> → </color>
+                Ruft Meereskreaturen zum Schutz.
+            </label>
+            <label hex="#573d19" x="305" y="52" w="150">
+                Der Rippenbogen wird aus Korallenrippen gefertigt.
+                <br/><br/>
+                Pfeile fliegen unter Wasser völlig ungehindert geradeaus.
+            </label>
+            <container popup="popups/3" hover-animation="scale" x="458" y="72" w="34" h="34">
+                <image src="images/2" src-x="458" src-y="72" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:rib_bow" x="297" y="99">
+                        <label x="58" scale="0.65"><b>Rippenbogen</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+            <label hex="#573d19" x="305" y="150" w="210">
+                Die Rüstung wird aus Korallenrippen gefertigt.
+            </label>
+            <container x="315" y="180">
+                <label hex="#947546" w="180">→ Set-Bonus:</label>
+                <label hex="#573d19" x="12" y="10" w="180">Schwimmtempo, Eile &amp; Meeresschutz unter Wasser</label>
+                <label hex="#947546" y="50" w="180">→ Spezial: <color hex="#573d19">Meeresbefehl</color> (4s ⌚)</label>
+                <label hex="#573d19" x="12" y="62" w="170">
+                    Drücke <color hex="#947546"><u><keybind id="ec_ad.armor"/></u></color> im Wasser, um Wächter zu rufen.
+                </label>
+            </container>
+            <container popup="popups/4" hover-animation="scale" x="337" y="260" w="142" h="43">
+                <image src="images/2" src-x="337" src-y="260" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:coralosaur_helmet" x="296" y="27">
+                        <label x="58" scale="0.65"><b>Coralosaur-Helm</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:coralosaur_chestplate" x="296" y="98">
+                        <label x="58" scale="0.65"><b>Coralosaur-Brustplatte</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:coralosaur_leggings" x="296" y="169">
+                        <label x="58" scale="0.65"><b>Coralosaur-Beinschutz</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:coralosaur_boots" x="296" y="240">
+                        <label x="58" scale="0.65"><b>Coralosaur-Stiefel</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+        </page>
+    </category>
+    <category id="obsidiceratops">
+        <page src="infos/1">
+            <container popup="popups/1" hover-animation="scale" x="63" y="63" w="104" h="80">
+                <image src="images/1" absolute="true" w="576" h="320"/>
+            </container>
+            <label hex="#573d19" x="98" y="48">Herbivor</label>
+            <label hex="#573d19" x="189" y="48">Biom</label>
+            <label hex="#947546" x="180" y="112" align="center" w="36" scale="0.5">Seelensandtal</label>
+            <label hex="#947546" x="231" y="116" align="center" w="34" scale="0.5">Karmesinwald</label>
+            <label hex="#573d19" x="198" y="131">Beute</label>
+            <label hex="#947546" x="207" y="156" align="center" scale="0.5" w="45">Obsidianhorn</label>
+            <label hex="#573d19" x="60" y="194" w="214">
+                Der Obsidiceratops ist ein feuriger Panzer mit riesigem Durst nach Lava.
+                Er weicht selten von den Lavaseen des Nethers ab.
+            </label>
+            <label hex="#573d19" x="60" y="242" w="214">
+                Er bleibt ruhig, solange er voller Lava ist,
+                wird aber extrem aggressiv, wenn sie zur Neige geht.
+            </label>
+            <label hex="#573d19" x="361" y="74" w="160">
+                Sucht Lavabecken, um Vorräte aufzufüllen.
+            </label>
+            <label hex="#573d19" x="368" y="102" w="160">
+                Speichert Lava und gibt sie an dich ab.
+            </label>
+            <label hex="#573d19" x="364" y="130" w="150">
+                Besitzt ein internes Inventar einer Truhe.
+            </label>
+            <label hex="#573d19" x="370" y="166" w="150">
+                Schwerer Kopfstoß im Nahkampf.
+            </label>
+            <label hex="#573d19" x="345" y="194" w="170">
+                Schweifhieb mit starkem Rückstoß.
+            </label>
+            <label hex="#573d19" x="352" y="220" w="160">
+                Wird durch ein Obsidianhorn kurz betäubt.
+            </label>
+        </page>
+        <page src="infos/2">
+            <label hex="#573d19" x="68" y="62" w="140">
+                Nur zähmbar, wenn er ruhig ist.
+                Erfordert 14–25 Magmablöcke.
+            </label>
+            <label hex="#573d19" x="184" y="160" w="95">
+                Halte seinen Lavastand hoch – sinkt er zu tief,
+                verfällt der Zähmungsfortschritt.
+            </label>
+            <label hex="#573d19" x="64" y="244" w="214">
+                Einmal gezähmt, kann er gesattelt und geritten werden.
+            </label>
+            <label hex="#573d19" x="305" y="48" w="220">
+                Züchte ihn durch Fütterung zweier gezähmter
+                Tiere mit Magmablöcken.<br/><br/>
+                Er legt ein Ei am Boden ab.
+            </label>
+            <label hex="#573d19" x="375" y="200" w="140">
+                Das Ei kann aufgehoben werden, fügt bei Berührung aber Verbrennungen zu.
+            </label>
+            <label hex="#573d19" x="375" y="238" w="130">
+                Es muss nah an Lava brüten, sonst zerbricht es.
+            </label>
+        </page>
+        <page src="infos/3">
+            <label hex="#573d19" x="60" y="54" w="214">
+                Ein mächtiges Reittier zum Transport
+                von Fracht und Lava durch den Nether.
+            </label>
+            <label hex="#573d19" x="60" y="110" w="214" align="center">
+                <color hex="#947546"><u>Lavaspeicher</u> →</color> Fasst bis zu 15 Eimer Lava.
+            </label>
+            <label hex="#573d19" x="60" y="140" w="220" align="center">
+                <color hex="#947546"><u>Auffüllen</u> →</color>
+                Mit Lavaeimer auffüllbar.
+            </label>
+            <label hex="#573d19" x="60" y="170" w="200" align="center">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_primary_attack"/></u> →</color>
+                Kopfstoß im Nahkampf.
+            </label>
+            <label hex="#573d19" x="60" y="200" w="220" align="center">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_special_attack"/></u> →</color>
+                Schweifhieb mit Rückstoß.
+            </label>
+            <label hex="#573d19" x="305" y="48" w="210">
+                Das Sengende Horn wird aus erbeuteten Obsidianhörnern hergestellt.
+            </label>
+            <container x="342" y="88">
+                <label hex="#573d19">Tiere rufen <color hex="#947546">(5s ⌚)</color></label>
+                <label hex="#947546" y="10" w="150"><u><keybind id="key.use"/></u> →</label>
+                <label hex="#573d19" align="left" x="75" y="10" w="120">
+                    Ruft all deine gezähmten Begleiter sofort zu dir.
+                </label>
+            </container>
+            <container popup="popups/3" hover-animation="scale" x="304" y="88" w="34" h="34">
+                <image src="images/2" src-x="447" src-y="88" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:scorching_horn" x="296" y="99">
+                        <label x="58" scale="0.65"><b>Sengendes Horn</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+            <label hex="#573d19" x="305" y="148" w="210">
+                Die Rüstung wird aus Obsidianhörnern gefertigt.
+            </label>
+            <container x="315" y="180">
+                <label hex="#947546" w="180">→ Set-Bonus:</label>
+                <label hex="#573d19" x="12" y="10" w="180">Lavawandeln &amp; Feuerimmunität.</label>
+                <label hex="#947546" y="40" w="180">→ Spezial: <color hex="#573d19">Lava-Tauchen</color></label>
+                <label hex="#573d19" x="12" y="52" w="170">
+                    Drücke <color hex="#947546"><u><keybind id="key.sneak"/></u></color> zum Abtauchen in Lava.
+                </label>
+            </container>
+            <container popup="popups/4" hover-animation="scale" x="337" y="260" w="142" h="43">
+                <image src="images/2" src-x="337" src-y="260" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:obsidiceratops_helmet" x="296" y="27">
+                        <label x="58" scale="0.65"><b>Obsidiceratops-Helm</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:obsidiceratops_chestplate" x="296" y="98">
+                        <label x="58" scale="0.65"><b>Obsidiceratops-Brustplatte</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:obsidiceratops_leggings" x="296" y="169">
+                        <label x="58" scale="0.65"><b>Obsidiceratops-Beinschutz</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:obsidiceratops_boots" x="296" y="240">
+                        <label x="58" scale="0.65"><b>Obsidiceratops-Stiefel</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+        </page>
+    </category>
+    <category id="sculkraptor">
+        <page src="infos/1">
+            <container popup="popups/1" hover-animation="scale" x="71" y="58" w="85" h="85">
+                <image src="images/1" absolute="true" w="576" h="320"/>
+            </container>
+            <label hex="#573d19" x="98" y="48">Karnivor</label>
+            <label hex="#573d19" x="214" y="48">Biom</label>
+            <label hex="#947546" x="221" y="106" align="center" scale="0.65">Tiefes Dunkel</label>
+            <label hex="#573d19" x="202" y="131">Beute</label>
+            <label hex="#947546" x="215" y="150" align="center" scale="0.42" w="28">Raptorkralle</label>
+            <label hex="#573d19" x="60" y="190" w="214">
+                Sculkraptoren jagen in Rudeln im Tiefen Dunkel,
+                stets angezogen von Geräuschen und Vibrationen.
+                Allein meiden sie den Kampf, in Gruppen sind sie tödlich.
+            </label>
+            <label hex="#573d19" x="363" y="66" w="160">
+                Kämpft nur im Rudelverband.
+            </label>
+            <label hex="#573d19" x="340" y="92" w="160">
+                Ortet Beute über Vibrationen und Lärm.
+            </label>
+            <label hex="#573d19" x="358" y="122" w="160">
+                Giftige Geschosse im Fernkampf.
+            </label>
+            <label hex="#573d19" x="339" y="150" w="160">
+                Rudelschrei stößt Feinde zurück und betäubt.
+            </label>
+            <label hex="#573d19" x="348" y="192" w="160">
+                Markiert Ziele für andere Kreaturen der Tiefe.
+            </label>
+        </page>
+        <page src="infos/2">
+            <label hex="#573d19" x="60" y="48" w="130">
+                Wilde Tiere lassen sich nicht direkt zähmen.
+                Finde stattdessen ihr Nest.
+            </label>
+            <label hex="#573d19" x="165" y="120" w="110">
+                Näherst du dich dem Nest,
+                verteidigt das Rudel seine Eier erbittert.
+            </label>
+            <label hex="#573d19" x="60" y="196" w="150">
+                Besiege sie alle, um das Ei zu nehmen.
+                Jedes Nest birgt nur ein intaktes Ei.
+            </label>
+            <label hex="#573d19" x="308" y="52" w="120">
+                Eier müssen in völliger Dunkelheit brüten.
+            </label>
+            <label hex="#573d19" x="305" y="95" w="175">
+                Ein geschlüpfter Raptorenbabysaurier ist sofort
+                treu und folgt dir überallhin.
+            </label>
+            <label hex="#573d19" x="305" y="138" w="210">
+                Beschleunige das Wachstum mit Monsterbeute
+                wie verrottetem Fleisch, Spinnenaugen oder Knochen.
+            </label>
+        </page>
+        <page src="infos/3">
+            <label hex="#573d19" x="160" y="48" w="120">
+                Rufe gezähmte Raptoren mit einer Raptorkralle
+                <color hex="#947546">(30s ⌚)</color> zum Zielpunkt deines Fadenkreuzes.
+            </label>
+            <label hex="#573d19" x="64" y="134" w="130">
+                Sie attackieren nur Feinde, die mit einem
+                Sculk-Pfeil aus dem Sculk-Bogen markiert wurden.
+            </label>
+            <label hex="#573d19" x="60" y="222" w="220">
+                Wilde Projektile markieren Spieler für
+                andere Monster des Tiefen Dunkels.
+            </label>
+            <label hex="#573d19" x="305" y="48" w="210">
+                Gemeinsam entfesseln sie markerschütternde Schreie,
+                die Gegner betäuben, und kombinieren Bisse
+                mit giftigen Fernangriffen.
+            </label>
+        </page>
+    </category>
+    <category id="chorusoatl">
+        <page src="infos/1">
+            <container popup="popups/1" hover-animation="scale" x="63" y="63" w="120" h="70">
+                <image src="images/1" absolute="true" w="576" h="320"/>
+            </container>
+            <label hex="#573d19" x="98" y="48">Herbivor</label>
+            <label hex="#573d19" x="214" y="48">Biom</label>
+            <label hex="#947546" x="229" y="106" align="center" scale="0.65">Äußere Inseln</label>
+            <label hex="#573d19" x="206" y="121">Beute</label>
+            <label hex="#947546" x="221" y="142" align="center" scale="0.42" w="28">Chorusfossil</label>
+            <label hex="#573d19" x="60" y="204" w="214">
+                Der Chorusoatl gleitet in Schwärmen über das Ende.
+                Wird der Schwarm bedroht, wehrt er sich mit
+                durchdringendem Kreischen und gemeinsamen Attacken.
+            </label>
+            <label hex="#573d19" x="340" y="66" w="180">Wilde Schwärme attackieren gemeinsam.</label>
+            <label hex="#573d19" x="354" y="90" w="180">Lautes Kreischen wirft Feinde zurück.</label>
+            <label hex="#573d19" x="339" y="122" w="180">Mit Sattel kannst du frei durch die Lüfte fliegen.</label>
+            <label hex="#573d19" x="354" y="156" w="180">Nahkampf-Schnabelbiss.</label>
+            <label hex="#573d19" x="344" y="182" w="170">Energiewelle, die Angreifer wegbläst.</label>
+        </page>
+        <page src="infos/2">
+            <label hex="#573d19" x="60" y="48" w="214">
+                Tenne ein Einzeltier mit einer Chorusfrucht
+                vom Schwarm, um es zu zähmen.
+            </label>
+            <label hex="#573d19" x="60" y="84" w="136">
+                Eine Chorusfrucht in der Hand hält ihn am Platz.<br/>Ohne Frucht greift er nach einer Warnung sofort an.
+            </label>
+            <label hex="#573d19" x="174" y="158" w="100">
+                Er kann die Frucht ablehnen,
+                schreien und davonfliegen.
+            </label>
+            <label hex="#573d19" x="60" y="238" w="214">
+                Gezähmt kann er gesattelt und geflogen werden.
+            </label>
+            <label hex="#573d19" x="305" y="48" w="210">
+                Züchte ihn mit Chorusfrüchten bei zwei Tieren.
+                Das Ei ist zerbrechlich – bewege es nicht zu oft.
+            </label>
+            <label hex="#573d19" x="368" y="198" w="154">
+                Brütet am besten im Ende, schlüpft aber auch
+                woanders: benötigt völlige Dunkelheit, Endstein
+                darunter und Choruspflanzen in der Nähe.
+                Chorusfrüchte beschleunigen das Wachstum.
+            </label>
+        </page>
+        <page src="infos/3">
+            <label hex="#573d19" x="60" y="128" w="214">
+                Gesattelt fliegst du frei über die Inseln des Endes.
+            </label>
+            <label hex="#573d19" x="60" y="162" w="200" align="center">
+                <color hex="#947546"><u><keybind id="key.jump"/></u> →</color> Abflug / Landung
+            </label>
+            <label hex="#573d19" x="61" y="186" w="200" align="center">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_primary_attack"/></u> →</color>
+                Biss im Nahkampf.
+            </label>
+            <label hex="#573d19" x="61" y="216" w="200" align="center">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_special_attack"/></u> →</color>
+                Fernkampf-Energiespucke.
+            </label>
+            <label hex="#573d19" x="305" y="48" w="210">
+                Die Chorussense wird aus erbeuteten Chorusfossilien geschmiedet.
+            </label>
+            <container x="360" y="94">
+                <label hex="#573d19">Wirbelangriff <color hex="#947546">(20s ⌚)</color></label>
+                <label hex="#947546" y="10" w="150"><u><keybind id="key.use"/></u> →</label>
+                <label hex="#573d19" align="left" x="75" y="10" w="80">
+                    Schleudert nahe Feinde
+                    hoch in die Luft.
+                </label>
+            </container>
+            <container popup="popups/3" hover-animation="scale" x="317" y="98" w="34" h="34">
+                <image src="images/2" src-x="447" src-y="78" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:chorus_scythe" x="296" y="98">
+                        <label x="58" scale="0.65"><b>Chorussense</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+            <label hex="#573d19" x="305" y="166" w="210">
+                Die Rüstung wird aus Chorusfossilien gefertigt.
+            </label>
+            <container x="315" y="192">
+                <label hex="#947546" w="180">→ Set-Bonus:</label>
+                <label hex="#573d19" x="12" y="10" w="180">Verleiht Sanften Fall.</label>
+                <label hex="#947546" y="30" w="180">→ Spezial: <color hex="#573d19">Teleport</color> (15s ⌚)</label>
+                <label hex="#573d19" x="12" y="42" w="170">
+                    Halte <color hex="#947546"><u><keybind id="ec_ad.armor"/></u></color> gedrückt zum Teleportieren.
+                </label>
+            </container>
+            <container popup="popups/4" hover-animation="scale" x="337" y="260" w="142" h="43">
+                <image src="images/2" src-x="337" src-y="260" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:chorusoatl_helmet" x="296" y="28">
+                        <label x="58" scale="0.65"><b>Chorusoatl-Helm</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:chorusoatl_chestplate" x="296" y="98">
+                        <label x="58" scale="0.65"><b>Chorusoatl-Brustplatte</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:chorusoatl_leggings" x="296" y="169">
+                        <label x="58" scale="0.65"><b>Chorusoatl-Beinschutz</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:chorusoatl_boots" x="296" y="240">
+                        <label x="58" scale="0.65"><b>Chorusoatl-Stiefel</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+        </page>
+    </category>
+    <category id="sculksaur">
+        <page src="infos/1">
+            <container popup="popups/1" hover-animation="scale" x="63" y="63" w="115" h="85">
+                <image src="images/1" absolute="true" w="576" h="320"/>
+            </container>
+            <label hex="#573d19" x="98" y="48">Karnivor</label>
+            <label hex="#573d19" x="216" y="48">Biom</label>
+            <label hex="#947546" x="221" y="106" align="center" scale="0.65">Tiefes Dunkel</label>
+            <label hex="#573d19" x="216" y="129">Beute</label>
+            <label hex="#947546" x="226" y="151" align="center" scale="0.45" w="28">Sculk-Toxin</label>
+            <label hex="#573d19" x="60" y="200" w="214">
+                Der Sculksaur ist das unangefochtene Raubtier der Tiefe.
+                Selbst der Wärter ist seiner Zerstörungswut nicht gewachsen.
+            </label>
+            <label hex="#573d19" x="300" y="48" w="220">
+                <color hex="#947546">→</color> Erscheint kurz nach dem Wärter.<br/><br/>
+                <color hex="#947546">→</color> Extrem aggressiv.<br/><br/>
+                <color hex="#947546">→</color> Tötet Wärter mit Vorliebe.<br/><br/>
+                <color hex="#947546">→</color> Nicht zähm- oder züchtbar.
+            </label>
+            <label hex="#573d19" x="305" y="214" w="210">
+                Ihn zu wecken endet tödlich. Er verschlingt alles
+                und attackiert jede kleinste Regung.
+            </label>
+            <label hex="#573d19" x="345" y="254" w="210">
+                Du wurdest gewarnt.
+            </label>
+        </page>
+        <page src="infos/2">
+            <label hex="#573d19" x="95" y="74" w="184">
+                Erhält beim Spawnen massiven Schadensschub und zerreißt Wärter.
+            </label>
+            <label hex="#573d19" x="108" y="112" w="165">
+                Spürt Spieler durch Geräusche, Vibrationen und Geruch auf.
+            </label>
+            <label hex="#573d19" x="120" y="142" w="160">
+                Verheerender Biss mit extrem hohem Schaden.
+            </label>
+            <label hex="#573d19" x="148" y="178" w="130">
+                Schweifhieb mit Schaden und Rückstoß.
+            </label>
+            <label hex="#573d19" x="120" y="212" w="150">
+                Entfesselt ohrenbetäubendes Schallbrüllen.
+            </label>
+            <label hex="#573d19" x="328" y="48" w="190">
+                Triff die Warzen an seinen Flanken mit Pfeilen,
+                damit er Sculk-Toxine für Rüstungen fallen lässt.
+            </label>
+            <label hex="#573d19" x="350" y="100" w="165">
+                <color hex="#947546">→ </color>Verursacht Dunkelheit und Gift.
+                <br/>
+                <color hex="#947546">→ </color>Zusatzschaden gegen Mobs des Tiefen Dunkels.
+            </label>
+            <container popup="popups/2" hover-animation="scale" x="307" y="94" w="34" h="34">
+                <image src="images/2" src-x="317" src-y="102" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:ooze_tipped_arrow" x="296" y="98">
+                        <label x="58" scale="0.65"><b>Sculk-Pfeil</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+            <label hex="#573d19" x="305" y="140" w="210">
+                Die Rüstung wird aus Sculk-Toxinen geschmiedet.
+            </label>
+            <container x="315" y="168">
+                <label hex="#947546" w="180">→ Set-Bonus:</label>
+                <label hex="#573d19" x="12" y="10" w="180">Angriffe vergiften Feinde für 5 Sekunden.</label>
+                <label hex="#947546" y="34" w="180">→ Spezial: <color hex="#573d19">Sculk-Brüllen</color> (30s ⌚)</label>
+                <label hex="#573d19" x="12" y="46" w="170">
+                    Halte <color hex="#947546"><u><keybind id="ec_ad.armor"/></u></color> gedrückt: Verursacht
+                    Blindheit und Übelkeit, betäubt Mobs der Tiefe.
+                </label>
+            </container>
+            <container popup="popups/3" hover-animation="scale" x="337" y="260" w="142" h="43">
+                <image src="images/2" src-x="337" src-y="260" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:sculksaur_helmet" x="296" y="28">
+                        <label x="58" scale="0.65"><b>Sculksaur-Helm</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:sculksaur_chestplate" x="296" y="97">
+                        <label x="58" scale="0.65"><b>Sculksaur-Brustplatte</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:sculksaur_leggings" x="296" y="169">
+                        <label x="58" scale="0.65"><b>Sculksaur-Beinschutz</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:sculksaur_boots" x="296" y="240">
+                        <label x="58" scale="0.65"><b>Sculksaur-Stiefel</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+        </page>
+    </category>
+    <category id="credits" no-markers="true">
+        <page src="infos/1">
+            <label x="168" y="41" color="#573d19" align="center"><b>Erstellt von</b></label>
+            <label x="168" y="251" color="#573d19" align="center"><b>Webseite</b></label>
+            <label x="170" y="261" color="#573d19" align="center">
+                <a href="https://www.eternalcreations.games">
+                    www.eternalcreations.games
+                </a>
+            </label>
+            <label x="328" y="32" color="#573d19" w="160" align="center">
+                Folge uns für Neuigkeiten zu dieser
+                Mod und künftigen Projekten!
+            </label>
+            <label x="346" y="100" w="160" color="#573d19">
+                <b>Tritt unserem Discord bei!</b>
+                <br/>
+                <a href="https://discord.gg/eternalcreations">
+                    <color hex="#947546">discord.gg/</color>eternalcreations
+                </a>
+            </label>
+            <label x="346" y="160" w="160" color="#573d19">
+                <b>Folge uns auf X / Twitter!</b>
+                <br/>
+                <a href="https://x.com/EternalCrtns">
+                    <color hex="#947546">x.com/</color>EternalCrtns
+                </a>
+            </label>
+            <label x="346" y="220" w="160" color="#573d19">
+                <b>Folge uns auf TikTok!</b>
+                <br/>
+                <a href="https://tiktok.com/@eternalxcreations">
+                    <color hex="#947546">tiktok.com/</color>eternalxcreations
+                </a>
+            </label>
+        </page>
+    </category>
+</root>

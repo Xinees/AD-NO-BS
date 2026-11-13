@@ -1,0 +1,870 @@
+<root badges="info">
+    <category id="introduction" no-markers="true">
+        <page src="infos/1">
+            <label x="308" y="32" w="190" color="#573d19">
+                아치의 공룡들에 오신 것을 환영합니다!
+                이 안내서는 당신의 세계에 살고 있는
+                새로운 고대 생물들의 모든 것을
+                배우기 위한 완벽한 가이드북입니다!
+            </label>
+            <label x="368" y="95" w="120" color="#573d19">
+                흰색 윤곽선이 표시된 요소를
+                가리키고 상호작용하여 탐색하세요.
+            </label>
+            <label x="368" y="165" w="130" color="#573d19">
+                원하는 카테고리를 클릭하면
+                해당 공룡의 도감 페이지로
+                바로 이동할 수 있습니다!
+            </label>
+            <label x="368" y="230" w="120" color="#573d19">
+                <b><keybind id="key.keyboard.escape"/></b>
+                키를 눌러 가이드북을 닫으세요!
+            </label>
+        </page>
+        <page src="infos/2">
+            <label x="75" y="49" w="190" color="#573d19" align="center">
+                그날 밤 하늘에서 떨어진 것이 무엇인지는 아무도 모릅니다.
+                우리가 아는 것은 오직 하나: 파편이 따뜻하다는 것.
+                마치 그 안에서 무언가가 아직 살아 숨 쉬는 것처럼요.
+            </label>
+            <label x="58" y="168" w="220" color="#573d19">
+                공룡들이 거니는 땅에서 그을린 충돌구를 찾고,
+                사막과 악지에서 태고의 뼈를 발굴하세요.
+                호박이 떨어진 자리 가까이에는 고대의 존재가 잠들어 있습니다.
+            </label>
+            <label x="374" y="50" w="140" color="#573d19">
+                광석을 채굴해 파편을 소지하세요.
+                공룡들은 알 수 없는 이유로 이에 이끌립니다.
+                호박을 품은 자는 오래 찾아 헤매지 않습니다.
+            </label>
+            <label x="304" y="122" w="210" color="#573d19">
+                아치는 연구를 위해 파편을 후하게 매입합니다.
+                정제된 호박은 단단하여 석재처럼 깎아 건축에 쓸 수 있습니다.
+            </label>
+            <label x="304" y="178" w="148" color="#573d19">
+                그리고 한 가지 더: 생물을 완벽히 지배한 자는
+                그 모습을 호박에 영원히 주조하는 법을 배웁니다.
+            </label>
+            <label x="304" y="230" w="148" color="#573d19">
+                그들은 이를 '토템'이라 부릅니다. 가두거나 사냥한 것이 아닌,
+                신뢰를 얻어냈다는 증거입니다.
+            </label>
+        </page>
+    </category>
+    <category id="lushsaur">
+        <page src="infos/1">
+            <container popup="popups/1" hover-animation="scale" x="63" y="63" w="140" h="70">
+                <image src="images/1" absolute="true" w="576" h="320"/>
+            </container>
+            <label hex="#573d19" x="81" y="48">초식성</label>
+            <label hex="#573d19" x="236" y="48">생물군계</label>
+            <label hex="#947546" x="243" y="106" align="center" scale="0.65">점적석 동굴</label>
+            <label hex="#947546" x="209" y="166" align="center" scale="0.65">무성한 동굴</label>
+            <label hex="#573d19" x="244" y="133">전리품</label>
+            <label hex="#947546" x="248" y="170" align="center" scale="0.45" w="28">무성한 코어</label>
+            <label hex="#573d19" x="60" y="204" w="214">
+                러쉬사우루스는 무성한 동굴과 점적석 동굴에 서식하는 은둔형 초식공룡입니다.
+                방해받지 않을 때는 주변 환경에 완벽히 동화되며,
+                신뢰를 얻은 자에게만 그 모습을 드러냅니다.
+            </label>
+            <label hex="#573d19" x="343" y="70" w="170">휴식 중 투명화. 길들이면 이 능력이 비활성화됩니다.</label>
+            <label hex="#573d19" x="372" y="103" w="130">꼬리 찍기로 적을 밀쳐내어 안전 거리를 확보합니다.</label>
+            <label hex="#573d19" x="345" y="130" w="155">돌진하여 대상을 급습하고 후속 연타를 가합니다.</label>
+            <label hex="#573d19" x="370" y="162" w="170">원거리 투사체 공격을 높은 확률로 튕겨냅니다.</label>
+            <label hex="#573d19" x="344" y="192" w="170">박치기 공격: 대상을 기절시키고 지형 블록을 파괴합니다.</label>
+            <label hex="#573d19" x="369" y="222" w="170">넓은 반경의 꼬리 휘두르기로 강력한 넉백을 입힙니다.</label>
+        </page>
+        <page src="infos/2">
+            <label hex="#573d19" x="65" y="55" w="165">
+                러쉬사우루스는 인내심을
+                갖고 다가가야만 반응합니다.
+            </label>
+            <label hex="#573d19" x="65" y="88" w="125">
+                당신을 받아들일 때까지
+                발광열매를 꾸준히 먹이세요.
+            </label>
+            <label hex="#573d19" x="65" y="145" w="210">
+                위장 상태이거나 위험을 피해 달아나는 중에는
+                먹이를 주어도 전혀 반응하지 않습니다.
+            </label>
+            <label hex="#573d19" x="60" y="230" w="214">
+                길들이고 나면 온순해져 안전하게 상호작용할 수 있습니다.
+            </label>
+            <label hex="#573d19" x="305" y="48" w="210">
+                길들인 성체 러쉬사우루스 두 마리에게 발광열매를 먹여
+                번식시키세요. 땅에 알을 낳으며, 손으로 주울 수 있습니다.
+                알은 단단하여 아래에 잔디나 이끼 블록만 있으면
+                특별한 관리 없이도 잘 부화합니다.
+            </label>
+            <label hex="#573d19" x="389" y="125" w="130">
+                근처에 성체가 있으면 부화 시간이 단축됩니다.
+                <br/><br/>
+                부화한 새끼는 발광열매로 성장을 촉진할 수 있습니다.
+            </label>
+            <label hex="#573d19" x="320" y="210" w="140">
+                성체로 다 자라면 무성한 코어를 탈락시킵니다.
+                코어는 시간이 지나면 천천히 다시 자라납니다.
+            </label>
+        </page>
+        <page src="infos/3">
+            <container popup="popups/3" hover-animation="scale" x="317" y="102" w="34" h="34">
+                <image src="images/2"
+                       src-x="317" src-y="102"
+                       texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:lush_mace" x="296" y="97">
+                        <label x="58" scale="0.65"><b>러쉬 철퇴</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+            <container popup="popups/4" hover-animation="scale" x="337" y="260" w="142" h="43">
+                <image src="images/2"
+                       src-x="337" src-y="260"
+                       texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:lushsaur_helmet" x="296" y="25">
+                        <label x="58" scale="0.65"><b>러쉬사우루스 투구</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:lushsaur_chestplate" x="296" y="96">
+                        <label x="58" scale="0.65"><b>러쉬사우루스 흉갑</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:lushsaur_leggings" x="296" y="167">
+                        <label x="58" scale="0.65"><b>러쉬사우루스 레깅스</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:lushsaur_boots" x="296" y="238">
+                        <label x="58" scale="0.65"><b>러쉬사우루스 부츠</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+            <label hex="#573d19" x="60" y="54" w="214">
+                길들인 개체는 더 이상 투명화하지 않습니다.
+                주기적으로 자고 깨어나며 항상 모습을 드러냅니다.
+            </label>
+            <label hex="#573d19" x="60" y="105" w="214">
+                안장을 얹어 동굴 탐험용으로 탑승할 수 있습니다.
+                공격으로 지형을 파괴하여 직접 길을 개척할 수 있습니다.
+            </label>
+            <label hex="#573d19" x="61" y="165" w="200" align="center">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_primary_attack"/></u> →</color>
+                박치기
+                <color hex="#947546">(블록 파괴)</color>
+            </label>
+            <label hex="#573d19" x="61" y="195" w="200" align="center">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_special_attack"/></u> →</color>
+                휘두르기
+                <color hex="#947546">(넉백 / 풀 제거)</color>
+            </label>
+            <label hex="#573d19" x="58" y="230" w="224">
+                탑승 중에 발광열매를 먹이면
+                순간적인 속도 부스트를 얻습니다.
+            </label>
+            <label hex="#573d19" x="305" y="54" w="210">
+                번식 탈피나 토벌로 획득한 무성한 코어로 러쉬 철퇴를 제작할 수 있습니다.
+            </label>
+            <container x="360" y="100">
+                <label hex="#573d19">회전 공격 <color hex="#947546">(30초 ⌚)</color></label>
+                <label hex="#947546" y="10" w="150"><u><keybind id="key.use"/></u> →</label>
+                <label hex="#573d19" align="left" x="75" y="10" w="80">
+                    주변의 모든 적을
+                    강하게 밀쳐냅니다.
+                </label>
+            </container>
+            <label hex="#573d19" x="305" y="156" w="210">
+                무성한 코어로 러쉬사우루스 방어구를 제작하세요.
+            </label>
+            <container x="315" y="180">
+                <label hex="#947546" w="180">→ 풀세트 보너스:</label>
+                <label hex="#573d19" x="12" y="10">저항 I 효과 부여</label>
+                <label hex="#947546" y="25" w="180">→ 특수 능력: <color hex="#573d19">위장</color></label>
+                <label hex="#573d19" x="12" y="35" w="170">
+                    웅크려 이동 시 몬스터가 무시할 확률 증가.
+                    가만히 서 있으면 완벽하게 숨겨집니다.
+                </label>
+            </container>
+        </page>
+    </category>
+    <category id="therimoss">
+        <page src="infos/1">
+            <container popup="popups/1" hover-animation="scale" x="63" y="63" w="70" h="90">
+                <image src="images/1" absolute="true" w="576" h="320" y="10"/>
+            </container>
+            <label hex="#573d19" x="81" y="58">초식성</label>
+            <label hex="#573d19" x="158" y="58">생물군계</label>
+            <label hex="#947546" x="172" y="115" align="center" scale="0.75">정글</label>
+            <label hex="#573d19" x="222" y="71">전리품</label>
+            <label hex="#947546" x="236" y="90" align="center" scale="0.45" w="28">이끼 낀 갈퀴</label>
+            <label hex="#573d19" x="60" y="180" w="214">
+                테리모스는 정글 깊은 곳에 서식하는 느긋한 거인입니다.
+                울창한 수풀 속을 유유히 거닐며 나무에 기대어 쉬거나,
+                줄기를 타고 올라가 아래를 내려다보곤 합니다.
+            </label>
+            <label hex="#573d19" x="360" y="59" w="160">
+                지상에서 우거진 나뭇가지 꼭대기까지 한 번에 도약.
+            </label>
+            <label hex="#573d19" x="376" y="96" w="160">
+                나뭇잎을 부수며 나무줄기를 기어오름.
+            </label>
+            <label hex="#573d19" x="362" y="129" w="160">
+                육중한 타격으로 대상을 지면에 파묻음.
+            </label>
+            <label hex="#573d19" x="372" y="164" w="160">
+                근접 3연속 맹렬한 갈퀴 공격.
+            </label>
+            <label hex="#573d19" x="355" y="198" w="160">
+                흙덩어리를 던져 원거리 피해를 줌.
+            </label>
+            <label hex="#573d19" x="358" y="227" w="160">
+                산림 벌채를 몹시 싫어하므로 근처에서 원목을 팰 때 주의.
+            </label>
+        </page>
+        <page src="infos/2">
+            <label hex="#573d19" x="60" y="54" w="214">
+                테리모스는 거대한 공물에만 흥미를 보입니다.
+                시선을 끌려면 지정된 음식 블록으로 4x4 피라미드
+                <color hex="#947546">(총 20블록)</color>를 건축해야 합니다.
+            </label>
+            <label hex="#573d19" x="168" y="110" w="130">
+                <color hex="#947546">•</color> 수박<br/>
+                <color hex="#947546">•</color> 호박<br/>
+                <color hex="#947546">•</color> 케이크<br/>
+                <color hex="#947546">•</color> 대나무 블록<br/>
+                <color hex="#947546">•</color> 진달래 잎<br/>
+                <color hex="#947546">•</color> 버섯 블록
+            </label>
+            <label hex="#573d19" x="60" y="212" w="214">
+                피라미드를 먹기 시작하면 대나무를 주어 길들이세요.
+                성공 확률이 정해져 있으므로 충분한 끈기가 필요합니다.
+            </label>
+            <label hex="#573d19" x="305" y="54" w="210">
+                길들인 성체 두 마리에게 대나무를 먹여 번식시키세요.
+            </label>
+            <label hex="#573d19" x="365" y="154" w="150">
+                바닥에 낳은 테리모스의 알은
+                별도 조치 없이도 자연스럽게 부화합니다.
+            </label>
+            <label hex="#573d19" x="305" y="214" w="150">
+                부화한 새끼는 피라미드에 쓰인 블록을
+                먹여 빠르게 키울 수 있습니다.
+            </label>
+        </page>
+        <page src="infos/3">
+            <label hex="#573d19" x="145" y="48" w="130">
+                길들이고 나면 온순하고 말을 잘 듣습니다.
+            </label>
+            <label hex="#573d19" x="145" y="88" w="130">
+                험난한 지형을 돌파하는 최고의 탐험용 탑승물입니다.
+            </label>
+            <label hex="#573d19" x="60" y="150" w="214" align="center">
+                <color hex="#947546"><u><keybind id="key.jump"/></u> →</color> 나뭇가지 위로 도약
+            </label>
+            <label hex="#573d19" x="60" y="170" w="220" align="center">
+                <color hex="#947546"><u>나무 타기</u> →</color>
+                나뭇잎을 베어내며 줄기를 타고 상승
+            </label>
+            <label hex="#573d19" x="60" y="200" w="200" align="center">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_primary_attack"/></u> →</color>
+                근접 3연속 갈퀴 휘두르기
+            </label>
+            <label hex="#573d19" x="60" y="230" w="220" align="center">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_special_attack"/></u> →</color>
+                가장 가까운 적에게 흙덩어리 투척
+            </label>
+            <label hex="#573d19" x="305" y="48" w="210">
+                가위로 털을 깎거나 처치하여 얻는 이끼 낀 갈퀴로
+                테리 갈퀴발톱 무기를 제작하세요.
+            </label>
+            <label hex="#573d19" x="305" y="148" w="210">
+                벽에 붙어 낙하하면 안전하게 미끄러져 내려옵니다.
+            </label>
+            <label hex="#573d19" x="305" y="184" w="210">
+                이끼 낀 갈퀴로 테리모스 방어구를 제작할 수 있습니다.
+            </label>
+            <container x="315" y="212">
+                <label hex="#947546" w="180">→ 풀세트 보너스:</label>
+                <label hex="#573d19" x="12" y="10">음식 소비 속도를 대폭 감소시킵니다.</label>
+                <label hex="#947546" y="25" w="180">→ 특수 능력: <color hex="#573d19">질주</color> (10초 ⌚)</label>
+                <label hex="#573d19" x="12" y="35" w="170">
+                    <color hex="#947546"><u><keybind id="ec_ad.armor"/></u></color> 키를 누르면 순간적으로 이동 속도가 급상승합니다.
+                </label>
+            </container>
+            <container popup="popups/3" hover-animation="scale" x="317" y="102" w="180" h="35">
+                <image src="images/2" src-x="317" src-y="102" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:theri_claw_iron" x="296" y="27">
+                        <label x="58" scale="0.65"><b>철 테리 갈퀴발톱</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:theri_claw_copper" x="296" y="98">
+                        <label x="58" scale="0.65"><b>구리 테리 갈퀴발톱</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:theri_claw_gold" x="296" y="169">
+                        <label x="58" scale="0.65"><b>금 테리 갈퀴발톱</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:theri_claw_diamond" x="296" y="238">
+                        <label x="58" scale="0.65"><b>다이아몬드 테리 갈퀴발톱</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+            <container popup="popups/4" hover-animation="scale" x="337" y="260" w="142" h="43">
+                <image src="images/2" src-x="337" src-y="260" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:therimoss_helmet" x="296" y="27">
+                        <label x="58" scale="0.65"><b>테리모스 투구</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:therimoss_chestplate" x="296" y="98">
+                        <label x="58" scale="0.65"><b>테리모스 흉갑</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:therimoss_leggings" x="296" y="169">
+                        <label x="58" scale="0.65"><b>테리모스 레깅스</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:therimoss_boots" x="296" y="240">
+                        <label x="58" scale="0.65"><b>테리모스 부츠</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+        </page>
+    </category>
+    <category id="coralosaur">
+        <page src="infos/1">
+            <container popup="popups/1" hover-animation="scale" x="63" y="63" w="99" h="99">
+                <image src="images/1" absolute="true" w="576" h="320"/>
+            </container>
+            <label hex="#573d19" x="100" y="56">육식성</label>
+            <label hex="#573d19" x="186" y="62">생물군계</label>
+            <label hex="#947546" x="199" y="121" align="center" scale="0.7">따뜻한 바다</label>
+            <label hex="#573d19" x="244" y="62">전리품</label>
+            <label hex="#947546" x="238" y="100" align="center" scale="0.45" w="28">산호 갈비뼈</label>
+            <label hex="#573d19" x="64" y="186" w="214">
+                코랄로사우루스는 깊은 바다를 수호하는 거대한 파수꾼입니다.
+                따뜻한 해저 모래 밑에 파묻혀 잠들어 있으며,
+                모래를 뚫고 솟아오르는 기포가 그 거대한 잠자리를 드러냅니다.
+            </label>
+            <label hex="#573d19" x="337" y="62" w="190">
+                산소를 채워주는 기포 물줄기를 방출합니다.
+            </label>
+            <label hex="#573d19" x="358" y="88" w="140">
+                적이 너무 멀어지면 해저 모래 속으로 잠수해 재배치합니다.
+            </label>
+            <label hex="#573d19" x="348" y="128" w="160">
+                안장을 장착하면 끈으로 보트를 묶어 견인할 수 있습니다.
+            </label>
+            <label hex="#573d19" x="335" y="170" w="160">
+                상자를 사용하여 대용량 보관함을 확장할 수 있습니다.
+            </label>
+            <label hex="#573d19" x="352" y="200" w="160">
+                넓은 전방 부채꼴 범위에 치명적인 물기 공격을 가합니다.
+            </label>
+            <label hex="#573d19" x="338" y="238" w="160">
+                주변 해양 생물들을 지휘하여 자신을 수호하게 합니다.
+            </label>
+        </page>
+        <page src="infos/2">
+            <label hex="#573d19" x="68" y="52" w="200">
+                해저에서 솟구치는 기포를 추적해 모래에 묻힌 머리를 찾으세요.
+            </label>
+            <label hex="#573d19" x="68" y="172" w="200">
+                당신을 받아들일 때까지 산호 스튜를 끊임없이 먹이세요.
+            </label>
+            <label hex="#573d19" x="162" y="199" w="120">
+                길들이기에 성공하면 각성하여 더 이상 모래 밑으로 숨지 않습니다.
+            </label>
+            <label hex="#573d19" x="305" y="58" w="218">
+                길들인 성체 두 마리에게 산호 블록이나 산호 스튜를 먹여 번식시킵니다.
+            </label>
+            <label hex="#573d19" x="305" y="198" w="210">
+                새끼는 물속에서 자랍니다. 물고기나 산호 스튜로
+                성장 속도를 촉진할 수 있습니다.
+            </label>
+        </page>
+        <page src="infos/3">
+            <label hex="#573d19" x="60" y="142" w="214">
+                보트를 끌 수 있고 안장에 상자를 부착해 짐을 나를 수 있습니다.
+                가위를 사용하면 안장을 안전하게 제거할 수 있습니다.
+            </label>
+            <label hex="#573d19" x="60" y="208" w="214">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_primary_attack"/></u> → </color>
+                넓은 전방 부채꼴 범위 물기 공격
+            </label>
+            <label hex="#573d19" x="60" y="240" w="214">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_special_attack"/></u> → </color>
+                해양 생물을 소환하여 자신을 방어
+            </label>
+            <label hex="#573d19" x="305" y="52" w="150">
+                산호 갈비뼈로 갈비뼈 활을 제작하세요.
+                <br/><br/>
+                물속에서도 화살이 감속과 궤도 낙하 없이 곧게 날아갑니다.
+            </label>
+            <container popup="popups/3" hover-animation="scale" x="458" y="72" w="34" h="34">
+                <image src="images/2" src-x="458" src-y="72" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:rib_bow" x="297" y="99">
+                        <label x="58" scale="0.65"><b>갈비뼈 활</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+            <label hex="#573d19" x="305" y="150" w="210">
+                산호 갈비뼈로 코랄로사우루스 방어구를 제작하세요.
+            </label>
+            <container x="315" y="180">
+                <label hex="#947546" w="180">→ 풀세트 보너스:</label>
+                <label hex="#573d19" x="12" y="10" w="180">수영 속도 증가, 수중 성급함 및 전달체의 힘 효과 부여</label>
+                <label hex="#947546" y="50" w="180">→ 특수 능력: <color hex="#573d19">해양 지휘</color> (4초 ⌚)</label>
+                <label hex="#573d19" x="12" y="62" w="170">
+                    물속에서 <color hex="#947546"><u><keybind id="ec_ad.armor"/></u></color> 키를 누르면 아군 가디언을 소환해 함께 싸웁니다.
+                </label>
+            </container>
+            <container popup="popups/4" hover-animation="scale" x="337" y="260" w="142" h="43">
+                <image src="images/2" src-x="337" src-y="260" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:coralosaur_helmet" x="296" y="27">
+                        <label x="58" scale="0.65"><b>코랄로사우루스 투구</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:coralosaur_chestplate" x="296" y="98">
+                        <label x="58" scale="0.65"><b>코랄로사우루스 흉갑</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:coralosaur_leggings" x="296" y="169">
+                        <label x="58" scale="0.65"><b>코랄로사우루스 레깅스</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:coralosaur_boots" x="296" y="240">
+                        <label x="58" scale="0.65"><b>코랄로사우루스 부츠</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+        </page>
+    </category>
+    <category id="obsidiceratops">
+        <page src="infos/1">
+            <container popup="popups/1" hover-animation="scale" x="63" y="63" w="104" h="80">
+                <image src="images/1" absolute="true" w="576" h="320"/>
+            </container>
+            <label hex="#573d19" x="98" y="48">초식성</label>
+            <label hex="#573d19" x="189" y="48">생물군계</label>
+            <label hex="#947546" x="180" y="108" align="center" w="38" scale="0.48">영혼 모래 골짜기</label>
+            <label hex="#947546" x="232" y="117" align="center" w="34" scale="0.48">진홍빛 숲</label>
+            <label hex="#573d19" x="198" y="131">전리품</label>
+            <label hex="#947546" x="216" y="154" align="center" scale="0.45" w="45">흑요석 뿔</label>
+            <label hex="#573d19" x="60" y="194" w="214">
+                옵시디케라톱스는 용암을 끝없이 들이켜는 초고열의 중장갑 전차입니다.
+                네더의 용암 바다에서 멀리 떨어지는 법이 거의 없습니다.
+            </label>
+            <label hex="#573d19" x="60" y="242" w="214">
+                용암 열기가 충분할 때는 온순하지만,
+                열량이 고갈되면 극도로 위험해집니다.
+            </label>
+            <label hex="#573d19" x="361" y="74" w="160">
+                용암 웅덩이를 찾아다니며 열량을 보충.
+            </label>
+            <label hex="#573d19" x="368" y="102" w="160">
+                용암을 저장하여 주인에게 공급 가능.
+            </label>
+            <label hex="#573d19" x="364" y="130" w="150">
+                상자 1개 분량의 자체 보관함 내장.
+            </label>
+            <label hex="#573d19" x="370" y="166" w="150">
+                근접에서 막대한 피해를 입히는 박치기.
+            </label>
+            <label hex="#573d19" x="345" y="194" w="170">
+                강력한 넉백을 주는 꼬리 채찍질.
+            </label>
+            <label hex="#573d19" x="352" y="220" w="160">
+                근처에서 흑요석 뿔을 불면 잠시 기절.
+            </label>
+        </page>
+        <page src="infos/2">
+            <label hex="#573d19" x="68" y="62" w="140">
+                온순한 상태일 때만 길들일 수 있으며,
+                14~25개의 마그마 블록이 필요합니다.
+            </label>
+            <label hex="#573d19" x="184" y="160" w="95">
+                길들이는 동안 용암 수치를 높게 유지해야 합니다. 고갈되면 진행도가 초기화됩니다.
+            </label>
+            <label hex="#573d19" x="64" y="244" w="214">
+                길들이고 나면 안장을 장착해 탑승할 수 있습니다.
+            </label>
+            <label hex="#573d19" x="305" y="48" w="220">
+                길들인 성체 두 마리에게 마그마 블록을 먹여 번식시키세요.<br/><br/>
+                땅에 옵시디케라톱스의 알을 낳습니다.
+            </label>
+            <label hex="#573d19" x="375" y="200" w="140">
+                알은 주울 수 있지만, 접촉 시 화상 피해를 입습니다.
+            </label>
+            <label hex="#573d19" x="375" y="238" w="130">
+                용암 바로 옆에서 부화시켜야 하며, 멀어지면 알이 깨집니다.
+            </label>
+        </page>
+        <page src="infos/3">
+            <label hex="#573d19" x="60" y="54" w="214">
+                네더 전역에서 물자와 용암을
+                동시에 운반할 수 있는 든든한 대형 탑승물입니다.
+            </label>
+            <label hex="#573d19" x="60" y="110" w="214" align="center">
+                <color hex="#947546"><u>용암 탱크</u> →</color> 최대 15양동이의 용암 보관 가능
+            </label>
+            <label hex="#573d19" x="60" y="140" w="220" align="center">
+                <color hex="#947546"><u>보충</u> →</color>
+                용암 양동이로 즉시 보충
+            </label>
+            <label hex="#573d19" x="60" y="170" w="200" align="center">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_primary_attack"/></u> →</color>
+                근접 박치기 공격
+            </label>
+            <label hex="#573d19" x="60" y="200" w="220" align="center">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_special_attack"/></u> →</color>
+                강력한 넉백의 꼬리 휘두르기
+            </label>
+            <label hex="#573d19" x="305" y="48" w="210">
+                흑요석 뿔 전리품으로 작열의 뿔피리를 제작하세요.
+            </label>
+            <container x="342" y="88">
+                <label hex="#573d19">애완동물 소환 <color hex="#947546">(5초 ⌚)</color></label>
+                <label hex="#947546" y="10" w="150"><u><keybind id="key.use"/></u> →</label>
+                <label hex="#573d19" align="left" x="75" y="10" w="120">
+                    길들인 모든 생물을 즉시 자신의 위치로 텔레포트시킵니다.
+                </label>
+            </container>
+            <container popup="popups/3" hover-animation="scale" x="304" y="88" w="34" h="34">
+                <image src="images/2" src-x="447" src-y="88" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:scorching_horn" x="296" y="99">
+                        <label x="58" scale="0.65"><b>작열의 뿔피리</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+            <label hex="#573d19" x="305" y="148" w="210">
+                흑요석 뿔로 옵시디케라톱스 방어구를 제작하세요.
+            </label>
+            <container x="315" y="180">
+                <label hex="#947546" w="180">→ 풀세트 보너스:</label>
+                <label hex="#573d19" x="12" y="10" w="180">용암 위 걷기 및 화염/용암 피해 완전 면역 부여</label>
+                <label hex="#947546" y="40" w="180">→ 특수 능력: <color hex="#573d19">용암 다이빙</color></label>
+                <label hex="#573d19" x="12" y="52" w="170">
+                    <color hex="#947546"><u><keybind id="key.sneak"/></u></color> 키를 누르면 용암 속으로 잠수합니다.
+                </label>
+            </container>
+            <container popup="popups/4" hover-animation="scale" x="337" y="260" w="142" h="43">
+                <image src="images/2" src-x="337" src-y="260" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:obsidiceratops_helmet" x="296" y="27">
+                        <label x="58" scale="0.65"><b>옵시디케라톱스 투구</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:obsidiceratops_chestplate" x="296" y="98">
+                        <label x="58" scale="0.65"><b>옵시디케라톱스 흉갑</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:obsidiceratops_leggings" x="296" y="169">
+                        <label x="58" scale="0.65"><b>옵시디케라톱스 레깅스</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:obsidiceratops_boots" x="296" y="240">
+                        <label x="58" scale="0.65"><b>옵시디케라톱스 부츠</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+        </page>
+    </category>
+    <category id="sculkraptor">
+        <page src="infos/1">
+            <container popup="popups/1" hover-animation="scale" x="71" y="58" w="85" h="85">
+                <image src="images/1" absolute="true" w="576" h="320"/>
+            </container>
+            <label hex="#573d19" x="98" y="48">육식성</label>
+            <label hex="#573d19" x="214" y="48">생물군계</label>
+            <label hex="#947546" x="221" y="106" align="center" scale="0.65">딥 다크</label>
+            <label hex="#573d19" x="202" y="131">전리품</label>
+            <label hex="#947546" x="215" y="150" align="center" scale="0.45" w="28">랩터의 발톱</label>
+            <label hex="#573d19" x="60" y="190" w="214">
+                스컬크랩터는 딥 다크를 무리 지어 배회하는 민첩한 포식자입니다.
+                홀로 있을 때는 전투를 피하지만, 무리가 모이면 치명적인 위협이 됩니다.
+            </label>
+            <label hex="#573d19" x="363" y="66" w="160">
+                무리를 이루었을 때만 전투에 적극적으로 돌입.
+            </label>
+            <label hex="#573d19" x="340" y="92" w="160">
+                소리와 진동을 감지하여 먹잇감을 추적.
+            </label>
+            <label hex="#573d19" x="358" y="122" w="160">
+                확률적으로 중독을 유발하는 원거리 침 발사.
+            </label>
+            <label hex="#573d19" x="339" y="150" w="160">
+                무리 비명으로 적을 넉백시키고 어지러움을 유발.
+            </label>
+            <label hex="#573d19" x="348" y="192" w="160">
+                대상을 표식하여 다른 딥 다크 괴수들이 공격하도록 유도.
+            </label>
+        </page>
+        <page src="infos/2">
+            <label hex="#573d19" x="60" y="48" w="130">
+                야생 성체는 직접 길들일 수 없습니다.
+                무리가 지키고 있는 둥지를 찾아내세요.
+            </label>
+            <label hex="#573d19" x="165" y="120" w="110">
+                둥지에 다가가면 무리가 알을 지키기 위해 결사적으로 덤벼듭니다.
+            </label>
+            <label hex="#573d19" x="60" y="196" w="150">
+                모두 쓰러뜨려야 알을 챙길 수 있습니다.
+                둥지당 부화 가능한 알은 단 1개뿐입니다.
+            </label>
+            <label hex="#573d19" x="308" y="52" w="120">
+                알은 반드시 완전한 암흑 속에서만 부화합니다.
+            </label>
+            <label hex="#573d19" x="305" y="95" w="175">
+                부화한 새끼는 태생적으로 길들여져
+                당신을 평생 충실히 따릅니다.
+            </label>
+            <label hex="#573d19" x="305" y="138" w="210">
+                썩은 살점, 거미 눈, 뼈 같은 몬스터 드롭템으로 성장을 촉진하세요.
+            </label>
+        </page>
+        <page src="infos/3">
+            <label hex="#573d19" x="160" y="48" w="120">
+                랩터의 발톱 <color hex="#947546">(30초 ⌚)</color>
+                아이템을 사용해 조준점으로 무리를 일제히 집결시키세요.
+            </label>
+            <label hex="#573d19" x="64" y="134" w="130">
+                스컬크 활로 발사한 스컬크 화살에
+                맞은 대상만을 맹렬히 집중 공격합니다.
+            </label>
+            <label hex="#573d19" x="60" y="222" w="220">
+                야생 투사체에 맞으면 플레이어가 표식되어
+                다른 괴수들의 주요 표적이 됩니다.
+            </label>
+            <label hex="#573d19" x="305" y="48" w="210">
+                무리 지어 싸울 때 진가를 발휘하며,
+                합창 비명으로 적을 마비시키고 물어뜯기와 독침을 연사합니다.
+            </label>
+        </page>
+    </category>
+    <category id="chorusoatl">
+        <page src="infos/1">
+            <container popup="popups/1" hover-animation="scale" x="63" y="63" w="120" h="70">
+                <image src="images/1" absolute="true" w="576" h="320"/>
+            </container>
+            <label hex="#573d19" x="98" y="48">초식성</label>
+            <label hex="#573d19" x="214" y="48">생물군계</label>
+            <label hex="#947546" x="229" y="106" align="center" scale="0.65">엔드 외곽 섬</label>
+            <label hex="#573d19" x="206" y="121">전리품</label>
+            <label hex="#947546" x="221" y="142" align="center" scale="0.45" w="28">코러스 화석</label>
+            <label hex="#573d19" x="60" y="204" w="214">
+                코러스코아틀은 엔드 외곽 섬을 무리 지어 활공하는 우아한 익룡입니다.
+                위협을 느끼면 귀를 찢는 비명과 압도적인 협동 공격으로 맞섭니다.
+            </label>
+            <label hex="#573d19" x="340" y="66" w="180">야생 무리는 일제히 합동 공격을 개시합니다.</label>
+            <label hex="#573d19" x="354" y="90" w="180">강력한 비명 공격으로 적들을 날려버립니다.</label>
+            <label hex="#573d19" x="339" y="122" w="180">안장을 얹으면 하늘을 자유롭게 날아다닐 수 있습니다.</label>
+            <label hex="#573d19" x="354" y="156" w="180">근접 부리 쪼기 공격.</label>
+            <label hex="#573d19" x="344" y="182" w="170">적을 공중으로 날려버리는 원거리 에너지 탄환 발사.</label>
+        </page>
+        <page src="infos/2">
+            <label hex="#573d19" x="60" y="48" w="214">
+                홀로 다니는 법이 거의 없습니다. 길들이려면
+                코러스 열매로 무리에서 한 마리를 유인해 떼어내세요.
+            </label>
+            <label hex="#573d19" x="60" y="84" w="136">
+                열매를 들고 있으면 도망가지 않습니다.<br/>빈손으로 다가가면 한 번 경고한 후 덮쳐옵니다.
+            </label>
+            <label hex="#573d19" x="174" y="158" w="100">
+                열매를 먹이더라도 거부하고
+                비명을 지르며 날아가 버릴 수 있습니다.
+            </label>
+            <label hex="#573d19" x="60" y="238" w="214">
+                길들인 후 안장을 얹어 비행할 수 있습니다.
+            </label>
+            <label hex="#573d19" x="305" y="48" w="210">
+                길들인 성체 두 마리에게 코러스 열매를 먹여 번식시키세요.
+                알은 매우 깨지기 쉬워 자주 옮기면 부서집니다.
+            </label>
+            <label hex="#573d19" x="368" y="198" w="154">
+                엔드에서 가장 잘 부화하지만 다른 곳도 가능:
+                완전한 암흑, 아래의 엔드 돌, 주변의 코러스
+                식물이 필요합니다. 열매로 성장을 가속하세요.
+            </label>
+        </page>
+        <page src="infos/3">
+            <label hex="#573d19" x="60" y="128" w="214">
+                안장을 얹어 엔드 외곽 섬과 허공 위를 자유롭게 비행하세요.
+            </label>
+            <label hex="#573d19" x="60" y="162" w="200" align="center">
+                <color hex="#947546"><u><keybind id="key.jump"/></u> →</color> 이륙 및 착륙
+            </label>
+            <label hex="#573d19" x="61" y="186" w="200" align="center">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_primary_attack"/></u> →</color>
+                근접 부리 공격
+            </label>
+            <label hex="#573d19" x="61" y="216" w="200" align="center">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_special_attack"/></u> →</color>
+                원거리 에너지 침 뱉기
+            </label>
+            <label hex="#573d19" x="305" y="48" w="210">
+                코러스 화석 전리품으로 코러스 대낫을 제작하세요.
+            </label>
+            <container x="360" y="94">
+                <label hex="#573d19">회전 공격 <color hex="#947546">(20초 ⌚)</color></label>
+                <label hex="#947546" y="10" w="150"><u><keybind id="key.use"/></u> →</label>
+                <label hex="#573d19" align="left" x="75" y="10" w="80">
+                    주변 적들에게 피해를 주고
+                    공중에 높이 띄웁니다.
+                </label>
+            </container>
+            <container popup="popups/3" hover-animation="scale" x="317" y="98" w="34" h="34">
+                <image src="images/2" src-x="447" src-y="78" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:chorus_scythe" x="296" y="98">
+                        <label x="58" scale="0.65"><b>코러스 대낫</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+            <label hex="#573d19" x="305" y="166" w="210">
+                코러스 화석으로 코러스코아틀 방어구를 제작하세요.
+            </label>
+            <container x="315" y="192">
+                <label hex="#947546" w="180">→ 풀세트 보너스:</label>
+                <label hex="#573d19" x="12" y="10" w="180">느린 낙하 효과를 상시 부여합니다.</label>
+                <label hex="#947546" y="30" w="180">→ 특수 능력: <color hex="#573d19">순간이동</color> (15초 ⌚)</label>
+                <label hex="#573d19" x="12" y="42" w="170">
+                    <color hex="#947546"><u><keybind id="ec_ad.armor"/></u></color> 키를 길게 차징하여 바라보는 곳으로 텔레포트합니다.
+                </label>
+            </container>
+            <container popup="popups/4" hover-animation="scale" x="337" y="260" w="142" h="43">
+                <image src="images/2" src-x="337" src-y="260" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:chorusoatl_helmet" x="296" y="28">
+                        <label x="58" scale="0.65"><b>코러스코아틀 투구</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:chorusoatl_chestplate" x="296" y="98">
+                        <label x="58" scale="0.65"><b>코러스코아틀 흉갑</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:chorusoatl_leggings" x="296" y="169">
+                        <label x="58" scale="0.65"><b>코러스코아틀 레깅스</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:chorusoatl_boots" x="296" y="240">
+                        <label x="58" scale="0.65"><b>코러스코아틀 부츠</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+        </page>
+    </category>
+    <category id="sculksaur">
+        <page src="infos/1">
+            <container popup="popups/1" hover-animation="scale" x="63" y="63" w="115" h="85">
+                <image src="images/1" absolute="true" w="576" h="320"/>
+            </container>
+            <label hex="#573d19" x="98" y="48">육식성</label>
+            <label hex="#573d19" x="216" y="48">생물군계</label>
+            <label hex="#947546" x="221" y="106" align="center" scale="0.65">딥 다크</label>
+            <label hex="#573d19" x="216" y="129">전리품</label>
+            <label hex="#947546" x="226" y="151" align="center" scale="0.45" w="28">스컬크 독소</label>
+            <label hex="#573d19" x="60" y="200" w="214">
+                스컬크사우루스는 딥 다크의 절대적인 최상위 포식자입니다.
+                워든조차 녀석의 파괴적인 광란 앞에서는 적수가 되지 못합니다.
+            </label>
+            <label hex="#573d19" x="300" y="48" w="220">
+                <color hex="#947546">→</color> 워든이 땅에서 솟아난 직후 유인되어 출현.<br/><br/>
+                <color hex="#947546">→</color> 극도로 공격적이고 파괴적임.<br/><br/>
+                <color hex="#947546">→</color> 특히 워든에게 극심한 살의를 품음.<br/><br/>
+                <color hex="#947546">→</color> 길들이기 및 번식 불가.
+            </label>
+            <label hex="#573d19" x="305" y="214" w="210">
+                이 괴수를 깨우는 것은 곧 파멸을 부르는 일입니다.
+                주변의 모든 것을 집어삼키고 감지되는 생물을 닥치는 대로 짓밟습니다.
+            </label>
+            <label hex="#573d19" x="345" y="254" w="210">
+                분명히 경고했습니다.
+            </label>
+        </page>
+        <page src="infos/2">
+            <label hex="#573d19" x="95" y="74" w="184">
+                출현 시 엄청난 피해량 버프를 얻어 워든을 가볍게 압도함.
+            </label>
+            <label hex="#573d19" x="108" y="112" w="165">
+                소리, 진동, 후각으로 플레이어를 끝까지 추적.
+            </label>
+            <label hex="#573d19" x="120" y="142" w="160">
+                막대한 치명상을 입히는 강력한 물기.
+            </label>
+            <label hex="#573d19" x="148" y="178" w="130">
+                피해와 함께 상대를 날려버리는 꼬리 채찍.
+            </label>
+            <label hex="#573d19" x="120" y="212" w="150">
+                초음파 피해를 주는 귀가 먹먹한 포효.
+            </label>
+            <label hex="#573d19" x="328" y="48" w="190">
+                측면의 사마귀를 화살로 맞히면
+                장비 제작 재료인 스컬크 독소를 떨어뜨립니다.
+            </label>
+            <label hex="#573d19" x="350" y="100" w="165">
+                <color hex="#947546">→ </color>어둠 및 독 효과를 부여.
+                <br/>
+                <color hex="#947546">→ </color>딥 다크 몬스터들에게 치명적인 특효 피해.
+            </label>
+            <container popup="popups/2" hover-animation="scale" x="307" y="94" w="34" h="34">
+                <image src="images/2" src-x="317" src-y="102" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:ooze_tipped_arrow" x="296" y="98">
+                        <label x="58" scale="0.65"><b>스컬크 화살</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+            <label hex="#573d19" x="305" y="140" w="210">
+                스컬크 독소로 스컬크사우루스 방어구를 제작하세요.
+            </label>
+            <container x="315" y="168">
+                <label hex="#947546" w="180">→ 풀세트 보너스:</label>
+                <label hex="#573d19" x="12" y="10" w="180">공격 적중 시 적에게 5초 동안 독 상태이상을 입힙니다.</label>
+                <label hex="#947546" y="34" w="180">→ 특수 능력: <color hex="#573d19">스컬크 포효</color> (30초 ⌚)</label>
+                <label hex="#573d19" x="12" y="46" w="170">
+                    <color hex="#947546"><u><keybind id="ec_ad.armor"/></u></color> 키를 길게 눌러 포효를 내지릅니다. 주변 적에게 실명과 멀미를 주고 딥 다크 생물들을 기절시킵니다.
+                </label>
+            </container>
+            <container popup="popups/3" hover-animation="scale" x="337" y="260" w="142" h="43">
+                <image src="images/2" src-x="337" src-y="260" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:sculksaur_helmet" x="296" y="28">
+                        <label x="58" scale="0.65"><b>스컬크사우루스 투구</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:sculksaur_chestplate" x="296" y="97">
+                        <label x="58" scale="0.65"><b>스컬크사우루스 흉갑</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:sculksaur_leggings" x="296" y="169">
+                        <label x="58" scale="0.65"><b>스컬크사우루스 레깅스</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:sculksaur_boots" x="296" y="240">
+                        <label x="58" scale="0.65"><b>스컬크사우루스 부츠</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+        </page>
+    </category>
+    <category id="credits" no-markers="true">
+        <page src="infos/1">
+            <label x="168" y="41" color="#573d19" align="center"><b>제작자</b></label>
+            <label x="168" y="251" color="#573d19" align="center"><b>웹사이트</b></label>
+            <label x="170" y="261" color="#573d19" align="center">
+                <a href="https://www.eternalcreations.games">
+                    www.eternalcreations.games
+                </a>
+            </label>
+            <label x="328" y="32" color="#573d19" w="160" align="center">
+                이 모드의 업데이트 및
+                앞으로 출시될 새로운 콘텐츠 소식을 팔로우하세요!
+            </label>
+            <label x="346" y="100" w="160" color="#573d19">
+                <b>Discord에 참여하세요!</b>
+                <br/>
+                <a href="https://discord.gg/eternalcreations">
+                    <color hex="#947546">discord.gg/</color>eternalcreations
+                </a>
+            </label>
+            <label x="346" y="160" w="160" color="#573d19">
+                <b>X / Twitter를 팔로우하세요!</b>
+                <br/>
+                <a href="https://x.com/EternalCrtns">
+                    <color hex="#947546">x.com/</color>EternalCrtns
+                </a>
+            </label>
+            <label x="346" y="220" w="160" color="#573d19">
+                <b>TikTok을 확인하세요!</b>
+                <br/>
+                <a href="https://tiktok.com/@eternalxcreations">
+                    <color hex="#947546">tiktok.com/</color>eternalxcreations
+                </a>
+            </label>
+        </page>
+    </category>
+</root>

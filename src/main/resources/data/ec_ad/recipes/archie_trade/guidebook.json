@@ -1,0 +1,22 @@
+{
+  "type": "ec_ad:archie_trade",
+  "input": {
+    "item": "minecraft:book",
+    "max": 1,
+    "min": 1
+  },
+  "max_uses": 1,
+  "output": [
+    {
+      "item": "ec_ad:guidebook",
+      "max": 1,
+      "min": 1
+    }
+  ],
+  "reward_exp": 0,
+  "sort": [
+    {
+      "ordinal": 1
+    }
+  ]
+}

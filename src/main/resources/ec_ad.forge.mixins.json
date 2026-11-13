@@ -1,0 +1,22 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.eternal_creations.archies_dino_mod.mixin",
+  "refmap": "ec_ad.refmap.json",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "ArmorItemMixin",
+    "PlayerAttackDamageBonusMixin",
+    "forge.ADWeaponItemMixin",
+    "forge.CoralosaurMixin",
+    "forge.CustomStructurePieceMixin"
+  ],
+  "client": [
+    "HumanoidArmorLayerMixin"
+  ],
+  "server": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

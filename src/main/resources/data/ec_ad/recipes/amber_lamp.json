@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "A": {
+      "item": "ec_ad:amber"
+    },
+    "G": {
+      "tag": "forge:dusts/glowstone"
+    }
+  },
+  "pattern": [
+    " A ",
+    "AGA",
+    " A "
+  ],
+  "result": {
+    "item": "ec_ad:amber_lamp"
+  },
+  "show_notification": true
+}

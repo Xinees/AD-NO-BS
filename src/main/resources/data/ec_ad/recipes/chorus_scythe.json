@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "I": {
+      "tag": "forge:ingots/gold"
+    },
+    "W": {
+      "item": "ec_ad:chorus_fossil"
+    }
+  },
+  "pattern": [
+    "WW",
+    " I",
+    " I"
+  ],
+  "result": {
+    "item": "ec_ad:chorus_scythe"
+  },
+  "show_notification": true
+}

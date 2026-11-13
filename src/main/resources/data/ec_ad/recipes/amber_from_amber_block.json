@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "ec_ad:raw_amber_block"
+    }
+  ],
+  "result": {
+    "count": 4,
+    "item": "ec_ad:amber"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "D": {
+      "item": "ec_ad:raptor_talon"
+    },
+    "I": {
+      "tag": "forge:string"
+    },
+    "W": {
+      "item": "ec_ad:coral_rib"
+    }
+  },
+  "pattern": [
+    "DW ",
+    "I W",
+    "DW "
+  ],
+  "result": {
+    "item": "ec_ad:rib_bow"
+  },
+  "show_notification": true
+}

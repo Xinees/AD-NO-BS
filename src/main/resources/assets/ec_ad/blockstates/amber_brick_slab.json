@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "ec_ad:block/amber_brick_slab"
+    },
+    "type=double": {
+      "model": "ec_ad:block/amber_bricks"
+    },
+    "type=top": {
+      "model": "ec_ad:block/amber_brick_slab_top"
+    }
+  }
+}

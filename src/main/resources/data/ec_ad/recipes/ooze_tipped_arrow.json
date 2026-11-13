@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "I": {
+      "tag": "forge:rods/wooden"
+    },
+    "S": {
+      "tag": "forge:feathers"
+    },
+    "W": {
+      "item": "ec_ad:sculk_toxin"
+    }
+  },
+  "pattern": [
+    "W",
+    "I",
+    "S"
+  ],
+  "result": {
+    "count": 4,
+    "item": "ec_ad:ooze_tipped_arrow"
+  },
+  "show_notification": true
+}

@@ -1,0 +1,14 @@
+{
+  "placement": {
+    "type": "minecraft:random_spread",
+    "salt": 362774234,
+    "separation": 9,
+    "spacing": 18
+  },
+  "structures": [
+    {
+      "structure": "ec_ad:amber_fossil",
+      "weight": 1
+    }
+  ]
+}

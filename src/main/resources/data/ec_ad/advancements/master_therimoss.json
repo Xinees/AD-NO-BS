@@ -1,0 +1,116 @@
+{
+  "parent": "ec_ad:tame_therimoss",
+  "criteria": {
+    "craft_boots": {
+      "conditions": {
+        "recipe_id": "ec_ad:therimoss_boots"
+      },
+      "trigger": "minecraft:recipe_crafted"
+    },
+    "craft_chestplate": {
+      "conditions": {
+        "recipe_id": "ec_ad:therimoss_chestplate"
+      },
+      "trigger": "minecraft:recipe_crafted"
+    },
+    "craft_helmet": {
+      "conditions": {
+        "recipe_id": "ec_ad:therimoss_helmet"
+      },
+      "trigger": "minecraft:recipe_crafted"
+    },
+    "craft_leggings": {
+      "conditions": {
+        "recipe_id": "ec_ad:therimoss_leggings"
+      },
+      "trigger": "minecraft:recipe_crafted"
+    },
+    "kill": {
+      "conditions": {
+        "entity": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "type": "ec_ad:therimoss"
+            }
+          }
+        ]
+      },
+      "trigger": "minecraft:player_killed_entity"
+    },
+    "spot": {
+      "conditions": {
+        "entity": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "type": "ec_ad:therimoss"
+            }
+          }
+        ]
+      },
+      "trigger": "ec_ad:spotted_entity"
+    },
+    "tame": {
+      "conditions": {
+        "entity": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "type": "ec_ad:therimoss"
+            }
+          }
+        ]
+      },
+      "trigger": "minecraft:tame_animal"
+    }
+  },
+  "display": {
+    "announce_to_chat": true,
+    "description": {
+      "translate": "advancement.master_therimoss.desc"
+    },
+    "frame": "challenge",
+    "hidden": false,
+    "icon": {
+      "item": "ec_ad:therimoss_helmet",
+      "nbt": "{Damage:0}"
+    },
+    "show_toast": true,
+    "title": {
+      "translate": "advancement.master_therimoss.title"
+    }
+  },
+  "requirements": [
+    [
+      "spot"
+    ],
+    [
+      "kill"
+    ],
+    [
+      "craft_boots"
+    ],
+    [
+      "craft_chestplate"
+    ],
+    [
+      "craft_helmet"
+    ],
+    [
+      "craft_leggings"
+    ],
+    [
+      "tame"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "ec_ad:tropic_totem"
+    ]
+  },
+  "sends_telemetry_event": true
+}

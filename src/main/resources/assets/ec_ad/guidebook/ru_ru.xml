@@ -1,0 +1,891 @@
+<root badges="info">
+    <category id="introduction" no-markers="true">
+        <page src="infos/1">
+            <label x="308" y="32" w="190" color="#573d19">
+                Добро пожаловать в мод
+                «Динозавры Арчи»!
+                Это ваш путеводитель по всем
+                новым существам вашего мира!
+            </label>
+            <label x="368" y="95" w="120" color="#573d19">
+                Наводитесь и жмите на
+                всё с белой обводкой.
+            </label>
+            <label x="368" y="165" w="130" color="#573d19">
+                Жмите на категории,
+                чтобы открыть нужного
+                динозавра!
+            </label>
+            <label x="368" y="230" w="120" color="#573d19">
+                Нажмите <b><keybind id="key.keyboard.escape"/></b>,
+                чтобы закрыть книгу!
+            </label>
+        </page>
+        <page src="infos/2">
+            <label x="75" y="49" w="190" color="#573d19" align="center">
+                Никто не знает, что упало с неба той ночью.
+                Мы знаем лишь одно: осколки тёплые. Всегда.
+                Будто внутри них всё ещё теплится жизнь.
+            </label>
+            <label x="58" y="168" w="220" color="#573d19">
+                Ищите выжженные кратеры в землях, где
+                бродят звери, и древние кости в пустынях
+                и пустошах. Где упал янтарь — там древность.
+            </label>
+            <label x="374" y="50" w="140" color="#573d19">
+                Добудьте руду и носите осколок.
+                Звери тянутся к нему по неведомой
+                причине. С янтарём вы ищете недолго.
+            </label>
+            <label x="304" y="122" w="210" color="#573d19">
+                Арчи щедро платит за каждый осколок для
+                своих опытов. Очищенный янтарь можно
+                тесать и использовать как камень в стройке.
+            </label>
+            <label x="304" y="178" w="148" color="#573d19">
+                И ещё: истинные мастера
+                отливают образ зверя в янтаре.
+            </label>
+            <label x="304" y="230" w="148" color="#573d19">
+                Тотем — знак того, что зверя
+                не заперли в клетку, а заслужили.
+            </label>
+        </page>
+    </category>
+    <category id="lushsaur">
+        <page src="infos/1">
+            <container popup="popups/1" hover-animation="scale" x="63" y="63" w="140" h="70">
+                <image src="images/1" absolute="true" w="576" h="320"/>
+            </container>
+            <label hex="#573d19" x="81" y="48">Травоядное</label>
+            <label hex="#573d19" x="236" y="48">Биом</label>
+            <label hex="#947546" x="243" y="106" align="center" scale="0.55">Карстовые пещеры</label>
+            <label hex="#947546" x="209" y="166" align="center" scale="0.65">Пышные пещеры</label>
+            <label hex="#573d19" x="244" y="133">Дроп</label>
+            <label hex="#947546" x="248" y="170" align="center" scale="0.45" w="28">Пышное ядро</label>
+            <label hex="#573d19" x="60" y="204" w="214">
+                Пышнозавр — скрытный обитатель Пышных и Карстовых пещер.
+                Сливается с окружением в покое и является лишь тем, чьё доверие заслужил.
+            </label>
+            <label hex="#573d19" x="343" y="70" w="170">Невидим во сне. Приручение отключает способность.</label>
+            <label hex="#573d19" x="372" y="103" w="130">Топот хвостом держит врагов на дистанции.</label>
+            <label hex="#573d19" x="345" y="130" w="155">Таранный разгон с серией быстрых ударов.</label>
+            <label hex="#573d19" x="370" y="162" w="170">Высокий шанс отразить вражеские снаряды.</label>
+            <label hex="#573d19" x="344" y="192" w="170">Удар головой: оглушает и ломает блоки.</label>
+            <label hex="#573d19" x="369" y="222" w="170">Взмах хвостом с мощным отбрасыванием.</label>
+        </page>
+        <page src="infos/2">
+            <label hex="#573d19" x="65" y="55" w="165">
+                Пышнозавр пойдёт на контакт,
+                только если вы проявите терпение.
+            </label>
+            <label hex="#573d19" x="65" y="88" w="125">
+                Продолжайте кормить его
+                светящимися ягодами, пока
+                он не признает вас.
+            </label>
+            <label hex="#573d19" x="65" y="145" w="210">
+                Он не станет реагировать, пока находится
+                в маскировке или спасается от опасности.
+            </label>
+            <label hex="#573d19" x="60" y="230" w="214">
+                После приручения он становится спокойным
+                и покладистым, позволяя свободно
+                с ним взаимодействовать.
+            </label>
+            <label hex="#573d19" x="305" y="48" w="210">
+                Для размножения накормите ягодами двух
+                взрослых прирученных пышнозавров. Яйцо
+                будет отложено на землю — его можно забрать
+                в руку. Оно крепкое и требует лишь блоков
+                травы или мха под собой для вылупления.
+            </label>
+            <label hex="#573d19" x="389" y="125" w="130">
+                Взрослые особи рядом ускорят
+                вылупление яйца.
+                <br/><br/>
+                Рост детёныша ускоряется
+                светящимися ягодами.
+            </label>
+            <label hex="#573d19" x="320" y="210" w="140">
+                Повзрослев, пышнозавр сбросит
+                своё Пышное ядро. Со временем
+                оно медленно отрастёт снова.
+            </label>
+        </page>
+        <page src="infos/3">
+            <container popup="popups/3" hover-animation="scale" x="317" y="102" w="34" h="34">
+                <image src="images/2"
+                       src-x="317" src-y="102"
+                       texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:lush_mace" x="296" y="97">
+                        <label x="58" scale="0.65"><b>Пышная булава</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+            <container popup="popups/4" hover-animation="scale" x="337" y="260" w="142" h="43">
+                <image src="images/2"
+                       src-x="337" src-y="260"
+                       texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:lushsaur_helmet" x="296" y="25">
+                        <label x="58" scale="0.65"><b>Шлем пышнозавра</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:lushsaur_chestplate" x="296" y="96">
+                        <label x="58" scale="0.65"><b>Нагрудник пышнозавра</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:lushsaur_leggings" x="296" y="167">
+                        <label x="58" scale="0.65"><b>Поножи пышнозавра</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:lushsaur_boots" x="296" y="238">
+                        <label x="58" scale="0.65"><b>Ботинки пышнозавра</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+            <label hex="#573d19" x="60" y="54" w="214">
+                Ручной пышнозавр не маскируется, а спит
+                и бодрствует регулярно, оставаясь видимым.
+            </label>
+            <label hex="#573d19" x="60" y="105" w="214">
+                На нём можно ездить по пещерам.
+                Его удары крушат блоки, расчищая путь.
+            </label>
+            <label hex="#573d19" x="61" y="165" w="200" align="center">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_primary_attack"/></u> →</color>
+                Удар головой
+                <color hex="#947546">(ломает блоки)</color>
+            </label>
+            <label hex="#573d19" x="61" y="195" w="200" align="center">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_special_attack"/></u> →</color>
+                Взмах
+                <color hex="#947546">(отброс / срез травы)</color>
+            </label>
+            <label hex="#573d19" x="58" y="230" w="224">
+                Кормите его светящимися ягодами
+                верхом для рывка скорости.
+            </label>
+            <label hex="#573d19" x="305" y="54" w="210">
+                Пышную булаву куют из Пышного ядра,
+                добытого в бою или при взрослении зверя.
+            </label>
+            <container x="360" y="100">
+                <label hex="#573d19">Круговая атака <color hex="#947546">(30с ⌚)</color></label>
+                <label hex="#947546" y="10" w="150"><u><keybind id="key.use"/></u> →</label>
+                <label hex="#573d19" align="left" x="75" y="10" w="80">
+                    Отбрасывает всех
+                    существ вокруг.
+                </label>
+            </container>
+            <label hex="#573d19" x="305" y="156" w="210">
+                Броню пышнозавра куют из Пышных ядер.
+            </label>
+            <container x="315" y="180">
+                <label hex="#947546" w="180">→ Бонус комплекта:</label>
+                <label hex="#573d19" x="12" y="10">Даёт Стойкость I</label>
+                <label hex="#947546" y="25" w="180">→ Особое: <color hex="#573d19">Маскировка</color></label>
+                <label hex="#573d19" x="12" y="35" w="170">
+                    Присед на ходу даёт шанс спрятаться.
+                    Стоя неподвижно, вы становитесь
+                    полностью невидимы для врагов.
+                </label>
+            </container>
+        </page>
+    </category>
+    <category id="therimoss">
+        <page src="infos/1">
+            <container popup="popups/1" hover-animation="scale" x="63" y="63" w="70" h="90">
+                <image src="images/1" absolute="true" w="576" h="320" y="10"/>
+            </container>
+            <label hex="#573d19" x="81" y="58">Травоядное</label>
+            <label hex="#573d19" x="158" y="58">Биом</label>
+            <label hex="#947546" x="172" y="115" align="center" scale="0.75">Джунгли</label>
+            <label hex="#573d19" x="222" y="71">Дроп</label>
+            <label hex="#947546" x="236" y="90" align="center" scale="0.45" w="28">Мшистый коготь</label>
+            <label hex="#573d19" x="60" y="180" w="214">
+                Теримох — медлительный великан из глубин джунглей.
+                Неспешно бредёт сквозь чащу, опирается на стволы или
+                лазает по ним, наблюдая за миром вокруг.
+            </label>
+            <label hex="#573d19" x="360" y="59" w="160">
+                Прыгает с земли прямо в кроны деревьев.
+            </label>
+            <label hex="#573d19" x="376" y="96" w="160">
+                Карабкается по стволам, сбивая листву.
+            </label>
+            <label hex="#573d19" x="362" y="129" w="160">
+                Тяжёлый удар, втаптывающий врагов в землю.
+            </label>
+            <label hex="#573d19" x="372" y="164" w="160">
+                Ближний тройной взмах когтями.
+            </label>
+            <label hex="#573d19" x="355" y="198" w="160">
+                Швыряет блок земли, нанося дальний урон.
+            </label>
+            <label hex="#573d19" x="358" y="227" w="160">
+                Не рубите лес рядом: он свирепеет от вырубки.
+            </label>
+        </page>
+        <page src="infos/2">
+            <label hex="#573d19" x="60" y="54" w="214">
+                Теримоху нужно щедрое подношение.
+                Сложите пирамиду 4x4 <color hex="#947546">(20 блоков)</color>
+                целиком из еды, чтобы привлечь его внимание.
+            </label>
+            <label hex="#573d19" x="168" y="110" w="130">
+                <color hex="#947546">•</color> Арбуз<br/>
+                <color hex="#947546">•</color> Тыква<br/>
+                <color hex="#947546">•</color> Торт<br/>
+                <color hex="#947546">•</color> Блок бамбука<br/>
+                <color hex="#947546">•</color> Листья азалии<br/>
+                <color hex="#947546">•</color> Блок гриба
+            </label>
+            <label hex="#573d19" x="60" y="212" w="214">
+                Когда он начнёт есть, кормите его бамбуком.
+                Приручение требует терпения:
+                попытка срабатывает далеко не сразу.
+            </label>
+            <label hex="#573d19" x="305" y="54" w="210">
+                Для размножения кормите бамбуком
+                двух взрослых ручных теримохов.
+            </label>
+            <label hex="#573d19" x="365" y="154" w="150">
+                На землю будет отложено яйцо,
+                которое можно забрать.
+                Оно вылупляется без особого ухода.
+            </label>
+            <label hex="#573d19" x="305" y="214" w="150">
+                Детёныша можно кормить теми же
+                блоками из пирамиды для ускорения роста.
+            </label>
+        </page>
+        <page src="infos/3">
+            <label hex="#573d19" x="145" y="48" w="130">
+                Ручной теримох очень спокоен и послушен.
+            </label>
+            <label hex="#573d19" x="145" y="88" w="130">
+                Мощный зверь для путешествий по бездорожью.
+            </label>
+            <label hex="#573d19" x="60" y="150" w="214" align="center">
+                <color hex="#947546"><u><keybind id="key.jump"/></u> →</color> Прыжок в кроны деревьев.
+            </label>
+            <label hex="#573d19" x="60" y="170" w="220" align="center">
+                <color hex="#947546"><u>Подъём</u> →</color>
+                Карабканье по стволам со сбиванием листвы.
+            </label>
+            <label hex="#573d19" x="60" y="200" w="200" align="center">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_primary_attack"/></u> →</color>
+                Тройной взмах когтями вблизи.
+            </label>
+            <label hex="#573d19" x="60" y="230" w="220" align="center">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_special_attack"/></u> →</color>
+                Бросок блока земли в ближайшую цель.
+            </label>
+            <label hex="#573d19" x="305" y="48" w="210">
+                Когти теримоха куют из Мшистых когтей
+                (состригаются ножницами или добываются в бою).
+            </label>
+            <label hex="#573d19" x="305" y="148" w="210">
+                При падении у стены вы можете безопасно сползти вниз.
+            </label>
+            <label hex="#573d19" x="305" y="184" w="210">
+                Броню теримоха создают из Мшистых когтей.
+            </label>
+            <container x="315" y="212">
+                <label hex="#947546" w="180">→ Бонус комплекта:</label>
+                <label hex="#573d19" x="12" y="10">Замедляет расход шкалы голода.</label>
+                <label hex="#947546" y="25" w="180">→ Особое: <color hex="#573d19">Рывок</color> (10с ⌚)</label>
+                <label hex="#573d19" x="12" y="35" w="170">
+                    Нажмите <color hex="#947546"><u><keybind id="ec_ad.armor"/></u></color> для ускорения бега.
+                </label>
+            </container>
+            <container popup="popups/3" hover-animation="scale" x="317" y="102" w="180" h="35">
+                <image src="images/2" src-x="317" src-y="102" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:theri_claw_iron" x="296" y="27">
+                        <label x="58" scale="0.65"><b>Железные когти теримоха</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:theri_claw_copper" x="296" y="98">
+                        <label x="58" scale="0.65"><b>Медные когти теримоха</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:theri_claw_gold" x="296" y="169">
+                        <label x="58" scale="0.65"><b>Золотые когти теримоха</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:theri_claw_diamond" x="296" y="238">
+                        <label x="58" scale="0.65"><b>Алмазные когти теримоха</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+            <container popup="popups/4" hover-animation="scale" x="337" y="260" w="142" h="43">
+                <image src="images/2" src-x="337" src-y="260" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:therimoss_helmet" x="296" y="27">
+                        <label x="58" scale="0.65"><b>Шлем теримоха</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:therimoss_chestplate" x="296" y="98">
+                        <label x="58" scale="0.65"><b>Нагрудник теримоха</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:therimoss_leggings" x="296" y="169">
+                        <label x="58" scale="0.65"><b>Поножи теримоха</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:therimoss_boots" x="296" y="240">
+                        <label x="58" scale="0.65"><b>Ботинки теримоха</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+        </page>
+    </category>
+    <category id="coralosaur">
+        <page src="infos/1">
+            <container popup="popups/1" hover-animation="scale" x="63" y="63" w="99" h="99">
+                <image src="images/1" absolute="true" w="576" h="320"/>
+            </container>
+            <label hex="#573d19" x="100" y="56">Хищник</label>
+            <label hex="#573d19" x="186" y="62">Биом</label>
+            <label hex="#947546" x="199" y="121" align="center" scale="0.7">Тёплый океан</label>
+            <label hex="#573d19" x="244" y="62">Дроп</label>
+            <label hex="#947546" x="238" y="100" align="center" scale="0.42" w="28">Коралловое ребро</label>
+            <label hex="#573d19" x="64" y="186" w="214">
+                Кораллозавр — исполинский страж тёплых морей.
+                Он спит, зарывшись глубоко в песок на дне, пока
+                движение воды не потревожит его покой.
+            </label>
+            <label hex="#573d19" x="337" y="62" w="190">
+                Шлейф пузырей восстанавливает кислород.
+            </label>
+            <label hex="#573d19" x="358" y="88" w="140">
+                Зарывается в песок, если цель уплыла слишком далеко.
+            </label>
+            <label hex="#573d19" x="348" y="128" w="160">
+                Под седлом позволяет привязывать лодки поводком.
+            </label>
+            <label hex="#573d19" x="335" y="170" w="160">
+                Огромный инвентарь, расширяемый сундуками.
+            </label>
+            <label hex="#573d19" x="352" y="200" w="160">
+                Укус вперёд по широкой дуге поражения.
+            </label>
+            <label hex="#573d19" x="338" y="238" w="160">
+                Призывает морских обитателей на вашу защиту.
+            </label>
+        </page>
+        <page src="infos/2">
+            <label hex="#573d19" x="68" y="52" w="200">
+                Чтобы приручить гиганта, найдите его спящую голову по струе пузырей со дна.
+            </label>
+            <label hex="#573d19" x="68" y="172" w="200">
+                Кормите его коралловым рагу, пока он не примет вас.
+            </label>
+            <label hex="#573d19" x="162" y="199" w="120">
+                Приручённый кораллозавр восстанет со дна и больше
+                не уснёт под песком.
+            </label>
+            <label hex="#573d19" x="305" y="58" w="218">
+                Для размножения накормите двух ручных взрослых
+                особей кораллами или коралловым рагу.
+            </label>
+            <label hex="#573d19" x="305" y="198" w="210">
+                Детёныш растёт только под водой.
+                Его взросление ускоряют рыба и коралловое рагу.
+            </label>
+        </page>
+        <page src="infos/3">
+            <label hex="#573d19" x="60" y="142" w="214">
+                Буксирует лодки и возит сундуки на седле.
+                Седло можно безопасно снять ножницами.
+            </label>
+            <label hex="#573d19" x="60" y="208" w="214">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_primary_attack"/></u> → </color>
+                Укус вперёд с широким охватом.
+            </label>
+            <label hex="#573d19" x="60" y="240" w="214">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_special_attack"/></u> → </color>
+                Зов морских обитателей на защиту.
+            </label>
+            <label hex="#573d19" x="305" y="52" w="150">
+                Рёберный лук создают из Коралловых рёбер.
+                <br/><br/>
+                Стрелы из этого лука не теряют траекторию под водой.
+            </label>
+            <container popup="popups/3" hover-animation="scale" x="458" y="72" w="34" h="34">
+                <image src="images/2" src-x="458" src-y="72" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:rib_bow" x="297" y="99">
+                        <label x="58" scale="0.65"><b>Рёберный лук</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+            <label hex="#573d19" x="305" y="150" w="210">
+                Броню кораллозавра куют из Коралловых рёбер.
+            </label>
+            <container x="315" y="180">
+                <label hex="#947546" w="180">→ Бонус комплекта:</label>
+                <label hex="#573d19" x="12" y="10" w="180">Скорость плавания, спешка и Сила источника под водой</label>
+                <label hex="#947546" y="50" w="180">→ Особое: <color hex="#573d19">Морской зов</color> (4с ⌚)</label>
+                <label hex="#573d19" x="12" y="62" w="170">
+                    Нажмите <color hex="#947546"><u><keybind id="ec_ad.armor"/></u></color> в воде для призыва союзных защитников.
+                </label>
+            </container>
+            <container popup="popups/4" hover-animation="scale" x="337" y="260" w="142" h="43">
+                <image src="images/2" src-x="337" src-y="260" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:coralosaur_helmet" x="296" y="27">
+                        <label x="58" scale="0.65"><b>Шлем кораллозавра</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:coralosaur_chestplate" x="296" y="98">
+                        <label x="58" scale="0.65"><b>Нагрудник кораллозавра</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:coralosaur_leggings" x="296" y="169">
+                        <label x="58" scale="0.65"><b>Поножи кораллозавра</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:coralosaur_boots" x="296" y="240">
+                        <label x="58" scale="0.65"><b>Ботинки кораллозавра</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+        </page>
+    </category>
+    <category id="obsidiceratops">
+        <page src="infos/1">
+            <container popup="popups/1" hover-animation="scale" x="63" y="63" w="104" h="80">
+                <image src="images/1" absolute="true" w="576" h="320"/>
+            </container>
+            <label hex="#573d19" x="98" y="48">Травоядное</label>
+            <label hex="#573d19" x="189" y="48">Биом</label>
+            <label hex="#947546" x="180" y="108" align="center" w="38" scale="0.48">Долина песка душ</label>
+            <label hex="#947546" x="232" y="117" align="center" w="34" scale="0.48">Багровый лес</label>
+            <label hex="#573d19" x="198" y="131">Дроп</label>
+            <label hex="#947546" x="216" y="154" align="center" scale="0.42" w="32">Обсидиановый рог</label>
+            <label hex="#573d19" x="60" y="194" w="214">
+                Обсидицератопс — раскалённый танк, жадно поглощающий лаву.
+                Он редко уходит далеко от лавовых озёр Незера.
+            </label>
+            <label hex="#573d19" x="60" y="242" w="214">
+                Будьте начеку: он спокоен, пока полон лавы,
+                но впадает в ярость, когда запас иссякает.
+            </label>
+            <label hex="#573d19" x="361" y="74" w="160">
+                Ищет лаву для пополнения запаса.
+            </label>
+            <label hex="#573d19" x="368" y="102" w="160">
+                Хранит лаву и отдаёт её хозяину.
+            </label>
+            <label hex="#573d19" x="364" y="130" w="150">
+                Встроенный инвентарь на сундук.
+            </label>
+            <label hex="#573d19" x="370" y="166" w="150">
+                Таран головой с тяжким уроном.
+            </label>
+            <label hex="#573d19" x="345" y="194" w="170">
+                Удар хвостом с сильным отбросом.
+            </label>
+            <label hex="#573d19" x="352" y="220" w="160">
+                Звук обсидианового рога оглушает его.
+            </label>
+        </page>
+        <page src="infos/2">
+            <label hex="#573d19" x="68" y="62" w="140">
+                Приручается только спокойным:
+                скормите ему 14–25 блоков магмы.
+            </label>
+            <label hex="#573d19" x="184" y="160" w="95">
+                Держите уровень лавы высоким, иначе весь прогресс сбросится.
+            </label>
+            <label hex="#573d19" x="64" y="244" w="214">
+                Приручённого зверя можно оседлать.
+            </label>
+            <label hex="#573d19" x="305" y="48" w="220">
+                Для размножения кормите двух ручных особей блоками магмы.<br/><br/>Они
+                отложат яйцо прямо на землю.
+            </label>
+            <label hex="#573d19" x="375" y="200" w="140">
+                Яйцо можно поднять, но оно наносит ожоги при касании.
+            </label>
+            <label hex="#573d19" x="375" y="238" w="130">
+                Инкубируйте его у лавы, иначе оно расколется.
+            </label>
+        </page>
+        <page src="infos/3">
+            <label hex="#573d19" x="60" y="54" w="214">
+                Могучий зверь для перевозки
+                грузов и лавы по всему Незеру.
+            </label>
+            <label hex="#573d19" x="60" y="110" w="214" align="center">
+                <color hex="#947546"><u>Бак лавы</u> →</color> Вмещает до 15 вёдер лавы.
+            </label>
+            <label hex="#573d19" x="60" y="140" w="220" align="center">
+                <color hex="#947546"><u>Заливка</u> →</color>
+                Пополняется кликом ведра лавы.
+            </label>
+            <label hex="#573d19" x="60" y="170" w="200" align="center">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_primary_attack"/></u> →</color>
+                Таран головой вблизи.
+            </label>
+            <label hex="#573d19" x="60" y="200" w="220" align="center">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_special_attack"/></u> →</color>
+                Удар хвостом с сильным отбросом.
+            </label>
+            <label hex="#573d19" x="305" y="48" w="210">
+                Пылающий рог создают из Обсидиановых рогов, добытых в бою.
+            </label>
+            <container x="342" y="88">
+                <label hex="#573d19">Сбор питомцев <color hex="#947546">(5с ⌚)</color></label>
+                <label hex="#947546" y="10" w="150"><u><keybind id="key.use"/></u> →</label>
+                <label hex="#573d19" align="left" x="75" y="10" w="120">
+                    Призывает всех ваших питомцев к вам.
+                </label>
+            </container>
+            <container popup="popups/3" hover-animation="scale" x="304" y="88" w="34" h="34">
+                <image src="images/2" src-x="447" src-y="88" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:scorching_horn" x="296" y="99">
+                        <label x="58" scale="0.65"><b>Пылающий рог</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+            <label hex="#573d19" x="305" y="148" w="210">
+                Броню обсидицератопса куют из Обсидиановых рогов.
+            </label>
+            <container x="315" y="180">
+                <label hex="#947546" w="180">→ Бонус комплекта:</label>
+                <label hex="#573d19" x="12" y="10" w="180">Хождение по лаве и Огнестойкость.</label>
+                <label hex="#947546" y="40" w="180">→ Особое: <color hex="#573d19">Погружение в лаву</color></label>
+                <label hex="#573d19" x="12" y="52" w="170">
+                    Нажмите <color hex="#947546"><u><keybind id="key.sneak"/></u></color>, чтобы нырнуть вглубь лавы.
+                </label>
+            </container>
+            <container popup="popups/4" hover-animation="scale" x="337" y="260" w="142" h="43">
+                <image src="images/2" src-x="337" src-y="260" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:obsidiceratops_helmet" x="296" y="27">
+                        <label x="58" scale="0.65"><b>Шлем обсидицератопса</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:obsidiceratops_chestplate" x="296" y="98">
+                        <label x="58" scale="0.65"><b>Нагрудник обсидицератопса</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:obsidiceratops_leggings" x="296" y="169">
+                        <label x="58" scale="0.65"><b>Поножи обсидицератопса</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:obsidiceratops_boots" x="296" y="240">
+                        <label x="58" scale="0.65"><b>Ботинки обсидицератопса</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+        </page>
+    </category>
+    <category id="sculkraptor">
+        <page src="infos/1">
+            <container popup="popups/1" hover-animation="scale" x="71" y="58" w="85" h="85">
+                <image src="images/1" absolute="true" w="576" h="320"/>
+            </container>
+            <label hex="#573d19" x="98" y="48">Хищник</label>
+            <label hex="#573d19" x="214" y="48">Биом</label>
+            <label hex="#947546" x="221" y="106" align="center" scale="0.65">Тёмные глубины</label>
+            <label hex="#573d19" x="202" y="131">Дроп</label>
+            <label hex="#947546" x="215" y="150" align="center" scale="0.45" w="28">Коготь раптора</label>
+            <label hex="#573d19" x="60" y="190" w="214">
+                Скалкрапторы бродят стаями в Тёмных глубинах,
+                ища звуки и движение. Одиночка избегает боя,
+                но в стае они невероятно опасны.
+            </label>
+            <label hex="#573d19" x="363" y="66" w="160">
+                Нападает только в составе стаи.
+            </label>
+            <label hex="#573d19" x="340" y="92" w="160">
+                Ищет жертву по шуму и вибрациям.
+            </label>
+            <label hex="#573d19" x="358" y="122" w="160">
+                Стреляет ядовитыми сгустками.
+            </label>
+            <label hex="#573d19" x="339" y="150" w="160">
+                Стайный вопль оглушает и сбивает с ног.
+            </label>
+            <label hex="#573d19" x="348" y="192" w="160">
+                Метит цель для нападения монстров глубин.
+            </label>
+        </page>
+        <page src="infos/2">
+            <label hex="#573d19" x="60" y="48" w="130">
+                Диких особей нельзя приручить. Ищите их гнездо,
+                где собирается стая.
+            </label>
+            <label hex="#573d19" x="165" y="120" w="110">
+                Приближение к гнезду провоцирует яростную атаку всей стаи.
+            </label>
+            <label hex="#573d19" x="60" y="196" w="150">
+                Перебив стаю, заберите яйцо. В каждом гнезде
+                лишь одно жизнеспособное яйцо.
+            </label>
+            <label hex="#573d19" x="308" y="52" w="120">
+                Яйцо скалкраптора зреет только в темноте.
+            </label>
+            <label hex="#573d19" x="305" y="95" w="175">
+                Вылупившийся детёныш сразу ручной
+                и преданно следует за вами.
+            </label>
+            <label hex="#573d19" x="305" y="138" w="210">
+                Кормите его гнилой плотью, костями
+                или глазами паука для ускорения роста.
+            </label>
+        </page>
+        <page src="infos/3">
+            <label hex="#573d19" x="160" y="48" w="120">
+                Коготь раптора <color hex="#947546">(30с ⌚)</color>
+                стягивает прирученную стаю в точку вашего прицела.
+            </label>
+            <label hex="#573d19" x="64" y="134" w="130">
+                Ручные особи бьют лишь цели,
+                поражённые Стрелой со скалком из Скалк-лука.
+            </label>
+            <label hex="#573d19" x="60" y="222" w="220">
+                Снаряды диких особей метят игроков,
+                натравливая монстров глубин.
+            </label>
+            <label hex="#573d19" x="305" y="48" w="210">
+                Скалкрапторы сильны стаей: нападая вместе,
+                они оглушают криком и отбрасывают врага,
+                совмещая укусы и ядовитые плевки.
+            </label>
+        </page>
+    </category>
+    <category id="chorusoatl">
+        <page src="infos/1">
+            <container popup="popups/1" hover-animation="scale" x="63" y="63" w="120" h="70">
+                <image src="images/1" absolute="true" w="576" h="320"/>
+            </container>
+            <label hex="#573d19" x="98" y="48">Травоядное</label>
+            <label hex="#573d19" x="214" y="48">Биом</label>
+            <label hex="#947546" x="229" y="106" align="center" scale="0.65">Острова Края</label>
+            <label hex="#573d19" x="206" y="121">Дроп</label>
+            <label hex="#947546" x="221" y="142" align="center" scale="0.38" w="28">Окаменелость хоруса</label>
+            <label hex="#573d19" x="60" y="204" w="214">
+                Хорусоатль — летун с внешних островов Края.
+                При опасности стая отбивается пронзительным
+                визгом и сокрушительным совместным натиском.
+            </label>
+            <label hex="#573d19" x="340" y="66" w="180">Дикие особи нападают всей стаей.</label>
+            <label hex="#573d19" x="354" y="90" w="180">Мощный визг отбрасывает врагов.</label>
+            <label hex="#573d19" x="339" y="122" w="180">Под седлом позволяет игроку летать.</label>
+            <label hex="#573d19" x="354" y="156" w="180">Укус в ближнем бою.</label>
+            <label hex="#573d19" x="344" y="182" w="170">Сгусток энергии сдувает врагов.</label>
+        </page>
+        <page src="infos/2">
+            <label hex="#573d19" x="60" y="48" w="214">
+                Хорусоатли летают стаями. Выманите одного
+                из стаи при помощи плода хоруса.
+            </label>
+            <label hex="#573d19" x="60" y="84" w="136">
+                Плод хоруса в руке удержит его.<br/>Без плода он предупредит один раз и нападёт.
+            </label>
+            <label hex="#573d19" x="174" y="158" w="100">
+                Он может отвергнуть плод,
+                закричать и улететь.
+            </label>
+            <label hex="#573d19" x="60" y="238" w="214">
+                Ручного хорусоатля можно оседлать.
+            </label>
+            <label hex="#573d19" x="305" y="48" w="210">
+                Кормите двух ручных особей плодами хоруса.
+                Яйцо на земле очень хрупкое —
+                не перекладывайте его слишком часто.
+            </label>
+            <label hex="#573d19" x="368" y="198" w="154">
+                Зреет лучше в Крае, но может вылупиться
+                и в другом месте: нужна полная темнота,
+                камень Края снизу и растения хоруса рядом.
+                Рост ускоряет плод хоруса.
+            </label>
+        </page>
+        <page src="infos/3">
+            <label hex="#573d19" x="60" y="128" w="214">
+                В седле можно свободно летать над островами Края.
+            </label>
+            <label hex="#573d19" x="60" y="162" w="200" align="center">
+                <color hex="#947546"><u><keybind id="key.jump"/></u> →</color> Взлёт / посадка
+            </label>
+            <label hex="#573d19" x="61" y="186" w="200" align="center">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_primary_attack"/></u> →</color>
+                Укус вблизи.
+            </label>
+            <label hex="#573d19" x="61" y="216" w="200" align="center">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_special_attack"/></u> →</color>
+                Плевок сгустком энергии.
+            </label>
+            <label hex="#573d19" x="305" y="48" w="210">
+                Косу хоруса создают из Окаменелостей хоруса, добытых в бою.
+            </label>
+            <container x="360" y="94">
+                <label hex="#573d19">Круговая атака <color hex="#947546">(20с ⌚)</color></label>
+                <label hex="#947546" y="10" w="150"><u><keybind id="key.use"/></u> →</label>
+                <label hex="#573d19" align="left" x="75" y="10" w="80">
+                    Бьёт и подбрасывает
+                    врагов в воздух.
+                </label>
+            </container>
+            <container popup="popups/3" hover-animation="scale" x="317" y="98" w="34" h="34">
+                <image src="images/2" src-x="447" src-y="78" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:chorus_scythe" x="296" y="98">
+                        <label x="58" scale="0.65"><b>Коса хоруса</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+            <label hex="#573d19" x="305" y="166" w="210">
+                Броню хорусоатля куют из Окаменелостей хоруса.
+            </label>
+            <container x="315" y="192">
+                <label hex="#947546" w="180">→ Бонус комплекта:</label>
+                <label hex="#573d19" x="12" y="10" w="180">Даёт Плавное падение.</label>
+                <label hex="#947546" y="30" w="180">→ Особое: <color hex="#573d19">Телепортация</color> (15с ⌚)</label>
+                <label hex="#573d19" x="12" y="42" w="170">
+                    Зажмите <color hex="#947546"><u><keybind id="ec_ad.armor"/></u></color> для прыжка в точку взгляда.
+                </label>
+            </container>
+            <container popup="popups/4" hover-animation="scale" x="337" y="260" w="142" h="43">
+                <image src="images/2" src-x="337" src-y="260" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:chorusoatl_helmet" x="296" y="28">
+                        <label x="58" scale="0.65"><b>Шлем хорусоатля</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:chorusoatl_chestplate" x="296" y="98">
+                        <label x="58" scale="0.65"><b>Нагрудник хорусоатля</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:chorusoatl_leggings" x="296" y="169">
+                        <label x="58" scale="0.65"><b>Поножи хорусоатля</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:chorusoatl_boots" x="296" y="240">
+                        <label x="58" scale="0.65"><b>Ботинки хорусоатля</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+        </page>
+    </category>
+    <category id="sculksaur">
+        <page src="infos/1">
+            <container popup="popups/1" hover-animation="scale" x="63" y="63" w="115" h="85">
+                <image src="images/1" absolute="true" w="576" h="320"/>
+            </container>
+            <label hex="#573d19" x="98" y="48">Хищник</label>
+            <label hex="#573d19" x="216" y="48">Биом</label>
+            <label hex="#947546" x="221" y="106" align="center" scale="0.65">Тёмные глубины</label>
+            <label hex="#573d19" x="216" y="129">Дроп</label>
+            <label hex="#947546" x="226" y="151" align="center" scale="0.42" w="28">Скалковый токсин</label>
+            <label hex="#573d19" x="60" y="200" w="214">
+                Скалкзавр — высший хищник Тёмных глубин.
+                Даже Хранитель бессилен перед его первобытной яростью.
+            </label>
+            <label hex="#573d19" x="300" y="48" w="220">
+                <color hex="#947546">→</color> Вылезает вслед за Хранителем.<br/><br/>
+                <color hex="#947546">→</color> Крайне агрессивен.<br/><br/>
+                <color hex="#947546">→</color> Особенно яростно бьёт Хранителя.<br/><br/>
+                <color hex="#947546">→</color> Не приручается и не размножается.
+            </label>
+            <label hex="#573d19" x="305" y="214" w="210">
+                Его пробуждение несёт гибель. Зверь
+                крушит всё вокруг и бьёт по любому звуку.
+            </label>
+            <label hex="#573d19" x="345" y="254" w="210">
+                Вас предупредили.
+            </label>
+        </page>
+        <page src="infos/2">
+            <label hex="#573d19" x="95" y="74" w="184">
+                Получает огромный бонус силы при выходе и сминает Хранителя.
+            </label>
+            <label hex="#573d19" x="108" y="112" w="165">
+                Чует жертву по звукам, вибрациям и запаху.
+            </label>
+            <label hex="#573d19" x="120" y="142" w="160">
+                Сокрушительный укус с огромным уроном.
+            </label>
+            <label hex="#573d19" x="148" y="178" w="130">
+                Удар хвостом с уроном и отбросом.
+            </label>
+            <label hex="#573d19" x="120" y="212" w="150">
+                Рёв бьёт акустической волной.
+            </label>
+            <label hex="#573d19" x="328" y="48" w="190">
+                Стреляйте в наросты на боках зверя,
+                чтобы выбить Скалковый токсин.
+            </label>
+            <label hex="#573d19" x="350" y="100" w="165">
+                <color hex="#947546">→ </color>Даёт Тьму и Отравление.
+                <br/>
+                <color hex="#947546">→ </color>Бьёт мобов Тёмных глубин.
+            </label>
+            <container popup="popups/2" hover-animation="scale" x="307" y="94" w="34" h="34">
+                <image src="images/2" src-x="317" src-y="102" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:ooze_tipped_arrow" x="296" y="98">
+                        <label x="58" scale="0.65"><b>Стрела со скалком</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+            <label hex="#573d19" x="305" y="140" w="210">
+                Броню скалкзавра куют из Скалковых токсинов.
+            </label>
+            <container x="315" y="168">
+                <label hex="#947546" w="180">→ Бонус комплекта:</label>
+                <label hex="#573d19" x="12" y="10" w="180">Атаки травят поражённых врагов на 5 секунд.</label>
+                <label hex="#947546" y="34" w="180">→ Особое: <color hex="#573d19">Скалковый рёв</color> (30с ⌚)</label>
+                <label hex="#573d19" x="12" y="46" w="170">
+                    Зажмите <color hex="#947546"><u><keybind id="ec_ad.armor"/></u></color> для рёва: наложит
+                    Слепоту и Тошноту, оглушив мобов глубин.
+                </label>
+            </container>
+            <container popup="popups/3" hover-animation="scale" x="337" y="260" w="142" h="43">
+                <image src="images/2" src-x="337" src-y="260" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:sculksaur_helmet" x="296" y="28">
+                        <label x="58" scale="0.65"><b>Шлем скалкзавра</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:sculksaur_chestplate" x="296" y="97">
+                        <label x="58" scale="0.65"><b>Нагрудник скалкзавра</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:sculksaur_leggings" x="296" y="169">
+                        <label x="58" scale="0.65"><b>Поножи скалкзавра</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:sculksaur_boots" x="296" y="240">
+                        <label x="58" scale="0.65"><b>Ботинки скалкзавра</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+        </page>
+    </category>
+    <category id="credits" no-markers="true">
+        <page src="infos/1">
+            <label x="168" y="41" color="#573d19" align="center"><b>Создатели</b></label>
+            <label x="168" y="251" color="#573d19" align="center"><b>Сайт</b></label>
+            <label x="170" y="261" color="#573d19" align="center">
+                <a href="https://www.eternalcreations.games">
+                    www.eternalcreations.games
+                </a>
+            </label>
+            <label x="328" y="32" color="#573d19" w="160" align="center">
+                Следите за новостями
+                мода и новыми проектами!
+            </label>
+            <label x="346" y="100" w="160" color="#573d19">
+                <b>Наш Discord-сервер!</b>
+                <br/>
+                <a href="https://discord.gg/eternalcreations">
+                    <color hex="#947546">discord.gg/</color>eternalcreations
+                </a>
+            </label>
+            <label x="346" y="160" w="160" color="#573d19">
+                <b>Мы в X / Twitter!</b>
+                <br/>
+                <a href="https://x.com/EternalCrtns">
+                    <color hex="#947546">x.com/</color>EternalCrtns
+                </a>
+            </label>
+            <label x="346" y="220" w="160" color="#573d19">
+                <b>Мы в TikTok!</b>
+                <br/>
+                <a href="https://tiktok.com/@eternalxcreations">
+                    <color hex="#947546">tiktok.com/</color>eternalxcreations
+                </a>
+            </label>
+        </page>
+    </category>
+</root>

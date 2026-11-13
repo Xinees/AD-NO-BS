@@ -1,0 +1,43 @@
+{
+  "parent": "ec_ad:root",
+  "criteria": {
+    "spot": {
+      "conditions": {
+        "entity": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "type": "ec_ad:lushsaur"
+            }
+          }
+        ]
+      },
+      "trigger": "ec_ad:spotted_entity"
+    }
+  },
+  "display": {
+    "announce_to_chat": true,
+    "description": {
+      "translate": "advancement.spot_lushsaur.desc"
+    },
+    "frame": "task",
+    "hidden": false,
+    "icon": {
+      "item": "ec_ad:lushsaur_spawn_egg"
+    },
+    "show_toast": true,
+    "title": {
+      "translate": "advancement.spot_lushsaur.title"
+    }
+  },
+  "requirements": [
+    [
+      "spot"
+    ]
+  ],
+  "rewards": {
+    "experience": 100
+  },
+  "sends_telemetry_event": true
+}

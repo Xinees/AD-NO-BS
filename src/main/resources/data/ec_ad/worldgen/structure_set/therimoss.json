@@ -1,0 +1,14 @@
+{
+  "placement": {
+    "type": "minecraft:random_spread",
+    "salt": 5211633,
+    "separation": 6,
+    "spacing": 7
+  },
+  "structures": [
+    {
+      "structure": "ec_ad:therimoss",
+      "weight": 1
+    }
+  ]
+}

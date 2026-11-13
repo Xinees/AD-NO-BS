@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "A": {
+      "item": "ec_ad:amber"
+    },
+    "N": {
+      "tag": "forge:nuggets/iron"
+    }
+  },
+  "pattern": [
+    "N",
+    "A",
+    "N"
+  ],
+  "result": {
+    "item": "ec_ad:amber_chain"
+  },
+  "show_notification": true
+}

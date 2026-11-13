@@ -1,0 +1,49 @@
+{
+	"format_version": "1.10.0",
+	"particle_effect": {
+		"description": {
+			"identifier": "ec_ad:therimoss_beak_attack_2",
+			"basic_render_parameters": {
+				"material": "particles_alpha",
+				"texture": "atlas.terrain"
+			}
+		},
+		"components": {
+			"minecraft:emitter_rate_steady": {
+				"spawn_rate": 100,
+				"max_particles": 100
+			},
+			"minecraft:emitter_lifetime_once": {
+				"active_time": 0.3
+			},
+			"minecraft:emitter_shape_box": {
+				"half_dimensions": [2, 0, 2],
+				"direction": ["math.random(0.5, -0.5)", 1, "math.random(0.5, -0.5)"]
+			},
+			"minecraft:particle_lifetime_expression": {
+				"max_lifetime": "math.random(3, 2)"
+			},
+			"minecraft:particle_initial_speed": "-15*variable.particle_random_2-4",
+			"minecraft:particle_motion_dynamic": {
+				"linear_acceleration": [0, -24, 0],
+				"linear_drag_coefficient": 3
+			},
+			"minecraft:particle_appearance_billboard": {
+				"size": ["variable.particle_random_1 * 0.0375 + 0.0375", "variable.particle_random_1 * 0.0375 + 0.0375"],
+				"facing_camera_mode": "lookat_xyz",
+				"uv": {
+					"texture_width": 1,
+					"texture_height": 1,
+					"uv": ["variable.dig_particle_texture_coordinate.u + (variable.dig_particle_texture_size.u/4) * (variable.particle_random_1*3)", "variable.dig_particle_texture_coordinate.v + (variable.dig_particle_texture_size.v/4) * (variable.particle_random_2*3)"],
+					"uv_size": ["variable.dig_particle_texture_size.u/4", "variable.dig_particle_texture_size.v/4"]
+				}
+			},
+			"minecraft:particle_motion_collision": {
+				"collision_drag": 10,
+				"coefficient_of_restitution": 0.2,
+				"collision_radius": 0.1
+			},
+			"minecraft:particle_appearance_lighting": {}
+		}
+	}
+}

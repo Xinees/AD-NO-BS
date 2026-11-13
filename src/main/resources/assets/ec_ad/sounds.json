@@ -1,0 +1,957 @@
+{
+  "item.armor.equip_chorusoatl": {
+    "sounds": [
+      {
+        "type": "event",
+        "name": "item.armor.equip_chain"
+      }
+    ],
+    "subtitle": "subtitles.ec_ad.item.armor.equip_chorusoatl"
+  },
+  "item.armor.equip_coralosaur": {
+    "sounds": [
+      {
+        "type": "event",
+        "name": "item.armor.equip_leather"
+      }
+    ],
+    "subtitle": "subtitles.ec_ad.item.armor.equip_coralosaur"
+  },
+  "item.armor.equip_lush": {
+    "sounds": [
+      {
+        "type": "event",
+        "name": "item.armor.equip_chain"
+      }
+    ],
+    "subtitle": "subtitles.ec_ad.item.armor.equip_lush"
+  },
+  "item.armor.equip_obsidiceratops": {
+    "sounds": [
+      {
+        "type": "event",
+        "name": "item.armor.equip_chain"
+      }
+    ],
+    "subtitle": "subtitles.ec_ad.item.armor.equip_obsidiceratops"
+  },
+  "item.armor.equip_sculksaur": {
+    "sounds": [
+      {
+        "type": "event",
+        "name": "item.armor.equip_leather"
+      }
+    ],
+    "subtitle": "subtitles.ec_ad.item.armor.equip_sculksaur"
+  },
+  "item.armor.equip_therimoss": {
+    "sounds": [
+      {
+        "type": "event",
+        "name": "item.armor.equip_leather"
+      }
+    ],
+    "subtitle": "subtitles.ec_ad.item.armor.equip_therimoss"
+  },
+  "item.armor.explosion": {
+    "sounds": [
+      "ec_ad:item/armor/explosion"
+    ],
+    "subtitle": "subtitles.ec_ad.item.armor.explosion"
+  },
+  "item.armor.teleport": {
+    "sounds": [
+      {
+        "type": "event",
+        "name": "entity.enderman.teleport"
+      }
+    ],
+    "subtitle": "subtitles.ec_ad.item.armor.teleport"
+  },
+  "item.chorus_scythe.attack": {
+    "sounds": [
+      "ec_ad:item/chorus_scythe/attack1",
+      "ec_ad:item/chorus_scythe/attack2"
+    ],
+    "subtitle": "subtitles.ec_ad.item.chorus_scythe.attack"
+  },
+  "item.chorus_scythe.spin": {
+    "sounds": [
+      "ec_ad:item/chorus_scythe/spin"
+    ],
+    "subtitle": "subtitles.ec_ad.item.chorus_scythe.spin"
+  },
+  "item.lushsaur_mace.attack": {
+    "sounds": [
+      {
+        "type": "event",
+        "name": "entity.player.attack.sweep"
+      }
+    ],
+    "subtitle": "subtitles.ec_ad.item.lushsaur_mace.attack"
+  },
+  "item.lushsaur_mace.spin": {
+    "sounds": [
+      "ec_ad:item/lushsaur_mace/spin"
+    ],
+    "subtitle": "subtitles.ec_ad.item.lushsaur_mace.spin"
+  },
+  "item.scorching_horn": {
+    "sounds": [
+      "ec_ad:item/scorching_horn"
+    ],
+    "subtitle": "subtitles.ec_ad.item.scorching_horn"
+  },
+  "item.therimoss_claws.attack": {
+    "sounds": [
+      "ec_ad:item/therimoss_claws/attack"
+    ],
+    "subtitle": "subtitles.ec_ad.item.therimoss_claws.attack"
+  },
+  "mob.archie.aboveground_1": {
+    "sounds": [
+      "ec_ad:mob/archie/aboveground_1"
+    ]
+  },
+  "mob.archie.aboveground_2": {
+    "sounds": [
+      "ec_ad:mob/archie/aboveground_2"
+    ]
+  },
+  "mob.archie.accept": {
+    "sounds": [
+      "ec_ad:mob/archie/accept"
+    ]
+  },
+  "mob.archie.chorusoatl_1": {
+    "sounds": [
+      "ec_ad:mob/archie/chorusoatl_1"
+    ]
+  },
+  "mob.archie.chorusoatl_2": {
+    "sounds": [
+      "ec_ad:mob/archie/chorusoatl_2"
+    ]
+  },
+  "mob.archie.coralosaur_1": {
+    "sounds": [
+      "ec_ad:mob/archie/coralosaur_1"
+    ]
+  },
+  "mob.archie.coralosaur_2": {
+    "sounds": [
+      "ec_ad:mob/archie/coralosaur_2"
+    ]
+  },
+  "mob.archie.deny": {
+    "sounds": [
+      "ec_ad:mob/archie/deny"
+    ]
+  },
+  "mob.archie.dimensions_1": {
+    "sounds": [
+      "ec_ad:mob/archie/dimensions_1"
+    ]
+  },
+  "mob.archie.dimensions_2": {
+    "sounds": [
+      "ec_ad:mob/archie/dimensions_2"
+    ]
+  },
+  "mob.archie.friend": {
+    "sounds": [
+      "ec_ad:mob/archie/friend"
+    ]
+  },
+  "mob.archie.intro": {
+    "sounds": [
+      "ec_ad:mob/archie/intro"
+    ]
+  },
+  "mob.archie.lushsaur_1": {
+    "sounds": [
+      "ec_ad:mob/archie/lushsaur_1"
+    ]
+  },
+  "mob.archie.lushsaur_2": {
+    "sounds": [
+      "ec_ad:mob/archie/lushsaur_2"
+    ]
+  },
+  "mob.archie.obsidiceratops_1": {
+    "sounds": [
+      "ec_ad:mob/archie/obsidiceratops_1"
+    ]
+  },
+  "mob.archie.obsidiceratops_2": {
+    "sounds": [
+      "ec_ad:mob/archie/obsidiceratops_2"
+    ]
+  },
+  "mob.archie.sculk_raptor_1": {
+    "sounds": [
+      "ec_ad:mob/archie/sculk_raptor_1"
+    ]
+  },
+  "mob.archie.sculk_raptor_2": {
+    "sounds": [
+      "ec_ad:mob/archie/sculk_raptor_2"
+    ]
+  },
+  "mob.archie.sculksaur_1": {
+    "sounds": [
+      "ec_ad:mob/archie/sculksaur_1"
+    ]
+  },
+  "mob.archie.sculksaur_2": {
+    "sounds": [
+      "ec_ad:mob/archie/sculksaur_2"
+    ]
+  },
+  "mob.archie.therimoss_1": {
+    "sounds": [
+      "ec_ad:mob/archie/therimoss_1"
+    ]
+  },
+  "mob.archie.therimoss_2": {
+    "sounds": [
+      "ec_ad:mob/archie/therimoss_2"
+    ]
+  },
+  "mob.archie.underground_1": {
+    "sounds": [
+      "ec_ad:mob/archie/underground_1"
+    ]
+  },
+  "mob.archie.underground_2": {
+    "sounds": [
+      "ec_ad:mob/archie/underground_2"
+    ]
+  },
+  "mob.chorusoatl.bite": {
+    "sounds": [
+      "ec_ad:mob/chorusoatl/bite"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.chorusoatl.bite"
+  },
+  "mob.chorusoatl.death_air": {
+    "sounds": [
+      "ec_ad:mob/chorusoatl/death_air"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.chorusoatl.death_air"
+  },
+  "mob.chorusoatl.death_air_ground": {
+    "sounds": [
+      "ec_ad:mob/chorusoatl/death_air_ground"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.chorusoatl.death_air_ground"
+  },
+  "mob.chorusoatl.death_falling": {
+    "sounds": [
+      "ec_ad:mob/chorusoatl/death_falling"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.chorusoatl.death_falling"
+  },
+  "mob.chorusoatl.death_ground": {
+    "sounds": [
+      "ec_ad:mob/chorusoatl/death_ground"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.chorusoatl.death_ground"
+  },
+  "mob.chorusoatl.flap_down": {
+    "sounds": [
+      "ec_ad:mob/chorusoatl/flap_down1",
+      "ec_ad:mob/chorusoatl/flap_down2"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.chorusoatl.flap_down"
+  },
+  "mob.chorusoatl.flap_up": {
+    "sounds": [
+      "ec_ad:mob/chorusoatl/flap_up1",
+      "ec_ad:mob/chorusoatl/flap_up2"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.chorusoatl.flap_up"
+  },
+  "mob.chorusoatl.glide": {
+    "sounds": [
+      "ec_ad:mob/chorusoatl/glide1",
+      "ec_ad:mob/chorusoatl/glide2"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.chorusoatl.glide"
+  },
+  "mob.chorusoatl.hurt": {
+    "sounds": [
+      "ec_ad:mob/chorusoatl/hurt1",
+      "ec_ad:mob/chorusoatl/hurt2",
+      "ec_ad:mob/chorusoatl/hurt3"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.chorusoatl.hurt"
+  },
+  "mob.chorusoatl.idle": {
+    "sounds": [
+      "ec_ad:mob/chorusoatl/idle1",
+      "ec_ad:mob/chorusoatl/idle2",
+      "ec_ad:mob/chorusoatl/idle3"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.chorusoatl.idle"
+  },
+  "mob.chorusoatl.land": {
+    "sounds": [
+      "ec_ad:mob/chorusoatl/land"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.chorusoatl.land"
+  },
+  "mob.chorusoatl.scream": {
+    "sounds": [
+      "ec_ad:mob/chorusoatl/scream"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.chorusoatl.scream"
+  },
+  "mob.chorusoatl.spit": {
+    "sounds": [
+      "ec_ad:mob/chorusoatl/spit"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.chorusoatl.spit"
+  },
+  "mob.chorusoatl.step_heavy": {
+    "sounds": [
+      "ec_ad:mob/chorusoatl/step_heavy1",
+      "ec_ad:mob/chorusoatl/step_heavy2"
+    ],
+    "subtitle": "subtitles.block.generic.footsteps"
+  },
+  "mob.chorusoatl.step_light": {
+    "sounds": [
+      "ec_ad:mob/chorusoatl/step_light1",
+      "ec_ad:mob/chorusoatl/step_light2"
+    ],
+    "subtitle": "subtitles.block.generic.footsteps"
+  },
+  "mob.chorusoatl.stomp": {
+    "sounds": [
+      "ec_ad:mob/chorusoatl/stomp"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.chorusoatl.stomp"
+  },
+  "mob.chorusoatl.tame": {
+    "sounds": [
+      "ec_ad:mob/chorusoatl/tame1",
+      "ec_ad:mob/chorusoatl/tame2"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.chorusoatl.tame"
+  },
+  "mob.chorusoatl.up": {
+    "sounds": [
+      "ec_ad:mob/chorusoatl/up"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.chorusoatl.up"
+  },
+  "mob.coralosaur.bite": {
+    "sounds": [
+      "ec_ad:mob/coralosaur/bite"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.coralosaur.bite"
+  },
+  "mob.coralosaur.bury": {
+    "sounds": [
+      "ec_ad:mob/coralosaur/bury"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.coralosaur.bury"
+  },
+  "mob.coralosaur.death": {
+    "sounds": [
+      "ec_ad:mob/coralosaur/death"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.coralosaur.death"
+  },
+  "mob.coralosaur.hurt": {
+    "sounds": [
+      "ec_ad:mob/coralosaur/hurt1",
+      "ec_ad:mob/coralosaur/hurt2",
+      "ec_ad:mob/coralosaur/hurt3"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.coralosaur.hurt"
+  },
+  "mob.coralosaur.idle": {
+    "sounds": [
+      "ec_ad:mob/coralosaur/idle1",
+      "ec_ad:mob/coralosaur/idle2",
+      "ec_ad:mob/coralosaur/idle3"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.coralosaur.idle"
+  },
+  "mob.coralosaur.sleep": {
+    "sounds": [
+      "ec_ad:mob/coralosaur/sleep"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.coralosaur.sleep"
+  },
+  "mob.coralosaur.wake": {
+    "sounds": [
+      "ec_ad:mob/coralosaur/wake"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.coralosaur.wake"
+  },
+  "mob.dino.egg.breaks": {
+    "sounds": [
+      {
+        "type": "event",
+        "name": "entity.turtle.egg_break"
+      }
+    ],
+    "subtitle": "subtitles.ec_ad.mob.dino.egg.breaks"
+  },
+  "mob.dino.egg.cracks": {
+    "sounds": [
+      {
+        "type": "event",
+        "name": "entity.turtle.egg_crack"
+      }
+    ],
+    "subtitle": "subtitles.ec_ad.mob.dino.egg.cracks"
+  },
+  "mob.dino.egg.hatches": {
+    "sounds": [
+      {
+        "type": "event",
+        "name": "entity.turtle.egg_hatch"
+      }
+    ],
+    "subtitle": "subtitles.ec_ad.mob.dino.egg.hatches"
+  },
+  "mob.dino.egg.lay": {
+    "sounds": [
+      {
+        "type": "event",
+        "name": "entity.turtle.lay_egg"
+      }
+    ],
+    "subtitle": "subtitles.ec_ad.mob.dino.egg.lay"
+  },
+  "mob.dino.egg.pickup": {
+    "sounds": [
+      {
+        "type": "event",
+        "name": "entity.item.pickup"
+      }
+    ],
+    "subtitle": "subtitles.ec_ad.mob.dino.egg.pickup"
+  },
+  "mob.dino.equip": {
+    "sounds": [
+      {
+        "type": "event",
+        "name": "entity.horse.armor"
+      }
+    ],
+    "subtitle": "subtitles.ec_ad.mob.dino.equip"
+  },
+  "mob.lushsaur.attack1": {
+    "sounds": [
+      "ec_ad:mob/lushsaur/attack1"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.lushsaur.attack1"
+  },
+  "mob.lushsaur.attack2": {
+    "sounds": [
+      "ec_ad:mob/lushsaur/attack2"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.lushsaur.attack2"
+  },
+  "mob.lushsaur.attack3": {
+    "sounds": [
+      "ec_ad:mob/lushsaur/attack3"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.lushsaur.attack3"
+  },
+  "mob.lushsaur.attack4": {
+    "sounds": [
+      "ec_ad:mob/lushsaur/attack4"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.lushsaur.attack4"
+  },
+  "mob.lushsaur.death": {
+    "sounds": [
+      "ec_ad:mob/lushsaur/death"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.lushsaur.death"
+  },
+  "mob.lushsaur.down": {
+    "sounds": [
+      "ec_ad:mob/lushsaur/down"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.lushsaur.down"
+  },
+  "mob.lushsaur.ear_ringing": {
+    "sounds": [
+      "ec_ad:mob/lushsaur/ear_ringing"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.lushsaur.ear_ringing"
+  },
+  "mob.lushsaur.eat": {
+    "sounds": [
+      "ec_ad:mob/lushsaur/eat"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.lushsaur.eat"
+  },
+  "mob.lushsaur.hurt": {
+    "sounds": [
+      "ec_ad:mob/lushsaur/hurt1",
+      "ec_ad:mob/lushsaur/hurt2",
+      "ec_ad:mob/lushsaur/hurt3"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.lushsaur.hurt"
+  },
+  "mob.lushsaur.idle": {
+    "sounds": [
+      "ec_ad:mob/lushsaur/idle1",
+      "ec_ad:mob/lushsaur/idle2",
+      "ec_ad:mob/lushsaur/idle3",
+      "ec_ad:mob/lushsaur/idle4",
+      "ec_ad:mob/lushsaur/idle5"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.lushsaur.idle"
+  },
+  "mob.lushsaur.rest": {
+    "sounds": [
+      "ec_ad:mob/lushsaur/rest"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.lushsaur.rest"
+  },
+  "mob.lushsaur.roar": {
+    "sounds": [
+      "ec_ad:mob/lushsaur/roar"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.lushsaur.roar"
+  },
+  "mob.lushsaur.run_attack": {
+    "sounds": [
+      "ec_ad:mob/lushsaur/run_attack"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.lushsaur.run_attack"
+  },
+  "mob.lushsaur.shear": {
+    "sounds": [
+      {
+        "type": "event",
+        "name": "entity.sheep.shear"
+      }
+    ],
+    "subtitle": "subtitles.ec_ad.mob.lushsaur.shear"
+  },
+  "mob.lushsaur.step": {
+    "sounds": [
+      "ec_ad:mob/lushsaur/step1",
+      "ec_ad:mob/lushsaur/step2",
+      "ec_ad:mob/lushsaur/step3",
+      "ec_ad:mob/lushsaur/step4"
+    ],
+    "subtitle": "subtitles.block.generic.footsteps"
+  },
+  "mob.lushsaur.stomp_explosion": {
+    "sounds": [
+      {
+        "type": "event",
+        "name": "entity.generic.explode"
+      }
+    ],
+    "subtitle": "subtitles.ec_ad.mob.lushsaur.stomp_explosion"
+  },
+  "mob.lushsaur.up": {
+    "sounds": [
+      "ec_ad:mob/lushsaur/up"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.lushsaur.up"
+  },
+  "mob.obsidiceratops.agro": {
+    "sounds": [
+      "ec_ad:mob/obsidiceratops/agro"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.obsidiceratops.agro"
+  },
+  "mob.obsidiceratops.attack": {
+    "sounds": [
+      "ec_ad:mob/obsidiceratops/attack1",
+      "ec_ad:mob/obsidiceratops/attack2"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.obsidiceratops.attack"
+  },
+  "mob.obsidiceratops.charge_agro": {
+    "sounds": [
+      "ec_ad:mob/obsidiceratops/charge_agro"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.obsidiceratops.charge_agro"
+  },
+  "mob.obsidiceratops.charge_attack": {
+    "sounds": [
+      "ec_ad:mob/obsidiceratops/charge_attack"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.obsidiceratops.charge_attack"
+  },
+  "mob.obsidiceratops.death": {
+    "sounds": [
+      "ec_ad:mob/obsidiceratops/death"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.obsidiceratops.death"
+  },
+  "mob.obsidiceratops.drink": {
+    "sounds": [
+      "ec_ad:mob/obsidiceratops/drink1",
+      "ec_ad:mob/obsidiceratops/drink2"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.obsidiceratops.drink"
+  },
+  "mob.obsidiceratops.eat": {
+    "sounds": [
+      "ec_ad:mob/obsidiceratops/eat"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.obsidiceratops.eat"
+  },
+  "mob.obsidiceratops.egg.scorch": {
+    "sounds": [
+      {
+        "type": "event",
+        "name": "item.firecharge.use"
+      }
+    ],
+    "subtitle": "subtitles.ec_ad.mob.obsidiceratops.egg.scorch"
+  },
+  "mob.obsidiceratops.feed_lava": {
+    "sounds": [
+      {
+        "type": "event",
+        "name": "entity.cow.milk"
+      }
+    ],
+    "subtitle": "subtitles.ec_ad.mob.obsidiceratops.feed_lava"
+  },
+  "mob.obsidiceratops.harvest_lava": {
+    "sounds": [
+      {
+        "type": "event",
+        "name": "entity.cow.milk"
+      }
+    ],
+    "subtitle": "subtitles.ec_ad.mob.obsidiceratops.harvest_lava"
+  },
+  "mob.obsidiceratops.hurt": {
+    "sounds": [
+      "ec_ad:mob/obsidiceratops/hurt1",
+      "ec_ad:mob/obsidiceratops/hurt2",
+      "ec_ad:mob/obsidiceratops/hurt3"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.obsidiceratops.hurt"
+  },
+  "mob.obsidiceratops.idle": {
+    "sounds": [
+      "ec_ad:mob/obsidiceratops/idle1",
+      "ec_ad:mob/obsidiceratops/idle2",
+      "ec_ad:mob/obsidiceratops/idle3",
+      "ec_ad:mob/obsidiceratops/idle4"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.obsidiceratops.idle"
+  },
+  "mob.obsidiceratops.run": {
+    "sounds": [
+      "ec_ad:mob/obsidiceratops/run"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.obsidiceratops.run"
+  },
+  "mob.obsidiceratops.step": {
+    "sounds": [
+      "ec_ad:mob/obsidiceratops/step1",
+      "ec_ad:mob/obsidiceratops/step2",
+      "ec_ad:mob/obsidiceratops/step3",
+      "ec_ad:mob/obsidiceratops/step4"
+    ],
+    "subtitle": "subtitles.block.generic.footsteps"
+  },
+  "mob.obsidiceratops.walk": {
+    "sounds": [
+      "ec_ad:mob/obsidiceratops/walk"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.obsidiceratops.walk"
+  },
+  "mob.sculkraptor.bite_attack": {
+    "sounds": [
+      "ec_ad:mob/sculkraptor/bite_attack"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.sculkraptor.bite_attack"
+  },
+  "mob.sculkraptor.death": {
+    "sounds": [
+      "ec_ad:mob/sculkraptor/death"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.sculkraptor.death"
+  },
+  "mob.sculkraptor.hurt": {
+    "sounds": [
+      "ec_ad:mob/sculkraptor/hurt1",
+      "ec_ad:mob/sculkraptor/hurt2",
+      "ec_ad:mob/sculkraptor/hurt3"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.sculkraptor.hurt"
+  },
+  "mob.sculkraptor.idle": {
+    "sounds": [
+      "ec_ad:mob/sculkraptor/idle1",
+      "ec_ad:mob/sculkraptor/idle2",
+      "ec_ad:mob/sculkraptor/idle3"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.sculkraptor.idle"
+  },
+  "mob.sculkraptor.nest.egg": {
+    "sounds": [
+      {
+        "type": "event",
+        "name": "entity.chicken.egg"
+      }
+    ],
+    "subtitle": "subtitles.ec_ad.mob.sculkraptor.nest.egg"
+  },
+  "mob.sculkraptor.ranged_attack": {
+    "sounds": [
+      "ec_ad:mob/sculkraptor/ranged_attack1",
+      "ec_ad:mob/sculkraptor/ranged_attack2"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.sculkraptor.ranged_attack"
+  },
+  "mob.sculkraptor.scream": {
+    "sounds": [
+      "ec_ad:mob/sculkraptor/scream"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.sculkraptor.scream"
+  },
+  "mob.sculkraptor.sculk_projectile": {
+    "sounds": [
+      "ec_ad:mob/sculkraptor/sculk_projectile"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.sculkraptor.sculk_projectile"
+  },
+  "mob.sculkraptor.sculk_tracker": {
+    "sounds": [
+      "ec_ad:mob/sculkraptor/sculk_tracker1",
+      "ec_ad:mob/sculkraptor/sculk_tracker2"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.sculkraptor.sculk_tracker"
+  },
+  "mob.sculkraptor.sniff": {
+    "sounds": [
+      "ec_ad:mob/sculkraptor/sniff"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.sculkraptor.sniff"
+  },
+  "mob.sculkraptor.step": {
+    "sounds": [
+      "ec_ad:mob/sculkraptor/step1",
+      "ec_ad:mob/sculkraptor/step2",
+      "ec_ad:mob/sculkraptor/step3"
+    ],
+    "subtitle": "subtitles.block.generic.footsteps"
+  },
+  "mob.sculkraptor.tendril_clicks": {
+    "sounds": [
+      {
+        "type": "event",
+        "name": "entity.warden.tendril_clicks"
+      }
+    ],
+    "subtitle": "subtitles.ec_ad.mob.sculkraptor.tendril_clicks"
+  },
+  "mob.sculksaur.attack": {
+    "sounds": [
+      "ec_ad:mob/sculksaur/attack"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.sculksaur.attack"
+  },
+  "mob.sculksaur.charge_bite": {
+    "sounds": [
+      "ec_ad:mob/sculksaur/charge_bite"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.sculksaur.charge_bite"
+  },
+  "mob.sculksaur.death": {
+    "sounds": [
+      {
+        "name": "ec_ad:mob/sculksaur/death",
+        "volume": 4.0
+      }
+    ],
+    "subtitle": "subtitles.ec_ad.mob.sculksaur.death"
+  },
+  "mob.sculksaur.explosion": {
+    "sounds": [
+      "ec_ad:mob/sculksaur/explosion"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.sculksaur.explosion"
+  },
+  "mob.sculksaur.hurt": {
+    "sounds": [
+      "ec_ad:mob/sculksaur/hurt1",
+      "ec_ad:mob/sculksaur/hurt2"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.sculksaur.hurt"
+  },
+  "mob.sculksaur.idle": {
+    "sounds": [
+      "ec_ad:mob/sculksaur/idle1",
+      "ec_ad:mob/sculksaur/idle2",
+      "ec_ad:mob/sculksaur/idle3"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.sculksaur.idle"
+  },
+  "mob.sculksaur.roar": {
+    "sounds": [
+      "ec_ad:mob/sculksaur/roar"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.sculksaur.roar"
+  },
+  "mob.sculksaur.sniff": {
+    "sounds": [
+      "ec_ad:mob/sculksaur/sniff"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.sculksaur.sniff"
+  },
+  "mob.sculksaur.spawn": {
+    "sounds": [
+      "ec_ad:mob/sculksaur/spawn"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.sculksaur.spawn"
+  },
+  "mob.sculksaur.step": {
+    "sounds": [
+      "ec_ad:mob/sculksaur/step1",
+      "ec_ad:mob/sculksaur/step2",
+      "ec_ad:mob/sculksaur/step3",
+      "ec_ad:mob/sculksaur/step4"
+    ],
+    "subtitle": "subtitles.block.generic.footsteps"
+  },
+  "mob.sculksaur.tail_attack": {
+    "sounds": [
+      "ec_ad:mob/sculksaur/tail_attack"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.sculksaur.tail_attack"
+  },
+  "mob.sculksaur.tendril_clicks": {
+    "sounds": [
+      {
+        "type": "event",
+        "name": "entity.warden.tendril_clicks"
+      }
+    ],
+    "subtitle": "subtitles.ec_ad.mob.sculksaur.tendril_clicks"
+  },
+  "mob.sculksaur.wart_pop": {
+    "sounds": [
+      {
+        "type": "event",
+        "name": "block.slime_block.break"
+      }
+    ],
+    "subtitle": "subtitles.ec_ad.mob.sculksaur.wart_pop"
+  },
+  "mob.therimoss.beak": {
+    "sounds": [
+      "ec_ad:mob/therimoss/beak"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.therimoss.beak"
+  },
+  "mob.therimoss.block.land": {
+    "sounds": [
+      {
+        "type": "event",
+        "name": "block.gravel.break"
+      }
+    ],
+    "subtitle": "subtitles.ec_ad.mob.therimoss.block.land"
+  },
+  "mob.therimoss.block.throw": {
+    "sounds": [
+      {
+        "type": "event",
+        "name": "block.gravel.break"
+      }
+    ],
+    "subtitle": "subtitles.ec_ad.mob.therimoss.block.throw"
+  },
+  "mob.therimoss.climb_down": {
+    "sounds": [
+      "ec_ad:mob/therimoss/climb_down"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.therimoss.climb_down"
+  },
+  "mob.therimoss.climb_up": {
+    "sounds": [
+      "ec_ad:mob/therimoss/climb_up"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.therimoss.climb_up"
+  },
+  "mob.therimoss.death": {
+    "sounds": [
+      "ec_ad:mob/therimoss/death"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.therimoss.death"
+  },
+  "mob.therimoss.eat": {
+    "sounds": [
+      "ec_ad:mob/therimoss/eat"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.therimoss.eat"
+  },
+  "mob.therimoss.fall": {
+    "sounds": [
+      "ec_ad:mob/therimoss/fall"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.therimoss.fall"
+  },
+  "mob.therimoss.hurt": {
+    "sounds": [
+      "ec_ad:mob/therimoss/hurt1",
+      "ec_ad:mob/therimoss/hurt2"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.therimoss.hurt"
+  },
+  "mob.therimoss.idle": {
+    "sounds": [
+      "ec_ad:mob/therimoss/idle1",
+      "ec_ad:mob/therimoss/idle2",
+      "ec_ad:mob/therimoss/idle3",
+      "ec_ad:mob/therimoss/idle4"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.therimoss.idle"
+  },
+  "mob.therimoss.land": {
+    "sounds": [
+      "ec_ad:mob/therimoss/land"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.therimoss.land"
+  },
+  "mob.therimoss.land_bigger": {
+    "sounds": [
+      "ec_ad:mob/therimoss/land_bigger"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.therimoss.land_bigger"
+  },
+  "mob.therimoss.melee": {
+    "sounds": [
+      "ec_ad:mob/therimoss/melee"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.therimoss.melee"
+  },
+  "mob.therimoss.step": {
+    "sounds": [
+      "ec_ad:mob/therimoss/step1",
+      "ec_ad:mob/therimoss/step2",
+      "ec_ad:mob/therimoss/step3",
+      "ec_ad:mob/therimoss/step4"
+    ],
+    "subtitle": "subtitles.block.generic.footsteps"
+  },
+  "mob.therimoss.throw": {
+    "sounds": [
+      "ec_ad:mob/therimoss/throw"
+    ],
+    "subtitle": "subtitles.ec_ad.mob.therimoss.throw"
+  }
+}

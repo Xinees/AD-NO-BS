@@ -1,0 +1,89 @@
+{
+	"format_version": "26.3",
+	"credit": "Made with Blockbench",
+	"render_type": "minecraft:cutout",
+	"texture_size": [32, 32],
+	"textures": {
+		"1": "ec_ad:block/amber_lantern",
+		"2": "ec_ad:block/amber_chain",
+		"particle": "ec_ad:block/amber_lantern"
+	},
+	"elements": [
+		{
+			"name": "root",
+			"from": [4, 2, 4],
+			"to": [12, 12, 12],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 2, 8]},
+			"faces": {
+				"north": {"uv": [4, 4, 8, 9], "texture": "#1"},
+				"east": {"uv": [0, 4, 4, 9], "texture": "#1"},
+				"south": {"uv": [12, 4, 16, 9], "texture": "#1"},
+				"west": {"uv": [8, 4, 12, 9], "texture": "#1"},
+				"up": {"uv": [8, 4, 4, 0], "texture": "#1"},
+				"down": {"uv": [12, 0, 8, 4], "texture": "#1"}
+			}
+		},
+		{
+			"from": [8, 14, 6.5],
+			"to": [8, 16, 9.5],
+			"shade_direction_override": "up",
+			"rotation": {"angle": 45, "axis": "y", "origin": [8, 8, 8]},
+			"faces": {
+				"east": {"uv": [3, 0, 6, 2], "texture": "#2"},
+				"west": {"uv": [6, 0, 3, 2], "texture": "#2"}
+			}
+		},
+		{
+			"from": [5, 12, 8],
+			"to": [11, 15, 8],
+			"shade_direction_override": "up",
+			"rotation": {"angle": 45, "axis": "y", "origin": [8, 9, 8]},
+			"faces": {
+				"north": {"uv": [6, 12, 3, 13.5], "texture": "#1"},
+				"south": {"uv": [0, 12, 3, 13.5], "texture": "#1"}
+			}
+		}
+	],
+	"display": {
+		"thirdperson_righthand": {
+			"rotation": [75, 45, 0],
+			"translation": [0, 2.5, 0],
+			"scale": [0.375, 0.375, 0.375]
+		},
+		"thirdperson_lefthand": {
+			"rotation": [75, 45, 0],
+			"translation": [0, 2.5, 0],
+			"scale": [0.375, 0.375, 0.375]
+		},
+		"firstperson_righthand": {
+			"rotation": [0, 45, 0],
+			"translation": [0, 3, 0],
+			"scale": [0.4, 0.4, 0.4]
+		},
+		"firstperson_lefthand": {
+			"rotation": [0, -135, 0],
+			"translation": [0, 3, 0],
+			"scale": [0.4, 0.4, 0.4]
+		},
+		"ground": {
+			"translation": [0, 3, 0],
+			"scale": [0.5, 0.5, 0.5]
+		},
+		"gui": {
+			"rotation": [30, 45, 0],
+			"scale": [0.625, 0.625, 0.625]
+		},
+		"fixed": {
+			"scale": [0.5, 0.5, 0.5]
+		}
+	},
+	"groups": [
+		{
+			"name": "root",
+			"origin": [7.6, 9, 7.5],
+			"scope": 0,
+			"color": 0,
+			"children": [0, 1, 2]
+		}
+	]
+}

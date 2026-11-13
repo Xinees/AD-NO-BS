@@ -1,0 +1,14 @@
+{
+  "placement": {
+    "type": "minecraft:random_spread",
+    "salt": 745231145,
+    "separation": 2,
+    "spacing": 4
+  },
+  "structures": [
+    {
+      "structure": "ec_ad:obsidiceratops",
+      "weight": 1
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "type": "ec_ad:archie_trade",
+  "input": {
+    "item": "ec_ad:coral_rib",
+    "max": 1,
+    "min": 1
+  },
+  "max_uses": 12,
+  "output": [
+    {
+      "item": "minecraft:tube_coral_block",
+      "max": 4,
+      "min": 4,
+      "weight": 1
+    },
+    {
+      "item": "minecraft:brain_coral_block",
+      "max": 4,
+      "min": 4,
+      "weight": 1
+    },
+    {
+      "item": "minecraft:bubble_coral_block",
+      "max": 4,
+      "min": 4,
+      "weight": 1
+    },
+    {
+      "item": "minecraft:fire_coral_block",
+      "max": 4,
+      "min": 4,
+      "weight": 1
+    },
+    {
+      "item": "minecraft:horn_coral_block",
+      "max": 4,
+      "min": 4,
+      "weight": 1
+    }
+  ],
+  "reward_exp": 5,
+  "sort": [
+    {
+      "ordinal": 7,
+      "weight": 1
+    },
+    {
+      "ordinal": 8,
+      "weight": 1
+    }
+  ]
+}

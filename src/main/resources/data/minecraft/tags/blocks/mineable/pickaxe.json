@@ -1,0 +1,25 @@
+{
+  "values": [
+    "ec_ad:lush_totem",
+    "ec_ad:burning_totem",
+    "ec_ad:tropic_totem",
+    "ec_ad:soaring_totem",
+    "ec_ad:tidal_totem",
+    "ec_ad:echo_totem",
+    "ec_ad:fearful_totem",
+    "ec_ad:amber_ore",
+    "ec_ad:raw_amber_block",
+    "ec_ad:polished_amber",
+    "ec_ad:polished_amber_stairs",
+    "ec_ad:polished_amber_slab",
+    "ec_ad:polished_amber_wall",
+    "ec_ad:amber_bricks",
+    "ec_ad:amber_brick_stairs",
+    "ec_ad:amber_brick_slab",
+    "ec_ad:amber_brick_wall",
+    "ec_ad:cracked_amber_bricks",
+    "ec_ad:carved_amber",
+    "ec_ad:amber_chain",
+    "ec_ad:amber_lamp"
+  ]
+}

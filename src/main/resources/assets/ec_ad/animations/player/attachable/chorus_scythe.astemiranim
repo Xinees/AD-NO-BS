@@ -1,0 +1,2220 @@
+[
+    {
+        "name": "chorus_scythe.attack_1",
+        "length": 1.25,
+        "bones": {
+            "waist": {
+                "rotation": [
+                    {
+                        "time": 0,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "time": 0.1667,
+                        "value": [
+                            6.1014,
+                            -19.2363,
+                            2.3374
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.4583,
+                        "value": [
+                            8.9234,
+                            -28.1331,
+                            3.4185
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.5833,
+                        "value": [
+                            -17.6232,
+                            24.0454,
+                            -2.9218
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.8333,
+                        "value": [
+                            -23.3548,
+                            37.4263,
+                            -4.4189
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1,
+                        "value": [
+                            -0.4177,
+                            20.4577,
+                            -3.6145
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.125,
+                        "value": [
+                            0.2707,
+                            4.0838,
+                            0.2909
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.25,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    }
+                ],
+                "position": [
+                    {
+                        "time": 0,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "time": 0.125,
+                        "value": [
+                            0,
+                            -1.625,
+                            0
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.4167,
+                        "value": [
+                            0,
+                            0.005,
+                            0
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.5833,
+                        "value": [
+                            0,
+                            -0.86,
+                            -0.615
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.7083,
+                        "value": [
+                            0,
+                            -1.515,
+                            0.2
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1,
+                        "value": [
+                            0,
+                            -0.435,
+                            0.2
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.125,
+                        "value": [
+                            0,
+                            -0.087,
+                            0.04
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.25,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    }
+                ]
+            },
+            "head": {
+                "rotation": [
+                    {
+                        "time": 0,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "time": 0.1667,
+                        "value": [
+                            -17.8871,
+                            17.7789,
+                            -6.7615
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.4583,
+                        "value": [
+                            -26.1599,
+                            26.0016,
+                            -9.8887
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.5417,
+                        "value": [
+                            -3.1062,
+                            3.2981,
+                            2.726
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.6667,
+                        "value": [
+                            20.2986,
+                            -29.0415,
+                            -12.8376
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.8333,
+                        "value": [
+                            9.5758,
+                            -37.4356,
+                            -5.7041
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.9583,
+                        "value": [
+                            -7.5062,
+                            -22.2171,
+                            1.2271
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.125,
+                        "value": [
+                            -1.7759,
+                            -3.541,
+                            -2.5816
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.25,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    }
+                ]
+            },
+            "leftArm": {
+                "rotation": [
+                    {
+                        "time": 0,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "time": 0.1667,
+                        "value": [
+                            133.5378,
+                            -39.0726,
+                            -40.3977
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.4583,
+                        "value": [
+                            188.7464,
+                            -58.0308,
+                            -51.3222
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.5417,
+                        "value": [
+                            73.7763,
+                            -19.9034,
+                            -27.8082
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.5833,
+                        "value": [
+                            78.8536,
+                            28.5352,
+                            1.2844
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.8333,
+                        "value": [
+                            85.9504,
+                            31.1034,
+                            1.4
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.0833,
+                        "value": [
+                            15.5828,
+                            9.6178,
+                            -11.3421
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.25,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    }
+                ],
+                "position": [
+                    {
+                        "time": 0,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "time": 0.1667,
+                        "value": [
+                            5.8026,
+                            -1.3994,
+                            -2.4247
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.4583,
+                        "value": [
+                            8.936,
+                            0.7662,
+                            -2.3946
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.5417,
+                        "value": [
+                            1.6714,
+                            -0.7962,
+                            0.2927
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.5833,
+                        "value": [
+                            2.1585,
+                            -0.2485,
+                            2.0119
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.8333,
+                        "value": [
+                            2.3528,
+                            -0.2709,
+                            2.193
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.0833,
+                        "value": [
+                            0.1281,
+                            1.2725,
+                            0.4079
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.25,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    }
+                ]
+            },
+            "rightArm": {
+                "rotation": [
+                    {
+                        "time": 0,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "time": 0.1667,
+                        "value": [
+                            104.5902,
+                            -33.9774,
+                            -11.9136
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.4583,
+                        "value": [
+                            152.9632,
+                            -49.692,
+                            -17.4236
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.5833,
+                        "value": [
+                            4.8434,
+                            -5.7946,
+                            -71.734
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.8333,
+                        "value": [
+                            5.2793,
+                            -6.3161,
+                            -78.1901
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.0417,
+                        "value": [
+                            40.7024,
+                            -10.5477,
+                            -6.3583
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.25,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    }
+                ],
+                "position": [
+                    {
+                        "time": 0,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "time": 0.4583,
+                        "value": [
+                            -0.1335,
+                            1.5353,
+                            0.345
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.5833,
+                        "value": [
+                            -2.9599,
+                            1.2336,
+                            -4.6704
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.8333,
+                        "value": [
+                            -3.2263,
+                            1.3446,
+                            -5.0908
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.0417,
+                        "value": [
+                            -1.2547,
+                            1.784,
+                            -1.9677
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.25,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "name": "chorus_scythe.attack_2",
+        "length": 1.2917,
+        "bones": {
+            "waist": {
+                "rotation": [
+                    {
+                        "time": 0,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "time": 0.0417,
+                        "value": [
+                            -0.8035,
+                            1.2558,
+                            -0.6261
+                        ]
+                    },
+                    {
+                        "time": 0.0833,
+                        "value": [
+                            -3.8885,
+                            5.7622,
+                            -2.9828
+                        ]
+                    },
+                    {
+                        "time": 0.125,
+                        "value": [
+                            -10.4752,
+                            14.8004,
+                            -8.0626
+                        ]
+                    },
+                    {
+                        "time": 0.1667,
+                        "value": [
+                            -18.3093,
+                            25.9188,
+                            -15.1111
+                        ]
+                    },
+                    {
+                        "time": 0.2083,
+                        "value": [
+                            -23.5916,
+                            31.2887,
+                            -21.1328
+                        ]
+                    },
+                    {
+                        "time": 0.25,
+                        "value": [
+                            -27.0222,
+                            34.5642,
+                            -25.5681
+                        ]
+                    },
+                    {
+                        "time": 0.2917,
+                        "value": [
+                            -28.7458,
+                            36.7252,
+                            -28.019
+                        ]
+                    },
+                    {
+                        "time": 0.3333,
+                        "value": [
+                            -29.1093,
+                            37.5454,
+                            -28.7591
+                        ]
+                    },
+                    {
+                        "time": 0.375,
+                        "value": [
+                            -19.9614,
+                            4.2969,
+                            -16.1851
+                        ]
+                    },
+                    {
+                        "time": 0.4167,
+                        "value": [
+                            -17.1455,
+                            -1.5312,
+                            -10.0003
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.5,
+                        "value": [
+                            15.8832,
+                            -49.9684,
+                            -10.0872
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.7083,
+                        "value": [
+                            25.6306,
+                            -50.3404,
+                            -16.5213
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1,
+                        "value": [
+                            5.3657,
+                            -22.6094,
+                            -2.4511
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.1667,
+                        "value": [
+                            -1.1077,
+                            -7.839,
+                            -0.2692
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.2917,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    }
+                ],
+                "position": [
+                    {
+                        "time": 0,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "time": 0.125,
+                        "value": [
+                            0,
+                            -0.6,
+                            0
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.375,
+                        "value": [
+                            0,
+                            -0.35,
+                            0.5
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.5417,
+                        "value": [
+                            0,
+                            0.4,
+                            -2.475
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.6667,
+                        "value": [
+                            0,
+                            -0.1,
+                            -1.695
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.8333,
+                        "value": [
+                            0,
+                            -0.6687,
+                            -1.69
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.875,
+                        "value": [
+                            0,
+                            -0.6226,
+                            -1.5529
+                        ]
+                    },
+                    {
+                        "time": 0.9583,
+                        "value": [
+                            0,
+                            -0.1461,
+                            -0.1371
+                        ]
+                    },
+                    {
+                        "time": 1,
+                        "value": [
+                            0,
+                            -0.1,
+                            0
+                        ]
+                    },
+                    {
+                        "time": 1.0417,
+                        "value": [
+                            0,
+                            -0.1145,
+                            0
+                        ]
+                    },
+                    {
+                        "time": 1.0833,
+                        "value": [
+                            0,
+                            -0.1611,
+                            0
+                        ]
+                    },
+                    {
+                        "time": 1.125,
+                        "value": [
+                            0,
+                            -0.2444,
+                            0
+                        ]
+                    },
+                    {
+                        "time": 1.1667,
+                        "value": [
+                            0,
+                            -0.345,
+                            0
+                        ]
+                    },
+                    {
+                        "time": 1.2083,
+                        "value": [
+                            0,
+                            -0.1268,
+                            0
+                        ]
+                    },
+                    {
+                        "time": 1.25,
+                        "value": [
+                            0,
+                            -0.0244,
+                            0
+                        ]
+                    },
+                    {
+                        "time": 1.2917,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    }
+                ]
+            },
+            "head": {
+                "rotation": [
+                    {
+                        "time": 0,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "time": 0.0417,
+                        "value": [
+                            0.3493,
+                            -1.5707,
+                            0.3002
+                        ]
+                    },
+                    {
+                        "time": 0.0833,
+                        "value": [
+                            1.6897,
+                            -7.1163,
+                            1.5287
+                        ]
+                    },
+                    {
+                        "time": 0.125,
+                        "value": [
+                            4.5472,
+                            -18.0127,
+                            3.51
+                        ]
+                    },
+                    {
+                        "time": 0.1667,
+                        "value": [
+                            7.9331,
+                            -31.0642,
+                            4.1946
+                        ]
+                    },
+                    {
+                        "time": 0.2083,
+                        "value": [
+                            9.9464,
+                            -36.9382,
+                            3.8681
+                        ]
+                    },
+                    {
+                        "time": 0.25,
+                        "value": [
+                            11.2273,
+                            -40.3223,
+                            3.0475
+                        ]
+                    },
+                    {
+                        "time": 0.2917,
+                        "value": [
+                            12.0125,
+                            -42.2531,
+                            2.0711
+                        ]
+                    },
+                    {
+                        "time": 0.3333,
+                        "value": [
+                            12.2365,
+                            -42.7812,
+                            1.6712
+                        ]
+                    },
+                    {
+                        "time": 0.375,
+                        "value": [
+                            -0.8839,
+                            -9.8934,
+                            11.4658
+                        ]
+                    },
+                    {
+                        "time": 0.4167,
+                        "value": [
+                            -3.2778,
+                            -2.3864,
+                            13.0687
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.5,
+                        "value": [
+                            -5.5899,
+                            45.9512,
+                            19.0124
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.7083,
+                        "value": [
+                            -18.4919,
+                            52.311,
+                            11.7642
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1,
+                        "value": [
+                            -8.916,
+                            25.5427,
+                            2.0529
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.2917,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    }
+                ],
+                "position": [
+                    {
+                        "time": 0,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "time": 0.2083,
+                        "value": [
+                            -0.9879,
+                            -0.3437,
+                            -0.7583
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.5,
+                        "value": [
+                            -1.309,
+                            -0.4553,
+                            -1.0047
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.7083,
+                        "value": [
+                            -1.405,
+                            -0.5038,
+                            -1.0501
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.2917,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    }
+                ]
+            },
+            "leftArm": {
+                "rotation": [
+                    {
+                        "time": 0,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "time": 0.125,
+                        "value": [
+                            57.4979,
+                            -7.5669,
+                            -7.3727
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.2083,
+                        "value": [
+                            52.4965,
+                            -12.6115,
+                            -12.2879
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.3333,
+                        "value": [
+                            41,
+                            0,
+                            -27.25
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.4167,
+                        "value": [
+                            59.6431,
+                            -21.721,
+                            -24.698
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.5,
+                        "value": [
+                            134.5267,
+                            -32.9383,
+                            -67.0165
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.7083,
+                        "value": [
+                            134.5267,
+                            -32.9383,
+                            -67.0165
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.875,
+                        "value": [
+                            107.7849,
+                            -50.0641,
+                            -42.4188
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.0417,
+                        "value": [
+                            67.2035,
+                            -35.5762,
+                            -2.4443
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.1667,
+                        "value": [
+                            33.3568,
+                            -12.7221,
+                            -8.5964
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.2917,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    }
+                ],
+                "position": [
+                    {
+                        "time": 0,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "time": 0.125,
+                        "value": [
+                            -0.2077,
+                            1.1143,
+                            0.1942
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.3333,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.4167,
+                        "value": [
+                            0.8812,
+                            -0.9504,
+                            -4.4542
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.5,
+                        "value": [
+                            7.1623,
+                            0.5545,
+                            -6.1151
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.7083,
+                        "value": [
+                            6.7569,
+                            0.5231,
+                            -5.7689
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.1667,
+                        "value": [
+                            0.052,
+                            0.732,
+                            -0.7905
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.2917,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    }
+                ]
+            },
+            "rightArm": {
+                "rotation": [
+                    {
+                        "time": 0,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "time": 0.2083,
+                        "value": [
+                            93.549,
+                            45.2143,
+                            64.9214
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.3333,
+                        "value": [
+                            116.9362,
+                            56.5179,
+                            81.1517
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.5,
+                        "value": [
+                            33.7052,
+                            19.3049,
+                            116.0844
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.7083,
+                        "value": [
+                            31.7974,
+                            18.2122,
+                            109.5136
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.875,
+                        "value": [
+                            42.6658,
+                            18.9346,
+                            106.8355
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.0417,
+                        "value": [
+                            51.5331,
+                            29.8179,
+                            81.4968
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.2917,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    }
+                ],
+                "position": [
+                    {
+                        "time": 0,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "time": 0.2083,
+                        "value": [
+                            -2.1135,
+                            -0.4108,
+                            -1.3849
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.3333,
+                        "value": [
+                            -2.6419,
+                            -0.5135,
+                            -1.7311
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.5,
+                        "value": [
+                            1.5774,
+                            2.307,
+                            -0.3669
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.7083,
+                        "value": [
+                            1.4881,
+                            2.1764,
+                            -0.3461
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.2917,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "name": "chorus_scythe.spin",
+        "length": 1.875,
+        "loop": "hold",
+        "bones": {
+            "root": {
+                "rotation": [
+                    {
+                        "time": 0.4167,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "time": 0.5833,
+                        "value": [
+                            0,
+                            -211.75,
+                            0
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.75,
+                        "value": [
+                            0,
+                            -404.03,
+                            0
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.9167,
+                        "value": [
+                            0,
+                            -573.99,
+                            0
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.1667,
+                        "value": [
+                            0,
+                            -708.475,
+                            0
+                        ]
+                    },
+                    {
+                        "time": 1.375,
+                        "value": [
+                            0,
+                            -722.575,
+                            0
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.625,
+                        "value": [
+                            0,
+                            -720,
+                            0
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.6667,
+                        "value": [
+                            0,
+                            -720,
+                            0
+                        ]
+                    },
+                    {
+                        "time": 1.7083,
+                        "value": [
+                            0,
+                            -720,
+                            0
+                        ],
+                        "interpolation": "step"
+                    },
+                    {
+                        "time": 1.75,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "time": 1.875,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "interpolation": "step"
+                    }
+                ]
+            },
+            "waist": {
+                "rotation": [
+                    {
+                        "time": 0,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "time": 0.125,
+                        "value": [
+                            0.3149,
+                            1.3631,
+                            -0.9662
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.2083,
+                        "value": [
+                            -9,
+                            14.26,
+                            -4.41
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.2917,
+                        "value": [
+                            -17.996,
+                            28.5283,
+                            -8.8181
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.4167,
+                        "value": [
+                            -21.5952,
+                            34.234,
+                            -10.5817
+                        ]
+                    },
+                    {
+                        "time": 0.5833,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.1667,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.2917,
+                        "value": [
+                            10.8628,
+                            -27.3477,
+                            -6.1342
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.5,
+                        "value": [
+                            -1.2032,
+                            -33.1845,
+                            -4.7137
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.625,
+                        "value": [
+                            -9.3413,
+                            -25.1572,
+                            -0.1604
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.875,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    }
+                ],
+                "position": [
+                    {
+                        "time": 0,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "time": 0.2083,
+                        "value": [
+                            0,
+                            -1.46,
+                            0
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.2917,
+                        "value": [
+                            0,
+                            -0.525,
+                            0
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.4167,
+                        "value": [
+                            0,
+                            -0.335,
+                            0
+                        ]
+                    },
+                    {
+                        "time": 0.5833,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.1667,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.3333,
+                        "value": [
+                            0,
+                            0.44,
+                            0
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.5417,
+                        "value": [
+                            0,
+                            -0.025,
+                            0
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.625,
+                        "value": [
+                            0,
+                            -0.975,
+                            0
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.875,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    }
+                ]
+            },
+            "head": {
+                "rotation": [
+                    {
+                        "time": 0,
+                        "value": [
+                            "q.target_x_rotation",
+                            "q.target_y_rotation",
+                            0
+                        ]
+                    },
+                    {
+                        "time": 0.0417,
+                        "value": [
+                            -2.09,
+                            -2.41,
+                            -0.02
+                        ]
+                    },
+                    {
+                        "time": 0.125,
+                        "value": [
+                            -6.7789,
+                            -9.0528,
+                            -0.0667
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.2083,
+                        "value": [
+                            -4.58,
+                            -16.4,
+                            -0.12
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.2917,
+                        "value": [
+                            7.0009,
+                            -28.0867,
+                            0.4548
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.4167,
+                        "value": [
+                            11.7088,
+                            -35.936,
+                            0.6384
+                        ]
+                    },
+                    {
+                        "time": 0.5833,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.2917,
+                        "value": [
+                            -19.9277,
+                            27.749,
+                            1.3421
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.5,
+                        "value": [
+                            -19.9277,
+                            33.1181,
+                            5.1448
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.7083,
+                        "value": [
+                            8.216,
+                            17.8936,
+                            1.5872
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.875,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    }
+                ]
+            },
+            "leftArm": {
+                "rotation": [
+                    {
+                        "time": 0,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "time": 0.125,
+                        "value": [
+                            69.472,
+                            -14.7372,
+                            40.9769
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.2083,
+                        "value": [
+                            138.81,
+                            25.14,
+                            68.09
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.2917,
+                        "value": [
+                            277.6158,
+                            50.2765,
+                            136.1815
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.4167,
+                        "value": [
+                            316.6362,
+                            74.6858,
+                            141.6691
+                        ]
+                    },
+                    {
+                        "time": 0.4583,
+                        "value": [
+                            183.6377,
+                            63.4792,
+                            37.8488
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.5,
+                        "value": [
+                            142.2448,
+                            18.7912,
+                            42.0316
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.5417,
+                        "value": [
+                            94.4454,
+                            1.2856,
+                            23.1343
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.5833,
+                        "value": [
+                            90.1413,
+                            -6.97,
+                            4.2607
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.1667,
+                        "value": [
+                            90.1413,
+                            -6.97,
+                            4.2607
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.2917,
+                        "value": [
+                            90.1851,
+                            -40.72,
+                            4.157
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.5,
+                        "value": [
+                            67.6371,
+                            -37.0909,
+                            8.4161
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.875,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    }
+                ],
+                "position": [
+                    {
+                        "time": 0,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "time": 0.125,
+                        "value": [
+                            -0.0039,
+                            1.3849,
+                            0.7351
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.2083,
+                        "value": [
+                            0.01,
+                            1.02,
+                            1.35
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.2917,
+                        "value": [
+                            0.0162,
+                            2.0366,
+                            2.7029
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.4167,
+                        "value": [
+                            0.0194,
+                            2.4439,
+                            3.2435
+                        ]
+                    },
+                    {
+                        "time": 0.5,
+                        "value": [
+                            -1.0545,
+                            2.0421,
+                            -1.5615
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.5833,
+                        "value": [
+                            2.35,
+                            0,
+                            -1.925
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.1667,
+                        "value": [
+                            2.35,
+                            0,
+                            -1.925
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.875,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    }
+                ]
+            },
+            "rightArm": {
+                "rotation": [
+                    {
+                        "time": 0,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "time": 0.125,
+                        "value": [
+                            56.2772,
+                            4.825,
+                            44.8225
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.2083,
+                        "value": [
+                            99.67,
+                            22.98,
+                            55.96
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.2917,
+                        "value": [
+                            199.3468,
+                            45.9669,
+                            111.9148
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.4167,
+                        "value": [
+                            206.0096,
+                            59.1669,
+                            93.6671
+                        ]
+                    },
+                    {
+                        "time": 0.5,
+                        "value": [
+                            111.6223,
+                            66.1913,
+                            27.5504
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.5833,
+                        "value": [
+                            81.4303,
+                            32.4973,
+                            -9.6544
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.1667,
+                        "value": [
+                            81.4303,
+                            32.4973,
+                            -9.6544
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.2917,
+                        "value": [
+                            82.7343,
+                            -6.4089,
+                            -4.2103
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.5,
+                        "value": [
+                            67.7064,
+                            -10.9781,
+                            11.6377
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.875,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    }
+                ],
+                "position": [
+                    {
+                        "time": 0,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "time": 0.125,
+                        "value": [
+                            -0.8564,
+                            0.5948,
+                            -1.0157
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.2083,
+                        "value": [
+                            -1.52,
+                            -0.69,
+                            -1.83
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.2917,
+                        "value": [
+                            -3.0441,
+                            -1.3796,
+                            -3.651
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 0.4167,
+                        "value": [
+                            -4.5986,
+                            -2.193,
+                            -2.7267
+                        ]
+                    },
+                    {
+                        "time": 0.5833,
+                        "value": [
+                            -2.625,
+                            0,
+                            -4.725
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.1667,
+                        "value": [
+                            -2.625,
+                            0,
+                            -4.725
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.2917,
+                        "value": [
+                            -0.3543,
+                            0.4621,
+                            -2.9926
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.625,
+                        "value": [
+                            -0.1144,
+                            2.2936,
+                            -0.9559
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.875,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    }
+                ]
+            },
+            "rightLeg": {
+                "rotation": [
+                    {
+                        "time": 0.4167,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "time": 0.5417,
+                        "value": [
+                            -51.4036,
+                            -15.2662,
+                            -11.8688
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.1667,
+                        "value": [
+                            -51.4036,
+                            -15.2662,
+                            -11.8688
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.2917,
+                        "value": [
+                            -27.1998,
+                            -9.6716,
+                            -0.1287
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.5,
+                        "value": [
+                            -19.3278,
+                            -5.8662,
+                            2.523
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.5833,
+                        "value": [
+                            -13.2599,
+                            -5.7458,
+                            -1.1779
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.875,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    }
+                ],
+                "position": [
+                    {
+                        "time": 0.4167,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "time": 0.5417,
+                        "value": [
+                            2.625,
+                            1.5,
+                            -3.5
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.1667,
+                        "value": [
+                            2.625,
+                            1.5,
+                            -3.5
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.2917,
+                        "value": [
+                            1.3101,
+                            2.15,
+                            -1.6015
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.5,
+                        "value": [
+                            1.3407,
+                            1.81,
+                            -1.1912
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.5833,
+                        "value": [
+                            0.765,
+                            -0.385,
+                            -1.555
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.6667,
+                        "value": [
+                            0.46,
+                            0.02,
+                            -0.78
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.875,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    }
+                ]
+            },
+            "rightItem": {
+                "rotation": [
+                    {
+                        "time": 0.4167,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "time": 0.5417,
+                        "value": [
+                            2.832,
+                            80.4097,
+                            125.2307
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.2917,
+                        "value": [
+                            2.83,
+                            80.41,
+                            125.23
+                        ],
+                        "interpolation": "catmullrom"
+                    },
+                    {
+                        "time": 1.875,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    }
+                ],
+                "position": [
+                    {
+                        "time": 0,
+                        "value": [
+                            0,
+                            0,
+                            0
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+]

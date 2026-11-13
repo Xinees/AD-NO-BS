@@ -1,0 +1,39 @@
+{
+  "type": "ec_ad:custom_template",
+  "biomes": "#ec_ad:crater_valid",
+  "setups": [
+    {
+      "air_pocket_probability": 1.0,
+      "archie_processor": "process_crater",
+      "delta": 4,
+      "keep_liquids": "keep_liquids",
+      "placement": "on_ocean_floor",
+      "structure_locations": [
+        {
+          "location": "ec_ad:crater/crater_1",
+          "weight": 1
+        },
+        {
+          "location": "ec_ad:crater/crater_2",
+          "weight": 1
+        },
+        {
+          "location": "ec_ad:crater/crater_3",
+          "weight": 1
+        },
+        {
+          "location": "ec_ad:crater/crater_4",
+          "weight": 1
+        },
+        {
+          "location": "ec_ad:crater/crater_5",
+          "weight": 1
+        }
+      ],
+      "weight": 1.0
+    }
+  ],
+  "spawn_overrides": {},
+  "step": "top_layer_modification",
+  "terrain_adaptation": "beard_thin"
+}

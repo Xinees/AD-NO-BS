@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "ec_ad:block/cracked_amber_bricks"
+  }
+}

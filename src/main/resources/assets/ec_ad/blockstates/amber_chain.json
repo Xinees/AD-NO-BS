@@ -1,0 +1,28 @@
+{
+  "variants": {
+    "axis=x,waterlogged=false": {
+      "model": "ec_ad:block/amber_chain",
+      "x": 90,
+      "y": 90
+    },
+    "axis=x,waterlogged=true": {
+      "model": "ec_ad:block/amber_chain",
+      "x": 90,
+      "y": 90
+    },
+    "axis=y,waterlogged=false": {
+      "model": "ec_ad:block/amber_chain"
+    },
+    "axis=y,waterlogged=true": {
+      "model": "ec_ad:block/amber_chain"
+    },
+    "axis=z,waterlogged=false": {
+      "model": "ec_ad:block/amber_chain",
+      "x": 90
+    },
+    "axis=z,waterlogged=true": {
+      "model": "ec_ad:block/amber_chain",
+      "x": 90
+    }
+  }
+}

@@ -1,0 +1,66 @@
+{
+	"format_version": "1.10.0",
+	"particle_effect": {
+		"description": {
+			"identifier": "ec_ad:sculksaur_roar_2",
+			"basic_render_parameters": {
+				"material": "particles_blend",
+				"texture": "ec_ad:textures/emitter/glow_pixel"
+			}
+		},
+		"curves": {
+			"variable.c": {
+				"type": "linear",
+				"input": "v.particle_age",
+				"horizontal_range": "v.particle_lifetime",
+				"nodes": [2.74, 1.42, 1]
+			},
+			"variable.scale": {
+				"type": "linear",
+				"input": "v.particle_age",
+				"horizontal_range": "v.particle_lifetime",
+				"nodes": [3.47, 1.97, 1]
+			}
+		},
+		"components": {
+			"minecraft:emitter_rate_steady": {
+				"spawn_rate": 30,
+				"max_particles": 1000
+			},
+			"minecraft:emitter_lifetime_once": {
+				"active_time": 3.8
+			},
+			"minecraft:emitter_shape_sphere": {
+				"offset": [0, -0.1, 0],
+				"radius": 0.7,
+				"surface_only": true,
+				"direction": ["math.random(0.5, -0.5)", 3, "math.random(0.5, -0.5)"]
+			},
+			"minecraft:particle_lifetime_expression": {
+				"max_lifetime": "math.random(0.6, 1)"
+			},
+			"minecraft:particle_initial_spin": {
+				"rotation": -90
+			},
+			"minecraft:particle_initial_speed": "-30*variable.particle_random_2-6",
+			"minecraft:particle_motion_dynamic": {
+				"linear_acceleration": [0, "variable.particle_random_2*-90", 0],
+				"linear_drag_coefficient": 3
+			},
+			"minecraft:particle_appearance_billboard": {
+				"size": [0.3, "0.3*variable.scale"],
+				"facing_camera_mode": "lookat_direction"
+			},
+			"minecraft:particle_appearance_tinting": {
+				"color": {
+					"interpolant": "variable.particle_random_4",
+					"gradient": {
+						"0.0": "#CF56FBFF",
+						"0.4": "#FF00FFCB",
+						"1.0": "#FFA5FFF9"
+					}
+				}
+			}
+		}
+	}
+}

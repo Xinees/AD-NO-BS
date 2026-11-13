@@ -1,0 +1,874 @@
+<root badges="info">
+    <category id="introduction" no-markers="true">
+        <page src="infos/1">
+            <label x="308" y="32" w="190" color="#573d19">
+                欢迎阅读阿奇的恐龙指南！
+                这是你的生存手册，带你了解
+                在这个世界中生存的所有全新古生物！
+            </label>
+            <label x="368" y="95" w="120" color="#573d19">
+                悬停并点击带有白色轮廓的
+                元素即可进行交互与导航。
+            </label>
+            <label x="368" y="165" w="130" color="#573d19">
+                点击对应分类，即可直接
+                翻到该生物的专属图鉴页面！
+            </label>
+            <label x="368" y="230" w="120" color="#573d19">
+                按下 <b><keybind id="key.keyboard.escape"/></b>
+                即可关闭指南书！
+            </label>
+        </page>
+        <page src="infos/2">
+            <label x="75" y="49" w="190" color="#573d19" align="center">
+                没人知道那天夜里从天而降的是什么。
+                我们唯一知道的是：碎片是温热的。
+                始终温热，仿佛其中仍有生命在搏动。
+            </label>
+            <label x="58" y="168" w="220" color="#573d19">
+                在巨兽漫步的大地上寻找焦黑的陨石坑，
+                或是荒漠与恶地中的远古遗骸。
+                琥珀坠落之处，必有古老之物沉睡。
+            </label>
+            <label x="374" y="50" w="140" color="#573d19">
+                开采矿石，并将碎片随身携带。
+                巨兽不知为何会被它深深吸引。
+                携带琥珀之人，搜寻绝不会太久。
+            </label>
+            <label x="304" y="122" w="210" color="#573d19">
+                阿奇会高价收购你带来的每一枚碎片，
+                他声称这全是为了研究。精炼后的琥珀
+                质地坚硬，多余的可以像石块一样用于建筑。
+            </label>
+            <label x="304" y="178" w="148" color="#573d19">
+                还有一件事：真正掌握驯化之法的人，
+                学会了将巨兽的身姿铸入琥珀之中。
+            </label>
+            <label x="304" y="230" w="148" color="#573d19">
+                他们称之为“图腾”。这是你并非
+                猎杀或囚禁它，而是赢得其认可的证明。
+            </label>
+        </page>
+    </category>
+    <category id="lushsaur">
+        <page src="infos/1">
+            <container popup="popups/1" hover-animation="scale" x="63" y="63" w="140" h="70">
+                <image src="images/1" absolute="true" w="576" h="320"/>
+            </container>
+            <label hex="#573d19" x="81" y="48">植食性</label>
+            <label hex="#573d19" x="236" y="48">生物群系</label>
+            <label hex="#947546" x="243" y="106" align="center" scale="0.6">滴水石溶洞</label>
+            <label hex="#947546" x="209" y="166" align="center" scale="0.65">繁茂洞穴</label>
+            <label hex="#573d19" x="244" y="133">掉落物</label>
+            <label hex="#947546" x="248" y="170" align="center" scale="0.45" w="28">繁茂核心</label>
+            <label hex="#573d19" x="60" y="204" w="214">
+                繁茂龙是栖息于繁茂洞穴与滴水石溶洞的隐士。
+                在不受打扰时它能完美融入环境，
+                唯有赢得其信任之人才能得见真容。
+            </label>
+            <label hex="#573d19" x="343" y="70" w="170">休息时隐形。驯服后将禁用此能力。</label>
+            <label hex="#573d19" x="372" y="103" w="130">尾部猛击地面，击退并拉开敌人距离。</label>
+            <label hex="#573d19" x="345" y="130" w="155">冲锋突进并对目标衔接后续攻击。</label>
+            <label hex="#573d19" x="370" y="162" w="170">有极大概率弹开射来的弹射物。</label>
+            <label hex="#573d19" x="344" y="192" w="170">头槌攻击：击晕目标并破坏周围方块。</label>
+            <label hex="#573d19" x="369" y="222" w="170">大范围尾击甩动，附带强力击退效果。</label>
+        </page>
+        <page src="infos/2">
+            <label hex="#573d19" x="65" y="55" w="165">
+                繁茂龙极其警惕，
+                只有极具耐心者才能获得回应。
+            </label>
+            <label hex="#573d19" x="65" y="88" w="125">
+                你必须持续喂食发光浆果，
+                直到它彻底接纳你为止。
+            </label>
+            <label hex="#573d19" x="65" y="145" w="210">
+                处于伪装隐形状态或躲避危险时，
+                它绝不会理会任何食物。
+            </label>
+            <label hex="#573d19" x="60" y="230" w="214">
+                驯服后它将变得温顺平静，
+                你可以安全地与它进行各项互动。
+            </label>
+            <label hex="#573d19" x="305" y="48" w="210">
+                喂食两只成年已驯服的繁茂龙发光浆果即可繁殖。
+                产下的蛋可直接拾取。繁茂龙蛋极为坚硬，
+                只需下方垫有草方块或苔藓块即可孵化。
+            </label>
+            <label hex="#573d19" x="389" y="125" w="130">
+                周围若有成年繁茂龙，可缩短孵化时间。
+                <br/><br/>
+                幼龙孵化后，喂食发光浆果可加速其生长。
+            </label>
+            <label hex="#573d19" x="320" y="210" w="140">
+                繁茂龙长至成年时会蜕落其繁茂核心，
+                核心随后会随时间缓慢重新长出。
+            </label>
+        </page>
+        <page src="infos/3">
+            <container popup="popups/3" hover-animation="scale" x="317" y="102" w="34" h="34">
+                <image src="images/2"
+                       src-x="317" src-y="102"
+                       texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:lush_mace" x="296" y="97">
+                        <label x="58" scale="0.65"><b>繁茂重锤</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+            <container popup="popups/4" hover-animation="scale" x="337" y="260" w="142" h="43">
+                <image src="images/2"
+                       src-x="337" src-y="260"
+                       texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:lushsaur_helmet" x="296" y="25">
+                        <label x="58" scale="0.65"><b>繁茂龙头盔</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:lushsaur_chestplate" x="296" y="96">
+                        <label x="58" scale="0.65"><b>繁茂龙胸甲</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:lushsaur_leggings" x="296" y="167">
+                        <label x="58" scale="0.65"><b>繁茂龙护腿</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:lushsaur_boots" x="296" y="238">
+                        <label x="58" scale="0.65"><b>繁茂龙靴子</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+            <label hex="#573d19" x="60" y="54" w="214">
+                驯服后繁茂龙不再进入伪装隐形状态，
+                而是会规律地休眠与苏醒，始终清晰可见。
+            </label>
+            <label hex="#573d19" x="60" y="105" w="214">
+                装上鞍后可在洞穴中骑乘探索。
+                它的强力攻击能够直接开凿岩石，为你开辟通路。
+            </label>
+            <label hex="#573d19" x="61" y="165" w="200" align="center">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_primary_attack"/></u> →</color>
+                头槌撞击
+                <color hex="#947546">(破坏方块)</color>
+            </label>
+            <label hex="#573d19" x="61" y="195" w="200" align="center">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_special_attack"/></u> →</color>
+                甩尾扫击
+                <color hex="#947546">(强力击退 / 清除植被)</color>
+            </label>
+            <label hex="#573d19" x="58" y="230" w="224">
+                骑乘时喂食发光浆果可令其短暂爆发冲刺加速。
+            </label>
+            <label hex="#573d19" x="305" y="54" w="210">
+                击败繁茂龙或繁殖脱落的繁茂核心可用来制作繁茂重锤。
+            </label>
+            <container x="360" y="100">
+                <label hex="#573d19">回旋重击 <color hex="#947546">(30秒 ⌚)</color></label>
+                <label hex="#947546" y="10" w="150"><u><keybind id="key.use"/></u> →</label>
+                <label hex="#573d19" align="left" x="75" y="10" w="80">
+                    击退并扫飞周围
+                    所有的敌人。
+                </label>
+            </container>
+            <label hex="#573d19" x="305" y="156" w="210">
+                使用繁茂核心即可打造全套繁茂龙盔甲。
+            </label>
+            <container x="315" y="180">
+                <label hex="#947546" w="180">→ 全套套装效果：</label>
+                <label hex="#573d19" x="12" y="10">获得 抗性提升 I</label>
+                <label hex="#947546" y="25" w="180">→ 特殊能力：<color hex="#573d19">伪装隐蔽</color></label>
+                <label hex="#573d19" x="12" y="35" w="170">
+                    潜行移动时有几率被生物忽略；
+                    静止不动时将完全隐蔽，无法被侦测。
+                </label>
+            </container>
+        </page>
+    </category>
+    <category id="therimoss">
+        <page src="infos/1">
+            <container popup="popups/1" hover-animation="scale" x="63" y="63" w="70" h="90">
+                <image src="images/1" absolute="true" w="576" h="320" y="10"/>
+            </container>
+            <label hex="#573d19" x="81" y="58">植食性</label>
+            <label hex="#573d19" x="158" y="58">生物群系</label>
+            <label hex="#947546" x="172" y="115" align="center" scale="0.75">丛林</label>
+            <label hex="#573d19" x="222" y="71">掉落物</label>
+            <label hex="#947546" x="236" y="90" align="center" scale="0.45" w="28">苔藓利爪</label>
+            <label hex="#573d19" x="60" y="180" w="214">
+                苔镰龙是栖息于丛林深处的慢速庞然大物。
+                它平静地穿梭于林木间，有时会靠在树干上休憩，
+                甚至半爬上树梢俯瞰下方的世界。
+            </label>
+            <label hex="#573d19" x="360" y="59" w="160">
+                可直接从地面一跃跳入高耸的树冠。
+            </label>
+            <label hex="#573d19" x="376" y="96" w="160">
+                能够攀爬巨木并粉碎阻挡的树叶。
+            </label>
+            <label hex="#573d19" x="362" y="129" w="160">
+                沉重踩踏：将目标直接拍入地面掩埋。
+            </label>
+            <label hex="#573d19" x="372" y="164" w="160">
+                近身三连猛烈爪击。
+            </label>
+            <label hex="#573d19" x="355" y="198" w="160">
+                投掷泥土方块造成远程伤害。
+            </label>
+            <label hex="#573d19" x="358" y="227" w="160">
+                在它身边砍伐原木要格外小心，它极度痛恨毁林行为。
+            </label>
+        </page>
+        <page src="infos/2">
+            <label hex="#573d19" x="60" y="54" w="214">
+                苔镰龙只对体量巨大的食物感兴趣。
+                玩家必须建造一座 4x4 <color hex="#947546">(20块)</color>
+                完全由指定食物方块构成的金字塔来吸引其注意。
+            </label>
+            <label hex="#573d19" x="168" y="110" w="130">
+                <color hex="#947546">•</color> 西瓜<br/>
+                <color hex="#947546">•</color> 南瓜<br/>
+                <color hex="#947546">•</color> 蛋糕<br/>
+                <color hex="#947546">•</color> 竹块<br/>
+                <color hex="#947546">•</color> 杜鹃树叶<br/>
+                <color hex="#947546">•</color> 蘑菇块
+            </label>
+            <label hex="#573d19" x="60" y="212" w="214">
+                当它开始享用祭品时，玩家可手持竹子继续喂食以尝试驯服。
+                每次互动都有几率成功，需备足耐心。
+            </label>
+            <label hex="#573d19" x="305" y="54" w="210">
+                喂食两只成年已驯服的苔镰龙竹子即可进行繁衍。
+            </label>
+            <label hex="#573d19" x="365" y="154" w="150">
+                它会在地上产下一枚苔镰龙蛋，右键可拾取。
+                苔镰龙蛋无需特殊条件即可轻松孵化。
+            </label>
+            <label hex="#573d19" x="305" y="214" w="150">
+                幼龙孵化后，喂食金字塔所用的食物方块可加速其生长。
+            </label>
+        </page>
+        <page src="infos/3">
+            <label hex="#573d19" x="145" y="48" w="130">
+                驯服后，苔镰龙将变得温驯且极易听从指挥。
+            </label>
+            <label hex="#573d19" x="145" y="88" w="130">
+                它是跋涉险峻地形与丛林探索的顶级坐骑。
+            </label>
+            <label hex="#573d19" x="60" y="150" w="214" align="center">
+                <color hex="#947546"><u><keybind id="key.jump"/></u> →</color> 飞跃跳上树冠高处。
+            </label>
+            <label hex="#573d19" x="60" y="170" w="220" align="center">
+                <color hex="#947546"><u>攀爬</u> →</color>
+                沿树干向上攀爬并自动清除叶片。
+            </label>
+            <label hex="#573d19" x="60" y="200" w="200" align="center">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_primary_attack"/></u> →</color>
+                近身三连猛烈爪击。
+            </label>
+            <label hex="#573d19" x="60" y="230" w="220" align="center">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_special_attack"/></u> →</color>
+                掷出泥土方块远程打击最近的敌人。
+            </label>
+            <label hex="#573d19" x="305" y="48" w="210">
+                使用剪刀对苔镰龙修剪或将其击败可获得苔藓利爪，
+                用于打造专属的苔镰爪武器。
+            </label>
+            <label hex="#573d19" x="305" y="148" w="210">
+                从高空沿墙面坠落时可借助爪子安全滑降。
+            </label>
+            <label hex="#573d19" x="305" y="184" w="210">
+                使用苔藓利爪可制作全套苔镰龙护甲。
+            </label>
+            <container x="315" y="212">
+                <label hex="#947546" w="180">→ 全套套装效果：</label>
+                <label hex="#573d19" x="12" y="10">显著降低饥饿饱食度消耗速度。</label>
+                <label hex="#947546" y="25" w="180">→ 特殊能力：<color hex="#573d19">极速爆发</color> (10秒 ⌚)</label>
+                <label hex="#573d19" x="12" y="35" w="170">
+                    按下 <color hex="#947546"><u><keybind id="ec_ad.armor"/></u></color> 即可激活短时间爆发移速加成。
+                </label>
+            </container>
+            <container popup="popups/3" hover-animation="scale" x="317" y="102" w="180" h="35">
+                <image src="images/2" src-x="317" src-y="102" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:theri_claw_iron" x="296" y="27">
+                        <label x="58" scale="0.65"><b>铁制苔镰爪</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:theri_claw_copper" x="296" y="98">
+                        <label x="58" scale="0.65"><b>铜制苔镰爪</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:theri_claw_gold" x="296" y="169">
+                        <label x="58" scale="0.65"><b>金制苔镰爪</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:theri_claw_diamond" x="296" y="238">
+                        <label x="58" scale="0.65"><b>钻石苔镰爪</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+            <container popup="popups/4" hover-animation="scale" x="337" y="260" w="142" h="43">
+                <image src="images/2" src-x="337" src-y="260" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:therimoss_helmet" x="296" y="27">
+                        <label x="58" scale="0.65"><b>苔镰龙头盔</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:therimoss_chestplate" x="296" y="98">
+                        <label x="58" scale="0.65"><b>苔镰龙胸甲</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:therimoss_leggings" x="296" y="169">
+                        <label x="58" scale="0.65"><b>苔镰龙护腿</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:therimoss_boots" x="296" y="240">
+                        <label x="58" scale="0.65"><b>苔镰龙靴子</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+        </page>
+    </category>
+    <category id="coralosaur">
+        <page src="infos/1">
+            <container popup="popups/1" hover-animation="scale" x="63" y="63" w="99" h="99">
+                <image src="images/1" absolute="true" w="576" h="320"/>
+            </container>
+            <label hex="#573d19" x="100" y="56">肉食性</label>
+            <label hex="#573d19" x="186" y="62">生物群系</label>
+            <label hex="#947546" x="199" y="121" align="center" scale="0.7">暖水海洋</label>
+            <label hex="#573d19" x="244" y="62">掉落物</label>
+            <label hex="#947546" x="238" y="100" align="center" scale="0.45" w="28">珊瑚肋骨</label>
+            <label hex="#573d19" x="64" y="186" w="214">
+                珊瑚龙是漫游于深海的庞然守护者，
+                常休眠掩埋于温暖的海底沙层之中。
+                唯有海沙激荡出的阵阵气泡会暴露其沉睡之所。
+            </label>
+            <label hex="#573d19" x="337" y="62" w="190">
+                喷吐气泡水流，可为骑乘者补充氧气。
+            </label>
+            <label hex="#573d19" x="358" y="88" w="140">
+                威胁过远时会潜入沙床重新调整战斗位置。
+            </label>
+            <label hex="#573d19" x="348" y="128" w="160">
+                装备鞍后可用拴绳牵引并拖曳船只航行。
+            </label>
+            <label hex="#573d19" x="335" y="170" w="160">
+                拥有极大的储物背包，可用箱子继续扩充。
+            </label>
+            <label hex="#573d19" x="352" y="200" w="160">
+                前向撕咬：在大范围弧形区域内造成伤害。
+            </label>
+            <label hex="#573d19" x="338" y="238" w="160">
+                号令周围的海洋生物协同保护你。
+            </label>
+        </page>
+        <page src="infos/2">
+            <label hex="#573d19" x="68" y="52" w="200">
+                跟随海底不断涌出的气泡痕迹，可找到埋在沙中的巨龙头部。
+            </label>
+            <label hex="#573d19" x="68" y="172" w="200">
+                持续向其喂食珊瑚煲，直到它接纳你并完成驯化。
+            </label>
+            <label hex="#573d19" x="162" y="199" w="120">
+                成功后，珊瑚龙将苏醒并与你缔结契约，不再潜藏于沙下。
+            </label>
+            <label hex="#573d19" x="305" y="58" w="218">
+                喂食两只成年已驯服的珊瑚龙任何珊瑚块或珊瑚煲即可繁殖。
+            </label>
+            <label hex="#573d19" x="305" y="198" w="210">
+                幼龙随后会在水中诞生。珊瑚龙在水下生长，
+                喂食珊瑚煲或任何鱼类均可加快其成长速度。
+            </label>
+        </page>
+        <page src="infos/3">
+            <label hex="#573d19" x="60" y="142" w="214">
+                珊瑚龙能牵引船只航行，手持箱子右键鞍座可扩展随身仓储。
+                手持剪刀可随时安全卸下其鞍具。
+            </label>
+            <label hex="#573d19" x="60" y="208" w="214">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_primary_attack"/></u> → </color>
+                宽范围前方强力撕咬攻击。
+            </label>
+            <label hex="#573d19" x="60" y="240" w="214">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_special_attack"/></u> → </color>
+                召唤海中生物协助护卫迎敌。
+            </label>
+            <label hex="#573d19" x="305" y="52" w="150">
+                使用击败珊瑚龙掉落的珊瑚肋骨可合成专属的肋骨弓。
+                <br/><br/>
+                此弓射出的箭矢在水下飞行几乎没有任何弹道下坠。
+            </label>
+            <container popup="popups/3" hover-animation="scale" x="458" y="72" w="34" h="34">
+                <image src="images/2" src-x="458" src-y="72" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:rib_bow" x="297" y="99">
+                        <label x="58" scale="0.65"><b>肋骨弓</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+            <label hex="#573d19" x="305" y="150" w="210">
+                珊瑚肋骨同样可用来打造珊瑚龙护甲套装。
+            </label>
+            <container x="315" y="180">
+                <label hex="#947546" w="180">→ 全套套装效果：</label>
+                <label hex="#573d19" x="12" y="10" w="180">处于水中时赋予游泳加速、水下速掘与潮涌能量效果</label>
+                <label hex="#947546" y="50" w="180">→ 特殊能力：<color hex="#573d19">海洋守卫</color> (4秒 ⌚)</label>
+                <label hex="#573d19" x="12" y="62" w="170">
+                    在水中按下 <color hex="#947546"><u><keybind id="ec_ad.armor"/></u></color> 即可召唤守卫者协助参战。
+                </label>
+            </container>
+            <container popup="popups/4" hover-animation="scale" x="337" y="260" w="142" h="43">
+                <image src="images/2" src-x="337" src-y="260" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:coralosaur_helmet" x="296" y="27">
+                        <label x="58" scale="0.65"><b>珊瑚龙头盔</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:coralosaur_chestplate" x="296" y="98">
+                        <label x="58" scale="0.65"><b>珊瑚龙胸甲</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:coralosaur_leggings" x="296" y="169">
+                        <label x="58" scale="0.65"><b>珊瑚龙护腿</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:coralosaur_boots" x="296" y="240">
+                        <label x="58" scale="0.65"><b>珊瑚龙靴子</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+        </page>
+    </category>
+    <category id="obsidiceratops">
+        <page src="infos/1">
+            <container popup="popups/1" hover-animation="scale" x="63" y="63" w="104" h="80">
+                <image src="images/1" absolute="true" w="576" h="320"/>
+            </container>
+            <label hex="#573d19" x="98" y="48">植食性</label>
+            <label hex="#573d19" x="189" y="48">生物群系</label>
+            <label hex="#947546" x="180" y="108" align="center" w="38" scale="0.48">灵魂沙峡谷</label>
+            <label hex="#947546" x="232" y="117" align="center" w="34" scale="0.48">绯红森林</label>
+            <label hex="#573d19" x="198" y="131">掉落物</label>
+            <label hex="#947546" x="216" y="154" align="center" scale="0.45" w="45">黑曜石角</label>
+            <label hex="#573d19" x="60" y="194" w="214">
+                黑曜角龙是一座极度灼热的重装活体战车，对熔岩极度渴求。
+                它很少离开下界的熔岩之海太远。
+            </label>
+            <label hex="#573d19" x="60" y="242" w="214">
+                遭遇时务必保持警惕：体内熔岩充足时它极度温顺，
+                但一旦储备不足，它将变得极其致命且狂暴。
+            </label>
+            <label hex="#573d19" x="361" y="74" w="160">
+                会主动寻找熔岩池饮啜以补充体内储备。
+            </label>
+            <label hex="#573d19" x="368" y="102" w="160">
+                驯服后可储存并在需要时向玩家提供熔岩。
+            </label>
+            <label hex="#573d19" x="364" y="130" w="150">
+                自带相当于单个箱子大小的随身储物仓。
+            </label>
+            <label hex="#573d19" x="370" y="166" w="150">
+                凶猛头槌：近距离造成极具破坏性的重击。
+            </label>
+            <label hex="#573d19" x="345" y="194" w="170">
+                尾部鞭击：击退并扫飞前方大批敌人。
+            </label>
+            <label hex="#573d19" x="352" y="220" w="160">
+                在它近前吹响黑曜石角可令其短暂陷入眩晕。
+            </label>
+        </page>
+        <page src="infos/2">
+            <label hex="#573d19" x="68" y="62" w="140">
+                黑曜角龙唯有在心情温和时才可驯服，
+                通常需要消耗 14–25 块岩浆块才能赢得信任。
+            </label>
+            <label hex="#573d19" x="184" y="160" w="95">
+                驯养期间必须保证其熔岩储量充裕，
+                储量耗尽将导致驯化进度完全归零。
+            </label>
+            <label hex="#573d19" x="64" y="244" w="214">
+                完成驯服后，可为其配鞍骑乘跨越焦灼的下界。
+            </label>
+            <label hex="#573d19" x="305" y="48" w="220">
+                喂食两只成年已驯服的黑曜角龙岩浆块即可繁殖。<br/><br/>
+                它们会在地上产下一枚黑曜角龙蛋。
+            </label>
+            <label hex="#573d19" x="375" y="200" w="140">
+                龙蛋可以拾取，但触碰时会造成灼烧伤害。
+            </label>
+            <label hex="#573d19" x="375" y="238" w="130">
+                必须将其放置于熔岩旁孵化，离开热源将会破裂损毁。
+            </label>
+        </page>
+        <page src="infos/3">
+            <label hex="#573d19" x="60" y="54" w="214">
+                黑曜角龙是极坚韧的重型坐骑，
+                能在整个下界旅途中为你同时转运大量物资与熔岩。
+            </label>
+            <label hex="#573d19" x="60" y="110" w="214" align="center">
+                <color hex="#947546"><u>熔岩仓</u> →</color> 最多可储存 15 桶熔岩。
+            </label>
+            <label hex="#573d19" x="60" y="140" w="220" align="center">
+                <color hex="#947546"><u>加注</u> →</color>
+                手持熔岩桶右键即可快速补充其体内储量。
+            </label>
+            <label hex="#573d19" x="60" y="170" w="200" align="center">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_primary_attack"/></u> →</color>
+                近身重型头槌冲撞。
+            </label>
+            <label hex="#573d19" x="60" y="200" w="220" align="center">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_special_attack"/></u> →</color>
+                强力尾鞭扫击，击退敌人。
+            </label>
+            <label hex="#573d19" x="305" y="48" w="210">
+                使用击败黑曜角龙取得的黑曜石角可合成灼炎号角。
+            </label>
+            <container x="342" y="88">
+                <label hex="#573d19">召回战宠 <color hex="#947546">(5秒 ⌚)</color></label>
+                <label hex="#947546" y="10" w="150"><u><keybind id="key.use"/></u> →</label>
+                <label hex="#573d19" align="left" x="75" y="10" w="120">
+                    吹响号角即可将你所有的驯养宠物立即召唤至身边。
+                </label>
+            </container>
+            <container popup="popups/3" hover-animation="scale" x="304" y="88" w="34" h="34">
+                <image src="images/2" src-x="447" src-y="88" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:scorching_horn" x="296" y="99">
+                        <label x="58" scale="0.65"><b>灼炎号角</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+            <label hex="#573d19" x="305" y="148" w="210">
+                黑曜石角同样可锻造为全套黑曜角龙盔甲。
+            </label>
+            <container x="315" y="180">
+                <label hex="#947546" w="180">→ 全套套装效果：</label>
+                <label hex="#573d19" x="12" y="10" w="180">赋予熔岩漫步能力并完全免疫火焰与熔岩伤害</label>
+                <label hex="#947546" y="40" w="180">→ 特殊能力：<color hex="#573d19">熔岩潜游</color></label>
+                <label hex="#573d19" x="12" y="52" w="170">
+                    按下 <color hex="#947546"><u><keybind id="key.sneak"/></u></color> 即可自由下潜至熔岩深处。
+                </label>
+            </container>
+            <container popup="popups/4" hover-animation="scale" x="337" y="260" w="142" h="43">
+                <image src="images/2" src-x="337" src-y="260" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:obsidiceratops_helmet" x="296" y="27">
+                        <label x="58" scale="0.65"><b>黑曜角龙头盔</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:obsidiceratops_chestplate" x="296" y="98">
+                        <label x="58" scale="0.65"><b>黑曜角龙胸甲</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:obsidiceratops_leggings" x="296" y="169">
+                        <label x="58" scale="0.65"><b>黑曜角龙护腿</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:obsidiceratops_boots" x="296" y="240">
+                        <label x="58" scale="0.65"><b>黑曜角龙靴子</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+        </page>
+    </category>
+    <category id="sculkraptor">
+        <page src="infos/1">
+            <container popup="popups/1" hover-animation="scale" x="71" y="58" w="85" h="85">
+                <image src="images/1" absolute="true" w="576" h="320"/>
+            </container>
+            <label hex="#573d19" x="98" y="48">肉食性</label>
+            <label hex="#573d19" x="214" y="48">生物群系</label>
+            <label hex="#947546" x="221" y="106" align="center" scale="0.65">深暗之域</label>
+            <label hex="#573d19" x="202" y="131">掉落物</label>
+            <label hex="#947546" x="215" y="150" align="center" scale="0.45" w="28">猛禽爪</label>
+            <label hex="#573d19" x="60" y="190" w="214">
+                幽匿迅猛龙是成群潜伏于深暗之域的敏捷猎手，
+                对一切声响与震动极其敏锐。单体往往避战，
+                但一旦结群成势，其致命性将成倍飙升。
+            </label>
+            <label hex="#573d19" x="363" y="66" w="160">
+                唯有结成群落时才会主动发动协同进攻。
+            </label>
+            <label hex="#573d19" x="340" y="92" w="160">
+                通过地面震动与细微声响精准索敌。
+            </label>
+            <label hex="#573d19" x="358" y="122" w="160">
+                可吐出附带中毒效果的剧毒幽匿飞弹。
+            </label>
+            <label hex="#573d19" x="339" y="150" w="160">
+                狼群状态下会释放震耳欲聋的尖啸，击退并重度击晕敌人。
+            </label>
+            <label hex="#573d19" x="348" y="192" w="160">
+                标记猎物，引诱深暗之域的其他恐怖怪物协同撕碎目标。
+            </label>
+        </page>
+        <page src="infos/2">
+            <label hex="#573d19" x="60" y="48" w="130">
+                成年野生幽匿迅猛龙无法直接驯服。
+                你必须深入其领地，寻找集群守护的龙巢。
+            </label>
+            <label hex="#573d19" x="165" y="120" w="110">
+                过于靠近龙巢会惊扰群落，
+                整群迅猛龙将不顾一切扑来誓死护卵。
+            </label>
+            <label hex="#573d19" x="60" y="196" w="150">
+                将其全数消灭后方可从巢中夺取幽匿迅猛龙蛋。
+                每个巢穴仅蕴育一枚可成功孵化的活性蛋。
+            </label>
+            <label hex="#573d19" x="308" y="52" w="120">
+                幽匿迅猛龙蛋必须置于完全黑暗的环境中方可孵化。
+            </label>
+            <label hex="#573d19" x="305" y="95" w="175">
+                新孵化的幼年幽匿迅猛龙将天生对你保持忠诚，
+                无论你身在何方都会如影随形紧随其后。
+            </label>
+            <label hex="#573d19" x="305" y="138" w="210">
+                喂食腐肉、蜘蛛眼或骨头等怪物掉落物可大幅加速成长。
+            </label>
+        </page>
+        <page src="infos/3">
+            <label hex="#573d19" x="160" y="48" w="120">
+                手持击败野生迅猛龙获得的猛禽爪 <color hex="#947546">(30秒 ⌚)</color>，
+                即可指挥已驯服的狼群迅速集结至准星所指之处。
+            </label>
+            <label hex="#573d19" x="64" y="134" w="130">
+                驯服的迅猛龙只会围攻被幽匿弓射出的幽匿箭命中的猎物，
+                整群战宠会死咬被标记的受害者不放。
+            </label>
+            <label hex="#573d19" x="60" y="222" w="220">
+                野生迅猛龙的远程飞弹亦有可能标记玩家，
+                使深暗之域的其他怪物将你视为主仇恨目标。
+            </label>
+            <label hex="#573d19" x="305" y="48" w="210">
+                幽匿迅猛龙唯有成群结队时才能爆发最强战力。
+                多只迅猛龙合力时能释放震魂尖叫击退并击晕敌人，
+                结合撕咬与远程毒液飞弹，是极为致命的狼群军团。
+            </label>
+        </page>
+    </category>
+    <category id="chorusoatl">
+        <page src="infos/1">
+            <container popup="popups/1" hover-animation="scale" x="63" y="63" w="120" h="70">
+                <image src="images/1" absolute="true" w="576" h="320"/>
+            </container>
+            <label hex="#573d19" x="98" y="48">植食性</label>
+            <label hex="#573d19" x="214" y="48">生物群系</label>
+            <label hex="#947546" x="229" y="106" align="center" scale="0.65">末地群岛</label>
+            <label hex="#573d19" x="206" y="121">掉落物</label>
+            <label hex="#947546" x="221" y="142" align="center" scale="0.45" w="28">紫颂化石</label>
+            <label hex="#573d19" x="60" y="204" w="214">
+                颂翼龙是优雅翱翔于末地外部群岛的空之住民，
+                成群巡弋在虚空天际。一旦受到挑衅，
+                鸦群将以穿云破雾的刺耳尖叫与狂暴攻势予以重击。
+            </label>
+            <label hex="#573d19" x="340" y="66" w="180">野外未驯服时会全族群体协同迎敌作战。</label>
+            <label hex="#573d19" x="354" y="90" w="180">释放尖锐鸣叫，震退大范围内所有的对手。</label>
+            <label hex="#573d19" x="339" y="122" w="180">装配马鞍后即可驾驭其在天际自由御风飞翔。</label>
+            <label hex="#573d19" x="354" y="156" w="180">近身鸟喙强力撕咬攻击。</label>
+            <label hex="#573d19" x="344" y="182" w="170">喷吐毁灭性的空间能量波吹飞并掀翻敌人。</label>
+        </page>
+        <page src="infos/2">
+            <label hex="#573d19" x="60" y="48" w="214">
+                颂翼龙几乎从不落单。欲驯服它，
+                必须先手持紫颂果将落单的个体从族群中引出。
+            </label>
+            <label hex="#573d19" x="60" y="84" w="136">
+                手持紫颂果能防止其受惊飞走。<br/>若两手空空直接接近，它在发出一次威吓鸣叫后便会主动扑杀过来。
+            </label>
+            <label hex="#573d19" x="174" y="158" w="100">
+                即使你成功递上果实，
+                它仍有概率发怒尖叫并拍翅高飞逃遁。
+            </label>
+            <label hex="#573d19" x="60" y="238" w="214">
+                一旦成功驯养，为它套上鞍具即可翱翔九天。
+            </label>
+            <label hex="#573d19" x="305" y="48" w="210">
+                给两只成年已驯服的翼龙喂食紫颂果即可完成配种繁衍。
+                产出的颂翼龙蛋可被拾取，但蛋壳极脆，
+                频繁移动翻倒将会碎裂。
+            </label>
+            <label hex="#573d19" x="368" y="198" w="154">
+                在末地孵化最佳，但也支持异地孵化：
+                需完全黑暗、下方垫有末地石且附近有紫颂植物。
+                喂食紫颂果可加速幼鸟发育。
+            </label>
+        </page>
+        <page src="infos/3">
+            <label hex="#573d19" x="60" y="128" w="214">
+                佩鞍后可肆意穿行于末地外岛虚空，是征服末地维度的绝佳飞行坐骑。
+            </label>
+            <label hex="#573d19" x="60" y="162" w="200" align="center">
+                <color hex="#947546"><u><keybind id="key.jump"/></u> →</color> 振翅升空 / 降落
+            </label>
+            <label hex="#573d19" x="61" y="186" w="200" align="center">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_primary_attack"/></u> →</color>
+                喙部近身猛啄撕咬。
+            </label>
+            <label hex="#573d19" x="61" y="216" w="200" align="center">
+                <color hex="#947546"><u><keybind id="ec_ad.mount_special_attack"/></u> →</color>
+                空间能量吐息远程轰击。
+            </label>
+            <label hex="#573d19" x="305" y="48" w="210">
+                使用讨伐颂翼龙获得的紫颂化石可打造专属的紫颂镰刀。
+            </label>
+            <container x="360" y="94">
+                <label hex="#573d19">旋风斩 <color hex="#947546">(20秒 ⌚)</color></label>
+                <label hex="#947546" y="10" w="150"><u><keybind id="key.use"/></u> →</label>
+                <label hex="#573d19" align="left" x="75" y="10" w="80">
+                    造成重击并将近身所有
+                    敌人击飞至空中。
+                </label>
+            </container>
+            <container popup="popups/3" hover-animation="scale" x="317" y="98" w="34" h="34">
+                <image src="images/2" src-x="447" src-y="78" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:chorus_scythe" x="296" y="98">
+                        <label x="58" scale="0.65"><b>紫颂镰刀</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+            <label hex="#573d19" x="305" y="166" w="210">
+                紫颂化石亦可用来打造颂翼龙盔甲。
+            </label>
+            <container x="315" y="192">
+                <label hex="#947546" w="180">→ 全套套装效果：</label>
+                <label hex="#573d19" x="12" y="10" w="180">赋予缓慢落下的飘浮效果。</label>
+                <label hex="#947546" y="30" w="180">→ 特殊能力：<color hex="#573d19">瞬间折跃</color> (15秒 ⌚)</label>
+                <label hex="#573d19" x="12" y="42" w="170">
+                    按住 <color hex="#947546"><u><keybind id="ec_ad.armor"/></u></color> 蓄力即可瞬间折跃传送至目光聚焦的位置。
+                </label>
+            </container>
+            <container popup="popups/4" hover-animation="scale" x="337" y="260" w="142" h="43">
+                <image src="images/2" src-x="337" src-y="260" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:chorusoatl_helmet" x="296" y="28">
+                        <label x="58" scale="0.65"><b>颂翼龙头盔</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:chorusoatl_chestplate" x="296" y="98">
+                        <label x="58" scale="0.65"><b>颂翼龙胸甲</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:chorusoatl_leggings" x="296" y="169">
+                        <label x="58" scale="0.65"><b>颂翼龙护腿</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:chorusoatl_boots" x="296" y="240">
+                        <label x="58" scale="0.65"><b>颂翼龙靴子</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+        </page>
+    </category>
+    <category id="sculksaur">
+        <page src="infos/1">
+            <container popup="popups/1" hover-animation="scale" x="63" y="63" w="115" h="85">
+                <image src="images/1" absolute="true" w="576" h="320"/>
+            </container>
+            <label hex="#573d19" x="98" y="48">肉食性</label>
+            <label hex="#573d19" x="216" y="48">生物群系</label>
+            <label hex="#947546" x="221" y="106" align="center" scale="0.65">深暗之域</label>
+            <label hex="#573d19" x="216" y="129">掉落物</label>
+            <label hex="#947546" x="226" y="151" align="center" scale="0.45" w="28">幽匿毒素</label>
+            <label hex="#573d19" x="60" y="200" w="214">
+                幽匿龙是深暗之域绝对的顶级霸主掠食者。
+                即便强如监守者，在它的毁灭怒火面前亦毫无招架之力。
+            </label>
+            <label hex="#573d19" x="300" y="48" w="220">
+                <color hex="#947546">→</color> 监守者钻出地面不久后随即被引诱破土现身。<br/><br/>
+                <color hex="#947546">→</color> 拥有极端的灭绝性敌意。<br/><br/>
+                <color hex="#947546">→</color> 对监守者怀有本能杀意。<br/><br/>
+                <color hex="#947546">→</color> 无法驯服，亦不可进行繁殖。
+            </label>
+            <label hex="#573d19" x="305" y="214" w="210">
+                唤醒这尊凶神必将招致灭顶之灾。
+                它将蚕食感知到的一切生灵与物质。
+            </label>
+            <label hex="#573d19" x="345" y="254" w="210">
+                这是对你最后的警告。
+            </label>
+        </page>
+        <page src="infos/2">
+            <label hex="#573d19" x="95" y="74" w="184">
+                现身降临时获得极巨额的伤害加成，足以轻易撕碎监守者。
+            </label>
+            <label hex="#573d19" x="108" y="112" w="165">
+                结合声音、震波与气味三重感知追踪玩家。
+            </label>
+            <label hex="#573d19" x="120" y="142" w="160">
+                极具毁灭性的撕咬，造成极其惊人的重创。
+            </label>
+            <label hex="#573d19" x="148" y="178" w="130">
+                尾部攻击，附带伤害与击退效果。
+            </label>
+            <label hex="#573d19" x="120" y="212" w="150">
+                咆哮造成震耳欲聋的音波伤害。
+            </label>
+            <label hex="#573d19" x="328" y="48" w="190">
+                射中幽匿龙躯干两侧凸起的肉瘤，
+                能迫使其掉落幽匿毒素，这是锻造深暗武装的核心材料。
+            </label>
+            <label hex="#573d19" x="350" y="100" w="165">
+                <color hex="#947546">→ </color>附加黑暗与中毒效果。
+                <br/>
+                <color hex="#947546">→ </color>对深暗之域所有生物具备极强伤害克制。
+            </label>
+            <container popup="popups/2" hover-animation="scale" x="307" y="94" w="34" h="34">
+                <image src="images/2" src-x="317" src-y="102" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:ooze_tipped_arrow" x="296" y="98">
+                        <label x="58" scale="0.65"><b>幽匿箭</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+            <label hex="#573d19" x="305" y="140" w="210">
+                使用幽匿毒素可制作全套幽匿龙盔甲。
+            </label>
+            <container x="315" y="168">
+                <label hex="#947546" w="180">→ 全套套装效果：</label>
+                <label hex="#573d19" x="12" y="10" w="180">攻击命中敌人时造成持续5秒的中毒效果。</label>
+                <label hex="#947546" y="34" w="180">→ 特殊能力：<color hex="#573d19">幽匿咆哮</color> (30秒 ⌚)</label>
+                <label hex="#573d19" x="12" y="46" w="170">
+                    按住 <color hex="#947546"><u><keybind id="ec_ad.armor"/></u></color> 蓄力释放震天狂吼，
+                    对周围敌人造成失明与反胃，并直接震晕深暗之域生物。
+                </label>
+            </container>
+            <container popup="popups/3" hover-animation="scale" x="337" y="260" w="142" h="43">
+                <image src="images/2" src-x="337" src-y="260" texture-width="576" texture-height="320"/>
+                <popup-content>
+                    <recipe item="ec_ad:sculksaur_helmet" x="296" y="28">
+                        <label x="58" scale="0.65"><b>幽匿龙头盔</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:sculksaur_chestplate" x="296" y="97">
+                        <label x="58" scale="0.65"><b>幽匿龙胸甲</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:sculksaur_leggings" x="296" y="169">
+                        <label x="58" scale="0.65"><b>幽匿龙护腿</b></label>
+                    </recipe>
+                    <recipe item="ec_ad:sculksaur_boots" x="296" y="240">
+                        <label x="58" scale="0.65"><b>幽匿龙靴子</b></label>
+                    </recipe>
+                </popup-content>
+            </container>
+        </page>
+    </category>
+    <category id="credits" no-markers="true">
+        <page src="infos/1">
+            <label x="168" y="41" color="#573d19" align="center"><b>创作者</b></label>
+            <label x="168" y="251" color="#573d19" align="center"><b>官方网站</b></label>
+            <label x="170" y="261" color="#573d19" align="center">
+                <a href="https://www.eternalcreations.games">
+                    www.eternalcreations.games
+                </a>
+            </label>
+            <label x="328" y="32" color="#573d19" w="160" align="center">
+                关注我们获取本模组
+                以及未来更多全新内容的更新动态！
+            </label>
+            <label x="346" y="100" w="160" color="#573d19">
+                <b>加入我们的 Discord！</b>
+                <br/>
+                <a href="https://discord.gg/eternalcreations">
+                    <color hex="#947546">discord.gg/</color>eternalcreations
+                </a>
+            </label>
+            <label x="346" y="160" w="160" color="#573d19">
+                <b>关注我们的 X / Twitter！</b>
+                <br/>
+                <a href="https://x.com/EternalCrtns">
+                    <color hex="#947546">x.com/</color>EternalCrtns
+                </a>
+            </label>
+            <label x="346" y="220" w="160" color="#573d19">
+                <b>关注我们的 TikTok！</b>
+                <br/>
+                <a href="https://tiktok.com/@eternalxcreations">
+                    <color hex="#947546">tiktok.com/</color>eternalxcreations
+                </a>
+            </label>
+        </page>
+    </category>
+</root>

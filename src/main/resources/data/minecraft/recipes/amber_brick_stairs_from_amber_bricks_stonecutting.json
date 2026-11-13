@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "count": 1,
+  "ingredient": {
+    "item": "ec_ad:amber_bricks"
+  },
+  "result": "ec_ad:amber_brick_stairs"
+}

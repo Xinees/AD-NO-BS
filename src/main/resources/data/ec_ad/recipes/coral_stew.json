@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "I": {
+      "item": "minecraft:tube_coral"
+    },
+    "S": {
+      "item": "minecraft:bowl"
+    },
+    "T": {
+      "item": "minecraft:fire_coral"
+    },
+    "W": {
+      "item": "minecraft:bubble_coral"
+    }
+  },
+  "pattern": [
+    "ITW",
+    " S "
+  ],
+  "result": {
+    "item": "ec_ad:coral_stew"
+  },
+  "show_notification": true
+}

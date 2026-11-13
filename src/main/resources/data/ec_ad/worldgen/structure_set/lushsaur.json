@@ -1,0 +1,14 @@
+{
+  "placement": {
+    "type": "minecraft:random_spread",
+    "salt": 172332262,
+    "separation": 5,
+    "spacing": 6
+  },
+  "structures": [
+    {
+      "structure": "ec_ad:lushsaur",
+      "weight": 1
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "type": "ec_ad:archie_trade",
+  "input": {
+    "item": "ec_ad:obsidian_horn",
+    "max": 1,
+    "min": 1
+  },
+  "max_uses": 12,
+  "output": [
+    {
+      "item": "minecraft:emerald",
+      "max": 12,
+      "min": 12
+    }
+  ],
+  "reward_exp": 5,
+  "sort": [
+    {
+      "ordinal": 9,
+      "weight": 1
+    },
+    {
+      "ordinal": 10,
+      "weight": 1
+    }
+  ]
+}
