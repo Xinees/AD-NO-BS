@@ -1219,10 +1219,20 @@ public final class JarPruner {
         InsnList p = particle.instructions;
 
         p.add(new VarInsnNode(Opcodes.ILOAD, 7));
+        p.add(new IntInsnNode(Opcodes.SIPUSH, 384));
+        p.add(new InsnNode(Opcodes.IREM));
+        p.add(new VarInsnNode(Opcodes.ISTORE, 18));
+
+        p.add(new VarInsnNode(Opcodes.ILOAD, 7));
+        p.add(new IntInsnNode(Opcodes.SIPUSH, 384));
+        p.add(new InsnNode(Opcodes.IDIV));
+        p.add(new VarInsnNode(Opcodes.ISTORE, 19));
+
+        p.add(new VarInsnNode(Opcodes.ILOAD, 18));
         p.add(new InsnNode(Opcodes.I2D));
         p.add(new LdcInsnNode(0.5d));
         p.add(new InsnNode(Opcodes.DADD));
-        p.add(new LdcInsnNode(2.0d / 1536.0d));
+        p.add(new LdcInsnNode(2.0d / 384.0d));
         p.add(new InsnNode(Opcodes.DMUL));
         p.add(new InsnNode(Opcodes.DCONST_1));
         p.add(new InsnNode(Opcodes.DSUB));
@@ -1237,7 +1247,7 @@ public final class JarPruner {
             "java/lang/Math", "sqrt", "(D)D", false));
         p.add(new VarInsnNode(Opcodes.DSTORE, 10));
 
-        p.add(new VarInsnNode(Opcodes.ILOAD, 7));
+        p.add(new VarInsnNode(Opcodes.ILOAD, 18));
         p.add(new InsnNode(Opcodes.I2D));
         p.add(new LdcInsnNode(2.399963229728653d));
         p.add(new InsnNode(Opcodes.DMUL));
@@ -1257,37 +1267,48 @@ public final class JarPruner {
         p.add(new InsnNode(Opcodes.DMUL));
         p.add(new VarInsnNode(Opcodes.DSTORE, 16));
 
+        LabelNode trailingLayer = new LabelNode();
+        LabelNode offsetReady = new LabelNode();
+        p.add(new VarInsnNode(Opcodes.ILOAD, 19));
+        p.add(new JumpInsnNode(Opcodes.IFNE, trailingLayer));
+        p.add(new LdcInsnNode(0.30d));
+        p.add(new JumpInsnNode(Opcodes.GOTO, offsetReady));
+        p.add(trailingLayer);
+        p.add(new LdcInsnNode(0.06d));
+        p.add(offsetReady);
+        p.add(new VarInsnNode(Opcodes.DSTORE, 20));
+
         p.add(new VarInsnNode(Opcodes.ALOAD, 0));
         p.add(new FieldInsnNode(Opcodes.GETSTATIC,
-            "net/minecraft/core/particles/ParticleTypes", "f_235898_",
+            "net/minecraft/core/particles/ParticleTypes", "f_235902_",
             "Lnet/minecraft/core/particles/SimpleParticleType;"));
 
         p.add(new VarInsnNode(Opcodes.DLOAD, 1));
         p.add(new VarInsnNode(Opcodes.DLOAD, 14));
-        p.add(new LdcInsnNode(0.15d));
+        p.add(new VarInsnNode(Opcodes.DLOAD, 20));
         p.add(new InsnNode(Opcodes.DMUL));
         p.add(new InsnNode(Opcodes.DADD));
 
         p.add(new VarInsnNode(Opcodes.DLOAD, 3));
         p.add(new VarInsnNode(Opcodes.DLOAD, 8));
-        p.add(new LdcInsnNode(0.15d));
+        p.add(new VarInsnNode(Opcodes.DLOAD, 20));
         p.add(new InsnNode(Opcodes.DMUL));
         p.add(new InsnNode(Opcodes.DADD));
 
         p.add(new VarInsnNode(Opcodes.DLOAD, 5));
         p.add(new VarInsnNode(Opcodes.DLOAD, 16));
-        p.add(new LdcInsnNode(0.15d));
+        p.add(new VarInsnNode(Opcodes.DLOAD, 20));
         p.add(new InsnNode(Opcodes.DMUL));
         p.add(new InsnNode(Opcodes.DADD));
 
         p.add(new VarInsnNode(Opcodes.DLOAD, 14));
-        p.add(new LdcInsnNode(0.72d));
+        p.add(new LdcInsnNode(0.82d));
         p.add(new InsnNode(Opcodes.DMUL));
         p.add(new VarInsnNode(Opcodes.DLOAD, 8));
-        p.add(new LdcInsnNode(0.72d));
+        p.add(new LdcInsnNode(0.82d));
         p.add(new InsnNode(Opcodes.DMUL));
         p.add(new VarInsnNode(Opcodes.DLOAD, 16));
-        p.add(new LdcInsnNode(0.72d));
+        p.add(new LdcInsnNode(0.82d));
         p.add(new InsnNode(Opcodes.DMUL));
 
         p.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
@@ -1295,7 +1316,7 @@ public final class JarPruner {
             "(Lnet/minecraft/core/particles/ParticleOptions;DDDDDD)V", false));
         p.add(new InsnNode(Opcodes.RETURN));
         particle.maxStack = 14;
-        particle.maxLocals = 18;
+        particle.maxLocals = 22;
         owner.methods.add(particle);
 
         MethodNode sphere = new MethodNode(
@@ -1356,7 +1377,7 @@ public final class JarPruner {
         ));
         s.add(new VarInsnNode(Opcodes.ASTORE, 7));
         s.add(new InsnNode(Opcodes.ICONST_0));
-        s.add(new IntInsnNode(Opcodes.SIPUSH, 1536));
+        s.add(new IntInsnNode(Opcodes.SIPUSH, 768));
         s.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
             "java/util/stream/IntStream", "range",
             "(II)Ljava/util/stream/IntStream;", true));
@@ -1519,7 +1540,16 @@ public final class JarPruner {
 
         code.add(new VarInsnNode(Opcodes.ALOAD, 0));
         code.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        code.add(new FieldInsnNode(Opcodes.GETFIELD, owner.name, "smoothY", "D"));
+        code.add(new VarInsnNode(Opcodes.ALOAD, 0));
         code.add(new FieldInsnNode(Opcodes.GETFIELD, owner.name, "f_24942_", "D"));
+        code.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        code.add(new FieldInsnNode(Opcodes.GETFIELD, owner.name, "smoothY", "D"));
+        code.add(new InsnNode(Opcodes.DSUB));
+        code.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        code.add(new FieldInsnNode(Opcodes.GETFIELD, owner.name, "interpolationSpeed", "D"));
+        code.add(new InsnNode(Opcodes.DMUL));
+        code.add(new InsnNode(Opcodes.DADD));
         code.add(new FieldInsnNode(Opcodes.PUTFIELD, owner.name, "smoothY", "D"));
 
         code.add(new VarInsnNode(Opcodes.ALOAD, 0));
@@ -1532,7 +1562,8 @@ public final class JarPruner {
         code.add(new FieldInsnNode(Opcodes.PUTFIELD, lookControlInternal, "f_24938_", "F"));
 
         code.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        code.add(new LdcInsnNode(360.0f));
+        code.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        code.add(new FieldInsnNode(Opcodes.GETFIELD, owner.name, "maxSpeedLimit", "F"));
         code.add(new FieldInsnNode(Opcodes.PUTFIELD, lookControlInternal, "f_24939_", "F"));
         code.add(new JumpInsnNode(Opcodes.GOTO, invokeVanilla));
 
@@ -1548,7 +1579,7 @@ public final class JarPruner {
         code.add(new MethodInsnNode(Opcodes.INVOKESPECIAL,
             lookControlInternal, "m_8128_", "()V", false));
         code.add(new InsnNode(Opcodes.RETURN));
-        tick.maxStack = 3;
+        tick.maxStack = 4;
         tick.maxLocals = 1;
     }
 
