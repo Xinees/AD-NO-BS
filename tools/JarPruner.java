@@ -1590,7 +1590,8 @@ public final class JarPruner {
         code.add(new JumpInsnNode(Opcodes.IF_ACMPNE, done));
 
         code.add(new VarInsnNode(Opcodes.ALOAD, 2));
-        code.add(new InsnNode(Opcodes.ICONST_1));
+        code.add(new FieldInsnNode(Opcodes.GETSTATIC,
+            "java/lang/Boolean", "TRUE", "Ljava/lang/Boolean;"));
         code.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
             "org/spongepowered/asm/mixin/injection/callback/CallbackInfoReturnable",
             "setReturnValue", "(Ljava/lang/Object;)V", false));
