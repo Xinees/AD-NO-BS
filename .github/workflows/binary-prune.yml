@@ -73,6 +73,15 @@ jobs:
             build/classes-pruned.jar \
             build/libs/ec_ad-legacy-forge-1.20.1.jar
 
+      - name: Embed untouched Astemir RE as Jar-in-Jar
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/embed_astemir_jar.py \
+            build/libs/ec_ad-legacy-forge-1.20.1.jar \
+            astemirlib_re-1.20.1-forge-1.2.98-SNAPSHOT.jar \
+            build/libs/ec_ad-legacy-forge-1.20.1.jar
+
       - name: Verify Legacy JAR structure and retained content
         shell: bash
         run: |
@@ -89,6 +98,8 @@ jobs:
 
               names = set(z.namelist())
               required = {
+                  "META-INF/jarjar/metadata.json",
+                  "META-INF/jarjar/astemirlib_re-1.20.1-forge-1.2.98-SNAPSHOT.jar",
                   "META-INF/mods.toml",
                   "ec_ad.mixins.json",
                   "ec_ad.forge.mixins.json",
@@ -108,6 +119,22 @@ jobs:
                   "assets/ec_ad/models/block/lushsaur_egg.json",
                   "assets/ec_ad/models/block/chorusoatl_egg.json",
               }
+              nested_library = "META-INF/jarjar/astemirlib_re-1.20.1-forge-1.2.98-SNAPSHOT.jar"
+              expected_library_hash = "906198b220958f352c308ec9a2178342b7af90198ade206d1596eb336a89a0a3"
+              metadata = json.loads(z.read("META-INF/jarjar/metadata.json"))
+              matches = [
+                  entry for entry in metadata.get("jars", [])
+                  if entry.get("path") == nested_library
+              ]
+              if len(matches) != 1:
+                  raise SystemExit("Astemir RE Jar-in-Jar metadata entry is missing or duplicated")
+              embedded_hash = hashlib.sha256(z.read(nested_library)).hexdigest()
+              if embedded_hash != expected_library_hash:
+                  raise SystemExit(f"Embedded Astemir RE hash mismatch: {embedded_hash}")
+              mods_toml = z.read("META-INF/mods.toml").decode("utf-8")
+              if 'modId = "astemirlib_re"' not in mods_toml:
+                  raise SystemExit("Parent mod no longer declares its Astemir RE dependency")
+
               missing = sorted(required - names)
               if missing:
                   raise SystemExit("Missing required Legacy entries:\n" + "\n".join(missing))
