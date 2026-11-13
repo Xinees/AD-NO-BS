@@ -187,6 +187,46 @@ jobs:
             fi
           done
 
+          LUSHSAUR_CLIENT='com.eternal_creations.archies_dino_mod.client.model.render.entity.mob.LushsaurClient'
+          verify_method "$LUSHSAUR_CLIENT" \
+            'archiesDinoMod$shouldUseRunAnimation(' \
+            '(Lcom/eternal_creations/archies_dino_mod/common/entity/mob/lushsaur/LushsaurEntity;)Z'
+          LUSH_GAIT="$(javap -classpath build/classes-pruned.jar -p -c "$LUSHSAUR_CLIENT")"
+          for required_call in 'LushsaurEntity.m_6688_' 'LivingEntity.m_20142_' \
+            'EntityLocomotion.whenRunning' 'Condition.check'; do
+            if ! printf '%s\n' "$LUSH_GAIT" | grep -Fq "$required_call"; then
+              echo "Lushsaur run animation gate is missing $required_call"
+              printf '%s\n' "$LUSH_GAIT"
+              exit 1
+            fi
+          done
+          LUSH_GAIT_VERBOSE="$(javap -classpath build/classes-pruned.jar -p -v "$LUSHSAUR_CLIENT")"
+          if ! printf '%s\n' "$LUSH_GAIT_VERBOSE" | grep -Fq 'archiesDinoMod$shouldUseRunAnimation'; then
+            echo "Lushsaur locomotion states do not reference the rider-sprint predicate."
+            exit 1
+          fi
+          LUSH_LOCOMOTION="$(printf '%s\n' "$LUSH_GAIT" | sed -n '/buildLocomotionState(/,/^  private /p')"
+          RUN_CONDITION_COUNT="$(printf '%s\n' "$LUSH_LOCOMOTION" | grep -F -o 'check:(Lcom/eternal_creations/archies_dino_mod/common/entity/mob/lushsaur/LushsaurEntity;)Lcom/astemir/astemirlib/re/core/function/Condition;' | wc -l)"
+          test "$RUN_CONDITION_COUNT" -eq 2
+
+          RIDER_ANIMATIONS='com.eternal_creations.archies_dino_mod.client.animation.player.riding.OnLushsaurPlayerAnimations'
+          verify_method "$RIDER_ANIMATIONS" \
+            'lambda$init$11(' \
+            '(Lcom/eternal_creations/archies_dino_mod/common/entity/mob/lushsaur/LushsaurEntity;)Z'
+          RIDER_RUN="$(javap -classpath build/classes-pruned.jar -p -c "$RIDER_ANIMATIONS" | sed -n '/lambda[$]init[$]11(/,/^  private static /p')"
+          for required_call in 'LushsaurEntity.m_6688_' 'LivingEntity.m_20142_'; do
+            if ! printf '%s\n' "$RIDER_RUN" | grep -Fq "$required_call"; then
+              echo "Lushsaur rider run animation is not synchronized to the controlling passenger: $required_call"
+              printf '%s\n' "$RIDER_RUN"
+              exit 1
+            fi
+          done
+          if printf '%s\n' "$RIDER_RUN" | grep -Fq 'getRunLocomotion'; then
+            echo "Lushsaur rider run animation still uses the old velocity-based predicate."
+            printf '%s\n' "$RIDER_RUN"
+            exit 1
+          fi
+
           LUSH_MOUNT_SPEED="$(printf '%s\\n' "$LUSH_SPRINT_CONTROL" | sed -n '/lambda[$]createMount[$]21(/,/lambda[$]createMount[$]20(/p')"
           for required_call in 'm_6688_' 'm_20142_' 'getSpeedBoostTicks' 'java/lang/Integer.signum' 'java/lang/Math.max'; do
             if ! printf '%s\\n' "$LUSH_MOUNT_SPEED" | grep -Fq "$required_call"; then
