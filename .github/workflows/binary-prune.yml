@@ -147,12 +147,14 @@ jobs:
               print(f"Final size: {jar.stat().st_size} bytes")
           PY
 
-      - name: Upload Legacy JAR and reports
+      - name: Upload Legacy JAR and debug files
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ec-ad-legacy-forge-1.20.1
+          name: ec-ad-legacy-forge-1.20.1-debug
           path: |
+            build/classes-pruned.jar
             build/libs/ec_ad-legacy-forge-1.20.1.jar
             build/resource-prune-report.txt
-          if-no-files-found: error
+          if-no-files-found: ignore
           retention-days: 30
