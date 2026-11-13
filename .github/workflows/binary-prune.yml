@@ -301,8 +301,8 @@ jobs:
 
           SMOOTH_LOOK="$(javap -classpath build/classes-pruned.jar -p -c "$SMOOTH_LOOK_CONTROL")"
           SMOOTH_LOOK_TICK="$(printf '%s\n' "$SMOOTH_LOOK" | sed -n '/m_8128_(/,/^  protected /p')"
-          for required_call in 'Condition.check' 'LookControl.m_8128_' 'SmoothLookControl.smoothX' \
-            'SmoothLookControl.smoothY' 'SmoothLookControl.smoothZ' 'LookControl.f_24938_' 'LookControl.f_24939_'; do
+          for required_call in 'Condition.check' 'LookControl.m_8128_' 'Field smoothX' \
+            'Field smoothY' 'Field smoothZ' 'LookControl.f_24938_' 'LookControl.f_24939_'; do
             if ! printf '%s\n' "$SMOOTH_LOOK_TICK" | grep -Fq "$required_call"; then
               echo "SmoothLookControl is missing direct look tracking or its rotation gate: $required_call"
               printf '%s\n' "$SMOOTH_LOOK_TICK"
