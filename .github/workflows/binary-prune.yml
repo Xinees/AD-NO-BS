@@ -86,7 +86,7 @@ jobs:
             javap -classpath build/classes-pruned.jar -p -s "$class_name" | grep -F "descriptor: $PROVIDER_DESC"
           done
           RENDER_CALLS="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.client.CommonClient)"
-          COUNT="$(printf '%s\\n' "$RENDER_CALLS" | grep -F -c "createRenderProvider:$PROVIDER_DESC" || true)"
+          COUNT="$(printf '%s\\n' "$RENDER_CALLS" | grep -F -o "createRenderProvider:$PROVIDER_DESC" | wc -l)"
           test "$COUNT" -eq 3
           if printf '%s\\n' "$RENDER_CALLS" | grep -F "createRenderProvider:()Lnet/minecraft/client/renderer/entity/EntityRendererProvider;"; then
             echo "Found stale renderer descriptor in CommonClient."
