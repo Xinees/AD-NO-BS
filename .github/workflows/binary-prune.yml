@@ -176,7 +176,7 @@ jobs:
             fi
           done
 
-          LUSH_MOUNT_SPEED="$(printf '%s\\n' "$LUSH_SPRINT_CONTROL" | sed -n '/lambda\\$createMount\\$21(/,/lambda\\$createMount\\$20(/p')"
+          LUSH_MOUNT_SPEED="$(printf '%s\\n' "$LUSH_SPRINT_CONTROL" | sed -n '/lambda[$]createMount[$]21(/,/lambda[$]createMount[$]20(/p')"
           for required_call in 'm_6688_' 'm_20142_' 'getSpeedBoostTicks' 'java/lang/Integer.signum' 'java/lang/Math.max'; do
             if ! printf '%s\\n' "$LUSH_MOUNT_SPEED" | grep -Fq "$required_call"; then
               echo "Lushsaur mount speed is missing expected walk/run or feed-boost logic: $required_call"
