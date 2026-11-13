@@ -8,26 +8,30 @@ This file is the explicit task list for the next Legacy work. The order below is
 
 ## Current baseline and test status
 
-### Build 81
+### Build 94 — latest CI-verified JAR
 
-- Commit: `eeec7201f55dd1252d201284048d8468312d6a01`
-- GitHub Actions run: [#81](https://github.com/Xinees/AD-NO-BS/actions/runs/43507305757) — successful.
-- Artifact ID: `14075429830`
-- JAR SHA-256: `e46600a329c32e34554157fac2964ab7ebf10f9b747a39ab4592ed7bca479b53`
-- CI verifies the added LocalPlayer sprint gate, the Lushsaur mounted speed callback, retained content, and JAR structure.
-- **Runtime status: not yet confirmed by the user.** The user's report in this chat concerns build 78, not build 81.
+- Animation patch implementation: [commit 338f774](https://github.com/Xinees/AD-NO-BS/commit/338f774b613ff886accb50b2438bc1e57a3a01a6); ASM invokedynamic node correction: [commit ff48c64](https://github.com/Xinees/AD-NO-BS/commit/ff48c64b91a56998d9742049c7ab66d791b44a51).
+- Sonic Boom visual patch: [commit 642be30](https://github.com/Xinees/AD-NO-BS/commit/642be309f50e8330ff24f48b3ce08d6abd3d6f64).
+- CI verification: [run #94 — success](https://github.com/Xinees/AD-NO-BS/actions/runs/43516535668).
+- Artifact ID: `14080273953`; artifact ZIP digest: `sha256:1862f5120d2d95167f856fd05c29e7769c9841ecbc44952fc8558551fcfddc72`.
+- Output JAR SHA-256: `c3ded081be4631e747c26ee1b68261adec81aa0752993e861fdc5b9f9c7d90a8`; size: `2,493,690` bytes.
+- The user's current report confirms that Ctrl and double-tap W both activate mounted sprint. Build 94 corrects the delayed run-animation transition by making the mounted Lushsaur's locomotion run condition read the controlling passenger's `isSprinting()`. The rider's own run animation uses the same condition. When the Lushsaur has no controlling passenger, its pre-existing AI locomotion test is retained.
+- The Sculksaur Sonic Boom final visual event now spawns a hollow shell of 1,536 vanilla `SCULK_SOUL` particles, distributed over a sphere and moving radially outward at 0.72 blocks/tick. The sphere is centered at the Sculksaur's body center. The old post-process `Shockwave` and `ColoredLight`, jaw emitter fallback, and old ground-wave emitters are removed from the attack's event methods.
+- The camera shake `ShakeUtil.shakeExplosion(entity, 1.0f, 20.0f)` is intentionally preserved; it is separate from the screen-space distortion that was removed.
+- Only the two Sonic Boom visual event methods in `SculksaurEffects` were changed. The attack AI, target selection, cooldown, range, damage, knockback, animation event schedule, sounds, listening/vibration behavior, and unrelated Sculksaur particle tracks remain untouched.
+- **Runtime status:** CI verifies the transformed bytecode, helper descriptors, vanilla particle call, retained camera shake, and absence of the old wave calls. Build 94 has not yet been visually tested in-game. Test mounted walking for more than three seconds and sprint activation; test Sonic Boom with post-processing both enabled and disabled.
 
-### Build 78 — user-reported test result
+### Previous sprint baseline — Build 81
 
-The player mounts the Lushsaur and holds W. The Lushsaur begins with its walking animation. After roughly three seconds, the running animation appears, but the actual movement speed does not increase. This is a mismatch: animation says "run", movement still behaves like walking.
+Build 81 added the Lushsaur-only vanilla mounted-sprint permission path in `LocalPlayerMixin` and changed the mounted movement-speed callback to read the controlling passenger's sprint state while retaining the feeding speed boost. Build 94 preserves that behavior and corrects only the animation predicates.
 
-Build 81 adds the next part of the fix that build 78 did not contain: the client-side `LocalPlayerMixin` gate for `LocalPlayer.vehicleCanSprint(Entity)`. It grants the vanilla vehicle-sprint check only when the vehicle is a Lushsaur and the local player is the Lushsaur's actual controlling passenger. Build 81 also uses the controlling passenger's sprint state in the Lushsaur mount speed callback.
+### Build 78 — user-reported historical test
 
-Do not mark mounted sprint as fixed based on CI alone. The user must test build 81 in-game.
+The player mounted the Lushsaur and held W. The Lushsaur began with its walking animation; after roughly three seconds the running animation appeared, but actual movement speed did not increase. Build 78 was not correct. The user's newer report confirms that sprint input is now accepted through Ctrl and double-tap W; only the run-animation timing remained to be fixed.
 
 ## Priority 1 — replace the Sculksaur Sonic Boom visual effect
 
-**This is the first visual rework to implement.** The current 3D/post-processing distortion is explicitly unwanted. Remove it completely from the Sculksaur's sonic-wave attack; do not merely lower its intensity, shrink it, or tune the distortion until it is "less noticeable".
+**Implemented in Build 94; in-game acceptance tests remain.** The current 3D/post-processing distortion is explicitly unwanted and has been removed from the Sculksaur's sonic-wave attack; it was not merely toned down.
 
 ### Required result
 
@@ -46,6 +50,18 @@ The original `explosionFinalEvent()` checks `PostProcessEngine.INSTANCE.isEnable
 
 That is the exact visual path to replace. Audit all call sites before deleting resources: the explosion-specific emitters should no longer be spawned by this wave, but unrelated Sculksaur particle tracks must remain intact.
 
+### Build 94 implementation
+
+- `lambda$explosionFinalEvent$12` now calls a dedicated vanilla-particle sphere helper. The helper creates 1,536 points with a Fibonacci-sphere distribution, starts them 0.15 blocks from the center, and sends them outward along their radial direction at 0.72 blocks/tick. The particle is vanilla `ParticleTypes.SCULK_SOUL`.
+- The origin is the Sculksaur's horizontal center and half its bounding-box height above its feet. This produces a 3D shell rather than the previous mixture of discs, rings, and ground effects.
+- `lambda$explosionGroundEvent$11` is now a no-op, so the four old ground-wave emitters are no longer spawned. The final jaw-emitter fallback is also gone.
+- `PostProcessEngine`, `Shockwave`, and `ColoredLight` are no longer called from the Sonic Boom event, so the visual no longer depends on the post-processing setting.
+- `ShakeUtil.shakeExplosion(entity, 1.0f, 20.0f)` remains. It is the original camera shake, not the removed screen-space distortion.
+- The existing event-track callbacks/timestamps and every other `SculksaurEffects` track were left unchanged. The attack AI and combat implementation were not edited.
+- CI run #94 verifies the two patched event methods, helper descriptors, vanilla particle type and spawn call, preserved camera shake, and absence of old wave calls. This proves bytecode structure only; it does not prove how dense or smooth the sphere looks in the game.
+- Old explosion particle asset files remain in the pruned JAR but are no longer spawned by either Sonic Boom event method. They were not deleted because this pass only disconnects the attack-specific visual call path.
+
+
 ### Preserve the gameplay attack
 
 This request is about the wave's visuals. Keep the existing Sonic Boom gameplay behavior unless a separate bug is found and reported first:
@@ -58,7 +74,7 @@ This request is about the wave's visuals. Keep the existing Sonic Boom gameplay 
 
 Do not remove or rewrite the entire `SculksaurEffects` system. Keep unrelated idle, walk, run, tail, roar, listen, spawn, and death effects.
 
-**Open check before implementation:** `ShakeUtil.shakeExplosion(...)` is a camera-shake call in the same final event, not the shader `Shockwave` object. Confirm whether it is part of the unwanted distortion before removing it; do not silently remove camera shake as collateral.
+**Camera shake decision:** `ShakeUtil.shakeExplosion(...)` is separate from the shader `Shockwave` object. Build 94 preserves it; only the post-process distortion and attack-specific emitter spawns are removed.
 
 ### Acceptance tests
 
