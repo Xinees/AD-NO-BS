@@ -159,6 +159,8 @@ public final class JarPruner {
         patchTemptItems(nodes.get(ROOT + "common/entity/mob/lushsaur/ai/LushsaurAI"), "LUSH_CORE");
         patchTemptItems(nodes.get(ROOT + "common/entity/mob/chorusoatl/ai/ChorusoatlAI"), "CHORUS_FOSSIL");
         patchDazedEffect(nodes.get(ROOT + "common/effect/MobEffectDazed"));
+        patchEntitySettings(nodes.get(ROOT + "server/ServerConfig$EntitySettings"));
+        patchServerConfig(nodes.get(ROOT + "server/ServerConfig"));
         patchNetworkHelper(nodes.get(ROOT + "platform/ForgeNetworkHelper"));
         patchAbstractArrowMixin(nodes.get(ROOT + "mixin/AbstractArrowMixin"));
         patchPlayerMixin(nodes.get(ROOT + "mixin/PlayerMixin"));
@@ -434,6 +436,209 @@ public final class JarPruner {
         if (replaced == 0) {
             throw new IllegalStateException("No Amber temptation reference found in " + owner.name);
         }
+    }
+
+    private static final String ENTITY_SETTINGS =
+        ROOT + "server/ServerConfig$EntitySettings";
+    private static final String TAMEABLE_SETTINGS =
+        ROOT + "common/entity/base/AbstractComplexMob$TameableDinoSettings";
+    private static final String SCULK_SETTINGS =
+        ROOT + "util/handlers/SculksaurHandler$SculksaurSettings";
+    private static final String ENTITY_SETTINGS_CTOR =
+        "(L" + TAMEABLE_SETTINGS + ";L" + TAMEABLE_SETTINGS + ";L" + TAMEABLE_SETTINGS +
+        ";L" + TAMEABLE_SETTINGS + ";L" + TAMEABLE_SETTINGS + ";L" + TAMEABLE_SETTINGS +
+        ";L" + SCULK_SETTINGS + ";L" + TAMEABLE_SETTINGS + ";)V";
+
+    private static void patchEntitySettings(ClassNode owner) {
+        if (owner == null) throw new IllegalStateException("ServerConfig EntitySettings class is missing");
+        String oldArchieType = "L" + ROOT + "common/entity/mob/archie/ArchieEntity$ArchieSettings;";
+        String newGenericType = "L" + TAMEABLE_SETTINGS + ";";
+
+        for (FieldNode field : owner.fields) {
+            if (field.name.equals("archie")) {
+                field.desc = newGenericType;
+                field.signature = null;
+            }
+        }
+        if (owner.recordComponents != null) {
+            for (RecordComponentNode component : owner.recordComponents) {
+                if (component.name.equals("archie")) {
+                    component.descriptor = newGenericType;
+                    component.signature = null;
+                }
+            }
+        }
+
+        for (MethodNode method : owner.methods) {
+            if (method.name.equals("<init>")) {
+                method.desc = method.desc.replace(oldArchieType, newGenericType);
+                method.signature = null;
+            } else if (method.name.equals("archie")) {
+                method.desc = "()" + newGenericType;
+                method.signature = null;
+            } else if (method.name.equals("toTag")) {
+                clearMethod(method);
+                InsnList code = method.instructions;
+                code.add(new TypeInsnNode(Opcodes.NEW, "net/minecraft/nbt/CompoundTag"));
+                code.add(new InsnNode(Opcodes.DUP));
+                code.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, "net/minecraft/nbt/CompoundTag",
+                    "<init>", "()V", false));
+                code.add(new VarInsnNode(Opcodes.ASTORE, 1));
+                addEntitySettingEncode(code, "lushsaur", "lushsaur", TAMEABLE_SETTINGS);
+                addEntitySettingEncode(code, "chorusoatl", "chorusoatl", TAMEABLE_SETTINGS);
+                addEntitySettingEncode(code, "sculksaur", "sculksaur", SCULK_SETTINGS);
+                code.add(new VarInsnNode(Opcodes.ALOAD, 1));
+                code.add(new InsnNode(Opcodes.ARETURN));
+                method.maxLocals = 2;
+            } else if (method.name.equals("fromTag") &&
+                method.desc.equals("(Lnet/minecraft/nbt/CompoundTag;L" + ENTITY_SETTINGS + ";)L" + ENTITY_SETTINGS + ";")) {
+                clearMethod(method);
+                InsnList code = method.instructions;
+                code.add(new TypeInsnNode(Opcodes.NEW, ENTITY_SETTINGS));
+                code.add(new InsnNode(Opcodes.DUP));
+                code.add(new InsnNode(Opcodes.ACONST_NULL));
+                addEntitySettingDecode(code, "lushsaur", "lushsaur", TAMEABLE_SETTINGS);
+                code.add(new InsnNode(Opcodes.ACONST_NULL));
+                code.add(new InsnNode(Opcodes.ACONST_NULL));
+                addEntitySettingDecode(code, "chorusoatl", "chorusoatl", TAMEABLE_SETTINGS);
+                code.add(new InsnNode(Opcodes.ACONST_NULL));
+                addEntitySettingDecode(code, "sculksaur", "sculksaur", SCULK_SETTINGS);
+                code.add(new InsnNode(Opcodes.ACONST_NULL));
+                code.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, ENTITY_SETTINGS,
+                    "<init>", ENTITY_SETTINGS_CTOR, false));
+                code.add(new InsnNode(Opcodes.ARETURN));
+                method.maxLocals = 2;
+            } else if (method.name.equals("equals") || method.name.equals("hashCode") ||
+                method.name.equals("toString")) {
+                clearMethod(method);
+                owner.methods.remove(method);
+                break;
+            }
+        }
+
+        for (MethodNode method : owner.methods) {
+            for (AbstractInsnNode insn : method.instructions.toArray()) {
+                if (insn instanceof FieldInsnNode field &&
+                    field.owner.equals(owner.name) && field.name.equals("archie")) {
+                    field.desc = newGenericType;
+                }
+            }
+        }
+    }
+
+    private static void addEntitySettingEncode(
+        InsnList code, String tagKey, String fieldName, String valueType
+    ) {
+        code.add(new VarInsnNode(Opcodes.ALOAD, 1));
+        code.add(new LdcInsnNode(tagKey));
+        String codecOwner = valueType.equals(SCULK_SETTINGS) ? SCULK_SETTINGS : TAMEABLE_SETTINGS;
+        code.add(new FieldInsnNode(Opcodes.GETSTATIC, codecOwner, "CODEC", "Lcom/mojang/serialization/Codec;"));
+        code.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        code.add(new FieldInsnNode(Opcodes.GETFIELD, ENTITY_SETTINGS, fieldName, "L" + valueType + ";"));
+        code.add(new MethodInsnNode(Opcodes.INVOKESTATIC, ROOT + "util/ADConfig", "encode",
+            "(Lcom/mojang/serialization/Codec;Ljava/lang/Object;)Lnet/minecraft/nbt/Tag;", false));
+        code.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "net/minecraft/nbt/CompoundTag", "m_128365_",
+            "(Ljava/lang/String;Lnet/minecraft/nbt/Tag;)Lnet/minecraft/nbt/Tag;", false));
+        code.add(new InsnNode(Opcodes.POP));
+    }
+
+    private static void addEntitySettingDecode(
+        InsnList code, String tagKey, String fieldName, String valueType
+    ) {
+        String codecOwner = valueType.equals(SCULK_SETTINGS) ? SCULK_SETTINGS : TAMEABLE_SETTINGS;
+        code.add(new FieldInsnNode(Opcodes.GETSTATIC, codecOwner, "CODEC", "Lcom/mojang/serialization/Codec;"));
+        code.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        code.add(new LdcInsnNode(tagKey));
+        code.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "net/minecraft/nbt/CompoundTag", "m_128423_",
+            "(Ljava/lang/String;)Lnet/minecraft/nbt/Tag;", false));
+        code.add(new VarInsnNode(Opcodes.ALOAD, 1));
+        code.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, ENTITY_SETTINGS, fieldName,
+            "()L" + valueType + ";", false));
+        code.add(new MethodInsnNode(Opcodes.INVOKESTATIC, ROOT + "util/ADConfig", "decode",
+            "(Lcom/mojang/serialization/Codec;Lnet/minecraft/nbt/Tag;Ljava/lang/Object;)Ljava/lang/Object;", false));
+        code.add(new TypeInsnNode(Opcodes.CHECKCAST, valueType));
+    }
+
+    private static void patchServerConfig(ClassNode owner) {
+        if (owner == null) throw new IllegalStateException("ServerConfig class is missing");
+        owner.fields.removeIf(field -> field.name.equals("weaponSettings") || field.name.equals("armorSettings"));
+        owner.methods.removeIf(method -> method.name.equals("getWeaponSettings") || method.name.equals("getArmorSettings"));
+
+        for (MethodNode method : owner.methods) {
+            if (method.name.equals("<init>")) {
+                replaceExcludedEntityDefaults(method);
+                removeConstructorFieldInit(method, owner.name, "weaponSettings");
+                removeConstructorFieldInit(method, owner.name, "armorSettings");
+            } else if (method.name.equals("toTag") && method.desc.equals("()Lnet/minecraft/nbt/CompoundTag;")) {
+                clearMethod(method);
+                InsnList code = method.instructions;
+                code.add(new TypeInsnNode(Opcodes.NEW, "net/minecraft/nbt/CompoundTag"));
+                code.add(new InsnNode(Opcodes.DUP));
+                code.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, "net/minecraft/nbt/CompoundTag", "<init>", "()V", false));
+                code.add(new VarInsnNode(Opcodes.ASTORE, 1));
+                code.add(new VarInsnNode(Opcodes.ALOAD, 0));
+                code.add(new FieldInsnNode(Opcodes.GETFIELD, owner.name, "entitySettings",
+                    "L" + ROOT + "util/ADConfig$Setting;"));
+                code.add(new VarInsnNode(Opcodes.ALOAD, 1));
+                code.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, ROOT + "util/ADConfig$Setting", "write",
+                    "(Lnet/minecraft/nbt/CompoundTag;)V", false));
+                code.add(new VarInsnNode(Opcodes.ALOAD, 1));
+                code.add(new InsnNode(Opcodes.ARETURN));
+                method.maxLocals = 2;
+            } else if (method.name.equals("fromTag") &&
+                method.desc.equals("(Lnet/minecraft/nbt/CompoundTag;)V")) {
+                clearMethod(method);
+                InsnList code = method.instructions;
+                code.add(new VarInsnNode(Opcodes.ALOAD, 0));
+                code.add(new FieldInsnNode(Opcodes.GETFIELD, owner.name, "entitySettings",
+                    "L" + ROOT + "util/ADConfig$Setting;"));
+                code.add(new VarInsnNode(Opcodes.ALOAD, 1));
+                code.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, ROOT + "util/ADConfig$Setting", "read",
+                    "(Lnet/minecraft/nbt/CompoundTag;)V", false));
+                code.add(new InsnNode(Opcodes.RETURN));
+                method.maxLocals = 2;
+            }
+        }
+    }
+
+    private static void replaceExcludedEntityDefaults(MethodNode method) {
+        Set<String> excludedOwners = Set.of(
+            ROOT + "common/entity/mob/archie/ArchieEntity",
+            ROOT + "common/entity/mob/obsidiceratops/ObsidiceratopsEntity",
+            ROOT + "common/entity/mob/therimoss/TherimossEntity",
+            ROOT + "common/entity/mob/sculkraptor/SculkraptorEntity",
+            ROOT + "common/entity/mob/coralosaur/CoralosaurEntity"
+        );
+        for (AbstractInsnNode insn : method.instructions.toArray()) {
+            if (insn instanceof FieldInsnNode field &&
+                field.getOpcode() == Opcodes.GETSTATIC &&
+                field.name.equals("DEFAULT_STATS") &&
+                excludedOwners.contains(field.owner)) {
+                method.instructions.set(field, new InsnNode(Opcodes.ACONST_NULL));
+            }
+        }
+    }
+
+    private static void removeConstructorFieldInit(MethodNode method, String owner, String fieldName) {
+        FieldInsnNode put = null;
+        for (AbstractInsnNode insn : method.instructions.toArray()) {
+            if (insn instanceof FieldInsnNode field &&
+                field.getOpcode() == Opcodes.PUTFIELD &&
+                field.owner.equals(owner) && field.name.equals(fieldName)) {
+                put = field;
+                break;
+            }
+        }
+        if (put == null) return;
+
+        AbstractInsnNode start = put;
+        for (AbstractInsnNode cursor = put.getPrevious(); cursor != null; cursor = cursor.getPrevious()) {
+            if (cursor instanceof VarInsnNode var && var.getOpcode() == Opcodes.ALOAD && var.var == 0) {
+                start = cursor;
+                break;
+            }
+        }
+        removeInclusive(method.instructions, start, put);
     }
 
     private static void patchDazedEffect(ClassNode owner) {
