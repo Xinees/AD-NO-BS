@@ -54,7 +54,7 @@ KEEP_MIXINS = {
     ],
 }
 KEEP_FORGE_MIXINS = {
-    "mixins": ["forge.CustomStructurePieceMixin"],
+    "mixins": [],
     "client": [],
 }
 
