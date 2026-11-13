@@ -98,7 +98,6 @@ public final class JarPruner {
         ROOT + "mixin/CriteriaTriggersAccessor",
         ROOT + "mixin/EntityAccessor",
         ROOT + "mixin/PlayerListMixin",
-        ROOT + "mixin/PlayerMixin",
         ROOT + "mixin/sculksaur/PrimaryLevelDataMixin",
         ROOT + "mixin/sculksaur/SculkShriekerBlockEntityMixin",
         ROOT + "mixin/sculksaur/WalkNodeEvaluatorAccessor",
