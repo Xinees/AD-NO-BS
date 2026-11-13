@@ -238,12 +238,12 @@ jobs:
                           config["mixins"] = ["CriteriaTriggersAccessor"]
                           config["client"] = []
                           config["server"] = []
-                          content = (json.dumps(config, indent=2) + "\\n").encode("utf-8")
+                          content = (json.dumps(config, indent=2) + "\n").encode("utf-8")
                       # Astemir RE mixins stay disabled for this diagnostic server launch.
                       elif info.filename == nested_name:
                           content = strip_nested_mixins(content)
                       changed.writestr(info, content)
-os.replace(temp_name, smoke_jar)
+              os.replace(temp_name, smoke_jar)
           except Exception:
               Path(temp_name).unlink(missing_ok=True)
               raise
