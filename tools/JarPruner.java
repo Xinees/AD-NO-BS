@@ -1122,8 +1122,9 @@ public final class JarPruner {
                 for (MethodNode method : node.methods) {
                     String key = method.name + method.desc;
                     boolean synthetic = (method.access & Opcodes.ACC_SYNTHETIC) != 0;
+                    boolean bridge = (method.access & Opcodes.ACC_BRIDGE) != 0;
                     boolean shouldScan = method.name.equals("<clinit>") ||
-                        (keepAll && !synthetic) || selected.contains(key);
+                        bridge || (keepAll && !synthetic) || selected.contains(key);
                     if (!shouldScan || !processed.add(key)) continue;
                     progressed = true;
 
