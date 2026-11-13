@@ -141,6 +141,8 @@ jobs:
             'modify(' '(ILcom/astemir/astemirlib/re/client/model/core/animation/AnimationState;FFLcom/astemir/astemirlib/re/client/model/core/animation/BoneState;)V'
           verify_method 'com.eternal_creations.archies_dino_mod.common.menu.DinoMenu' \
             'm_6875_(' '(Lnet/minecraft/world/entity/player/Player;)Z'
+          verify_method 'com.eternal_creations.archies_dino_mod.common.menu.DinoMenu' \
+            'm_7648_(' '(Lnet/minecraft/world/entity/player/Player;I)Lnet/minecraft/world/item/ItemStack;'
           verify_method 'com.eternal_creations.archies_dino_mod.client.screen.DinoScreen' \
             'm_7286_(' '(Lnet/minecraft/client/gui/GuiGraphics;FII)V'
           verify_method 'com.eternal_creations.archies_dino_mod.networking.serverbound.MountControlMessage' \
