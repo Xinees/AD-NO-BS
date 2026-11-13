@@ -232,16 +232,23 @@ jobs:
           try:
               with zipfile.ZipFile(temp_name, "w", zipfile.ZIP_DEFLATED) as changed:
                   for info, content in entries:
-                      # Keep parent mod mixins active; disable only Astemir RE mixins for diagnosis.
-                      if info.filename == nested_name:
+                      # Keep only the criterion accessor to isolate the parent mixin causing early ASM failure.
+                      if info.filename == "ec_ad.mixins.json":
+                          config = json.loads(content.decode("utf-8"))
+                          config["mixins"] = ["CriteriaTriggersAccessor"]
+                          config["client"] = []
+                          config["server"] = []
+                          content = (json.dumps(config, indent=2) + "\\n").encode("utf-8")
+                      # Astemir RE mixins stay disabled for this diagnostic server launch.
+                      elif info.filename == nested_name:
                           content = strip_nested_mixins(content)
                       changed.writestr(info, content)
-              os.replace(temp_name, smoke_jar)
+os.replace(temp_name, smoke_jar)
           except Exception:
               Path(temp_name).unlink(missing_ok=True)
               raise
 
-          print("Diagnostic-only smoke copy: parent MixinConfigs enabled, Astemir RE MixinConfigs disabled")
+          print("Diagnostic-only smoke copy: only CriteriaTriggersAccessor enabled; Astemir RE MixinConfigs disabled")
           PY
           printf 'eula=true\n' > build/smoke/eula.txt
           python3 - <<'PY'
