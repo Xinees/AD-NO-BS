@@ -789,8 +789,8 @@ public final class JarPruner {
                 InsnList code = method.instructions;
                 code.add(new VarInsnNode(Opcodes.ALOAD, 1));
                 code.add(new FieldInsnNode(Opcodes.GETSTATIC, items.name, itemName, descriptor));
-                code.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, ROOT + "util/ResourceSupplier",
-                    "get", "()Ljava/lang/Object;", true));
+                code.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, ROOT + "util/ResourceSupplier",
+                    "get", "()Ljava/lang/Object;", false));
                 code.add(new TypeInsnNode(Opcodes.CHECKCAST, "net/minecraft/world/level/ItemLike"));
                 code.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, outputOwner, acceptName, acceptDesc, true));
             }
@@ -806,8 +806,8 @@ public final class JarPruner {
                 code.add(new InsnNode(Opcodes.DUP));
                 code.add(new FieldInsnNode(Opcodes.GETSTATIC, items.name, "LUSH_CORE",
                     itemDescriptors.get("LUSH_CORE")));
-                code.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, ROOT + "util/ResourceSupplier",
-                    "get", "()Ljava/lang/Object;", true));
+                code.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, ROOT + "util/ResourceSupplier",
+                    "get", "()Ljava/lang/Object;", false));
                 code.add(new TypeInsnNode(Opcodes.CHECKCAST, "net/minecraft/world/level/ItemLike"));
                 code.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, "net/minecraft/world/item/ItemStack",
                     "<init>", "(Lnet/minecraft/world/level/ItemLike;)V", false));

@@ -1,4 +1,4 @@
-name: Direct Legacy JAR Prune - build 9
+name: Direct Legacy JAR Prune - build 10
 
 on:
   push:
@@ -106,6 +106,13 @@ jobs:
           test "$SUPPLIER_GET_COUNT" -eq 1
           if printf '%s\\n' "$CLIENT_SETUP_CALLS" | grep -F "invokeinterface" | grep -F "ResourceSupplier.get:()Ljava/lang/Object;"; then
             echo "ResourceSupplier.get must use invokevirtual because ResourceSupplier is a class."
+            exit 1
+          fi
+          CREATIVE_TAB_CALLS="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.common.tab.ADCreativeTabs)"
+          CREATIVE_GET_COUNT="$(printf '%s\\n' "$CREATIVE_TAB_CALLS" | grep -F "invokevirtual" | grep -F -o "ResourceSupplier.get:()Ljava/lang/Object;" | wc -l)"
+          test "$CREATIVE_GET_COUNT" -eq 9
+          if printf '%s\\n' "$CREATIVE_TAB_CALLS" | grep -F "invokeinterface" | grep -F "ResourceSupplier.get:()Ljava/lang/Object;"; then
+            echo "Creative tab contains invalid interface invocation of ResourceSupplier.get."
             exit 1
           fi
           EGG_RENDERER_DESC='(Lcom/astemir/astemirlib/re/client/model/AstemirModel;)Lcom/astemir/astemirlib/re/client/model/render/renderer/AstemirBlockEntityRenderer;'
