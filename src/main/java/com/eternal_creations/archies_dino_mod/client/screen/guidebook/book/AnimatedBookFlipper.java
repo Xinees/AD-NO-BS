@@ -60,39 +60,39 @@ extends AbstractWidget {
      */
     @Override
     public void tick() {
-        this.flipAnimation.tick();
-        if (this.soundCooldown > 0) {
-            --this.soundCooldown;
-        }
-
-        if (this.isFlipping && this.flipAnimation.isFinished()) {
-            this.current = this.step;
-            if (this.current instanceof FlipTarget.Real currentReal) {
-                this.lastRealIndex = currentReal.index();
+        block5: {
+            this.flipAnimation.tick();
+            if (this.soundCooldown > 0) {
+                --this.soundCooldown;
             }
+            if (!this.isFlipping || !this.flipAnimation.isFinished()) break block5;
+            this.current = this.step;
+            var2_1 = this.current;
+            if (var2_1 instanceof FlipTarget.Real) {
+                r = (FlipTarget.Real)var2_1;
+                this.lastRealIndex = r.index();
+            }
+            if (!((var3_3 = this.current) instanceof FlipTarget.Real)) ** GOTO lbl-1000
+            cur = (FlipTarget.Real)var3_3;
+            var3_3 = this.target;
+            if (!(var3_3 instanceof FlipTarget.Real)) ** GOTO lbl-1000
+            tgt = (FlipTarget.Real)var3_3;
+            if (cur.index() != tgt.index()) {
+                remaining = Math.abs(tgt.index() - cur.index());
+                forward = tgt.index() > cur.index();
+                stepAmount = remaining > 3 ? 2 : 1;
+                next = cur.index() + (forward != false ? stepAmount : -stepAmount);
+                next = forward != false ? Math.min(next, tgt.index()) : Math.max(next, tgt.index());
+                this.startStepFlip(new FlipTarget.Real(next));
+            } else lbl-1000:
+            // 3 sources
 
-            if (this.current instanceof FlipTarget.Real currentReal
-                    && this.target instanceof FlipTarget.Real targetReal) {
-                if (currentReal.index() != targetReal.index()) {
-                    int remaining = Math.abs(targetReal.index() - currentReal.index());
-                    boolean forward = targetReal.index() > currentReal.index();
-                    int stepAmount = remaining > 3 ? 2 : 1;
-                    int next = currentReal.index() + (forward ? stepAmount : -stepAmount);
-                    next = forward ? Math.min(next, targetReal.index()) : Math.max(next, targetReal.index());
-                    this.startStepFlip(new FlipTarget.Real(next));
-                } else {
-                    this.isFlipping = false;
-                }
-            } else {
+            {
                 this.isFlipping = false;
             }
         }
-
-        if (!this.isFlipping) {
-            PageSpread spread = this.getCurrentSpread();
-            if (spread != null) {
-                spread.tick();
-            }
+        if (!this.isFlipping && (cur = this.getCurrentSpread()) != null) {
+            cur.tick();
         }
     }
 
@@ -284,45 +284,43 @@ extends AbstractWidget {
      */
     @Override
     public void render(UIContext ctx) {
-        float partialTick = ctx.partialTick();
-        float width = this.bounds.width();
-        float height = this.bounds.height();
+        block4: {
+            block3: {
+                pt = ctx.partialTick();
+                w = this.bounds.width();
+                h = this.bounds.height();
+                RenderSystem.enableBlend();
+                RenderSystem.defaultBlendFunc();
+                if (!this.isFlipping) break block3;
+                progress = this.flipAnimation.get(pt);
+                src = this.resolve(this.current);
+                dst = this.resolve(this.step);
+                this.srcBuffer.renderSpread(src, ctx, w, h);
+                this.dstBuffer.renderSpread(dst, ctx, w, h);
+                var11_9 = this.current;
+                if (!(var11_9 instanceof FlipTarget.Real)) ** GOTO lbl-1000
+                cur = (FlipTarget.Real)var11_9;
+                var11_9 = this.target;
+                if (var11_9 instanceof FlipTarget.Real && Math.abs((tgt = (FlipTarget.Real)var11_9).index() - cur.index()) > 1) {
+                    v0 = true;
+                } else lbl-1000:
+                // 2 sources
 
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-
-        if (this.isFlipping) {
-            float progress = this.flipAnimation.get(partialTick);
-            PageSpread source = this.resolve(this.current);
-            PageSpread destination = this.resolve(this.step);
-            this.srcBuffer.renderSpread(source, ctx, width, height);
-            this.dstBuffer.renderSpread(destination, ctx, width, height);
-
-            boolean isFast = false;
-            if (this.current instanceof FlipTarget.Real currentReal
-                    && this.target instanceof FlipTarget.Real targetReal) {
-                isFast = Math.abs(targetReal.index() - currentReal.index()) > 1;
+                {
+                    v0 = false;
+                }
+                isFast = v0;
+                this.curlMesh.updateGeometry(w, h, progress, this.flipForward, isFast);
+                this.curlMesh.renderMesh(ctx.graphics(), w, h, progress, this.flipForward, this.srcBuffer.getTextureId(), this.dstBuffer.getTextureId());
+                break block4;
             }
-
-            this.curlMesh.updateGeometry(width, height, progress, this.flipForward, isFast);
-            this.curlMesh.renderMesh(
-                    ctx.graphics(),
-                    width,
-                    height,
-                    progress,
-                    this.flipForward,
-                    this.srcBuffer.getTextureId(),
-                    this.dstBuffer.getTextureId()
-            );
-        } else {
-            PageSpread spread = this.getCurrentSpread();
-            if (spread != null) {
-                this.renderStaticSpread(ctx.graphics(), width, height, spread);
-                spread.render(ctx);
+            cur = this.getCurrentSpread();
+            if (cur != null) {
+                this.renderStaticSpread(ctx.graphics(), w, h, cur);
+                cur.render(ctx);
             }
         }
-
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.setShaderColor((float)1.0f, (float)1.0f, (float)1.0f, (float)1.0f);
     }
 
     private void renderStaticSpread(GuiGraphics graphics, float w, float h, PageSpread spread) {
