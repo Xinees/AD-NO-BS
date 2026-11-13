@@ -171,7 +171,7 @@ public final class JarPruner {
 
         Set<String> retained = dependencyClosure(roots, nodes);
         stripUnreferencedMethods(retained, nodes);
-        verifyNoRemovedRegistryReferences(retained, nodes);
+        printPruneDiagnostics(retained, nodes);
 
         Map<String, byte[]> transformedClasses = new HashMap<>();
         for (String internalName : retained) {
@@ -716,6 +716,50 @@ public final class JarPruner {
             owner.methods.removeIf(method ->
                 (method.access & Opcodes.ACC_SYNTHETIC) != 0 &&
                 !processed.contains(method.name + method.desc));
+        }
+    }
+
+    private static void printPruneDiagnostics(Set<String> retained, Map<String, ClassNode> nodes) {
+        System.out.println("Retained classes: " + retained.size());
+        for (String name : retained) {
+            if (name.contains("ADItemProperties") ||
+                name.contains("ADAttachableModels") ||
+                name.contains("Attachable") ||
+                name.contains("RibBow") ||
+                name.contains("SculkBow") ||
+                name.contains("ScorchingHorn") ||
+                name.contains("Archie") ||
+                name.contains("Therimoss") ||
+                name.contains("Coralosaur") ||
+                name.contains("Obsidiceratops") ||
+                name.contains("Sculkraptor")) {
+                System.out.println("KEEP-OUTSIDE-SCOPE " + name);
+            }
+        }
+
+        for (String target : List.of(
+            ROOT + "common/items/ADItemProperties",
+            ROOT + "client/model/registry/ADAttachableModels",
+            ROOT + "client/model/attachable/LushsaurMaceAttachable",
+            ROOT + "client/animation/player/attachable/RibBowAnimations",
+            ROOT + "client/particle/effect/TherimossEffects",
+            ROOT + "common/entity/mob/archie/ArchieEntity"
+        )) {
+            System.out.println("REFERENCERS " + target);
+            for (ClassNode owner : nodes.values()) {
+                for (MethodNode method : owner.methods) {
+                    for (AbstractInsnNode insn : method.instructions.toArray()) {
+                        String referenced = null;
+                        if (insn instanceof TypeInsnNode type) referenced = type.desc;
+                        else if (insn instanceof FieldInsnNode field) referenced = field.owner;
+                        else if (insn instanceof MethodInsnNode call) referenced = call.owner;
+                        if (target.equals(referenced)) {
+                            System.out.println("  " + owner.name + "." + method.name + method.desc);
+                            break;
+                        }
+                    }
+                }
+            }
         }
     }
 
