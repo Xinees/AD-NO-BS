@@ -3,24 +3,18 @@
 ## Current branch status — 2026-11-14
 
 - Working branch: `binary-prune/legacy`
-- Latest completed build: Direct Legacy JAR Prune **build 110**.
-- GitHub Actions: [run #110 — success](https://github.com/Xinees/AD-NO-BS/actions/runs/43525560144); final CI guard commit: `416b2f50693c313dd4210d4952adfff2495f6612`.
-- Build 110 fixes the second runtime bytecode failure found by the user's Build105 launch. Patch commit: [`42bbcebb`](https://github.com/Xinees/AD-NO-BS/commit/42bbcebbbea01edfe0f903b08fdde732b0a45594).
-- Artifact ID: `14085555038`; ZIP digest: `sha256:6df695e5ec2be061c7779fa27a7ce0dae2711f842f90005109458e6f3d7227d4`.
-- Output JAR: `ec_ad-legacy-forge-1.20.1.jar`; size: `2,493,408` bytes; SHA-256: `edefc1d1cd4b4b8df3df20d6e8815055927a81cf618b8d92767567c7e26db059`.
-- **Build105 runtime finding:** Forge, Astemir shaders/models, and all nine Astemir model definitions loaded successfully; the integrated server started, the world was created, and the player joined before the crash.
-- The crash was in `LocalPlayer.handler$...$allowLushsaurSprint`. The generated mixin handler pushed primitive `ICONST_1` and passed it to erased `CallbackInfoReturnable.setReturnValue(Object)`, which is invalid bytecode (`integer` is not assignable to `Object`).
-- Build110 now pushes `java/lang/Boolean.TRUE` before `setReturnValue(Object)`. The target was checked against Minecraft 1.20.1 mappings: `m_264231_(Entity)` is the boolean `LocalPlayer.vehicleCanSprint(Entity)` method. The Lushsaur controlling-passenger gate remains intact.
-- CI now explicitly verifies that the custom callback contains `Boolean.TRUE` before `setReturnValue` and does not contain a primitive `iconst_1`. Build110 passed this guard and all renderer, retained-behavior, bytecode, and JAR structure/resource checks.
-- Post-download inspection: `javap -v` confirms the callback bytecode uses `GETSTATIC java/lang/Boolean.TRUE` and then calls `setReturnValue(Object)`. A direct Build105-to-Build110 archive comparison found exactly one changed entry: `LocalPlayerMixin.class`; all 473 JAR entries are present with no added or removed resources.
-- The Build105 follow-on `LocalPlayer.m_108629_()` null-pointer report occurred after the invalid callback prevented player initialization; it is downstream of that `VerifyError`, not a second established root cause.
-- The missing model/shader and `forge:swim_speed` errors seen in the older failed Build99 launch did not recur in the Build105 log: Astemir logged successful shader/model loading, and the mod was in `DONE` state before the new sprint callback error.
-- **Runtime status:** Build110 has passed CI and post-download bytecode/archive inspection, but has **not** yet been launched in Minecraft. The next launch must confirm world entry and Lushsaur sprint behavior. Then retest the previously changed Sonic Boom sphere, mounted gait transition, and turning of all three mobs.
-- **Font/display symptom:** the earlier report of square-like glyphs remains unclassified. The Build105 log has no font-loading exception and reports a successful resource reload; confirm whether the glyph issue remains after Build110 before changing the resource pack.
-- Lushsaur mounted sprint input was previously confirmed by the user to work with Ctrl and double-tap W; Build110 retains the mounted run-animation synchronization and the original unmounted AI gait predicate.
-- Build94 onward replaces Sculksaur Sonic Boom post-process distortion with 1,536 vanilla `SCULK_SOUL` particles in an expanding sphere; the original camera shake and gameplay attack code are preserved. In-game visual quality still needs confirmation.
-- **Open audit — Sculksaur locomotion:** the original `SculksaurEntity.createLocomotion()` sets `EntityLocomotion.Builder.turnFactor(0.003f)`. Its behavior belongs to the separate Astemir RE dependency. This setting remains unchanged until the exact Astemir RE 1.2.98 dependency is inspected; smooth-turning work is still partially implemented, not closed.
-- The immutable original mod JAR and Astemir RE dependency remain untouched and separate. Astemir RE is not bundled into the Legacy JAR.
+- Latest completed build: Direct Legacy JAR Prune **build 111**.
+- GitHub Actions: [run #116 — success](https://github.com/Xinees/AD-NO-BS/actions/runs/43528408869); workflow/guard commit: `8a22d56e01f1bc9b5d08db522ec87fccfef97e50`.
+- Code changes: [`127bb60d`](https://github.com/Xinees/AD-NO-BS/commit/127bb60d49cae787e26b8e3feaa594ea4b86174d) and [`669bc901`](https://github.com/Xinees/AD-NO-BS/commit/669bc901d48893c3b7f81056b1f7a720ac72283a).
+- Artifact ID: `14085958100`; ZIP digest: `sha256:cc0bf23229b7cbc931f70035227a29b42e5933d039fd3f2f411376bb375e9f7b`.
+- Output JAR: `ec_ad-legacy-forge-1.20.1.jar`; size: `2,493,447` bytes; SHA-256: `5b01626519d9b02934f932c58d5ffe8fd9210851ba3630725f2347726a03c456`.
+- **Build110 runtime feedback:** the user confirmed Lushsaur behavior and the new turning behavior work, but reported that Sculksaur sometimes aimed its head unnaturally downward. The likely regression was the shared `SmoothLookControl` patch applying an instant 360-degree limit to vertical pitch as well as horizontal yaw.
+- **Build111 look correction:** horizontal yaw remains instant. Vertical target tracking now interpolates `smoothY` using the controller's existing `interpolationSpeed`, and the vertical rotation limit is restored to `maxSpeedLimit`. The existing `canRotate` condition, look timer, action locks, and passenger handling remain.
+- **Build111 Sonic Boom correction:** replaced the previous vanilla `SCULK_SOUL` particles with Minecraft 1.20.1's `SONIC_BOOM` type. The effect is two concentric spherical layers: 384 particles per layer (768 total), with the leading layer offset 0.30 blocks and the following layer 0.06 blocks from the origin. Radial particle speed is raised from 0.72 to 0.82. Camera shake remains; legacy distortion and ground-wave emitters remain disconnected.
+- Post-download comparison with Build110: all 473 JAR entries remain; no entries were added or removed; exactly two classes changed: `SculksaurEffects.class` and `SmoothLookControl.class`. The original input JAR hash was verified unchanged by CI; Astemir RE remains a separate dependency.
+- **Runtime status:** Build111 passed CI and downloaded-JAR bytecode/archive inspection. It has **not** yet been launched in Minecraft. Retest Sculksaur spawn/idle gaze, Sonic Boom appearance and the two-layer spacing; also confirm the already-working Lushsaur sprint and turning behavior remain intact.
+- **Font/display symptom:** the earlier report of square-like glyphs remains unclassified. Do not change the resource pack without a reproducing screenshot/log.
+- **Open audit — Sculksaur locomotion:** the original `SculksaurEntity.createLocomotion()` sets `EntityLocomotion.Builder.turnFactor(0.003f)`. Its behavior belongs to the separate Astemir RE dependency. This setting remains unchanged until the exact Astemir RE 1.2.98 dependency is inspected; the turn-factor audit remains open.
 - Next planned task after the smooth-turning audit: Lushsaur-only Happy-Ghast-like platform collision. The proposed `SPIN.get(this)` gate remains plan-only and has not been implemented.
 
 ---
