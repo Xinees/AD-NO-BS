@@ -41,7 +41,14 @@ jobs:
         run: |
           set -euo pipefail
           echo "Astemir RE archive entries:"
-          jar tf astemirlib_re-1.20.1-forge-1.2.98-SNAPSHOT.jar | grep -E '^(META-INF/(mods.toml|MANIFEST.MF|jarjar/metadata.json)|.*\\.jar)        shell: bash
+          jar tf astemirlib_re-1.20.1-forge-1.2.98-SNAPSHOT.jar | grep -E 'mods.toml|MANIFEST.MF|jarjar/metadata.json|[.]jar$' || true
+          echo "Astemir RE mods.toml:"
+          unzip -p astemirlib_re-1.20.1-forge-1.2.98-SNAPSHOT.jar META-INF/mods.toml || true
+          echo "Astemir RE manifest:"
+          unzip -p astemirlib_re-1.20.1-forge-1.2.98-SNAPSHOT.jar META-INF/MANIFEST.MF || true
+
+      - name: Download ASM bytecode tools
+        shell: bash
         run: |
           set -euo pipefail
           mkdir -p build/tools
