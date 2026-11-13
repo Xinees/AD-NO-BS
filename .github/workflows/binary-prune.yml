@@ -31,10 +31,33 @@ jobs:
         run: |
           set -euo pipefail
           test -s ec_ad-forge-1.20.1-1.0.4.jar
-          echo "Original JAR SHA-256:"
-          sha256sum ec_ad-forge-1.20.1-1.0.4.jar
-          echo "Astemir RE input SHA-256:"
-          sha256sum astemirlib_re-1.20.1-forge-1.2.98-SNAPSHOT.jar
+          ORIGINAL_SHA="$(sha256sum ec_ad-forge-1.20.1-1.0.4.jar | cut -d' ' -f1)"
+          ASTEMIR_SHA="$(sha256sum astemirlib_re-1.20.1-forge-1.2.98-SNAPSHOT.jar | cut -d' ' -f1)"
+          test "$ORIGINAL_SHA" = "8df20e08d46f778a6e975b60b0cc7e19ff674264834812015537d7ef0fb121b1"
+          test "$ASTEMIR_SHA" = "906198b220958f352c308ec9a2178342b7af90198ade206d1596eb336a89a0a3"
+          echo "Immutable original input hashes verified."
+          echo "Original JAR SHA-256: $ORIGINAL_SHA"
+          echo "Astemir RE input SHA-256: $ASTEMIR_SHA"
+
+      - name: Audit original initialization bytecode
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build/audit
+          : > build/audit/original-bytecode-audit.txt
+          for class_name in \
+            com.eternal_creations.archies_dino_mod.ArchiesDinosaurs \
+            'com.eternal_creations.archies_dino_mod.ArchiesDinosaurs$ModBusEvents' \
+            com.eternal_creations.archies_dino_mod.CommonClass \
+            com.eternal_creations.archies_dino_mod.client.CommonClient \
+            com.eternal_creations.archies_dino_mod.client.ADClientModBus
+          do
+            {
+              echo "===== $class_name ====="
+              javap -classpath ec_ad-forge-1.20.1-1.0.4.jar -c -p "$class_name"
+              echo
+            } >> build/audit/original-bytecode-audit.txt
+          done
 
       - name: Download ASM bytecode tools
         shell: bash
@@ -99,6 +122,15 @@ jobs:
                   raise SystemExit(f"Corrupt ZIP entry: {bad}")
 
               names = set(z.namelist())
+              for config_name in ("ec_ad.mixins.json", "ec_ad.forge.mixins.json"):
+                  config = json.loads(z.read(config_name))
+                  package = config.get("package", "").replace(".", "/").strip("/")
+                  for section in ("mixins", "client", "server"):
+                      for mixin_name in config.get(section, []):
+                          class_path = f"{package}/{mixin_name.replace('.', '/')}.class"
+                          if class_path not in names:
+                              raise SystemExit(f"{config_name} references missing mixin class {class_path}")
+
               required = {
                   "META-INF/jarjar/metadata.json",
                   "META-INF/jarjar/astemirlib_re-1.20.1-forge-1.2.98-SNAPSHOT.jar",
@@ -176,11 +208,11 @@ jobs:
               print(f"Final size: {jar.stat().st_size} bytes")
           PY
 
-      - name: Forge 1.20.1 server smoke test
+      - name: Forge 1.20.1 full-JAR server smoke test
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p build/smoke
+          mkdir -p build/smoke/mods
           curl --fail --location --retry 3 \
             https://maven.minecraftforge.net/net/minecraftforge/forge/1.20.1-47.4.28/forge-1.20.1-47.4.28-installer.jar \
             -o build/forge-installer.jar
@@ -188,78 +220,8 @@ jobs:
             cd build/smoke
             java -jar ../forge-installer.jar --installServer
           )
-          mkdir -p build/smoke/mods
           cp build/libs/ec_ad-legacy-forge-1.20.1.jar build/smoke/mods/
-          python3 - <<'PY'
-          import io
-          import json
-          import os
-          from pathlib import Path
-          import tempfile
-          import zipfile
-
-          smoke_jar = Path("build/smoke/mods/ec_ad-legacy-forge-1.20.1.jar")
-          nested_name = "META-INF/jarjar/astemirlib_re-1.20.1-forge-1.2.98-SNAPSHOT.jar"
-
-          def strip_manifest(data):
-              lines = data.decode("utf-8", errors="replace").splitlines()
-              kept = []
-              skip_continuation = False
-              for line in lines:
-                  if not line.startswith(" ") and line.lower().startswith("mixinconfigs:"):
-                      skip_continuation = True
-                      continue
-                  if skip_continuation and line.startswith(" "):
-                      continue
-                  skip_continuation = False
-                  kept.append(line)
-              return ("\r\n".join(kept) + "\r\n\r\n").encode("utf-8")
-
-          def strip_nested_mixins(data):
-              src = io.BytesIO(data)
-              dst = io.BytesIO()
-              with zipfile.ZipFile(src, "r") as original, zipfile.ZipFile(dst, "w", zipfile.ZIP_DEFLATED) as changed:
-                  for info in original.infolist():
-                      content = original.read(info.filename)
-                      if info.filename == "META-INF/MANIFEST.MF":
-                          content = strip_manifest(content)
-                      changed.writestr(info, content)
-              return dst.getvalue()
-
-          with zipfile.ZipFile(smoke_jar, "r") as original:
-              entries = [(info, original.read(info.filename)) for info in original.infolist()]
-          fd, temp_name = tempfile.mkstemp(prefix="smoke-no-mixins-", suffix=".jar", dir=smoke_jar.parent)
-          os.close(fd)
-          try:
-              with zipfile.ZipFile(temp_name, "w", zipfile.ZIP_DEFLATED) as changed:
-                  for info, content in entries:
-                      # Keep only the criterion accessor to isolate the parent mixin causing early ASM failure.
-                      if info.filename == "ec_ad.mixins.json":
-                          config = json.loads(content.decode("utf-8"))
-                          config["mixins"] = [
-                              "CriteriaTriggersAccessor",
-                              "BreedGoalAccessor",
-                              "EntityAccessor",
-                              "PlayerListMixin",
-                              "sculksaur.PrimaryLevelDataMixin",
-                              "sculksaur.SculkShriekerBlockEntityMixin",
-                              "sculksaur.WalkNodeEvaluatorAccessor",
-                              "sculksaur.WardenMixin",
-                              "AbstractArrowMixin",
-                          ]
-                          config["client"] = []
-                          config["server"] = []
-                          content = (json.dumps(config, indent=2) + "\n").encode("utf-8")
-                      # Keep the original Astemir RE manifest and MixinConfigs for this launch.
-                      changed.writestr(info, content)
-              os.replace(temp_name, smoke_jar)
-          except Exception:
-              Path(temp_name).unlink(missing_ok=True)
-              raise
-
-          print("Diagnostic-only smoke copy: required Sculksaur mixins plus arrow and mount accessors; PlayerMixin excluded; Astemir RE MixinConfigs enabled")
-          PY
-          printf 'eula=true\n' > build/smoke/eula.txt
+          printf 'eula=true\\n' > build/smoke/eula.txt
           python3 - <<'PY'
           import pathlib
           import subprocess
@@ -270,49 +232,77 @@ jobs:
           if not args_file.is_file():
               raise SystemExit(f"Forge unix_args.txt missing: {args_file}")
 
-          log_path = root / "server-smoke.log"
-          command = [
-              "java",
-              "@user_jvm_args.txt",
-              f"@{args_file.relative_to(root)}",
-              "nogui",
-          ]
-          with log_path.open("w", encoding="utf-8") as log:
-              process = subprocess.Popen(
-                  command,
-                  cwd=root,
-                  stdin=subprocess.PIPE,
-                  stdout=log,
-                  stderr=subprocess.STDOUT,
-                  text=True,
-              )
-              deadline = time.monotonic() + 150
-              stop_sent = False
-              while time.monotonic() < deadline:
-                  if process.poll() is not None:
-                      break
+          def run_server(run_number, commands):
+              log_path = root / f"server-smoke-{run_number}.log"
+              command = ["java", "@user_jvm_args.txt", f"@{args_file.relative_to(root)}", "nogui"]
+              sent = False
+              with log_path.open("w", encoding="utf-8") as log:
+                  process = subprocess.Popen(
+                      command,
+                      cwd=root,
+                      stdin=subprocess.PIPE,
+                      stdout=log,
+                      stderr=subprocess.STDOUT,
+                      text=True,
+                  )
+                  deadline = time.monotonic() + 210
+                  while time.monotonic() < deadline:
+                      if process.poll() is not None:
+                          break
+                      content = log_path.read_text(encoding="utf-8", errors="replace")
+                      if "Done (" in content and not sent:
+                          for line in commands:
+                              process.stdin.write(line + "\\n")
+                              process.stdin.flush()
+                              time.sleep(1)
+                          sent = True
+                      time.sleep(1)
+
+                  if process.poll() is None:
+                      process.terminate()
+                      try:
+                          process.wait(timeout=10)
+                      except subprocess.TimeoutExpired:
+                          process.kill()
+                          process.wait()
+                      raise SystemExit(f"Forge server smoke run {run_number} exceeded timeout")
+
                   content = log_path.read_text(encoding="utf-8", errors="replace")
-                  if "Done (" in content and not stop_sent:
-                      process.stdin.write("stop\n")
-                      process.stdin.flush()
-                      stop_sent = True
-                  time.sleep(1)
+                  print(f"===== SERVER SMOKE RUN {run_number} =====")
+                  print(content[-22000:])
+                  if not sent:
+                      raise SystemExit(f"Forge server run {run_number} never reached Done")
+                  if process.returncode != 0:
+                      raise SystemExit(f"Forge server run {run_number} exited with code {process.returncode}")
+                  fatal_markers = (
+                      "Encountered an unexpected exception",
+                      "Mixin apply failed",
+                      "InvalidMixinException",
+                      "NoClassDefFoundError",
+                      "AbstractMethodError",
+                      "ClassNotFoundException",
+                      "Parsing error loading custom advancement",
+                      "Couldn't load advancement ec_ad:",
+                  )
+                  found = [marker for marker in fatal_markers if marker in content]
+                  if found:
+                      raise SystemExit(f"Forge server run {run_number} logged errors: {found}")
+                  return content
 
-              if process.poll() is None:
-                  process.terminate()
-                  try:
-                      process.wait(timeout=10)
-                  except subprocess.TimeoutExpired:
-                      process.kill()
-                      process.wait()
-                  raise SystemExit("Forge server did not shut down within smoke-test timeout")
+          first = run_server(1, [
+              "summon ec_ad:lushsaur 0 80 0",
+              "summon ec_ad:chorusoatl 5 80 5",
+              "summon ec_ad:sculksaur -5 80 -5",
+              "save-all flush",
+              "stop",
+          ])
+          if first.count("Summoned new") < 3:
+              raise SystemExit("Not all three retained mobs were successfully summoned")
 
-              content = log_path.read_text(encoding="utf-8", errors="replace")
-              print(content[-16000:])
-              if not stop_sent:
-                  raise SystemExit("Forge server never reached the Done startup marker")
-              if process.returncode != 0:
-                  raise SystemExit(f"Forge server exited with code {process.returncode}")
+          second = run_server(2, ["stop"])
+          if "Done (" not in second:
+              raise SystemExit("Persisted-world reload failed to reach Done")
+          print("Full, unmodified mod JAR passed two Forge server launches and all three entity summon commands.")
           PY
 
       - name: Upload Legacy JAR and debug files
@@ -321,9 +311,12 @@ jobs:
         with:
           name: ec-ad-legacy-forge-1.20.1-debug
           path: |
+            ec_ad-forge-1.20.1-1.0.4.jar
+            astemirlib_re-1.20.1-forge-1.2.98-SNAPSHOT.jar
             build/classes-pruned.jar
             build/libs/ec_ad-legacy-forge-1.20.1.jar
             build/resource-prune-report.txt
+            build/audit/original-bytecode-audit.txt
             astemirlib_re-1.20.1-forge-1.2.98-SNAPSHOT.jar
             build/smoke/server-smoke.log
           if-no-files-found: ignore
