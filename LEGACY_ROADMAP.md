@@ -8,19 +8,32 @@ This file is the explicit task list for the next Legacy work. The order below is
 
 ## Current baseline and test status
 
-### Build 99 — latest CI-verified JAR
+### Build 103 — latest CI-verified JAR; runtime retest required
 
-- CI: [run #99 — success](https://github.com/Xinees/AD-NO-BS/actions/runs/43520268349); final verification commit: `1514218f5490fc63ca7e5010b68955586ce5f14f`.
-- Artifact ID: `14082851815`; ZIP digest: `sha256:aeac0c5528f0a4c169e07a04d9bdd97b6d9928899eaad7f4b3362f577d18392e`.
-- Output JAR size: `2,493,371` bytes; SHA-256: `02a560d8d761b5690e60657e9ecad261285371172490c6345fec61462bd81970`.
-- Smooth-control implementation: [commit af7de9f](https://github.com/Xinees/AD-NO-BS/commit/af7de9f7f98f5a7918cef45cbf17e402e4587c19); yaw-only correction / frame-layout fix: [commit 81aa652](https://github.com/Xinees/AD-NO-BS/commit/81aa6526ee46b4554af030eee9ab50111a79866f).
-- Build 99 keeps the sprint-animation correction and Sonic Boom sphere from Build 94.
-- It patches the three shared custom control classes used by Lushsaur, Chorusoatl, and Sculksaur. Movement yaw snaps to its target instead of using `smoothRotlerp`; body yaw is assigned directly; look targets are applied immediately with vanilla look limits raised to 360 degrees. The original rotation-lock conditions remain, including the ridden-player exception for body rotation. In 3D movement only yaw is changed; pitch interpolation remains untouched.
-- **Open audit:** Sculksaur's original `createLocomotion()` also calls `EntityLocomotion.Builder.turnFactor(0.003f)`. This method is implemented in the external Astemir RE dependency, not in the Archie's Dinosaurs JAR. The exact Astemir RE 1.2.98 JAR is not present in this workspace, so the meaning and effects of this parameter have not been verified. I have deliberately left it unchanged rather than guessing at its behavior. Priority 2 is therefore **partially implemented, not closed**.
-- The original mod JAR and the Astemir RE dependency remain untouched; neither was repackaged or bundled.
-- **Runtime status:** Build 99 is CI/bytecode verified only. It has not yet been tested in Minecraft. Confirm mounted Lushsaur turn response, all three mobs' idle/wander/chase/target-switch turns, locked actions, and the Sculksaur turn behavior after the `turnFactor` audit.
+- CI: [run #103 — success](https://github.com/Xinees/AD-NO-BS/actions/runs/43522963684); final guard commit: `8130cbbd275f906fd82a722d93caf45fcd359706`.
+- Sonic Boom bytecode correction: [commit 42e9066](https://github.com/Xinees/AD-NO-BS/commit/42e9066889574b7ea7d4ac451c66b15291e7a247).
+- Artifact ID: `14082994709`; ZIP digest: `sha256:a7ee54c624216ce424080f767c2c59db32ee6a6f7bdd52863d59e4e5f5ec72c6`.
+- Output JAR size: `2,493,375` bytes; SHA-256: `865ff301ae5903d65aed0dcda4feec553c7f14be1139ff388d3d295fce93a50c`.
+- **Build99 failed during the user's first game launch.** `SculksaurEffects.archiesDinoMod$spawnSculksaurSonicBoomSphere` threw `VerifyError: Bad type on operand stack`, because the original generated sequence pushed `IntStream` before creating a captured `IntConsumer` lambda.
+- Build103 fixes the sequence by creating the captured lambda first, storing it in local slot 7, then creating the integer stream and invoking `forEach`. The downloaded class was inspected with `javap` and the exact corrected instruction order was confirmed.
+- CI now checks that order explicitly; Build103 passed the new guard and the full structural/resource validation. This is stronger bytecode validation, not proof of in-game stability.
+- The later missing-model/shader messages and `forge:swim_speed` registry failure in the Build99 log happened after the mod constructor had failed and `mod_resources` was removed. Treat them as downstream until Build103 is retested; do not patch Astemir RE or bundle it into the Legacy JAR.
+- The user's first report of square-like text glyphs is still unclassified. There is no explicit font-loading exception in the supplied log. Retest with Build103 first; investigate the selected resource pack separately only if the symptom remains.
+
+### Smooth turning — main controls changed, task still open
+
+Build103 includes the Build99 direct-turning changes:
+- `SmoothMoveControl`: replaced yaw interpolation in grounded walking, climbing, and aerial movement with a direct target-yaw result. Separate aerial pitch interpolation remains.
+- `SmoothBodyControl`: body yaw is assigned directly from current mob yaw when `canRotate` allows it. Existing action rotation locks and the Player-passenger body-rotation exception remain.
+- `SmoothLookControl`: target coordinates are applied directly and vanilla yaw/pitch limits are raised to 360 degrees while the original rotation gate and target timer allow turning.
+- **Open audit:** Sculksaur's original `createLocomotion()` also calls `EntityLocomotion.Builder.turnFactor(0.003f)`. The implementation belongs to the external Astemir RE dependency. The exact Astemir RE 1.2.98 JAR is not present in this workspace, so its precise effect is not verified. This parameter remains unchanged; Priority 2 is **partially implemented, not closed**.
+- The original mod JAR and Astemir RE dependency remain untouched. Astemir RE remains a separate mandatory dependency and is not bundled.
+
+**Runtime status:** Build103 has not yet been tested in Minecraft. Once the launch/resource issues are retested, confirm mounted Lushsaur turning, idle/wander/chase/target-switch turns for all three mobs, locked actions, and the Sculksaur turn behavior after the `turnFactor` audit.
 
 ### Previous completed visual change — Build 94
+
+
 
 Build 94 removed the Sculksaur Sonic Boom post-process distortion and old attack-wave emitters, replacing them with a vanilla `SCULK_SOUL` sphere while preserving the camera shake and the existing gameplay attack. Its CI run #94 succeeded. The effect has not yet received visual in-game confirmation.
 
