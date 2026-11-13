@@ -120,6 +120,60 @@ jobs:
             exit 1
           fi
 
+      - name: Verify framework overrides, mixin initialization, and mount attacks
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          verify_method() {
+            local class_name="$1"
+            local method_name="$2"
+            local descriptor="$3"
+            local output
+            output="$(javap -classpath build/classes-pruned.jar -p -s "$class_name")"
+            if ! printf '%s\\n' "$output" | grep -F -A1 "$method_name" | grep -Fq "descriptor: $descriptor"; then
+              echo "Missing required callback $class_name.$method_name $descriptor"
+              exit 1
+            fi
+          }
+
+          verify_method 'com.eternal_creations.archies_dino_mod.client.model.system.ADModifiers$1' \
+            'modify(' '(ILcom/astemir/astemirlib/re/client/model/core/animation/AnimationState;FFLcom/astemir/astemirlib/re/client/model/core/animation/BoneState;)V'
+          verify_method 'com.eternal_creations.archies_dino_mod.common.menu.DinoMenu' \
+            'm_6875_(' '(Lnet/minecraft/world/entity/player/Player;)Z'
+          verify_method 'com.eternal_creations.archies_dino_mod.client.screen.DinoScreen' \
+            'm_7286_(' '(Lnet/minecraft/client/gui/GuiGraphics;FII)V'
+          verify_method 'com.eternal_creations.archies_dino_mod.networking.serverbound.MountControlMessage' \
+            'execute(' '(Lnet/minecraft/server/level/ServerPlayer;)V'
+
+          ARROW_MIXIN="$(javap -classpath build/classes-pruned.jar -p -c -v com.eternal_creations.archies_dino_mod.mixin.AbstractArrowMixin)"
+          if printf '%s\\n' "$ARROW_MIXIN" | grep -Fq 'archies_Dino_Mod$RIB_BOW_ARROW'; then
+            echo "Removed rib-bow data accessor is still referenced by AbstractArrowMixin."
+            exit 1
+          fi
+
+          TAB="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.common.tab.ADCreativeTabs)"
+          python3 - "$TAB" <<'PY'
+          import sys
+          tab = sys.argv[1]
+          expected = [
+              "LUSHSAUR_SPAWN_EGG",
+              "CHORUSOATL_SPAWN_EGG",
+              "SCULKSAUR_SPAWN_EGG",
+              "LUSHSAUR_EGG",
+              "CHORUSOATL_EGG",
+              "LUSH_CORE",
+              "SCULK_TOXIN",
+              "CHORUS_FOSSIL",
+          ]
+          positions = [tab.find("ADItems." + name) for name in expected]
+          if any(position < 0 for position in positions):
+              raise SystemExit("Creative tab is missing one or more retained items")
+          if positions != sorted(positions):
+              raise SystemExit("Creative tab item order is incorrect: " + repr(positions))
+          print("Verified creative tab order:", " -> ".join(expected))
+          PY
+
       - name: Verify Legacy JAR structure and retained content
         shell: bash
         run: |

@@ -63,10 +63,10 @@ public final class JarPruner {
         Map.entry(ROOT + "client/model/registry/ADAttachableModels", Set.of())
     );
 
-    private static final Set<String> CREATIVE_ITEMS = Set.of(
-        "LUSH_CORE", "CHORUS_FOSSIL", "SCULK_TOXIN",
+    private static final List<String> CREATIVE_ITEMS = List.of(
+        "LUSHSAUR_SPAWN_EGG", "CHORUSOATL_SPAWN_EGG", "SCULKSAUR_SPAWN_EGG",
         "LUSHSAUR_EGG", "CHORUSOATL_EGG",
-        "LUSHSAUR_SPAWN_EGG", "CHORUSOATL_SPAWN_EGG", "SCULKSAUR_SPAWN_EGG"
+        "LUSH_CORE", "SCULK_TOXIN", "CHORUS_FOSSIL"
     );
 
     private static final Set<String> NETWORK_MESSAGES = Set.of(
@@ -824,6 +824,7 @@ public final class JarPruner {
         owner.fields.removeIf(field -> field.name.equals("archies_Dino_Mod$RIB_BOW_ARROW"));
 
         owner.methods.removeIf(method ->
+            method.name.equals("<clinit>") ||
             method.name.equals("onDefineSynchedData") ||
             method.name.equals("onGetWaterInertia") ||
             method.name.equals("archiesDinoMod$setShotFromRibBow") ||
@@ -1139,7 +1140,7 @@ public final class JarPruner {
                 for (FieldNode field : node.fields) addDescriptor(refs, field.desc);
             }
 
-            boolean keepAll = shouldKeepAllMethods(name, roots);
+            boolean keepAll = shouldKeepAllMethods(name, roots, nodes);
             Set<String> selected = requestedMethods.computeIfAbsent(name, k -> new HashSet<>());
             Set<String> processed = PROCESSED_METHODS.computeIfAbsent(name, k -> new HashSet<>());
 
@@ -1196,8 +1197,8 @@ public final class JarPruner {
         return retained;
     }
 
-    private static boolean shouldKeepAllMethods(String name, Set<String> roots) {
-        if (roots.contains(name)) return true;
+    private static boolean shouldKeepAllMethods(String name, Set<String> roots, Map<String, ClassNode> nodes) {
+        if (roots.contains(name) || hasInheritedCallbackContract(name, nodes)) return true;
 
         return name.startsWith(ROOT + "common/entity/base/") ||
             name.startsWith(ROOT + "common/entity/component/") ||
@@ -1230,6 +1231,34 @@ public final class JarPruner {
             name.startsWith(ROOT + "common/structure/piece/CustomStructurePiece$") ||
             name.equals(ROOT + "server/ServerConfig") ||
             name.equals(ROOT + "entity/ForgeEntityPart");
+    }
+
+    private static boolean hasInheritedCallbackContract(String name, Map<String, ClassNode> nodes) {
+        ClassNode node = nodes.get(name);
+        if (node == null) return false;
+
+        if ((node.access & Opcodes.ACC_INTERFACE) != 0 ||
+            (node.interfaces != null && !node.interfaces.isEmpty())) {
+            return true;
+        }
+
+        Set<String> visited = new HashSet<>();
+        String parentName = node.superName;
+        while (parentName != null &&
+            !parentName.equals("java/lang/Object") &&
+            visited.add(parentName)) {
+
+            if (!parentName.startsWith(ROOT)) return true;
+
+            ClassNode parent = nodes.get(parentName);
+            if (parent == null) return true;
+            if ((parent.access & Opcodes.ACC_ABSTRACT) != 0 ||
+                (parent.interfaces != null && !parent.interfaces.isEmpty())) {
+                return true;
+            }
+            parentName = parent.superName;
+        }
+        return false;
     }
 
     private static void requestMethod(
