@@ -82,6 +82,9 @@ public final class JarPruner {
         ),
         ROOT + "networking/serverbound/MountControlMessage", Set.of(
             "execute(Lnet/minecraft/server/level/ServerPlayer;)V"
+        ),
+        ROOT + "common/entity/mob/lushsaur/LushsaurEntity", Set.of(
+            "m_264410_()Z"
         )
     );
 
@@ -183,6 +186,8 @@ public final class JarPruner {
         patchKeyMappings(nodes.get(ROOT + "client/ADKeyMappings"));
         patchAbstractArrowMixin(nodes.get(ROOT + "mixin/AbstractArrowMixin"));
         patchLushsaurControllingPassenger(nodes.get(ROOT + "common/entity/mob/lushsaur/LushsaurEntity"));
+        patchLushsaurCanSprint(nodes.get(ROOT + "common/entity/mob/lushsaur/LushsaurEntity"));
+        patchLushsaurMountSpeed(nodes.get(ROOT + "common/entity/mob/lushsaur/LushsaurEntity"));
         patchPlayerMixin(nodes.get(ROOT + "mixin/PlayerMixin"));
         removeMethods(nodes.get(ROOT + "mixin/client/LevelRendererMixin"),
             Set.of("archiesDinoMod$onEntityRender"));
@@ -935,6 +940,69 @@ public final class JarPruner {
         method.maxLocals = 2;
         method.maxStack = 2;
         owner.methods.add(method);
+    }
+
+    private static void patchLushsaurCanSprint(ClassNode owner) {
+        if (owner == null) throw new IllegalStateException("LushsaurEntity class is missing");
+
+        String descriptor = "()Z";
+        owner.methods.removeIf(method -> method.name.equals("m_264410_") && method.desc.equals(descriptor));
+
+        MethodNode method = new MethodNode(
+            Opcodes.ACC_PUBLIC,
+            "m_264410_",
+            descriptor,
+            null,
+            null
+        );
+        method.instructions.add(new InsnNode(Opcodes.ICONST_1));
+        method.instructions.add(new InsnNode(Opcodes.IRETURN));
+        method.maxStack = 1;
+        method.maxLocals = 1;
+        owner.methods.add(method);
+    }
+
+    private static void patchLushsaurMountSpeed(ClassNode owner) {
+        if (owner == null) throw new IllegalStateException("LushsaurEntity class is missing");
+
+        String descriptor = "(Lnet/minecraft/world/entity/PathfinderMob;F)F";
+        MethodNode method = owner.methods.stream()
+            .filter(candidate -> candidate.name.equals("lambda$createMount$21") &&
+                candidate.desc.equals(descriptor))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("Lushsaur mount speed property is missing"));
+
+        clearMethod(method);
+        InsnList code = method.instructions;
+
+        code.add(new VarInsnNode(Opcodes.ALOAD, 1));
+        code.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
+            "net/minecraft/world/entity/PathfinderMob", "m_6688_",
+            "()Lnet/minecraft/world/entity/LivingEntity;", false));
+        code.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
+            "net/minecraft/world/entity/LivingEntity", "m_20142_", "()Z", false));
+        code.add(new InsnNode(Opcodes.I2F));
+        code.add(new LdcInsnNode(0.5f));
+        code.add(new InsnNode(Opcodes.FMUL));
+        code.add(new LdcInsnNode(0.5f));
+        code.add(new InsnNode(Opcodes.FADD));
+
+        code.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        code.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, owner.name,
+            "getSpeedBoostTicks", "()I", false));
+        code.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
+            "java/lang/Integer", "signum", "(I)I", false));
+        code.add(new InsnNode(Opcodes.ICONST_0));
+        code.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
+            "java/lang/Math", "max", "(II)I", false));
+        code.add(new InsnNode(Opcodes.I2F));
+        code.add(new InsnNode(Opcodes.FCONST_1));
+        code.add(new InsnNode(Opcodes.FADD));
+        code.add(new InsnNode(Opcodes.FMUL));
+        code.add(new InsnNode(Opcodes.FRETURN));
+
+        method.maxStack = 3;
+        method.maxLocals = 3;
     }
 
     private static void patchPlayerMixin(ClassNode owner) {
