@@ -120,7 +120,7 @@ jobs:
             exit 1
           fi
 
-      - name: Verify framework overrides, mixin initialization, and mount attacks
+      - name: Verify framework overrides, mounted attacks, and Lushsaur sprint controls
         shell: bash
         run: |
           set -euo pipefail
@@ -157,6 +157,33 @@ jobs:
             'onRiderAttack(' '(Lnet/minecraft/world/entity/LivingEntity;Lcom/eternal_creations/archies_dino_mod/common/entity/base/Mount$AttackType;)V'
           verify_method 'com.eternal_creations.archies_dino_mod.common.entity.mob.lushsaur.LushsaurEntity' \
             'm_6688_(' '()Lnet/minecraft/world/entity/LivingEntity;'
+          verify_method 'com.eternal_creations.archies_dino_mod.common.entity.mob.lushsaur.LushsaurEntity' \
+            'm_264410_(' '()Z'
+
+          LUSH_SPRINT_CONTROL="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.common.entity.mob.lushsaur.LushsaurEntity)"
+          if ! printf '%s\\n' "$LUSH_SPRINT_CONTROL" | grep -F -A5 'public boolean m_264410_();' | grep -Fq 'iconst_1'; then
+            echo "Lushsaur canSprint override must return true for vanilla mounted sprint input."
+            printf '%s\\n' "$LUSH_SPRINT_CONTROL"
+            exit 1
+          fi
+
+          for entity_class in \
+            com.eternal_creations.archies_dino_mod.common.entity.mob.chorusoatl.ChorusoatlEntity \
+            com.eternal_creations.archies_dino_mod.common.entity.mob.sculksaur.SculksaurEntity; do
+            if javap -classpath build/classes-pruned.jar -p "$entity_class" | grep -Fq 'm_264410_('; then
+              echo "$entity_class unexpectedly received the Lushsaur-only sprint override."
+              exit 1
+            fi
+          done
+
+          LUSH_MOUNT_SPEED="$(printf '%s\\n' "$LUSH_SPRINT_CONTROL" | sed -n '/lambda\\$createMount\\$21(/,/lambda\\$createMount\\$20(/p')"
+          for required_call in 'm_6688_' 'm_20142_' 'getSpeedBoostTicks' 'java/lang/Integer.signum' 'java/lang/Math.max'; do
+            if ! printf '%s\\n' "$LUSH_MOUNT_SPEED" | grep -Fq "$required_call"; then
+              echo "Lushsaur mount speed is missing expected walk/run or feed-boost logic: $required_call"
+              printf '%s\\n' "$LUSH_MOUNT_SPEED"
+              exit 1
+            fi
+          done
 
           LUSH_CONTROL="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.common.entity.mob.lushsaur.LushsaurEntity)"
           for required_call in 'm_6254_' 'm_6688_' 'm_146895_' 'isAdult' 'isSitting' 'isOwnedBy'; do
