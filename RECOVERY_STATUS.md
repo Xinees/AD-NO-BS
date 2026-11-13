@@ -17,10 +17,11 @@
 
 
 
-Last updated: 2026-11-13
-Working branch: `binary-prune/legacy`
+## Historical notes preserved from 2026-11-13
 
-## Current confirmed build
+The following sections are historical project notes. The current build and pending tests are recorded at the top of this file.
+
+## Last confirmed build at that time
 
 - Last user-tested playable baseline: `EC-AD Legacy Forge 1.20.1 fixed4`, Direct Legacy JAR Prune build 11.
 - Latest corrected build: Direct Legacy JAR Prune build 12.
