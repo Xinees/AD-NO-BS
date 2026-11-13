@@ -286,7 +286,7 @@ jobs:
           done
 
           SMOOTH_BODY="$(javap -classpath build/classes-pruned.jar -p -c "$SMOOTH_BODY_CONTROL" | sed -n '/m_8121_(/,/^  private /p')"
-          for required_call in 'Condition.check' 'Mob.m_20160_' 'Mob.m_6688_' 'instanceof Player' 'Mob.m_146908_' 'Mob.f_20883_'; do
+          for required_call in 'Condition.check' 'Mob.m_20160_' 'Mob.m_6688_' 'net/minecraft/world/entity/player/Player' 'Mob.m_146908_' 'Mob.f_20883_'; do
             if ! printf '%s\n' "$SMOOTH_BODY" | grep -Fq "$required_call"; then
               echo "SmoothBodyControl lost its immediate body snap or an existing rotation lock: $required_call"
               printf '%s\n' "$SMOOTH_BODY"
