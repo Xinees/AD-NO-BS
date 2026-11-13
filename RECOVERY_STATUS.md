@@ -3,19 +3,20 @@
 ## Current branch status — 2026-11-14
 
 - Working branch: `binary-prune/legacy`
-- Latest code-changing build: Direct Legacy JAR Prune **build 81** (run #81 passed). Subsequent commits only update documentation; no JAR source has changed.
-- Build 81 commit: `eeec7201f55dd1252d201284048d8468312d6a01`
-- GitHub Actions run: [#81 — success](https://github.com/Xinees/AD-NO-BS/actions/runs/43507305757)
-- Artifact ID: `14075429830`
-- Output JAR SHA-256: `e46600a329c32e34554157fac2964ab7ebf10f9b747a39ab4592ed7bca479b53`
-- Build 81 adds a Lushsaur-only vanilla mounted-sprint permission path in `LocalPlayerMixin`, gated by the local player being the Lushsaur's actual controlling passenger. Its mount speed callback reads the controlling passenger's sprint state and retains the existing feeding speed boost.
-- Build 81 is **CI-verified, not yet runtime-confirmed**. The user's reported test of build 78 showed a walk animation followed after about three seconds by a run animation without a corresponding speed increase. The user has not yet reported an in-game test of build 81. Do not mark mounted sprint fixed until build 81 is tested.
-- The prioritized next-work plan is in [LEGACY_ROADMAP.md](LEGACY_ROADMAP.md). The first visual rework is the Sculksaur Sonic Boom wave; the other listed tasks are abrupt turning for all three retained mobs and a Lushsaur-only Happy-Ghast-like platform collision.
-- The user-provided Lushsaur collision gate is recorded as a plan only; it has not been implemented.
+- Latest completed build: Direct Legacy JAR Prune **build 94**.
+- Animation fix implementation commit: `338f774b613ff886accb50b2438bc1e57a3a01a6`; follow-up ASM node fix: `ff48c64b91a56998d9742049c7ab66d791b44a51`.
+- Sculksaur Sonic Boom visual implementation commit: `642be309f50e8330ff24f48b3ce08d6abd3d6f64`.
+- Build 94 CI verification commit: `e84cb78a84577b75afc3985c7c616e27781082d2`.
+- GitHub Actions run: [#94 — success](https://github.com/Xinees/AD-NO-BS/actions/runs/43516535668).
+- Artifact ID: `14080273953`; ZIP digest: `sha256:1862f5120d2d95167f856fd05c29e7769c9841ecbc44952fc8558551fcfddc72`.
+- Output JAR: `libs/ec_ad-legacy-forge-1.20.1.jar`; size: `2,493,690` bytes; SHA-256: `c3ded081be4631e747c26ee1b68261adec81aa0752993e861fdc5b9f9c7d90a8`.
+- Lushsaur mounted sprint input is confirmed by the user to work with Ctrl and double-tap W. Build 94 fixes the remaining animation mismatch: while mounted, both the Lushsaur run animation and the rider's run animation now read the controlling passenger's actual sprint state. When unmounted, the Lushsaur retains its original AI locomotion condition. Movement speed, sprint authorization, feeding speed boost, and the other mobs' controls were not changed by this animation fix.
+- Build 94 replaces the Sculksaur Sonic Boom visuals with a hollow expanding sphere made from 1,536 vanilla `SCULK_SOUL` particles, directed radially outward. The old post-process `Shockwave`, `ColoredLight`, final jaw emitter, and ground-wave emitters are no longer spawned. The original camera shake remains. The animation events and gameplay attack implementation were left intact.
+- **Runtime status:** Build 94 is structurally/bytecode verified, not yet visually confirmed in-game. The user still needs to test the mounted Lushsaur animation and the Sonic Boom with post-processing both enabled and disabled.
+- Next planned tasks remain in [LEGACY_ROADMAP.md](LEGACY_ROADMAP.md): remove smooth turning from all three retained mobs, then implement and test the Lushsaur-only Happy-Ghast-like platform collision.
+- The proposed `SPIN.get(this)` collision gate is still plan-only and has not been implemented.
 
 ---
-
-
 
 ## Historical notes preserved from 2026-11-13
 
