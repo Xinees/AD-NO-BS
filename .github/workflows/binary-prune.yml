@@ -40,6 +40,18 @@ jobs:
           unzip -p astemirlib_re-1.20.1-forge-1.2.98-SNAPSHOT.jar META-INF/mods.toml > build/astemir-inspection/mods.toml || true
           unzip -p astemirlib_re-1.20.1-forge-1.2.98-SNAPSHOT.jar META-INF/MANIFEST.MF > build/astemir-inspection/MANIFEST.MF || true
 
+      - name: Download ASM bytecode tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build/tools
+          curl --fail --location --retry 3 \
+            https://repo.maven.apache.org/maven2/org/ow2/asm/asm/9.7.1/asm-9.7.1.jar \
+            -o build/tools/asm-9.7.1.jar
+          curl --fail --location --retry 3 \
+            https://repo.maven.apache.org/maven2/org/ow2/asm/asm-tree/9.7.1/asm-tree-9.7.1.jar \
+            -o build/tools/asm-tree-9.7.1.jar
+
       - name: Compile direct bytecode pruner
         shell: bash
         run: |
