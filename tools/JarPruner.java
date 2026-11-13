@@ -1174,6 +1174,7 @@ public final class JarPruner {
             name.equals(ROOT + "util/IModifiedArrow") ||
             name.equals(ROOT + "common/trigger/SpottedEntityTrigger") ||
             name.equals(ROOT + "common/trigger/ADCriteriaTriggers") ||
+            name.startsWith(ROOT + "common/structure/piece/CustomStructurePiece$") ||
             name.equals(ROOT + "server/ServerConfig") ||
             name.equals(ROOT + "entity/ForgeEntityPart");
     }
