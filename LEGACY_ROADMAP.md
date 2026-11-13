@@ -8,17 +8,20 @@ This file is the explicit task list for the next Legacy work. The order below is
 
 ## Current baseline and test status
 
-### Build 103 — latest CI-verified JAR; runtime retest required
+### Build 110 — latest CI-verified JAR; runtime retest required
 
-- CI: [run #103 — success](https://github.com/Xinees/AD-NO-BS/actions/runs/43522963684); final guard commit: `8130cbbd275f906fd82a722d93caf45fcd359706`.
-- Sonic Boom bytecode correction: [commit 42e9066](https://github.com/Xinees/AD-NO-BS/commit/42e9066889574b7ea7d4ac451c66b15291e7a247).
-- Artifact ID: `14082994709`; ZIP digest: `sha256:a7ee54c624216ce424080f767c2c59db32ee6a6f7bdd52863d59e4e5f5ec72c6`.
-- Output JAR size: `2,493,375` bytes; SHA-256: `865ff301ae5903d65aed0dcda4feec553c7f14be1139ff388d3d295fce93a50c`.
-- **Build99 failed during the user's first game launch.** `SculksaurEffects.archiesDinoMod$spawnSculksaurSonicBoomSphere` threw `VerifyError: Bad type on operand stack`, because the original generated sequence pushed `IntStream` before creating a captured `IntConsumer` lambda.
-- Build103 fixes the sequence by creating the captured lambda first, storing it in local slot 7, then creating the integer stream and invoking `forEach`. The downloaded class was inspected with `javap` and the exact corrected instruction order was confirmed.
-- CI now checks that order explicitly; Build103 passed the new guard and the full structural/resource validation. This is stronger bytecode validation, not proof of in-game stability.
-- The later missing-model/shader messages and `forge:swim_speed` registry failure in the Build99 log happened after the mod constructor had failed and `mod_resources` was removed. Treat them as downstream until Build103 is retested; do not patch Astemir RE or bundle it into the Legacy JAR.
-- The user's first report of square-like text glyphs is still unclassified. There is no explicit font-loading exception in the supplied log. Retest with Build103 first; investigate the selected resource pack separately only if the symptom remains.
+- CI: [run #110 — success](https://github.com/Xinees/AD-NO-BS/actions/runs/43525560144); final guard commit: `416b2f50693c313dd4210d4952adfff2495f6612`.
+- Fix commit: [`42bbcebb`](https://github.com/Xinees/AD-NO-BS/commit/42bbcebbbea01edfe0f903b08fdde732b0a45594).
+- Artifact ID: `14085555038`; ZIP digest: `sha256:6df695e5ec2be061c7779fa27a7ce0dae2711f842f90005109458e6f3d7227d4`.
+- Output JAR size: `2,493,408` bytes; SHA-256: `edefc1d1cd4b4b8df3df20d6e8815055927a81cf618b8d92767567c7e26db059`.
+- The user's Build105 launch passed mod construction, resource reload, Astemir shader/model loading, world creation, and player login before a new `VerifyError` in the generated Lushsaur sprint Mixin handler.
+- Root cause: the custom handler passed primitive `ICONST_1` to erased `CallbackInfoReturnable.setReturnValue(Object)`. Build110 now passes `Boolean.TRUE`; its downloaded bytecode was inspected with `javap -v`.
+- The injection target `m_264231_(Entity)` was checked against the 1.20.1 mappings and is `LocalPlayer.vehicleCanSprint(Entity)`, returning boolean. The controlling-passenger comparison is unchanged.
+- CI explicitly enforces the boxed Boolean callback and rejects a primitive `iconst_1` in that handler. Full CI and JAR structural/resource checks passed.
+- Build105-to-Build110 archive comparison found exactly one changed entry, `LocalPlayerMixin.class`; all 473 entries remain and there are no added/removed resources. This isolates the corrective patch.
+- The later null-player NPE in the Build105 log followed the invalid Mixin callback and is downstream until proven otherwise. The old Build99 missing-model/shader/registry errors were not seen in the Build105 launch; Astemir reported successful loading of all models and shaders.
+- **Runtime status:** Build110 has not yet been tested in Minecraft. Confirm world entry and Lushsaur sprint behavior first, then run the existing Sonic Boom, mounted gait, and mob-turning checks.
+- The square-glyph report remains unclassified; the Build105 log contains no font-loading exception. Confirm whether it persists before changing the selected resource pack.
 
 ### Smooth turning — main controls changed, task still open
 
