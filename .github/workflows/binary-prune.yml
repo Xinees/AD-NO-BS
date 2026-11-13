@@ -283,6 +283,7 @@ jobs:
                       "ClassNotFoundException",
                       "Parsing error loading custom advancement",
                       "Couldn't load advancement ec_ad:",
+                      "Couldn't parse element loot_tables:ec_ad:",
                   )
                   found = [marker for marker in fatal_markers if marker in content]
                   if found:

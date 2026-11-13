@@ -259,6 +259,49 @@ def keep_data_path(path):
 
     return False
 
+def filter_loot_entry(entry):
+    if isinstance(entry, dict):
+        if entry.get("type") == "minecraft:item":
+            item = entry.get("name")
+            if isinstance(item, str) and item.startswith("ec_ad:") and item.split(":", 1)[1] not in ITEMS:
+                return {"type": "minecraft:empty", "weight": entry.get("weight", 1)}
+        return {key: filter_loot_entry(value) for key, value in entry.items()}
+    if isinstance(entry, list):
+        return [filter_loot_entry(value) for value in entry]
+    return entry
+
+
+def filter_loot_table(data, name):
+    value = read_json(data, name)
+    pools = value.get("pools")
+    if not isinstance(pools, list):
+        raise RuntimeError(f"Loot table {name} has no pools array")
+    for pool in pools:
+        if not isinstance(pool, dict) or not isinstance(pool.get("entries"), list):
+            raise RuntimeError(f"Loot table {name} has malformed pool entries")
+        pool["entries"] = [filter_loot_entry(entry) for entry in pool["entries"]]
+    return dump_json(value)
+
+
+def validate_loot_tables(entries):
+    for name, data in entries.items():
+        if not (name.startswith("data/ec_ad/loot_tables/") and name.endswith(".json")):
+            continue
+        value = read_json(data, name)
+        def visit(node):
+            if isinstance(node, dict):
+                if node.get("type") == "minecraft:item":
+                    item = node.get("name")
+                    if isinstance(item, str) and item.startswith("ec_ad:") and item.split(":", 1)[1] not in ITEMS:
+                        raise RuntimeError(f"Loot table {name} still references removed item {item}")
+                for child in node.values():
+                    visit(child)
+            elif isinstance(node, list):
+                for child in node:
+                    visit(child)
+        visit(value)
+
+
 def filter_tag_json(data, name):
     value = read_json(data, name)
     if isinstance(value, dict) and isinstance(value.get("values"), list):
@@ -358,6 +401,8 @@ with zipfile.ZipFile(source, "r") as zin:
                 continue
             if name == "data/ec_ad/advancements/root.json":
                 data = filter_root_advancement(data)
+            elif name.startswith("data/ec_ad/loot_tables/") and name.endswith(".json"):
+                data = filter_loot_table(data, name)
             elif "/tags/" in name and name.endswith(".json"):
                 data = filter_tag_json(data, name)
 
@@ -412,6 +457,7 @@ with zipfile.ZipFile(target, "r") as check:
         raise SystemExit("Retained root advancement is missing")
 
 validate_advancement_graph(kept)
+validate_loot_tables(kept)
 
 report = Path("build/resource-prune-report.txt")
 report.parent.mkdir(parents=True, exist_ok=True)
