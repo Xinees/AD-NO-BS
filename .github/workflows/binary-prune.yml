@@ -35,29 +35,10 @@ jobs:
           sha256sum ec_ad-forge-1.20.1-1.0.4.jar
           echo "Astemir RE input SHA-256:"
           sha256sum astemirlib_re-1.20.1-forge-1.2.98-SNAPSHOT.jar
-
-      - name: Inspect Astemir RE metadata before Jar-in-Jar packaging
-        shell: bash
-        run: |
-          set -euo pipefail
-          echo "Astemir RE archive entries:"
-          jar tf astemirlib_re-1.20.1-forge-1.2.98-SNAPSHOT.jar | grep -E 'mods.toml|MANIFEST.MF|jarjar/metadata.json|[.]jar$' || true
-          echo "Astemir RE mods.toml:"
-          unzip -p astemirlib_re-1.20.1-forge-1.2.98-SNAPSHOT.jar META-INF/mods.toml || true
-          echo "Astemir RE manifest:"
-          unzip -p astemirlib_re-1.20.1-forge-1.2.98-SNAPSHOT.jar META-INF/MANIFEST.MF || true
-
-      - name: Download ASM bytecode tools
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p build/tools
-          curl --fail --location --retry 3 \
-            https://repo.maven.apache.org/maven2/org/ow2/asm/asm/9.7.1/asm-9.7.1.jar \
-            -o build/tools/asm-9.7.1.jar
-          curl --fail --location --retry 3 \
-            https://repo.maven.apache.org/maven2/org/ow2/asm/asm-tree/9.7.1/asm-tree-9.7.1.jar \
-            -o build/tools/asm-tree-9.7.1.jar
+          mkdir -p build/astemir-inspection
+          jar tf astemirlib_re-1.20.1-forge-1.2.98-SNAPSHOT.jar > build/astemir-inspection/entries.txt
+          unzip -p astemirlib_re-1.20.1-forge-1.2.98-SNAPSHOT.jar META-INF/mods.toml > build/astemir-inspection/mods.toml || true
+          unzip -p astemirlib_re-1.20.1-forge-1.2.98-SNAPSHOT.jar META-INF/MANIFEST.MF > build/astemir-inspection/MANIFEST.MF || true
 
       - name: Compile direct bytecode pruner
         shell: bash
@@ -167,6 +148,7 @@ jobs:
             build/classes-pruned.jar
             build/libs/ec_ad-legacy-forge-1.20.1.jar
             build/resource-prune-report.txt
+            build/astemir-inspection/
           if-no-files-found: ignore
           retention-days: 30
  || true
