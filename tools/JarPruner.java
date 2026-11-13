@@ -105,7 +105,7 @@ public final class JarPruner {
         ROOT + "mixin/client/CameraMixin",
         ROOT + "mixin/client/KeyMappingMixin",
         ROOT + "mixin/client/LevelRendererMixin",
-        ROOT + "mixin/client/LivingEntityRendererMixin",
+        ROOT + "mixin/client/LivingEntityRendererMixin"
     );
 
     public static void main(String[] args) throws Exception {
