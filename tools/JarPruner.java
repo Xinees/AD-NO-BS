@@ -19,6 +19,7 @@ public final class JarPruner {
         )),
         Map.entry(ROOT + "common/block/ADBlocks", Set.of("LUSHSAUR_EGG", "CHORUSOATL_EGG")),
         Map.entry(ROOT + "common/block/entity/ADBlockEntityTypes", Set.of("LUSHSAUR_EGG", "CHORUSOATL_EGG")),
+        Map.entry(ROOT + "common/menu/ADMenus", Set.of("DINO")),
         Map.entry(ROOT + "common/entity/ADEntityTypes", Set.of(
             "SPAWN_INFO", "LUSHSAUR", "CHORUSOATL", "SCULKSAUR", "CHORUSOATL_SPIT"
         )),
@@ -152,6 +153,7 @@ public final class JarPruner {
             "(Lnet/minecraftforge/fml/event/lifecycle/FMLCommonSetupEvent;)V");
         patchCommonClient(nodes.get(ROOT + "client/CommonClient"));
         patchClientModBus(nodes.get(ROOT + "client/ADClientModBus"));
+        patchClientModBusRegistrations(nodes.get(ROOT + "client/ADClientModBus"));
         patchSpawnPlacements(nodes.get(ROOT + "ArchiesDinosaurs$ModBusEvents"));
         patchPlayerAnimations(nodes.get(ROOT + "client/animation/player/ADPlayerAnimations"));
         patchCreativeTab(nodes.get(ROOT + "common/tab/ADCreativeTabs"), nodes.get(ROOT + "common/items/ADItems"));
@@ -351,6 +353,41 @@ public final class JarPruner {
             "createRenderer", "(Lcom/astemir/astemirlib/re/client/model/AstemirModel;)Lnet/minecraft/client/renderer/blockentity/BlockEntityRenderer;", false));
         code.add(new MethodInsnNode(Opcodes.INVOKESTATIC, ROOT + "client/CommonClient", "registerBlockEntityRenderer",
             "(Ljava/util/function/Supplier;Lnet/minecraft/client/renderer/blockentity/BlockEntityRenderer;)V", false));
+    }
+
+    private static void patchClientModBusRegistrations(ClassNode owner) {
+        if (owner == null) return;
+        for (MethodNode method : owner.methods) {
+            if (method.name.equals("onClientSetup") &&
+                method.desc.equals("(Lnet/minecraftforge/fml/event/lifecycle/FMLClientSetupEvent;)V")) {
+                clearMethod(method);
+                InsnList code = method.instructions;
+                code.add(new FieldInsnNode(Opcodes.GETSTATIC, ROOT + "common/menu/ADMenus",
+                    "DINO", "L" + ROOT + "util/ResourceSupplier;"));
+                code.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, ROOT + "util/ResourceSupplier",
+                    "get", "()Ljava/lang/Object;", true));
+                code.add(new TypeInsnNode(Opcodes.CHECKCAST, "net/minecraft/world/inventory/MenuType"));
+                code.add(new InvokeDynamicInsnNode("m_96214_",
+                    "()Lnet/minecraft/client/gui/screens/MenuScreens$ScreenConstructor;",
+                    new Handle(Opcodes.H_INVOKESTATIC, "java/lang/invoke/LambdaMetafactory", "metafactory",
+                        "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;", false),
+                    Type.getMethodType("(Lnet/minecraft/world/inventory/AbstractContainerMenu;Lnet/minecraft/world/entity/player/Inventory;Lnet/minecraft/network/chat/Component;)Lnet/minecraft/client/gui/screens/Screen;"),
+                    new Handle(Opcodes.H_NEWINVOKESPECIAL,
+                        ROOT + "client/screen/DinoScreen", "<init>",
+                        "(L" + ROOT + "common/menu/DinoMenu;Lnet/minecraft/world/entity/player/Inventory;Lnet/minecraft/network/chat/Component;)V",
+                        false),
+                    Type.getMethodType("(L" + ROOT + "common/menu/DinoMenu;Lnet/minecraft/world/entity/player/Inventory;Lnet/minecraft/network/chat/Component;)L" + ROOT + "client/screen/DinoScreen;")));
+                code.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "net/minecraft/client/gui/screens/MenuScreens",
+                    "m_96206_", "(Lnet/minecraft/world/inventory/MenuType;Lnet/minecraft/client/gui/screens/MenuScreens$ScreenConstructor;)V", false));
+                code.add(new InsnNode(Opcodes.RETURN));
+                method.maxLocals = 1;
+            } else if (method.name.equals("registerLayers") &&
+                method.desc.equals("(Lnet/minecraftforge/client/event/EntityRenderersEvent$RegisterLayerDefinitions;)V")) {
+                clearMethod(method);
+                method.instructions.add(new InsnNode(Opcodes.RETURN));
+                method.maxLocals = 1;
+            }
+        }
     }
 
     private static void patchClientModBus(ClassNode owner) {
@@ -567,6 +604,12 @@ public final class JarPruner {
         for (MethodNode method : owner.methods) {
             if (method.name.equals("<init>")) {
                 replaceExcludedEntityDefaults(method);
+                for (AbstractInsnNode insn : method.instructions.toArray()) {
+                    if (insn instanceof MethodInsnNode call && call.owner.equals(ENTITY_SETTINGS) &&
+                        call.name.equals("<init>")) {
+                        call.desc = ENTITY_SETTINGS_CTOR;
+                    }
+                }
                 removeConstructorFieldInit(method, owner.name, "weaponSettings");
                 removeConstructorFieldInit(method, owner.name, "armorSettings");
             } else if (method.name.equals("toTag") && method.desc.equals("()Lnet/minecraft/nbt/CompoundTag;")) {
@@ -1114,7 +1157,6 @@ public final class JarPruner {
             name.startsWith(ROOT + "client/model/render/entity/mob/LushsaurClient") ||
             name.startsWith(ROOT + "client/model/render/entity/mob/ChorusoatlClient") ||
             name.startsWith(ROOT + "client/model/render/entity/mob/SculksaurClient") ||
-            name.startsWith(ROOT + "client/model/render/block/DinoEggClient") ||
             name.startsWith(ROOT + "client/animation/player/riding/OnLushsaurPlayerAnimations") ||
             name.startsWith(ROOT + "client/animation/player/riding/OnChorusoatlPlayerAnimations") ||
             name.equals(ROOT + "util/ResourceSupplier") ||
