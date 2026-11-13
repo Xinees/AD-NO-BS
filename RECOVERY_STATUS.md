@@ -3,18 +3,16 @@
 ## Current branch status — 2026-11-14
 
 - Working branch: `binary-prune/legacy`
-- Latest completed build: Direct Legacy JAR Prune **build 94**.
-- Animation fix implementation commit: `338f774b613ff886accb50b2438bc1e57a3a01a6`; follow-up ASM node fix: `ff48c64b91a56998d9742049c7ab66d791b44a51`.
-- Sculksaur Sonic Boom visual implementation commit: `642be309f50e8330ff24f48b3ce08d6abd3d6f64`.
-- Build 94 CI verification commit: `e84cb78a84577b75afc3985c7c616e27781082d2`.
-- GitHub Actions run: [#94 — success](https://github.com/Xinees/AD-NO-BS/actions/runs/43516535668).
-- Artifact ID: `14080273953`; ZIP digest: `sha256:1862f5120d2d95167f856fd05c29e7769c9841ecbc44952fc8558551fcfddc72`.
-- Output JAR: `libs/ec_ad-legacy-forge-1.20.1.jar`; size: `2,493,690` bytes; SHA-256: `c3ded081be4631e747c26ee1b68261adec81aa0752993e861fdc5b9f9c7d90a8`.
-- Lushsaur mounted sprint input is confirmed by the user to work with Ctrl and double-tap W. Build 94 fixes the remaining animation mismatch: while mounted, both the Lushsaur run animation and the rider's run animation now read the controlling passenger's actual sprint state. When unmounted, the Lushsaur retains its original AI locomotion condition. Movement speed, sprint authorization, feeding speed boost, and the other mobs' controls were not changed by this animation fix.
-- Build 94 replaces the Sculksaur Sonic Boom visuals with a hollow expanding sphere made from 1,536 vanilla `SCULK_SOUL` particles, directed radially outward. The old post-process `Shockwave`, `ColoredLight`, final jaw emitter, and ground-wave emitters are no longer spawned. The original camera shake remains. The animation events and gameplay attack implementation were left intact.
-- **Runtime status:** Build 94 is structurally/bytecode verified, not yet visually confirmed in-game. The user still needs to test the mounted Lushsaur animation and the Sonic Boom with post-processing both enabled and disabled.
-- Next planned tasks remain in [LEGACY_ROADMAP.md](LEGACY_ROADMAP.md): remove smooth turning from all three retained mobs, then implement and test the Lushsaur-only Happy-Ghast-like platform collision.
-- The proposed `SPIN.get(this)` collision gate is still plan-only and has not been implemented.
+- Latest completed build: Direct Legacy JAR Prune **build 99**.
+- GitHub Actions run: [#99 — success](https://github.com/Xinees/AD-NO-BS/actions/runs/43520268349); CI verification commit: `1514218f5490fc63ca7e5010b68955586ce5f14f`.
+- Artifact ID: `14082851815`; ZIP digest: `sha256:aeac0c5528f0a4c169e07a04d9bdd97b6d9928899eaad7f4b3362f577d18392e`.
+- Output JAR: `ec_ad-legacy-forge-1.20.1.jar`; size: `2,493,371` bytes; SHA-256: `02a560d8d761b5690e60657e9ecad261285371172490c6345fec61462bd81970`.
+- Lushsaur mounted sprint input is confirmed by the user to work with Ctrl and double-tap W. Build 94 onward synchronizes both the mounted Lushsaur run animation and the rider's run animation with the controlling passenger's actual sprint state. The unmounted Lushsaur retains its original AI locomotion predicate. Movement speed, sprint authorization, feeding speed boost, and the other mobs' controls were not changed by this animation correction.
+- Build 94 onward replaces the Sculksaur Sonic Boom post-process distortion with a hollow expanding sphere of 1,536 vanilla `SCULK_SOUL` particles. The `Shockwave`, `ColoredLight`, final jaw emitter, and ground-wave emitters are no longer spawned. Original camera shake and gameplay attack logic are retained.
+- Build 99 applies direct yaw and look targeting to the custom `SmoothMoveControl`, `SmoothBodyControl`, and `SmoothLookControl` used by the three retained mobs. Ground yaw, aerial yaw, body yaw, and head look no longer use the original slow interpolation paths; flight pitch easing and existing action/player rotation guards are preserved.
+- **Open audit — Sculksaur locomotion:** the original `SculksaurEntity.createLocomotion()` also sets `EntityLocomotion.Builder.turnFactor(0.003f)`. Its implementation belongs to the separate Astemir RE dependency, which is not present in this workspace. I have not changed this setting because its exact effect cannot be established from the mod's JAR alone. Do not mark the smooth-turning task complete until this parameter is checked against the exact Astemir RE 1.2.98 dependency.
+- **Runtime status:** build 99 passed structural and bytecode CI checks, but has not yet been tested in Minecraft. The Sonic Boom sphere's appearance, the mounted Lushsaur gait transition, and abrupt turning of all three mobs still require in-game confirmation.
+- Next planned task after the smooth-turning audit: implement and test the Lushsaur-only Happy-Ghast-like platform collision. The proposed `SPIN.get(this)` collision gate remains plan-only and has not been implemented.
 
 ---
 
