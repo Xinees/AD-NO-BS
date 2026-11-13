@@ -189,6 +189,8 @@ public final class JarPruner {
         patchLushsaurControllingPassenger(nodes.get(ROOT + "common/entity/mob/lushsaur/LushsaurEntity"));
         patchLushsaurCanSprint(nodes.get(ROOT + "common/entity/mob/lushsaur/LushsaurEntity"));
         patchLushsaurMountSpeed(nodes.get(ROOT + "common/entity/mob/lushsaur/LushsaurEntity"));
+        patchLushsaurRunAnimation(nodes.get(ROOT + "client/model/render/entity/mob/LushsaurClient"));
+        patchLushsaurRiderRunAnimation(nodes.get(ROOT + "client/animation/player/riding/OnLushsaurPlayerAnimations"));
         patchLushsaurLocalPlayerSprintMixin(nodes.get(ROOT + "mixin/client/LocalPlayerMixin"));
         patchPlayerMixin(nodes.get(ROOT + "mixin/PlayerMixin"));
         removeMethods(nodes.get(ROOT + "mixin/client/LevelRendererMixin"),
@@ -1005,6 +1007,144 @@ public final class JarPruner {
 
         method.maxStack = 3;
         method.maxLocals = 3;
+    }
+
+    private static void patchLushsaurRunAnimation(ClassNode owner) {
+        if (owner == null) throw new IllegalStateException("LushsaurClient class is missing");
+
+        String entityInternal = ROOT + "common/entity/mob/lushsaur/LushsaurEntity";
+        String entityDescriptor = "L" + entityInternal + ";";
+        String locomotionInternal = "com/astemir/astemirlib/re/common/world/entity/EntityLocomotion";
+        String conditionInternal = "com/astemir/astemirlib/re/core/function/Condition";
+        String conditionDescriptor = "()L" + conditionInternal + ";";
+        String helperName = "archiesDinoMod$shouldUseRunAnimation";
+        String helperDescriptor = "(" + entityDescriptor + ")Z";
+
+        owner.methods.removeIf(method ->
+            method.name.equals(helperName) && method.desc.equals(helperDescriptor));
+
+        MethodNode helper = new MethodNode(
+            Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC | Opcodes.ACC_SYNTHETIC,
+            helperName,
+            helperDescriptor,
+            null,
+            null
+        );
+        InsnList helperCode = helper.instructions;
+        LabelNode useLocomotion = new LabelNode();
+
+        helperCode.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        helperCode.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
+            entityInternal, "m_6688_", "()Lnet/minecraft/world/entity/LivingEntity;", false));
+        helperCode.add(new VarInsnNode(Opcodes.ASTORE, 1));
+        helperCode.add(new VarInsnNode(Opcodes.ALOAD, 1));
+        helperCode.add(new JumpInsnNode(Opcodes.IFNULL, useLocomotion));
+        helperCode.add(new VarInsnNode(Opcodes.ALOAD, 1));
+        helperCode.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
+            "net/minecraft/world/entity/LivingEntity", "m_20142_", "()Z", false));
+        helperCode.add(new InsnNode(Opcodes.IRETURN));
+        helperCode.add(useLocomotion);
+        helperCode.add(new FrameNode(Opcodes.F_FULL, 2,
+            new Object[] { entityInternal, "net/minecraft/world/entity/LivingEntity" },
+            0, new Object[0]));
+        helperCode.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        helperCode.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
+            entityInternal, "getLocomotion",
+            "()L" + locomotionInternal + ";", false));
+        helperCode.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
+            locomotionInternal, "whenRunning", conditionDescriptor, false));
+        helperCode.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE,
+            conditionInternal, "check", "()Z", true));
+        helperCode.add(new InsnNode(Opcodes.IRETURN));
+        helper.maxStack = 1;
+        helper.maxLocals = 2;
+        owner.methods.add(helper);
+
+        String buildDescriptor = "(" + entityDescriptor +
+            ")Lcom/astemir/astemirlib/re/client/model/core/animation/node/LayerNode$Definition;";
+        MethodNode build = owner.methods.stream()
+            .filter(method -> method.name.equals("buildLocomotionState") &&
+                method.desc.equals(buildDescriptor))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("Lushsaur locomotion animation method is missing"));
+
+        Handle lambdaMetafactory = new Handle(
+            Opcodes.H_INVOKESTATIC,
+            "java/lang/invoke/LambdaMetafactory",
+            "metafactory",
+            "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;" +
+                "Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;" +
+                "Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;",
+            false
+        );
+        InvokeDynamicInsnNode runCondition = new InvokeDynamicInsnNode(
+            "check",
+            "(" + entityDescriptor + ")L" + conditionInternal + ";",
+            lambdaMetafactory,
+            Type.getMethodType("()Z"),
+            new Handle(Opcodes.H_INVOKESTATIC, owner.name, helperName, helperDescriptor, false),
+            Type.getMethodType("()Z")
+        );
+
+        int patchedConditions = 0;
+        for (AbstractInsnNode insn : build.instructions.toArray()) {
+            if (!(insn instanceof MethodInsnNode call) ||
+                call.getOpcode() != Opcodes.INVOKEVIRTUAL ||
+                !call.owner.equals(locomotionInternal) ||
+                !call.name.equals("whenRunning") ||
+                !call.desc.equals(conditionDescriptor)) continue;
+
+            AbstractInsnNode receiver = call.getPrevious();
+            if (!(receiver instanceof VarInsnNode load) ||
+                load.getOpcode() != Opcodes.ALOAD || load.var != 2) {
+                throw new IllegalStateException("Unexpected receiver before Lushsaur whenRunning condition");
+            }
+
+            build.instructions.set(receiver, new VarInsnNode(Opcodes.ALOAD, 1));
+            build.instructions.set(call, runCondition);
+            patchedConditions++;
+        }
+
+        if (patchedConditions != 2) {
+            throw new IllegalStateException("Expected to replace 2 Lushsaur run conditions, replaced " +
+                patchedConditions);
+        }
+    }
+
+    private static void patchLushsaurRiderRunAnimation(ClassNode owner) {
+        if (owner == null) throw new IllegalStateException("OnLushsaurPlayerAnimations class is missing");
+
+        String entityInternal = ROOT + "common/entity/mob/lushsaur/LushsaurEntity";
+        String descriptor = "(L" + entityInternal + ";)Z";
+        MethodNode method = owner.methods.stream()
+            .filter(candidate -> candidate.name.equals("lambda$init$11") &&
+                candidate.desc.equals(descriptor))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("Lushsaur rider run-animation predicate is missing"));
+
+        clearMethod(method);
+        InsnList code = method.instructions;
+        LabelNode noController = new LabelNode();
+
+        code.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        code.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
+            entityInternal, "m_6688_", "()Lnet/minecraft/world/entity/LivingEntity;", false));
+        code.add(new VarInsnNode(Opcodes.ASTORE, 1));
+        code.add(new VarInsnNode(Opcodes.ALOAD, 1));
+        code.add(new JumpInsnNode(Opcodes.IFNULL, noController));
+        code.add(new VarInsnNode(Opcodes.ALOAD, 1));
+        code.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
+            "net/minecraft/world/entity/LivingEntity", "m_20142_", "()Z", false));
+        code.add(new InsnNode(Opcodes.IRETURN));
+        code.add(noController);
+        code.add(new FrameNode(Opcodes.F_FULL, 2,
+            new Object[] { entityInternal, "net/minecraft/world/entity/LivingEntity" },
+            0, new Object[0]));
+        code.add(new InsnNode(Opcodes.ICONST_0));
+        code.add(new InsnNode(Opcodes.IRETURN));
+
+        method.maxStack = 1;
+        method.maxLocals = 2;
     }
 
     private static void patchLushsaurLocalPlayerSprintMixin(ClassNode owner) {
