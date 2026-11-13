@@ -311,7 +311,7 @@ public final class JarPruner {
                 InsnList code = method.instructions;
                 code.add(new FieldInsnNode(Opcodes.GETSTATIC, ROOT + "common/entity/ADEntityTypes",
                     "CHORUSOATL_SPIT", "L" + ROOT + "util/ResourceSupplier;"));
-                code.add(new InvokeDynamicInsnNode("get", "()Lnet/minecraft/client/renderer/entity/EntityRendererProvider;",
+                code.add(new InvokeDynamicInsnNode("m_174009_", "()Lnet/minecraft/client/renderer/entity/EntityRendererProvider;",
                     new Handle(Opcodes.H_INVOKESTATIC, "java/lang/invoke/LambdaMetafactory", "metafactory",
                         "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;", false),
                     Type.getMethodType("(Lnet/minecraft/client/renderer/entity/EntityRendererProvider$Context;)Lnet/minecraft/client/renderer/entity/EntityRenderer;"),
@@ -365,8 +365,8 @@ public final class JarPruner {
                 InsnList code = method.instructions;
                 code.add(new FieldInsnNode(Opcodes.GETSTATIC, ROOT + "common/menu/ADMenus",
                     "DINO", "L" + ROOT + "util/ResourceSupplier;"));
-                code.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, ROOT + "util/ResourceSupplier",
-                    "get", "()Ljava/lang/Object;", true));
+                code.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, ROOT + "util/ResourceSupplier",
+                    "get", "()Ljava/lang/Object;", false));
                 code.add(new TypeInsnNode(Opcodes.CHECKCAST, "net/minecraft/world/inventory/MenuType"));
                 code.add(new InvokeDynamicInsnNode("m_96214_",
                     "()Lnet/minecraft/client/gui/screens/MenuScreens$ScreenConstructor;",

@@ -1,4 +1,4 @@
-name: Direct Legacy JAR Prune - build 8
+name: Direct Legacy JAR Prune - build 9
 
 on:
   push:
@@ -90,6 +90,22 @@ jobs:
           test "$COUNT" -eq 3
           if printf '%s\\n' "$RENDER_CALLS" | grep -F "createRenderProvider:()Lnet/minecraft/client/renderer/entity/EntityRendererProvider;"; then
             echo "Found stale renderer descriptor in CommonClient."
+            exit 1
+          fi
+          if ! printf '%s\\n' "$RENDER_CALLS" | grep -F "m_174009_:()Lnet/minecraft/client/renderer/entity/EntityRendererProvider;"; then
+            echo "Missing correctly named EntityRendererProvider lambda SAM."
+            exit 1
+          fi
+          if printf '%s\\n' "$RENDER_CALLS" | grep -F "get:()Lnet/minecraft/client/renderer/entity/EntityRendererProvider;"; then
+            echo "Found invalid EntityRendererProvider lambda SAM name."
+            exit 1
+          fi
+          CLIENT_SETUP_CALLS="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.client.ADClientModBus)"
+          SUPPLIER_GET_COUNT="$(printf '%s\\n' "$CLIENT_SETUP_CALLS" | grep -F -o "invokevirtual" | wc -l)"
+          SUPPLIER_GET_COUNT="$(printf '%s\\n' "$CLIENT_SETUP_CALLS" | grep -F "invokevirtual" | grep -F -o "ResourceSupplier.get:()Ljava/lang/Object;" | wc -l)"
+          test "$SUPPLIER_GET_COUNT" -eq 1
+          if printf '%s\\n' "$CLIENT_SETUP_CALLS" | grep -F "invokeinterface" | grep -F "ResourceSupplier.get:()Ljava/lang/Object;"; then
+            echo "ResourceSupplier.get must use invokevirtual because ResourceSupplier is a class."
             exit 1
           fi
           EGG_RENDERER_DESC='(Lcom/astemir/astemirlib/re/client/model/AstemirModel;)Lcom/astemir/astemirlib/re/client/model/render/renderer/AstemirBlockEntityRenderer;'
