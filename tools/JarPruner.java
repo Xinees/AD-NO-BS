@@ -125,7 +125,8 @@ public final class JarPruner {
         ROOT + "mixin/client/CameraMixin",
         ROOT + "mixin/client/KeyMappingMixin",
         ROOT + "mixin/client/LevelRendererMixin",
-        ROOT + "mixin/client/LivingEntityRendererMixin"
+        ROOT + "mixin/client/LivingEntityRendererMixin",
+        ROOT + "mixin/client/LocalPlayerMixin"
     );
 
     public static void main(String[] args) throws Exception {
@@ -188,6 +189,7 @@ public final class JarPruner {
         patchLushsaurControllingPassenger(nodes.get(ROOT + "common/entity/mob/lushsaur/LushsaurEntity"));
         patchLushsaurCanSprint(nodes.get(ROOT + "common/entity/mob/lushsaur/LushsaurEntity"));
         patchLushsaurMountSpeed(nodes.get(ROOT + "common/entity/mob/lushsaur/LushsaurEntity"));
+        patchLushsaurLocalPlayerSprintMixin(nodes.get(ROOT + "mixin/client/LocalPlayerMixin"));
         patchPlayerMixin(nodes.get(ROOT + "mixin/PlayerMixin"));
         removeMethods(nodes.get(ROOT + "mixin/client/LevelRendererMixin"),
             Set.of("archiesDinoMod$onEntityRender"));
@@ -1003,6 +1005,76 @@ public final class JarPruner {
 
         method.maxStack = 3;
         method.maxLocals = 3;
+    }
+
+    private static void patchLushsaurLocalPlayerSprintMixin(ClassNode owner) {
+        if (owner == null) throw new IllegalStateException("LocalPlayerMixin class is missing");
+
+        owner.fields.removeIf(field -> field.name.equals("f_108619_"));
+        owner.methods.removeIf(method -> method.name.equals("archiesDinoMod$onOpenBook"));
+
+        String descriptor =
+            "(Lnet/minecraft/world/entity/Entity;" +
+            "Lorg/spongepowered/asm/mixin/injection/callback/CallbackInfoReturnable;)V";
+        owner.methods.removeIf(method ->
+            method.name.equals("archiesDinoMod$allowLushsaurSprint") &&
+                method.desc.equals(descriptor));
+
+        MethodNode method = new MethodNode(
+            Opcodes.ACC_PUBLIC,
+            "archiesDinoMod$allowLushsaurSprint",
+            descriptor,
+            null,
+            null
+        );
+        InsnList code = method.instructions;
+        LabelNode done = new LabelNode();
+
+        code.add(new VarInsnNode(Opcodes.ALOAD, 1));
+        code.add(new TypeInsnNode(Opcodes.INSTANCEOF,
+            ROOT + "common/entity/mob/lushsaur/LushsaurEntity"));
+        code.add(new JumpInsnNode(Opcodes.IFEQ, done));
+
+        code.add(new VarInsnNode(Opcodes.ALOAD, 1));
+        code.add(new TypeInsnNode(Opcodes.CHECKCAST,
+            ROOT + "common/entity/mob/lushsaur/LushsaurEntity"));
+        code.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
+            ROOT + "common/entity/mob/lushsaur/LushsaurEntity",
+            "m_6688_", "()Lnet/minecraft/world/entity/LivingEntity;", false));
+        code.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        code.add(new JumpInsnNode(Opcodes.IF_ACMPNE, done));
+
+        code.add(new VarInsnNode(Opcodes.ALOAD, 2));
+        code.add(new InsnNode(Opcodes.ICONST_1));
+        code.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
+            "org/spongepowered/asm/mixin/injection/callback/CallbackInfoReturnable",
+            "setReturnValue", "(Ljava/lang/Object;)V", false));
+        code.add(done);
+        code.add(new InsnNode(Opcodes.RETURN));
+
+        AnnotationNode at = new AnnotationNode(
+            "Lorg/spongepowered/asm/mixin/injection/At;");
+        at.values = new ArrayList<>();
+        at.values.add("value");
+        at.values.add("HEAD");
+
+        AnnotationNode inject = new AnnotationNode(
+            "Lorg/spongepowered/asm/mixin/injection/Inject;");
+        inject.values = new ArrayList<>();
+        inject.values.add("method");
+        inject.values.add(List.of("m_264231_"));
+        inject.values.add("at");
+        inject.values.add(List.of(at));
+        inject.values.add("cancellable");
+        inject.values.add(Boolean.TRUE);
+        inject.values.add("remap");
+        inject.values.add(Boolean.FALSE);
+        method.visibleAnnotations = new ArrayList<>();
+        method.visibleAnnotations.add(inject);
+
+        method.maxStack = 2;
+        method.maxLocals = 3;
+        owner.methods.add(method);
     }
 
     private static void patchPlayerMixin(ClassNode owner) {
