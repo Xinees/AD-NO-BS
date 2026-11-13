@@ -61,7 +61,9 @@ public final class JarPruner {
 
     private static final Set<String> NETWORK_MESSAGES = Set.of(
         ROOT + "networking/serverbound/MountControlMessage",
-        ROOT + "networking/clientbound/SyncSettingsMessage"
+        ROOT + "networking/serverbound/PopZitMessage",
+        ROOT + "networking/clientbound/SyncSettingsMessage",
+        ROOT + "networking/clientbound/AskShooterIfHitBoneMessage"
     );
 
     private static final Set<String> ROOT_CLASSES = Set.of(
@@ -82,33 +84,20 @@ public final class JarPruner {
 
     private static final Set<String> MIXIN_ROOTS = Set.of(
         ROOT + "mixin/AbstractArrowMixin",
-        ROOT + "mixin/BlockMixin",
         ROOT + "mixin/BreedGoalAccessor",
         ROOT + "mixin/CriteriaTriggersAccessor",
-        ROOT + "mixin/DamageEnchantmentMixin",
-        ROOT + "mixin/DamageSourcesMixin",
-        ROOT + "mixin/EnchantmentCategoryMixin",
-        ROOT + "mixin/EnchantmentHelperMixin",
         ROOT + "mixin/EntityAccessor",
-        ROOT + "mixin/EntityMixin",
-        ROOT + "mixin/LivingEntityMixin",
-        ROOT + "mixin/PlayerInterfaceMixin",
         ROOT + "mixin/PlayerListMixin",
         ROOT + "mixin/PlayerMixin",
-        ROOT + "mixin/ServerPlayerInterfaceMixin",
-        ROOT + "mixin/VibrationSystemListenerMixin",
         ROOT + "mixin/sculksaur/PrimaryLevelDataMixin",
         ROOT + "mixin/sculksaur/SculkShriekerBlockEntityMixin",
         ROOT + "mixin/sculksaur/WalkNodeEvaluatorAccessor",
         ROOT + "mixin/sculksaur/WardenMixin",
-        ROOT + "mixin/MultiplayerGameModeMixin",
         ROOT + "mixin/client/CameraMixin",
         ROOT + "mixin/client/ClientAdvancementsAccessor",
         ROOT + "mixin/client/KeyMappingMixin",
         ROOT + "mixin/client/LevelRendererMixin",
         ROOT + "mixin/client/LivingEntityRendererMixin",
-        ROOT + "mixin/client/LocalPlayerMixin",
-        ROOT + "mixin/client/MinecraftMixin",
         ROOT + "mixin/forge/CustomStructurePieceMixin"
     );
 
@@ -158,6 +147,10 @@ public final class JarPruner {
         patchPlayerAnimations(nodes.get(ROOT + "client/animation/player/ADPlayerAnimations"));
         patchCreativeTab(nodes.get(ROOT + "common/tab/ADCreativeTabs"));
         patchNetworkHelper(nodes.get(ROOT + "platform/ForgeNetworkHelper"));
+        patchAbstractArrowMixin(nodes.get(ROOT + "mixin/AbstractArrowMixin"));
+        patchPlayerMixin(nodes.get(ROOT + "mixin/PlayerMixin"));
+        removeMethods(nodes.get(ROOT + "mixin/client/LevelRendererMixin"),
+            Set.of("archiesDinoMod$onEntityRender"));
 
         Map<String, byte[]> transformedClasses = new HashMap<>();
         for (Map.Entry<String, ClassNode> entry : nodes.entrySet()) {
@@ -331,6 +324,78 @@ public final class JarPruner {
                 }
             }
         }
+    }
+
+    private static void patchAbstractArrowMixin(ClassNode owner) {
+        if (owner == null) return;
+
+        owner.interfaces.removeIf(name -> name.equals(ROOT + "util/IModifiedArrow"));
+        owner.fields.removeIf(field -> field.name.equals("archies_Dino_Mod$RIB_BOW_ARROW"));
+
+        owner.methods.removeIf(method ->
+            method.name.equals("onDefineSynchedData") ||
+            method.name.equals("onGetWaterInertia") ||
+            method.name.equals("archiesDinoMod$setShotFromRibBow") ||
+            method.name.equals("onAddAdditionalSaveData") ||
+            method.name.equals("onReadAdditionalSaveData")
+        );
+
+        for (MethodNode method : owner.methods) {
+            if (!method.name.equals("onTick")) continue;
+            clearMethod(method);
+            LabelNode done = new LabelNode();
+            InsnList code = method.instructions;
+            code.add(new VarInsnNode(Opcodes.ALOAD, 0));
+            code.add(new TypeInsnNode(Opcodes.CHECKCAST, "net/minecraft/world/entity/projectile/AbstractArrow"));
+            code.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
+                "net/minecraft/world/entity/projectile/AbstractArrow", "m_9236_",
+                "()Lnet/minecraft/world/level/Level;", false));
+            code.add(new FieldInsnNode(Opcodes.GETFIELD, "net/minecraft/world/level/Level", "f_46443_", "Z"));
+            code.add(new JumpInsnNode(Opcodes.IFEQ, done));
+            code.add(new VarInsnNode(Opcodes.ALOAD, 0));
+            code.add(new TypeInsnNode(Opcodes.CHECKCAST, "net/minecraft/world/entity/projectile/AbstractArrow"));
+            code.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
+                ROOT + "util/ClientUtil", "handleArrowTick",
+                "(Lnet/minecraft/world/entity/projectile/AbstractArrow;)V", false));
+            code.add(done);
+            code.add(new InsnNode(Opcodes.RETURN));
+            method.maxLocals = 2;
+        }
+    }
+
+    private static void patchPlayerMixin(ClassNode owner) {
+        if (owner == null) return;
+
+        owner.methods.removeIf(method -> method.name.equals("onCauseFoodExhaustion") ||
+            method.name.equals("archiesDinoMod$isTwoHanded"));
+
+        for (MethodNode method : owner.methods) {
+            if (!method.name.equals("archiesDinoMod$enforceTwoHanded")) continue;
+            MethodInsnNode spotted = null;
+            for (AbstractInsnNode insn : method.instructions.toArray()) {
+                if (insn instanceof MethodInsnNode call &&
+                    call.getOpcode() == Opcodes.INVOKEINTERFACE &&
+                    call.owner.equals("java/util/stream/Stream") &&
+                    call.name.equals("forEach") &&
+                    call.desc.equals("(Ljava/util/function/Consumer;)V")) {
+                    spotted = call;
+                    break;
+                }
+            }
+            if (spotted == null) {
+                throw new IllegalStateException("Could not locate spotted-entity trigger boundary in PlayerMixin");
+            }
+            AbstractInsnNode next = spotted.getNext();
+            if (next != null) removeInclusive(method.instructions, next, method.instructions.getLast());
+            method.instructions.add(new InsnNode(Opcodes.RETURN));
+            method.tryCatchBlocks.clear();
+            if (method.localVariables != null) method.localVariables.clear();
+        }
+    }
+
+    private static void removeMethods(ClassNode owner, Set<String> methodNames) {
+        if (owner == null) return;
+        owner.methods.removeIf(method -> methodNames.contains(method.name));
     }
 
     private static void patchNetworkHelper(ClassNode owner) {
