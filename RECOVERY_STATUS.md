@@ -33,6 +33,16 @@ The three mobs and their ordinary behavior are reported working. Do not alter th
 - Astemir RE is a separate mandatory dependency in the `mods` folder. Do not embed another copy inside the Legacy JAR.
 
 
+
+## Build 14 change — Lushsaur no-saddle control
+
+- Build 14 commit: pending CI
+- Add a Lushsaur-only override of `AbstractComplexMount.m_6688_()`.
+- When saddled, Lushsaur delegates to the original superclass implementation unchanged.
+- When unsaddled, Lushsaur returns a controlling passenger only when the first passenger is a Player, the dinosaur is adult, the dinosaur is not sitting, and that Player is its owner. Otherwise it returns null.
+- This matches the existing Lushsaur mount predicate; no new mount eligibility, tame progression, movement speed, animation, saddle rendering, or attack behavior is introduced.
+- Chorusoatl and Sculksaur keep the original shared saddle-gated control implementation. CI explicitly verifies the override is present only in Lushsaur and that both saddle and owner checks are retained in its bytecode.
+
 ## Build 13 findings — quick-move menu and mounted input dispatch
 
 - Build 13 commit: `df9f9dc4bc18fbfe2564088495bcad8e4d56d296`

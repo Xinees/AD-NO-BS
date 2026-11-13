@@ -1,4 +1,4 @@
-name: Direct Legacy JAR Prune - build 13
+name: Direct Legacy JAR Prune - build 14
 
 on:
   push:
@@ -155,6 +155,21 @@ jobs:
             'onRiderAttack(' '(Lnet/minecraft/world/entity/LivingEntity;Lcom/eternal_creations/archies_dino_mod/common/entity/base/Mount$AttackType;)V'
           verify_method 'com.eternal_creations.archies_dino_mod.common.entity.mob.chorusoatl.ChorusoatlEntity' \
             'onRiderAttack(' '(Lnet/minecraft/world/entity/LivingEntity;Lcom/eternal_creations/archies_dino_mod/common/entity/base/Mount$AttackType;)V'
+          verify_method 'com.eternal_creations.archies_dino_mod.common.entity.mob.lushsaur.LushsaurEntity' \
+            'm_6688_(' '()Lnet/minecraft/world/entity/LivingEntity;'
+
+          LUSH_CONTROL="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.common.entity.mob.lushsaur.LushsaurEntity)"
+          for required_call in 'm_6254_' 'm_6688_' 'm_146895_' 'isAdult' 'isSitting' 'isOwnedBy'; do
+            if ! printf '%s\\n' "$LUSH_CONTROL" | grep -Fq "$required_call"; then
+              echo "Lushsaur no-saddle controller is missing required guard/call: $required_call"
+              exit 1
+            fi
+          done
+          CHORUS_CONTROL="$(javap -classpath build/classes-pruned.jar -p com.eternal_creations.archies_dino_mod.common.entity.mob.chorusoatl.ChorusoatlEntity)"
+          if printf '%s\\n' "$CHORUS_CONTROL" | grep -Fq 'm_6688_('; then
+            echo "Chorusoatl unexpectedly received the Lushsaur-only no-saddle override."
+            exit 1
+          fi
 
           MOUNT_CONTROL="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.networking.serverbound.MountControlMessage)"
           if ! printf '%s\\n' "$MOUNT_CONTROL" | grep -Fq 'Mount.onRiderAttack'; then

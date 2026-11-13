@@ -182,6 +182,7 @@ public final class JarPruner {
         patchNetworkHelper(nodes.get(ROOT + "platform/ForgeNetworkHelper"));
         patchKeyMappings(nodes.get(ROOT + "client/ADKeyMappings"));
         patchAbstractArrowMixin(nodes.get(ROOT + "mixin/AbstractArrowMixin"));
+        patchLushsaurControllingPassenger(nodes.get(ROOT + "common/entity/mob/lushsaur/LushsaurEntity"));
         patchPlayerMixin(nodes.get(ROOT + "mixin/PlayerMixin"));
         removeMethods(nodes.get(ROOT + "mixin/client/LevelRendererMixin"),
             Set.of("archiesDinoMod$onEntityRender"));
@@ -870,6 +871,70 @@ public final class JarPruner {
             code.add(new InsnNode(Opcodes.RETURN));
             method.maxLocals = 2;
         }
+    }
+
+    private static void patchLushsaurControllingPassenger(ClassNode owner) {
+        if (owner == null) throw new IllegalStateException("LushsaurEntity class is missing");
+
+        String descriptor = "()Lnet/minecraft/world/entity/LivingEntity;";
+        owner.methods.removeIf(method -> method.name.equals("m_6688_") && method.desc.equals(descriptor));
+
+        MethodNode method = new MethodNode(
+            Opcodes.ACC_PUBLIC,
+            "m_6688_",
+            descriptor,
+            null,
+            null
+        );
+        InsnList code = method.instructions;
+        LabelNode unsaddled = new LabelNode();
+        LabelNode noController = new LabelNode();
+
+        code.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        code.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
+            ROOT + "common/entity/base/AbstractComplexMount", "m_6254_", "()Z", false));
+        code.add(new JumpInsnNode(Opcodes.IFEQ, unsaddled));
+        code.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        code.add(new MethodInsnNode(Opcodes.INVOKESPECIAL,
+            ROOT + "common/entity/base/AbstractComplexMount", "m_6688_", descriptor, false));
+        code.add(new InsnNode(Opcodes.ARETURN));
+
+        code.add(unsaddled);
+        code.add(new FrameNode(Opcodes.F_FULL, 1,
+            new Object[] { owner.name }, 0, new Object[0]));
+        code.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        code.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, owner.name, "isAdult", "()Z", false));
+        code.add(new JumpInsnNode(Opcodes.IFEQ, noController));
+        code.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        code.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, owner.name, "isSitting", "()Z", false));
+        code.add(new JumpInsnNode(Opcodes.IFNE, noController));
+        code.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        code.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
+            ROOT + "common/entity/base/AbstractComplexMount", "m_146895_",
+            "()Lnet/minecraft/world/entity/Entity;", false));
+        code.add(new VarInsnNode(Opcodes.ASTORE, 1));
+        code.add(new VarInsnNode(Opcodes.ALOAD, 1));
+        code.add(new TypeInsnNode(Opcodes.INSTANCEOF, "net/minecraft/world/entity/player/Player"));
+        code.add(new JumpInsnNode(Opcodes.IFEQ, noController));
+        code.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        code.add(new VarInsnNode(Opcodes.ALOAD, 1));
+        code.add(new TypeInsnNode(Opcodes.CHECKCAST, "net/minecraft/world/entity/player/Player"));
+        code.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, owner.name, "isOwnedBy",
+            "(Lnet/minecraft/world/entity/LivingEntity;)Z", false));
+        code.add(new JumpInsnNode(Opcodes.IFEQ, noController));
+        code.add(new VarInsnNode(Opcodes.ALOAD, 1));
+        code.add(new TypeInsnNode(Opcodes.CHECKCAST, "net/minecraft/world/entity/LivingEntity"));
+        code.add(new InsnNode(Opcodes.ARETURN));
+
+        code.add(noController);
+        code.add(new FrameNode(Opcodes.F_FULL, 1,
+            new Object[] { owner.name }, 0, new Object[0]));
+        code.add(new InsnNode(Opcodes.ACONST_NULL));
+        code.add(new InsnNode(Opcodes.ARETURN));
+
+        method.maxLocals = 2;
+        method.maxStack = 2;
+        owner.methods.add(method);
     }
 
     private static void patchPlayerMixin(ClassNode owner) {
