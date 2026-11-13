@@ -1168,6 +1168,7 @@ public final class JarPruner {
             name.startsWith(ROOT + "client/model/render/entity/mob/SculksaurClient") ||
             name.startsWith(ROOT + "client/animation/player/riding/OnLushsaurPlayerAnimations") ||
             name.startsWith(ROOT + "client/animation/player/riding/OnChorusoatlPlayerAnimations") ||
+            name.equals(ROOT + "util/ADConfig") ||
             name.equals(ROOT + "util/ResourceSupplier") ||
             name.equals(ROOT + "util/ClientUtil") ||
             name.equals(ROOT + "util/IModifiedArrow") ||
