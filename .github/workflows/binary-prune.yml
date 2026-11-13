@@ -192,6 +192,7 @@ jobs:
           cp build/libs/ec_ad-legacy-forge-1.20.1.jar build/smoke/mods/
           python3 - <<'PY'
           import io
+          import json
           import os
           from pathlib import Path
           import tempfile
