@@ -87,6 +87,32 @@ Technical cause identified in the original behavior:
 
 This behavior change is recorded for the next task; it is not part of build 12.
 
+## Someday / uncertain idea — separate Ancient Chorusoatl (not near-term)
+
+This is a deliberately deferred design idea, not part of the current repair scope.
+
+The user's older favorite builds had two distinct Chorusoatl mobs:
+- Regular Chorusoatl
+- Ancient Chorusoatl
+
+They were separate entity types, not baby/adult variants of one entity. The intended historical behavior was that either one could be tamed independently and either one could be ridden.
+
+This conflicts with the current Legacy behavior, where the small/young Chorusoatl is a growth stage: it can be tamed, fed, and grow into the larger form. A separate Ancient entity raises unresolved questions about which entity owns the growth progression and whether a young regular Chorusoatl should still grow into the current adult regular form.
+
+Requirements already stated:
+- Ancient Chorusoatl must be a genuinely separate mob/entity, not just a texture, model, or age variant.
+- Regular and Ancient Chorusoatl must each be independently tameable.
+- Both must support riding.
+- Preserve the current young-Chorusoatl feeding/growth behavior unless a future design decision explicitly changes it.
+
+Open design questions for that future task:
+- What is the exact relationship, if any, between young regular Chorusoatl, adult regular Chorusoatl, and Ancient Chorusoatl?
+- Does Ancient have its own baby/growth cycle, or is it a separate fixed-stage species/form?
+- Which distinct taming item/progression, stats, attacks, animations, spawn rules, and mount controls should Ancient use?
+- How should the two forms appear in spawn eggs, registrations, creative tab, and entity data without breaking old worlds or existing tamed Chorusoatls?
+
+Do not implement this during the current crash/creative-tab repair cycle. Revisit only after the stable Legacy build is verified in-game and the user explicitly returns to this idea.
+
 ## Required in-game retest of build 12
 
 1. Launch Forge 1.20.1 with Astemir RE installed separately.
