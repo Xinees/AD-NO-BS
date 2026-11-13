@@ -374,10 +374,11 @@ public final class JarPruner {
             MethodInsnNode spotted = null;
             for (AbstractInsnNode insn : method.instructions.toArray()) {
                 if (insn instanceof MethodInsnNode call &&
-                    call.getOpcode() == Opcodes.INVOKEINTERFACE &&
-                    call.owner.equals("java/util/stream/Stream") &&
                     call.name.equals("forEach") &&
-                    call.desc.equals("(Ljava/util/function/Consumer;)V")) {
+                    call.desc.equals("(Ljava/util/function/Consumer;)V") &&
+                    (call.owner.equals("java/util/stream/Stream") ||
+                     call.owner.equals("java/util/List") ||
+                     call.owner.equals("java/lang/Iterable"))) {
                     spotted = call;
                     break;
                 }
