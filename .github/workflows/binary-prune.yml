@@ -86,17 +86,17 @@ jobs:
             javap -classpath build/classes-pruned.jar -p -s "$class_name" | grep -F "descriptor: $PROVIDER_DESC"
           done
           RENDER_CALLS="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.client.CommonClient)"
-          COUNT="$(printf '%s\\n' "$RENDER_CALLS" | grep -F -o "createRenderProvider:$PROVIDER_DESC" | wc -l)"
+          COUNT="$(printf '%s\n' "$RENDER_CALLS" | grep -F -o "createRenderProvider:$PROVIDER_DESC" | wc -l)"
           test "$COUNT" -eq 3
-          if printf '%s\\n' "$RENDER_CALLS" | grep -F "createRenderProvider:()Lnet/minecraft/client/renderer/entity/EntityRendererProvider;"; then
+          if printf '%s\n' "$RENDER_CALLS" | grep -F "createRenderProvider:()Lnet/minecraft/client/renderer/entity/EntityRendererProvider;"; then
             echo "Found stale renderer descriptor in CommonClient."
             exit 1
           fi
-          if ! printf '%s\\n' "$RENDER_CALLS" | grep -F "m_174009_:()Lnet/minecraft/client/renderer/entity/EntityRendererProvider;"; then
+          if ! printf '%s\n' "$RENDER_CALLS" | grep -F "m_174009_:()Lnet/minecraft/client/renderer/entity/EntityRendererProvider;"; then
             echo "Missing correctly named EntityRendererProvider lambda SAM."
             exit 1
           fi
-          if printf '%s\\n' "$RENDER_CALLS" | grep -F "get:()Lnet/minecraft/client/renderer/entity/EntityRendererProvider;"; then
+          if printf '%s\n' "$RENDER_CALLS" | grep -F "get:()Lnet/minecraft/client/renderer/entity/EntityRendererProvider;"; then
             echo "Found invalid EntityRendererProvider lambda SAM name."
             exit 1
           fi
@@ -104,18 +104,18 @@ jobs:
           EGG_CLIENT='com.eternal_creations.archies_dino_mod.client.model.render.block.DinoEggClient'
           javap -classpath build/classes-pruned.jar -p -s "$EGG_CLIENT" | grep -F "descriptor: $EGG_RENDERER_DESC"
           BLOCK_RENDER_CALLS="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.client.CommonClient)"
-          BLOCK_COUNT="$(printf '%s\\n' "$BLOCK_RENDER_CALLS" | grep -F -o "createRenderer:$EGG_RENDERER_DESC" | wc -l)"
+          BLOCK_COUNT="$(printf '%s\n' "$BLOCK_RENDER_CALLS" | grep -F -o "createRenderer:$EGG_RENDERER_DESC" | wc -l)"
           test "$BLOCK_COUNT" -eq 2
-          if printf '%s\\n' "$BLOCK_RENDER_CALLS" | grep -F "createRenderer:(Lcom/astemir/astemirlib/re/client/model/AstemirModel;)Lnet/minecraft/client/renderer/blockentity/BlockEntityRenderer;"; then
+          if printf '%s\n' "$BLOCK_RENDER_CALLS" | grep -F "createRenderer:(Lcom/astemir/astemirlib/re/client/model/AstemirModel;)Lnet/minecraft/client/renderer/blockentity/BlockEntityRenderer;"; then
             echo "Found stale egg renderer descriptor in CommonClient."
             exit 1
           fi
           COMMON_CLIENT='com.eternal_creations.archies_dino_mod.client.CommonClient'
           BLOCK_HELPER_DESC='(Lcom/eternal_creations/archies_dino_mod/util/ResourceSupplier;Lnet/minecraft/client/renderer/blockentity/BlockEntityRenderer;)V'
           javap -classpath build/classes-pruned.jar -p -s "$COMMON_CLIENT" | grep -F "descriptor: $BLOCK_HELPER_DESC"
-          BLOCK_HELPER_CALLS="$(printf '%s\\n' "$BLOCK_RENDER_CALLS" | grep -F -o "registerBlockEntityRenderer:$BLOCK_HELPER_DESC" | wc -l)"
+          BLOCK_HELPER_CALLS="$(printf '%s\n' "$BLOCK_RENDER_CALLS" | grep -F -o "registerBlockEntityRenderer:$BLOCK_HELPER_DESC" | wc -l)"
           test "$BLOCK_HELPER_CALLS" -eq 2
-          if printf '%s\\n' "$BLOCK_RENDER_CALLS" | grep -F "registerBlockEntityRenderer:(Ljava/util/function/Supplier;Lnet/minecraft/client/renderer/blockentity/BlockEntityRenderer;)V"; then
+          if printf '%s\n' "$BLOCK_RENDER_CALLS" | grep -F "registerBlockEntityRenderer:(Ljava/util/function/Supplier;Lnet/minecraft/client/renderer/blockentity/BlockEntityRenderer;)V"; then
             echo "Found mismatched ResourceSupplier/Supplier block-entity renderer call."
             exit 1
           fi
@@ -131,7 +131,7 @@ jobs:
             local descriptor="$3"
             local output
             output="$(javap -classpath build/classes-pruned.jar -p -s "$class_name")"
-            if ! printf '%s\\n' "$output" | grep -F -A1 "$method_name" | grep -Fq "descriptor: $descriptor"; then
+            if ! printf '%s\n' "$output" | grep -F -A1 "$method_name" | grep -Fq "descriptor: $descriptor"; then
               echo "Missing required callback $class_name.$method_name $descriptor"
               exit 1
             fi
@@ -164,17 +164,17 @@ jobs:
 
           LOCAL_PLAYER_SPRINT="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.mixin.client.LocalPlayerMixin)"
           for required_call in 'LushsaurEntity.m_6688_' 'CallbackInfoReturnable.setReturnValue'; do
-            if ! printf '%s\\n' "$LOCAL_PLAYER_SPRINT" | grep -Fq "$required_call"; then
+            if ! printf '%s\n' "$LOCAL_PLAYER_SPRINT" | grep -Fq "$required_call"; then
               echo "LocalPlayer sprint gate is missing Lushsaur controller authorization: $required_call"
-              printf '%s\\n' "$LOCAL_PLAYER_SPRINT"
+              printf '%s\n' "$LOCAL_PLAYER_SPRINT"
               exit 1
             fi
           done
 
           LUSH_SPRINT_CONTROL="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.common.entity.mob.lushsaur.LushsaurEntity)"
-          if ! printf '%s\\n' "$LUSH_SPRINT_CONTROL" | grep -F -A5 'public boolean m_264410_();' | grep -Fq 'iconst_1'; then
+          if ! printf '%s\n' "$LUSH_SPRINT_CONTROL" | grep -F -A5 'public boolean m_264410_();' | grep -Fq 'iconst_1'; then
             echo "Lushsaur canSprint override must return true for vanilla mounted sprint input."
-            printf '%s\\n' "$LUSH_SPRINT_CONTROL"
+            printf '%s\n' "$LUSH_SPRINT_CONTROL"
             exit 1
           fi
 
@@ -231,11 +231,11 @@ jobs:
             '(Lnet/minecraft/world/level/Level;DDDI)V'
 
           SCULK_SPHERE="$(javap -classpath build/classes-pruned.jar -p -c "$SCULK_EFFECTS" | sed -n '/archiesDinoMod[$]spawnSculksaurSonicBoomSphere(/,/^  private /p')"
-          INDY_LINE="$(printf '%s\\n' "$SCULK_SPHERE" | grep -n 'InvokeDynamic.*accept:.*java/util/function/IntConsumer' | cut -d: -f1)"
-          STORE_LINE="$(printf '%s\\n' "$SCULK_SPHERE" | grep -n 'astore 7' | cut -d: -f1)"
-          RANGE_LINE="$(printf '%s\\n' "$SCULK_SPHERE" | grep -n 'IntStream.range' | cut -d: -f1)"
-          LOAD_LINE="$(printf '%s\\n' "$SCULK_SPHERE" | grep -n 'aload 7' | cut -d: -f1)"
-          FOREACH_LINE="$(printf '%s\\n' "$SCULK_SPHERE" | grep -n 'IntStream.forEach' | cut -d: -f1)"
+          INDY_LINE="$(printf '%s\n' "$SCULK_SPHERE" | grep -n 'InvokeDynamic.*accept:.*java/util/function/IntConsumer' | cut -d: -f1)"
+          STORE_LINE="$(printf '%s\n' "$SCULK_SPHERE" | grep -n 'astore 7' | cut -d: -f1)"
+          RANGE_LINE="$(printf '%s\n' "$SCULK_SPHERE" | grep -n 'IntStream.range' | cut -d: -f1)"
+          LOAD_LINE="$(printf '%s\n' "$SCULK_SPHERE" | grep -n 'aload 7' | cut -d: -f1)"
+          FOREACH_LINE="$(printf '%s\n' "$SCULK_SPHERE" | grep -n 'IntStream.forEach' | cut -d: -f1)"
           if [ -z "$INDY_LINE" ] || [ -z "$STORE_LINE" ] || [ -z "$RANGE_LINE" ] || \
              [ -z "$LOAD_LINE" ] || [ -z "$FOREACH_LINE" ] || \
              [ "$STORE_LINE" -ne "$((INDY_LINE + 1))" ] || \
@@ -243,7 +243,7 @@ jobs:
              [ "$RANGE_LINE" -ge "$LOAD_LINE" ] || \
              [ "$LOAD_LINE" -ge "$FOREACH_LINE" ]; then
             echo "Sculksaur Sonic Boom lambda/stream bytecode has an invalid operand-stack order."
-            printf '%s\\n' "$SCULK_SPHERE"
+            printf '%s\n' "$SCULK_SPHERE"
             exit 1
           fi
           echo "Verified Sonic Boom lambda is captured before IntStream.range, stored locally, and passed to forEach."
@@ -337,11 +337,11 @@ jobs:
           done
           echo "Verified instant horizontal yaw/look on all retained mobs, preserved pitch easing, and retained action/player rotation locks."
 
-          LUSH_MOUNT_SPEED="$(printf '%s\\n' "$LUSH_SPRINT_CONTROL" | sed -n '/lambda[$]createMount[$]21(/,/lambda[$]createMount[$]20(/p')"
+          LUSH_MOUNT_SPEED="$(printf '%s\n' "$LUSH_SPRINT_CONTROL" | sed -n '/lambda[$]createMount[$]21(/,/lambda[$]createMount[$]20(/p')"
           for required_call in 'm_6688_' 'm_20142_' 'getSpeedBoostTicks' 'java/lang/Integer.signum' 'java/lang/Math.max'; do
-            if ! printf '%s\\n' "$LUSH_MOUNT_SPEED" | grep -Fq "$required_call"; then
+            if ! printf '%s\n' "$LUSH_MOUNT_SPEED" | grep -Fq "$required_call"; then
               echo "Lushsaur mount speed is missing expected walk/run or feed-boost logic: $required_call"
-              printf '%s\\n' "$LUSH_MOUNT_SPEED"
+              printf '%s\n' "$LUSH_MOUNT_SPEED"
               exit 1
             fi
           done
@@ -352,25 +352,25 @@ jobs:
               *"$required_call"*) ;;
               *)
                 echo "Lushsaur no-saddle controller is missing required guard/call: $required_call"
-                printf '%s\\n' "$LUSH_CONTROL"
+                printf '%s\n' "$LUSH_CONTROL"
                 exit 1
                 ;;
             esac
           done
           CHORUS_CONTROL="$(javap -classpath build/classes-pruned.jar -p com.eternal_creations.archies_dino_mod.common.entity.mob.chorusoatl.ChorusoatlEntity)"
-          if printf '%s\\n' "$CHORUS_CONTROL" | grep -Fq 'm_6688_('; then
+          if printf '%s\n' "$CHORUS_CONTROL" | grep -Fq 'm_6688_('; then
             echo "Chorusoatl unexpectedly received the Lushsaur-only no-saddle override."
             exit 1
           fi
 
           MOUNT_CONTROL="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.networking.serverbound.MountControlMessage)"
-          if ! printf '%s\\n' "$MOUNT_CONTROL" | grep -Fq 'Mount.onRiderAttack'; then
+          if ! printf '%s\n' "$MOUNT_CONTROL" | grep -Fq 'Mount.onRiderAttack'; then
             echo "MountControlMessage no longer dispatches rider attacks."
             exit 1
           fi
 
           ARROW_MIXIN="$(javap -classpath build/classes-pruned.jar -p -c -v com.eternal_creations.archies_dino_mod.mixin.AbstractArrowMixin)"
-          if printf '%s\\n' "$ARROW_MIXIN" | grep -Fq 'archies_Dino_Mod$RIB_BOW_ARROW'; then
+          if printf '%s\n' "$ARROW_MIXIN" | grep -Fq 'archies_Dino_Mod$RIB_BOW_ARROW'; then
             echo "Removed rib-bow data accessor is still referenced by AbstractArrowMixin."
             exit 1
           fi
