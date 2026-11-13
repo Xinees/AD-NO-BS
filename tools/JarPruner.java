@@ -175,7 +175,7 @@ public final class JarPruner {
 
         Set<String> retained = dependencyClosure(roots, nodes);
         stripUnreferencedMethods(retained, nodes);
-        verifySelfStaticCalls(retained, nodes);
+        verifyCommonClientRendererCalls(nodes);
         printPruneDiagnostics(retained, nodes);
 
         Map<String, byte[]> transformedClasses = new HashMap<>();
@@ -1294,29 +1294,40 @@ public final class JarPruner {
         }
     }
 
-    private static void verifySelfStaticCalls(Set<String> retained, Map<String, ClassNode> nodes) {
-        List<String> unresolved = new ArrayList<>();
-        for (String name : retained) {
-            ClassNode owner = nodes.get(name);
-            if (owner == null) continue;
-            for (MethodNode method : owner.methods) {
-                for (AbstractInsnNode insn : method.instructions) {
-                    if (!(insn instanceof MethodInsnNode call) ||
-                        call.getOpcode() != Opcodes.INVOKESTATIC ||
-                        !call.owner.equals(owner.name)) continue;
+    private static void verifyCommonClientRendererCalls(Map<String, ClassNode> nodes) {
+        String commonClientName = ROOT + "client/CommonClient";
+        ClassNode commonClient = nodes.get(commonClientName);
+        if (commonClient == null) {
+            throw new IllegalStateException("Missing CommonClient class during renderer verification");
+        }
 
-                    boolean declared = owner.methods.stream().anyMatch(candidate ->
-                        candidate.name.equals(call.name) && candidate.desc.equals(call.desc));
-                    if (!declared) {
-                        unresolved.add(owner.name + "." + method.name + method.desc +
-                            " -> " + call.name + call.desc);
-                    }
+        String helperDescriptor = "(L" + ROOT +
+            "util/ResourceSupplier;Lnet/minecraft/client/renderer/blockentity/BlockEntityRenderer;)V";
+        boolean helperDeclared = commonClient.methods.stream().anyMatch(candidate ->
+            candidate.name.equals("registerBlockEntityRenderer") &&
+                candidate.desc.equals(helperDescriptor));
+        if (!helperDeclared) {
+            throw new IllegalStateException("CommonClient is missing registerBlockEntityRenderer" +
+                helperDescriptor);
+        }
+
+        int calls = 0;
+        for (MethodNode method : commonClient.methods) {
+            if (!method.name.equals("registerBlockEntityRenderers") || !method.desc.equals("()V")) continue;
+            for (AbstractInsnNode insn : method.instructions) {
+                if (!(insn instanceof MethodInsnNode call) ||
+                    call.getOpcode() != Opcodes.INVOKESTATIC ||
+                    !call.owner.equals(commonClientName) ||
+                    !call.name.equals("registerBlockEntityRenderer")) continue;
+                calls++;
+                if (!call.desc.equals(helperDescriptor)) {
+                    throw new IllegalStateException("CommonClient.registerBlockEntityRenderers calls " +
+                        "registerBlockEntityRenderer with the wrong descriptor: " + call.desc);
                 }
             }
         }
-        if (!unresolved.isEmpty()) {
-            throw new IllegalStateException("Unresolved static self-calls after pruning:\n" +
-                String.join("\n", unresolved));
+        if (calls != 2) {
+            throw new IllegalStateException("Expected exactly 2 CommonClient block-entity renderer helper calls, found " + calls);
         }
     }
 
