@@ -108,10 +108,21 @@ tasks.register('remapOriginalJar', JavaExec) {
          '--output', outputJar.absolutePath,
          '--map', mappingFile.absolutePath
 
+    // FART needs the actual Forge/Minecraft compile classpath for inherited
+    // member lookup; mappings alone do not provide those class definitions.
+    inputs.files(sourceSets.main.compileClasspath)
+
     doFirst {
         if (!inputJar.isFile()) throw new GradleException("Missing original mod JAR: ${inputJar}")
         if (!mappingFile.isFile()) throw new GradleException("Missing SRG-to-official mappings: ${mappingFile}")
         outputJar.parentFile.mkdirs()
+
+        sourceSets.main.compileClasspath.files
+            .findAll { it.isFile() && it.name.endsWith('.jar') }
+            .sort { a, b -> a.name <=> b.name }
+            .each { libraryJar ->
+                args '--lib', libraryJar.absolutePath
+            }
     }
 }
 
