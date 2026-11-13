@@ -1,4 +1,4 @@
-name: Direct Legacy JAR Prune - build 12
+name: Direct Legacy JAR Prune - build 13
 
 on:
   push:
@@ -147,6 +147,20 @@ jobs:
             'm_7286_(' '(Lnet/minecraft/client/gui/GuiGraphics;FII)V'
           verify_method 'com.eternal_creations.archies_dino_mod.networking.serverbound.MountControlMessage' \
             'execute(' '(Lnet/minecraft/server/level/ServerPlayer;)V'
+          verify_method 'com.eternal_creations.archies_dino_mod.client.ADClientForgeBus' \
+            'onClientTick(' '(Lnet/minecraftforge/event/TickEvent$ClientTickEvent;)V'
+          verify_method 'com.eternal_creations.archies_dino_mod.client.ADClientForgeBus' \
+            'lambda$onClientTick$0(' '(Lnet/minecraft/client/Minecraft;Lnet/minecraft/client/KeyMapping;Ljava/util/function/BiConsumer;)V'
+          verify_method 'com.eternal_creations.archies_dino_mod.common.entity.mob.lushsaur.LushsaurEntity' \
+            'onRiderAttack(' '(Lnet/minecraft/world/entity/LivingEntity;Lcom/eternal_creations/archies_dino_mod/common/entity/base/Mount$AttackType;)V'
+          verify_method 'com.eternal_creations.archies_dino_mod.common.entity.mob.chorusoatl.ChorusoatlEntity' \
+            'onRiderAttack(' '(Lnet/minecraft/world/entity/LivingEntity;Lcom/eternal_creations/archies_dino_mod/common/entity/base/Mount$AttackType;)V'
+
+          MOUNT_CONTROL="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.networking.serverbound.MountControlMessage)"
+          if ! printf '%s\\n' "$MOUNT_CONTROL" | grep -Fq 'Mount.onRiderAttack'; then
+            echo "MountControlMessage no longer dispatches rider attacks."
+            exit 1
+          fi
 
           ARROW_MIXIN="$(javap -classpath build/classes-pruned.jar -p -c -v com.eternal_creations.archies_dino_mod.mixin.AbstractArrowMixin)"
           if printf '%s\\n' "$ARROW_MIXIN" | grep -Fq 'archies_Dino_Mod$RIB_BOW_ARROW'; then

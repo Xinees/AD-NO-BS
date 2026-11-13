@@ -99,6 +99,7 @@ public final class JarPruner {
         ROOT + "Constants",
         ROOT + "client/ADClientModBus",
         ROOT + "client/ADKeyMappings",
+        ROOT + "client/ADClientForgeBus",
         ROOT + "client/CommonClient",
         ROOT + "client/animation/player/ADPlayerAnimations",
         ROOT + "platform/Services",
@@ -181,7 +182,6 @@ public final class JarPruner {
         patchNetworkHelper(nodes.get(ROOT + "platform/ForgeNetworkHelper"));
         patchKeyMappings(nodes.get(ROOT + "client/ADKeyMappings"));
         patchAbstractArrowMixin(nodes.get(ROOT + "mixin/AbstractArrowMixin"));
-        printInputDispatchDiagnostics(nodes);
         patchPlayerMixin(nodes.get(ROOT + "mixin/PlayerMixin"));
         removeMethods(nodes.get(ROOT + "mixin/client/LevelRendererMixin"),
             Set.of("archiesDinoMod$onEntityRender"));
@@ -889,51 +889,6 @@ public final class JarPruner {
     private static void removeMethods(ClassNode owner, Set<String> methodNames) {
         if (owner == null) return;
         owner.methods.removeIf(method -> methodNames.contains(method.name));
-    }
-
-    private static void printInputDispatchDiagnostics(Map<String, ClassNode> nodes) {
-        System.out.println("INPUT DISPATCH DIAGNOSTICS");
-        String keyMappingsOwner = ROOT + "client/ADKeyMappings";
-        String mountMessageOwner = ROOT + "networking/serverbound/MountControlMessage";
-        String eventSubscriber = "Lnet/minecraftforge/fml/common/Mod$EventBusSubscriber;";
-        for (ClassNode owner : nodes.values()) {
-            boolean subscriber = hasAnnotation(owner.visibleAnnotations, eventSubscriber) ||
-                hasAnnotation(owner.invisibleAnnotations, eventSubscriber);
-            if (subscriber) System.out.println("EVENT-SUBSCRIBER " + owner.name);
-            for (MethodNode method : owner.methods) {
-                List<String> hits = new ArrayList<>();
-                for (AbstractInsnNode insn : method.instructions.toArray()) {
-                    if (insn instanceof FieldInsnNode field &&
-                        field.owner.equals(keyMappingsOwner) && field.name.equals("KEY_MAPPINGS")) {
-                        hits.add("KEY_MAPPINGS");
-                    } else if (insn instanceof MethodInsnNode call) {
-                        if (call.owner.equals(mountMessageOwner)) hits.add("MountControlMessage." + call.name);
-                        else if (call.owner.equals(ROOT + "common/entity/base/Mount") &&
-                            call.name.equals("onRiderAttack")) hits.add("Mount.onRiderAttack");
-                        else if (call.name.equals("sendToServer")) hits.add("sendToServer");
-                        else if (call.owner.contains("TickEvent") || call.owner.contains("InputEvent")) {
-                            hits.add(call.owner + "." + call.name);
-                        }
-                    }
-                }
-                if (subscriber && (method.desc.contains("TickEvent") ||
-                    method.desc.contains("InputEvent") || method.desc.contains("KeyMapping"))) {
-                    hits.add("EVENT-HANDLER");
-                }
-                if (!hits.isEmpty()) {
-                    System.out.println("INPUT-REF " + owner.name + "." + method.name + method.desc +
-                        " -> " + String.join(", ", hits));
-                }
-            }
-        }
-    }
-
-    private static boolean hasAnnotation(List<AnnotationNode> annotations, String descriptor) {
-        if (annotations == null) return false;
-        for (AnnotationNode annotation : annotations) {
-            if (annotation.desc.equals(descriptor)) return true;
-        }
-        return false;
     }
 
     private static void patchKeyMappings(ClassNode owner) {

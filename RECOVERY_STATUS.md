@@ -32,6 +32,16 @@ The three mobs and their ordinary behavior are reported working. Do not alter th
 - Both inputs are immutable. Do not overwrite, patch, repackage, or otherwise modify either input JAR.
 - Astemir RE is a separate mandatory dependency in the `mods` folder. Do not embed another copy inside the Legacy JAR.
 
+
+## Build 13 findings — quick-move menu and mounted input dispatch
+
+- Build 13 commit: `df9f9dc4bc18fbfe2564088495bcad8e4d56d296`
+- GitHub Actions run: `43488701464` (success)
+- Added the missing `DinoMenu.m_7648_(Player,int): ItemStack` implementation to the exact callback retention list. This is vanilla's `quickMoveStack` override; shift-clicking a saddle into the mount slot invokes it. CI now verifies the complete method descriptor.
+- A bytecode scan of the untouched original JAR found `client/ADClientForgeBus`, an `@Mod.EventBusSubscriber` whose `onClientTick(ClientTickEvent)` method processes the key-action map. That entire class was missing from the previous pruned JAR. Consequently the registered LMB/RMB mappings had no client tick dispatcher and never sent `MountControlMessage`.
+- The next build restores `ADClientForgeBus` as a client root and verifies both `onClientTick` and its `lambda$onClientTick$0` callback, plus both concrete mob `onRiderAttack` overrides and the server dispatch call.
+- These are infrastructure restorations only; no attack animations, damage values, AI, or mob behavior are being redesigned.
+
 ## Build 12 changes and checks
 
 - Preserve four required method implementations by exact owner and descriptor, instead of broadly keeping methods on every class with an external parent. This avoids reopening unrelated class dependencies.
