@@ -24,6 +24,9 @@ Behavior is not being redesigned in this first pass. The priority is to retain t
 original models, textures, animations, sounds, and rendering integration while the
 project structure and automated build are restored.
 
+The first content pass is limited to the three retained creatures and non-combat support
+needed by them. Unselected creatures and unrelated content are not part of this branch.
+
 ## Build
 The GitHub Actions workflow restores sources when they are absent and then runs
 `gradle clean build` on Java 17.
