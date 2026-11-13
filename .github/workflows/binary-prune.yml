@@ -159,6 +159,17 @@ jobs:
             'm_6688_(' '()Lnet/minecraft/world/entity/LivingEntity;'
           verify_method 'com.eternal_creations.archies_dino_mod.common.entity.mob.lushsaur.LushsaurEntity' \
             'm_264410_(' '()Z'
+          verify_method 'com.eternal_creations.archies_dino_mod.mixin.client.LocalPlayerMixin' \
+            'archiesDinoMod$allowLushsaurSprint(' '(Lnet/minecraft/world/entity/Entity;Lorg/spongepowered/asm/mixin/injection/callback/CallbackInfoReturnable;)V'
+
+          LOCAL_PLAYER_SPRINT="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.mixin.client.LocalPlayerMixin)"
+          for required_call in 'LushsaurEntity.m_6688_' 'CallbackInfoReturnable.setReturnValue'; do
+            if ! printf '%s\\n' "$LOCAL_PLAYER_SPRINT" | grep -Fq "$required_call"; then
+              echo "LocalPlayer sprint gate is missing Lushsaur controller authorization: $required_call"
+              printf '%s\\n' "$LOCAL_PLAYER_SPRINT"
+              exit 1
+            fi
+          done
 
           LUSH_SPRINT_CONTROL="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.common.entity.mob.lushsaur.LushsaurEntity)"
           if ! printf '%s\\n' "$LUSH_SPRINT_CONTROL" | grep -F -A5 'public boolean m_264410_();' | grep -Fq 'iconst_1'; then
