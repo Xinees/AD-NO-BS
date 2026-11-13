@@ -109,19 +109,12 @@ extends ThrowableProjectile {
         if (owner != null && (owner.m_20363_(target) || target.m_20363_(owner))) {
             return;
         }
-        v0 = this.m_269291_().m_269390_((Entity)this, owner);
-        if (!(owner instanceof TherimossEntity)) ** GOTO lbl-1000
-        therimoss = (TherimossEntity)owner;
-        if (target instanceof LivingEntity) {
-            living = (LivingEntity)target;
-            v1 = EntityUtils.multiplyDamage((Mob)therimoss, living, 0.625f);
-        } else lbl-1000:
-        // 2 sources
-
-        {
-            v1 = 5.0f;
+        var damageSource = this.m_269291_().m_269390_((Entity)this, owner);
+        float damage = 5.0f;
+        if (owner instanceof TherimossEntity therimoss && target instanceof LivingEntity living) {
+            damage = EntityUtils.multiplyDamage((Mob)therimoss, living, 0.625f);
         }
-        target.m_6469_(v0, v1);
+        target.m_6469_(damageSource, damage);
     }
 
     protected void m_6532_(@NotNull HitResult result) {

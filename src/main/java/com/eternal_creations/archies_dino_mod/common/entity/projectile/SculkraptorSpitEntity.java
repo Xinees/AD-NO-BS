@@ -79,16 +79,9 @@ extends LlamaSpit {
             return;
         }
         owner = (LivingEntity)var4_3;
-        if (!(owner instanceof SculkraptorEntity)) ** GOTO lbl-1000
-        raptor = (SculkraptorEntity)owner;
-        if (victim instanceof LivingEntity) {
-            target = (LivingEntity)victim;
-            v0 = EntityUtils.multiplyDamage((Mob)raptor, target, 0.6666667f);
-        } else lbl-1000:
-        // 2 sources
-
-        {
-            v0 = damage = 1.0f;
+        float damage = 1.0f;
+        if (owner instanceof SculkraptorEntity raptor && victim instanceof LivingEntity target) {
+            damage = EntityUtils.multiplyDamage((Mob)raptor, target, 0.6666667f);
         }
         if (victim.m_6469_(this.m_269291_().m_269299_((Entity)this, owner), damage) && victim instanceof LivingEntity) {
             target = (LivingEntity)victim;
