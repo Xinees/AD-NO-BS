@@ -1,5 +1,22 @@
 # AD-NO-BS Legacy recovery status
 
+## Current branch status — 2026-11-14
+
+- Working branch: `binary-prune/legacy`
+- Latest successful structural build: Direct Legacy JAR Prune **build 81**
+- Build 81 commit: `eeec7201f55dd1252d201284048d8468312d6a01`
+- GitHub Actions run: [#81 — success](https://github.com/Xinees/AD-NO-BS/actions/runs/43507305757)
+- Artifact ID: `14075429830`
+- Output JAR SHA-256: `e46600a329c32e34554157fac2964ab7ebf10f9b747a39ab4592ed7bca479b53`
+- Build 81 adds a Lushsaur-only vanilla mounted-sprint permission path in `LocalPlayerMixin`, gated by the local player being the Lushsaur's actual controlling passenger. Its mount speed callback reads the controlling passenger's sprint state and retains the existing feeding speed boost.
+- Build 81 is **CI-verified, not yet runtime-confirmed**. The user's reported test of build 78 showed a walk animation followed after about three seconds by a run animation without a corresponding speed increase. The user has not yet reported an in-game test of build 81. Do not mark mounted sprint fixed until build 81 is tested.
+- The prioritized next-work plan is in [LEGACY_ROADMAP.md](LEGACY_ROADMAP.md). The first visual rework is the Sculksaur Sonic Boom wave; the other listed tasks are abrupt turning for all three retained mobs and a Lushsaur-only Happy-Ghast-like platform collision.
+- The user-provided Lushsaur collision gate is recorded as a plan only; it has not been implemented.
+
+---
+
+
+
 Last updated: 2026-11-13
 Working branch: `binary-prune/legacy`
 
