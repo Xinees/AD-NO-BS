@@ -45,7 +45,7 @@ public final class JarPruner {
             "DINO_EQUIP", "DINO_EGG_PICKUP", "DINO_EGG_BREAK", "DINO_EGG_CRACK", "DINO_EGG_HATCH", "DINO_EGG_LAY",
             "LUSHSAUR_IDLE", "LUSHSAUR_ATTACK_HEADBUTT", "LUSHSAUR_ATTACK_BITE",
             "LUSHSAUR_ATTACK_TAIL_STOMP", "LUSHSAUR_ATTACK_TAIL_SWING", "LUSHSAUR_EMERGE",
-            "LUSHSAUR_BURY", "LUSHSAUR_EAT", "LUSHSAUR_REST", "LUSHSAUR_ROAR",
+            "LUSHSAUR_BURY", "LUSHSAUR_EAR_RINGING", "LUSHSAUR_EAT", "LUSHSAUR_REST", "LUSHSAUR_ROAR",
             "LUSHSAUR_RUN_ATTACK", "LUSHSAUR_STEP", "LUSHSAUR_HURT", "LUSHSAUR_DEATH",
             "LUSHSAUR_SHEAR", "LUSHSAUR_STOMP_EXPLOSION",
             "CHORUSOATL_BITE", "CHORUSOATL_HURT", "CHORUSOATL_DEATH_GROUND",
@@ -160,7 +160,6 @@ public final class JarPruner {
         patchParticleEmitters(nodes.get(ROOT + "client/particle/ADParticleEmitters"));
         patchTemptItems(nodes.get(ROOT + "common/entity/mob/lushsaur/ai/LushsaurAI"), "LUSH_CORE");
         patchTemptItems(nodes.get(ROOT + "common/entity/mob/chorusoatl/ai/ChorusoatlAI"), "CHORUS_FOSSIL");
-        patchDazedEffect(nodes.get(ROOT + "common/effect/MobEffectDazed"));
         patchEntitySettings(nodes.get(ROOT + "server/ServerConfig$EntitySettings"));
         patchServerConfig(nodes.get(ROOT + "server/ServerConfig"));
         patchNetworkHelper(nodes.get(ROOT + "platform/ForgeNetworkHelper"));
