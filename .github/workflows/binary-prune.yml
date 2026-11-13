@@ -89,6 +89,8 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           import zipfile
+          import json
+          import hashlib
 
           jar = Path("build/libs/ec_ad-legacy-forge-1.20.1.jar")
           with zipfile.ZipFile(jar) as z:
@@ -174,6 +176,76 @@ jobs:
               print(f"Final size: {jar.stat().st_size} bytes")
           PY
 
+      - name: Forge 1.20.1 server smoke test
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build/smoke
+          curl --fail --location --retry 3 \
+            https://maven.minecraftforge.net/net/minecraftforge/forge/1.20.1-47.4.28/forge-1.20.1-47.4.28-installer.jar \
+            -o build/forge-installer.jar
+          (
+            cd build/smoke
+            java -jar ../forge-installer.jar --installServer
+          )
+          mkdir -p build/smoke/mods
+          cp build/libs/ec_ad-legacy-forge-1.20.1.jar build/smoke/mods/
+          printf 'eula=true\n' > build/smoke/eula.txt
+          python3 - <<'PY'
+          import pathlib
+          import subprocess
+          import time
+
+          root = pathlib.Path("build/smoke")
+          args_file = root / "libraries/net/minecraftforge/forge/1.20.1-47.4.28/unix_args.txt"
+          if not args_file.is_file():
+              raise SystemExit(f"Forge unix_args.txt missing: {args_file}")
+
+          log_path = root / "server-smoke.log"
+          command = [
+              "java",
+              "@user_jvm_args.txt",
+              f"@{args_file.relative_to(root)}",
+              "nogui",
+          ]
+          with log_path.open("w", encoding="utf-8") as log:
+              process = subprocess.Popen(
+                  command,
+                  cwd=root,
+                  stdin=subprocess.PIPE,
+                  stdout=log,
+                  stderr=subprocess.STDOUT,
+                  text=True,
+              )
+              deadline = time.monotonic() + 150
+              stop_sent = False
+              while time.monotonic() < deadline:
+                  if process.poll() is not None:
+                      break
+                  content = log_path.read_text(encoding="utf-8", errors="replace")
+                  if "Done (" in content and not stop_sent:
+                      process.stdin.write("stop\n")
+                      process.stdin.flush()
+                      stop_sent = True
+                  time.sleep(1)
+
+              if process.poll() is None:
+                  process.terminate()
+                  try:
+                      process.wait(timeout=10)
+                  except subprocess.TimeoutExpired:
+                      process.kill()
+                      process.wait()
+                  raise SystemExit("Forge server did not shut down within smoke-test timeout")
+
+              content = log_path.read_text(encoding="utf-8", errors="replace")
+              print(content[-16000:])
+              if not stop_sent:
+                  raise SystemExit("Forge server never reached the Done startup marker")
+              if process.returncode != 0:
+                  raise SystemExit(f"Forge server exited with code {process.returncode}")
+          PY
+
       - name: Upload Legacy JAR and debug files
         if: always()
         uses: actions/upload-artifact@v4
@@ -184,5 +256,6 @@ jobs:
             build/libs/ec_ad-legacy-forge-1.20.1.jar
             build/resource-prune-report.txt
             astemirlib_re-1.20.1-forge-1.2.98-SNAPSHOT.jar
+            build/smoke/server-smoke.log
           if-no-files-found: ignore
           retention-days: 30
