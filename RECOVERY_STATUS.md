@@ -3,7 +3,7 @@
 ## Current branch status — 2026-11-14
 
 - Working branch: `binary-prune/legacy`
-- Latest successful structural build: Direct Legacy JAR Prune **build 81**
+- Latest code-changing build: Direct Legacy JAR Prune **build 81** (run #81 passed). Subsequent commits only update documentation; no JAR source has changed.
 - Build 81 commit: `eeec7201f55dd1252d201284048d8468312d6a01`
 - GitHub Actions run: [#81 — success](https://github.com/Xinees/AD-NO-BS/actions/runs/43507305757)
 - Artifact ID: `14075429830`
