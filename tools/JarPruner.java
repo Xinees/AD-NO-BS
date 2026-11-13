@@ -1198,6 +1198,7 @@ public final class JarPruner {
             name.equals(ROOT + "common/trigger/ADCriteriaTriggers") ||
             name.equals(ROOT + "common/structure/GenericTemplateStructure") ||
             name.equals(ROOT + "common/structure/CustomTemplateStructure") ||
+            name.startsWith(ROOT + "common/structure/GenericTemplateStructure$") ||
             name.equals(ROOT + "common/structure/piece/CustomStructurePiece") ||
             name.startsWith(ROOT + "common/structure/piece/CustomStructurePiece$") ||
             name.equals(ROOT + "server/ServerConfig") ||
