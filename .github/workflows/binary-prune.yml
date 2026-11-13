@@ -230,12 +230,17 @@ jobs:
             'archiesDinoMod$spawnSculksaurSonicBoomParticle(' \
             '(Lnet/minecraft/world/level/Level;DDDI)V'
 
-          SCULK_SPHERE="$(javap -classpath build/classes-pruned.jar -p -c "$SCULK_EFFECTS" | sed -n '/archiesDinoMod[$]spawnSculksaurSonicBoomSphere(/,/^  private /p')"
-          INDY_LINE="$(printf '%s\n' "$SCULK_SPHERE" | grep -n 'InvokeDynamic.*accept:.*java/util/function/IntConsumer' | cut -d: -f1)"
-          STORE_LINE="$(printf '%s\n' "$SCULK_SPHERE" | grep -n 'astore[[:space:]]*7' | cut -d: -f1)"
-          RANGE_LINE="$(printf '%s\n' "$SCULK_SPHERE" | grep -n 'IntStream.range' | cut -d: -f1)"
-          LOAD_LINE="$(printf '%s\n' "$SCULK_SPHERE" | grep -n 'aload[[:space:]]*7' | cut -d: -f1)"
-          FOREACH_LINE="$(printf '%s\n' "$SCULK_SPHERE" | grep -n 'IntStream.forEach' | cut -d: -f1)"
+          SCULK_DISASSEMBLY="$(javap -classpath build/classes-pruned.jar -p -c "$SCULK_EFFECTS")"
+          SCULK_SPHERE="$(printf '%s\n' "$SCULK_DISASSEMBLY" | awk '
+            /^[[:space:]]+private .*archiesDinoMod\\$spawnSculksaurSonicBoomSphere\\(/ { capture=1 }
+            capture && /^[[:space:]]+(private|public|protected) / && $0 !~ /archiesDinoMod\\$spawnSculksaurSonicBoomSphere\\(/ { exit }
+            capture { print }
+          ')"
+          INDY_LINE="$(printf '%s\n' "$SCULK_SPHERE" | grep -nE 'InvokeDynamic.*accept:.*IntConsumer' | cut -d: -f1 || true)"
+          STORE_LINE="$(printf '%s\n' "$SCULK_SPHERE" | grep -nE 'astore[[:space:]]+7' | cut -d: -f1 || true)"
+          RANGE_LINE="$(printf '%s\n' "$SCULK_SPHERE" | grep -nE 'IntStream[./]range' | cut -d: -f1 || true)"
+          LOAD_LINE="$(printf '%s\n' "$SCULK_SPHERE" | grep -nE 'aload[[:space:]]+7' | cut -d: -f1 || true)"
+          FOREACH_LINE="$(printf '%s\n' "$SCULK_SPHERE" | grep -nE 'IntStream[./]forEach' | cut -d: -f1 || true)"
           if [ -z "$INDY_LINE" ] || [ -z "$STORE_LINE" ] || [ -z "$RANGE_LINE" ] || \
              [ -z "$LOAD_LINE" ] || [ -z "$FOREACH_LINE" ] || \
              [ "$STORE_LINE" -ne "$((INDY_LINE + 1))" ] || \
