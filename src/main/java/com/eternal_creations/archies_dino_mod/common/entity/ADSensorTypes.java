@@ -14,7 +14,7 @@ import net.minecraft.world.entity.ai.sensing.SensorType;
 
 public class ADSensorTypes {
     public static final ResourceSupplier<SensorType<SculksaurEntitySensor>> SCULKSAUR_SENSOR = Services.COMMON.registerSensorType("sculksaur_sensor", SculksaurEntitySensor::new);
-    public static final ResourceSupplier<SensorType<SculkraptorEntitySensor>> SCULKRAPTOR_SENSOR = Services.COMMON.registerSensorType("sculkraptor_sensor", SculkraptorEntitySensor::new);
+    public static final ResourceSupplier<SensorType<SculkraptorEntitySensor>> SCULKRAPTOR_SENSOR = null;
 
     public static void init() {
     }

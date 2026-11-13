@@ -20,12 +20,12 @@ import com.eternal_creations.archies_dino_mod.client.model.attachable.SculkBowAt
 import com.eternal_creations.archies_dino_mod.client.model.attachable.TheriClawsAttachable;
 
 public class ADAttachableModels {
-    public static final AstemirModel<AttachableContext> THERIMOSS_CLAWS = AstemirModelManager.INSTANCE.registerModel(Constants.prefix("models/attachable/therimoss_claws"), TheriClawsAttachable::setupModel);
-    public static final AstemirModel<AttachableContext> CHORUS_SCYTHE = AstemirModelManager.INSTANCE.registerModel(Constants.prefix("models/attachable/chorus_scythe"), ChorusScytheAttachable::setupModel);
+    public static final AstemirModel<AttachableContext> THERIMOSS_CLAWS = null;
+    public static final AstemirModel<AttachableContext> CHORUS_SCYTHE = null;
     public static final AstemirModel<AttachableContext> LUSHSAUR_MACE = AstemirModelManager.INSTANCE.registerModel(Constants.prefix("models/attachable/lushsaur_mace"), LushsaurMaceAttachable::setupModel);
-    public static final AstemirModel<AttachableContext> RIB_BOW = AstemirModelManager.INSTANCE.registerModel(Constants.prefix("models/attachable/rib_bow"), RibBowAttachable::setupModel);
-    public static final AstemirModel<AttachableContext> SCULK_BOW = AstemirModelManager.INSTANCE.registerModel(Constants.prefix("models/attachable/sculk_bow"), SculkBowAttachable::setupModel);
-    public static final AstemirModel<AttachableContext> SCORCHING_HORN = AstemirModelManager.INSTANCE.registerModel(Constants.prefix("models/attachable/scorching_horn"), ScorchingHornAttachable::setupModel);
+    public static final AstemirModel<AttachableContext> RIB_BOW = null;
+    public static final AstemirModel<AttachableContext> SCULK_BOW = null;
+    public static final AstemirModel<AttachableContext> SCORCHING_HORN = null;
 
     public static void init() {
     }

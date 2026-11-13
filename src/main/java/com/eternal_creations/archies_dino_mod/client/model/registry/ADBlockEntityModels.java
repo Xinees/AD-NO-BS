@@ -20,9 +20,9 @@ import com.eternal_creations.archies_dino_mod.common.block.entity.egg.BlockEntit
 public class ADBlockEntityModels {
     public static final AstemirModel<BlockEntityLushsaurEgg> LUSHSAUR_EGG = AstemirModelManager.INSTANCE.registerModel(Constants.prefix("models/block/lushsaur_egg.astemirmodel"), DinoEggClient::setupLushsaur);
     public static final AstemirModel<BlockEntityChorusoatlEgg> CHORUSOATL_EGG = AstemirModelManager.INSTANCE.registerModel(Constants.prefix("models/block/chorusoatl_egg.astemirmodel"), DinoEggClient::setupChorusoatl);
-    public static final AstemirModel<BlockEntityObsidiceratopsEgg> OBSIDICERATOPS_EGG = AstemirModelManager.INSTANCE.registerModel(Constants.prefix("models/block/obsidiceratops_egg.astemirmodel"), DinoEggClient::setupObsidiceratops);
-    public static final AstemirModel<BlockEntitySculkraptorEgg> SCULKRAPTOR_EGG = AstemirModelManager.INSTANCE.registerModel(Constants.prefix("models/block/sculkraptor_egg.astemirmodel"), DinoEggClient::setupSculkraptor);
-    public static final AstemirModel<BlockEntityTherimossEgg> THERIMOSS_EGG = AstemirModelManager.INSTANCE.registerModel(Constants.prefix("models/block/therimoss_egg.astemirmodel"), DinoEggClient::setupTherimoss);
+    public static final AstemirModel<BlockEntityObsidiceratopsEgg> OBSIDICERATOPS_EGG = null;
+    public static final AstemirModel<BlockEntitySculkraptorEgg> SCULKRAPTOR_EGG = null;
+    public static final AstemirModel<BlockEntityTherimossEgg> THERIMOSS_EGG = null;
 
     public static void init() {
     }

@@ -20,8 +20,8 @@ import net.minecraft.world.level.pathfinder.Path;
 
 public class ADMemoryModuleTypes {
     public static final ResourceSupplier<MemoryModuleType<Unit>> IS_ENRAGED = Services.COMMON.registerMemoryModuleType("is_enraged", Codec.unit((Object)Unit.INSTANCE));
-    public static final ResourceSupplier<MemoryModuleType<Unit>> IS_READY_TO_SCREAM = Services.COMMON.registerMemoryModuleType("is_ready_to_scream", Codec.unit((Object)Unit.INSTANCE));
-    public static final ResourceSupplier<MemoryModuleType<Path>> FLEE_PATH = Services.COMMON.registerMemoryModuleType("flee_path", null);
+    public static final ResourceSupplier<MemoryModuleType<Unit>> IS_READY_TO_SCREAM = null;
+    public static final ResourceSupplier<MemoryModuleType<Path>> FLEE_PATH = null;
     public static final ResourceSupplier<MemoryModuleType<WalkTarget>> WALK_COMMAND = Services.COMMON.registerMemoryModuleType("walk_command", null);
 
     public static void init() {

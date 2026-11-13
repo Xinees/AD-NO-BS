@@ -32,19 +32,19 @@ public class ADParticles {
             return BlockParticleOption.m_123634_((ParticleType)this);
         }
     });
-    public static final ResourceSupplier<ParticleEmitterType> SCULKRAPTOR_PROJECTILE_IMPACT_0 = ADParticles.registerParticleEmitterType("sculkraptor_projectile_impact_0");
-    public static final ResourceSupplier<ParticleEmitterType> SCULKRAPTOR_PROJECTILE_IMPACT_1 = ADParticles.registerParticleEmitterType("sculkraptor_projectile_impact_1");
+    public static final ResourceSupplier<ParticleEmitterType> SCULKRAPTOR_PROJECTILE_IMPACT_0 = null;
+    public static final ResourceSupplier<ParticleEmitterType> SCULKRAPTOR_PROJECTILE_IMPACT_1 = null;
     public static final ResourceSupplier<ParticleEmitterType> CHORUSOATL_SPIT_0 = ADParticles.registerParticleEmitterType("chorusoatl_spit_0");
     public static final ResourceSupplier<ParticleEmitterType> CHORUSOATL_SPIT_1 = ADParticles.registerParticleEmitterType("chorusoatl_spit_1");
     public static final ResourceSupplier<ParticleEmitterType> CHORUSOATL_SPIT_AOE = ADParticles.registerParticleEmitterType("chorusoatl_spit_aoe");
     public static final ResourceSupplier<ParticleEmitterType> CHORUSOATL_SPIT_PROJECTILE = ADParticles.registerParticleEmitterType("chorusoatl_spit_projectile");
-    public static final ResourceSupplier<ParticleEmitterType> THERIMOSS_PROJECTILE_IMPACT = ADParticles.registerParticleEmitterType("therimoss_projectile_impact");
-    public static final ResourceSupplier<ParticleEmitterType> THERIMOSS_PROJECTILE = ADParticles.registerParticleEmitterType("therimoss_projectile");
-    public static final ResourceSupplier<ParticleEmitterType> RIB_BOW = ADParticles.registerParticleEmitterType("rib_bow");
-    public static final ResourceSupplier<ParticleEmitterType> AMBER = ADParticles.registerParticleEmitterType("amber");
-    public static final ResourceSupplier<ParticleEmitterType> TOTEM_SHINE = ADParticles.registerParticleEmitterType("totem_shine");
-    public static final ResourceSupplier<ParticleEmitterType> TOTEM_PLACE = ADParticles.registerParticleEmitterType("trophy_place");
-    public static final ResourceSupplier<ParticleEmitterType> TOTEM_PLACE_PARTICLE_UNDER = ADParticles.registerParticleEmitterType("trophy_place_particle_under");
+    public static final ResourceSupplier<ParticleEmitterType> THERIMOSS_PROJECTILE_IMPACT = null;
+    public static final ResourceSupplier<ParticleEmitterType> THERIMOSS_PROJECTILE = null;
+    public static final ResourceSupplier<ParticleEmitterType> RIB_BOW = null;
+    public static final ResourceSupplier<ParticleEmitterType> AMBER = null;
+    public static final ResourceSupplier<ParticleEmitterType> TOTEM_SHINE = null;
+    public static final ResourceSupplier<ParticleEmitterType> TOTEM_PLACE = null;
+    public static final ResourceSupplier<ParticleEmitterType> TOTEM_PLACE_PARTICLE_UNDER = null;
     public static final ResourceSupplier<ParticleEmitterType> SCULKSAUR_EXPLOSION_2 = ADParticles.registerParticleEmitterType("sculksaur_explosion_2");
     public static final ResourceSupplier<ParticleEmitterType> SCULKSAUR_EXPLOSION_3 = ADParticles.registerParticleEmitterType("sculksaur_explosion_3");
     public static final ResourceSupplier<ParticleEmitterType> SCULKSAUR_EXPLOSION_4 = ADParticles.registerParticleEmitterType("sculksaur_explosion_4");

@@ -12,8 +12,8 @@ import net.minecraft.world.entity.schedule.Activity;
 
 public class ADActivities {
     public static final ResourceSupplier<Activity> CHASE = Services.COMMON.registerActivity("chase");
-    public static final ResourceSupplier<Activity> SCREAM = Services.COMMON.registerActivity("scream");
-    public static final ResourceSupplier<Activity> FLEE = Services.COMMON.registerActivity("flee");
+    public static final ResourceSupplier<Activity> SCREAM = null;
+    public static final ResourceSupplier<Activity> FLEE = null;
 
     public static void init() {
     }

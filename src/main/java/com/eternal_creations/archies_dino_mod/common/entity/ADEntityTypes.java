@@ -51,19 +51,19 @@ import net.minecraft.world.level.biome.Biome;
 @MethodsReturnNonnullByDefault
 public class ADEntityTypes {
     public static final List<SpawnInfo<?>> SPAWN_INFO = new ArrayList();
-    public static final ResourceSupplier<EntityType<ArchieEntity>> ARCHIE = ADEntityTypes.register("archie", ArchieEntity::new, MobCategory.CREATURE, builder -> builder.m_20699_(0.6f, 1.8f), () -> ServerConfig.getEntitySettings().archie().stats().build());
+    public static final ResourceSupplier<EntityType<ArchieEntity>> ARCHIE = null;
     public static final ResourceSupplier<EntityType<LushsaurEntity>> LUSHSAUR = ADEntityTypes.register("lushsaur", LushsaurEntity::new, MobCategory.CREATURE, builder -> builder.m_20699_(3.2f, 3.0f), () -> ServerConfig.getEntitySettings().lushsaur().stats().build());
-    public static final ResourceSupplier<EntityType<ObsidiceratopsEntity>> OBSIDICERATOPS = ADEntityTypes.register("obsidiceratops", ObsidiceratopsEntity::new, MobCategory.CREATURE, builder -> builder.m_20699_(3.2f, 3.0f).m_20719_(), () -> ServerConfig.getEntitySettings().obsidiceratops().stats().build());
-    public static final ResourceSupplier<EntityType<TherimossEntity>> THERIMOSS = ADEntityTypes.register("therimoss", TherimossEntity::new, MobCategory.CREATURE, builder -> builder.m_20699_(2.4f, 3.5f), () -> ServerConfig.getEntitySettings().therimoss().stats().build());
+    public static final ResourceSupplier<EntityType<ObsidiceratopsEntity>> OBSIDICERATOPS = null;
+    public static final ResourceSupplier<EntityType<TherimossEntity>> THERIMOSS = null;
     public static final ResourceSupplier<EntityType<ChorusoatlEntity>> CHORUSOATL = ADEntityTypes.register("chorusoatl", ChorusoatlEntity::new, MobCategory.CREATURE, builder -> builder.m_20699_(3.6f, 5.2f).m_20717_(2), () -> ServerConfig.getEntitySettings().chorusoatl().stats().build(), ADTags.Biomes.SPAWNS_CHORUSOATLS, 2, 3, 5);
-    public static final ResourceSupplier<EntityType<SculkraptorEntity>> SCULKRAPTOR = ADEntityTypes.register("sculkraptor", SculkraptorEntity::new, MobCategory.MONSTER, builder -> builder.m_20699_(0.8f, 1.2f), () -> ServerConfig.getEntitySettings().sculkraptor().stats().build(), ADTags.Biomes.SPAWNS_SCULKRAPTORS, 10, 1, 1);
+    public static final ResourceSupplier<EntityType<SculkraptorEntity>> SCULKRAPTOR = null;
     public static final ResourceSupplier<EntityType<SculksaurEntity>> SCULKSAUR = ADEntityTypes.register("sculksaur", SculksaurEntity::new, MobCategory.MONSTER, builder -> builder.m_20699_(3.8f, 5.6f).m_20702_(16).m_20719_(), () -> ServerConfig.getEntitySettings().sculksaur().settings().stats().build());
-    public static final ResourceSupplier<EntityType<CoralosaurEntity>> CORALOSAUR = ADEntityTypes.register("coralosaur", CoralosaurEntity::new, MobCategory.CREATURE, builder -> builder.m_20699_(3.6f, 3.6f), () -> ServerConfig.getEntitySettings().coralosaur().stats().build());
+    public static final ResourceSupplier<EntityType<CoralosaurEntity>> CORALOSAUR = null;
     public static final ResourceSupplier<EntityType<ChorusoatlSpitEntity>> CHORUSOATL_SPIT = ADEntityTypes.register("chorusoatl_spit", ChorusoatlSpitEntity::new, MobCategory.MISC, builder -> builder.m_20699_(0.5f, 0.5f).m_20702_(100).m_20717_(20));
-    public static final ResourceSupplier<EntityType<TherimossProjectileEntity>> THERIMOSS_PROJECTILE = ADEntityTypes.register("therimoss_projectile", TherimossProjectileEntity::new, MobCategory.MISC, builder -> builder.m_20699_(0.85f, 0.85f).m_20702_(100).m_20717_(20));
+    public static final ResourceSupplier<EntityType<TherimossProjectileEntity>> THERIMOSS_PROJECTILE = null;
     public static final ResourceSupplier<EntityType<PusTippedArrowEntity>> PUS_TIPPED_ARROW = ADEntityTypes.register("pus_tipped_arrow", PusTippedArrowEntity::new, MobCategory.MISC, builder -> builder.m_20699_(0.5f, 0.5f).m_20702_(150).m_20717_(20));
-    public static final ResourceSupplier<EntityType<SculkraptorSpitEntity>> SCULKRAPTOR_SPIT = ADEntityTypes.register("sculkraptor_spit", SculkraptorSpitEntity::new, MobCategory.MISC, builder -> builder.m_20699_(0.5f, 0.5f).m_20702_(150).m_20717_(20));
-    public static final ResourceSupplier<EntityType<SculkraptorNestEntity>> SCULKRAPTOR_NEST = ADEntityTypes.register("sculkraptor_nest", SculkraptorNestEntity::new, MobCategory.MISC, builder -> builder.m_20699_(1.5f, 1.0f).m_20702_(150).m_20717_(20));
+    public static final ResourceSupplier<EntityType<SculkraptorSpitEntity>> SCULKRAPTOR_SPIT = null;
+    public static final ResourceSupplier<EntityType<SculkraptorNestEntity>> SCULKRAPTOR_NEST = null;
 
     public static void init() {
     }

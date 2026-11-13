@@ -12,9 +12,9 @@ import net.minecraft.world.level.gameevent.GameEvent;
 
 public class ADGameEvents {
     public static final ResourceSupplier<GameEvent> PUS_ARROW_AGGRO = Services.COMMON.registerGameEvent("pus_arrow_aggro", 64);
-    public static final ResourceSupplier<GameEvent> SCULKSAUR_ARMOR_DISTRACTION = Services.COMMON.registerGameEvent("sculksaur_armor_distraction", 32);
-    public static final ResourceSupplier<GameEvent> TRACKER_AGGRO = Services.COMMON.registerGameEvent("tracker_aggro", 64);
-    public static final ResourceSupplier<GameEvent> SCULKRAPTOR_NEST_AGGRO = Services.COMMON.registerGameEvent("sculkraptor_nest_aggro", 64);
+    public static final ResourceSupplier<GameEvent> SCULKSAUR_ARMOR_DISTRACTION = null;
+    public static final ResourceSupplier<GameEvent> TRACKER_AGGRO = null;
+    public static final ResourceSupplier<GameEvent> SCULKRAPTOR_NEST_AGGRO = null;
 
     public static void init() {
     }

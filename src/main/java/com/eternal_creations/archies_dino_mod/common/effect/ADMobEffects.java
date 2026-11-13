@@ -19,10 +19,10 @@ import net.minecraft.MethodsReturnNonnullByDefault;
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public class ADMobEffects {
-    public static final ResourceSupplier<MobEffectFallNegation> FALL_NEGATION = Services.COMMON.registerMobEffect("fall_negation", MobEffectFallNegation::new);
-    public static final ResourceSupplier<MobEffectHungerReduction> HUNGER_REDUCTION = Services.COMMON.registerMobEffect("hunger_reduction", MobEffectHungerReduction::new);
+    public static final ResourceSupplier<MobEffectFallNegation> FALL_NEGATION = null;
+    public static final ResourceSupplier<MobEffectHungerReduction> HUNGER_REDUCTION = null;
     public static final ResourceSupplier<MobEffectDazed> DAZED = Services.COMMON.registerMobEffect("dazed", MobEffectDazed::new);
-    public static final ResourceSupplier<MobEffectTracker> TRACKED = Services.COMMON.registerMobEffect("tracked", MobEffectTracker::new);
+    public static final ResourceSupplier<MobEffectTracker> TRACKED = null;
 
     public static void init() {
     }
