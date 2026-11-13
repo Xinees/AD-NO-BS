@@ -2,7 +2,7 @@
 
 Last updated: 2026-11-13
 Working branch: `binary-prune/legacy`
-Last confirmed playable baseline: `EC-AD Legacy Forge 1.20.1 fixed4`, Direct Legacy JAR Prune build 11
+Last confirmed playable baseline: `EC-AD Legacy Forge 1.20.1 fixed4`, Direct Legacy JAR Prune build 11; current repair cycle: build 12
 Baseline GitHub Actions run: `43459256389` (run number 68)
 Baseline artifact: `14054748256`
 Baseline commit: `8503044eedfffe1c7fcc7a07f315c1ce807065e4`
@@ -43,10 +43,10 @@ The five root TXT files uploaded on `main` were reviewed: `bow.txt`, `lush.txt`,
 
 ## Fixes being applied
 
-- Preserve non-synthetic methods on retained classes that implement interfaces, extend external/framework classes, or inherit from an internal abstract/interface contract. This protects callbacks invoked by Minecraft, Forge, Astemir, and the mod's packet dispatcher rather than only direct bytecode call sites.
+- Preserve only the four proven framework/network callback implementations by exact owner + descriptor. This restores required virtual/interface dispatch without reopening unrelated methods and accidentally retaining removed entities.
 - Remove the obsolete `AbstractArrowMixin.<clinit>` together with the removed rib-bow accessor. Keep unrelated arrow tick and Sculksaur hit handling.
 - Make creative-tab population deterministic and ordered: three spawn eggs first, then two hatchable eggs, then Lush Core, Sculk Toxin, and Chorus Fossil.
-- Add CI regression checks for all four missing callback methods, the removed bow field reference, and the creative-tab order.
+- Add CI regression checks for all four missing callback methods, the removed bow field reference, the creative-tab order, and the absence of removed entity classes.
 
 These are bytecode/build-time fixes. They still require a fresh in-game retest before being marked runtime-confirmed.
 

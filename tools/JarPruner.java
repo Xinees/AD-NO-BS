@@ -69,6 +69,21 @@ public final class JarPruner {
         "LUSH_CORE", "SCULK_TOXIN", "CHORUS_FOSSIL"
     );
 
+    private static final Map<String, Set<String>> FRAMEWORK_CALLBACK_METHODS = Map.of(
+        ROOT + "client/model/system/ADModifiers$1", Set.of(
+            "modify(ILcom/astemir/astemirlib/re/client/model/core/animation/AnimationState;FFLcom/astemir/astemirlib/re/client/model/core/animation/BoneState;)V"
+        ),
+        ROOT + "common/menu/DinoMenu", Set.of(
+            "m_6875_(Lnet/minecraft/world/entity/player/Player;)Z"
+        ),
+        ROOT + "client/screen/DinoScreen", Set.of(
+            "m_7286_(Lnet/minecraft/client/gui/GuiGraphics;FII)V"
+        ),
+        ROOT + "networking/serverbound/MountControlMessage", Set.of(
+            "execute(Lnet/minecraft/server/level/ServerPlayer;)V"
+        )
+    );
+
     private static final Set<String> NETWORK_MESSAGES = Set.of(
         ROOT + "networking/serverbound/MountControlMessage",
         ROOT + "networking/serverbound/PopZitMessage",
@@ -1140,7 +1155,7 @@ public final class JarPruner {
                 for (FieldNode field : node.fields) addDescriptor(refs, field.desc);
             }
 
-            boolean keepAll = shouldKeepAllMethods(name, roots, nodes);
+            boolean keepAll = shouldKeepAllMethods(name, roots);
             Set<String> selected = requestedMethods.computeIfAbsent(name, k -> new HashSet<>());
             Set<String> processed = PROCESSED_METHODS.computeIfAbsent(name, k -> new HashSet<>());
 
@@ -1151,8 +1166,10 @@ public final class JarPruner {
                     String key = method.name + method.desc;
                     boolean synthetic = (method.access & Opcodes.ACC_SYNTHETIC) != 0;
                     boolean bridge = (method.access & Opcodes.ACC_BRIDGE) != 0;
+                    boolean requiredCallback = FRAMEWORK_CALLBACK_METHODS
+                        .getOrDefault(name, Set.of()).contains(key);
                     boolean shouldScan = method.name.equals("<clinit>") ||
-                        bridge || (keepAll && !synthetic) || selected.contains(key);
+                        bridge || (keepAll && !synthetic) || selected.contains(key) || requiredCallback;
                     if (!shouldScan || !processed.add(key)) continue;
                     progressed = true;
 
@@ -1197,8 +1214,8 @@ public final class JarPruner {
         return retained;
     }
 
-    private static boolean shouldKeepAllMethods(String name, Set<String> roots, Map<String, ClassNode> nodes) {
-        if (roots.contains(name) || hasInheritedCallbackContract(name, nodes)) return true;
+    private static boolean shouldKeepAllMethods(String name, Set<String> roots) {
+        if (roots.contains(name)) return true;
 
         return name.startsWith(ROOT + "common/entity/base/") ||
             name.startsWith(ROOT + "common/entity/component/") ||
@@ -1231,34 +1248,6 @@ public final class JarPruner {
             name.startsWith(ROOT + "common/structure/piece/CustomStructurePiece$") ||
             name.equals(ROOT + "server/ServerConfig") ||
             name.equals(ROOT + "entity/ForgeEntityPart");
-    }
-
-    private static boolean hasInheritedCallbackContract(String name, Map<String, ClassNode> nodes) {
-        ClassNode node = nodes.get(name);
-        if (node == null) return false;
-
-        if ((node.access & Opcodes.ACC_INTERFACE) != 0 ||
-            (node.interfaces != null && !node.interfaces.isEmpty())) {
-            return true;
-        }
-
-        Set<String> visited = new HashSet<>();
-        String parentName = node.superName;
-        while (parentName != null &&
-            !parentName.equals("java/lang/Object") &&
-            visited.add(parentName)) {
-
-            if (!parentName.startsWith(ROOT)) return true;
-
-            ClassNode parent = nodes.get(parentName);
-            if (parent == null) return true;
-            if ((parent.access & Opcodes.ACC_ABSTRACT) != 0 ||
-                (parent.interfaces != null && !parent.interfaces.isEmpty())) {
-                return true;
-            }
-            parentName = parent.superName;
-        }
-        return false;
     }
 
     private static void requestMethod(
