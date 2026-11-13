@@ -36,7 +36,7 @@ The three mobs and their ordinary behavior are reported working. Do not alter th
 
 ## Build 14 change — Lushsaur no-saddle control
 
-- Build 14 commit: pending CI
+- Build 14 implementation commit: `e7384e3692db4a1bcfece9159475efb5d0570642` (initial CI guard needed a shell-check correction; no artifact was published)
 - Add a Lushsaur-only override of `AbstractComplexMount.m_6688_()`.
 - When saddled, Lushsaur delegates to the original superclass implementation unchanged.
 - When unsaddled, Lushsaur returns a controlling passenger only when the first passenger is a Player, the dinosaur is adult, the dinosaur is not sitting, and that Player is its owner. Otherwise it returns null.
