@@ -171,6 +171,21 @@ jobs:
             fi
           done
 
+          LOCAL_PLAYER_HANDLER="$(printf '%s\n' "$LOCAL_PLAYER_SPRINT" | awk '
+            /^[[:space:]]+public void archiesDinoMod\\$allowLushsaurSprint\\(/ { capture=1 }
+            capture && /^[[:space:]]+(private|public|protected) / && $0 !~ /archiesDinoMod\\$allowLushsaurSprint\\(/ { exit }
+            capture { print }
+          ')"
+          BOX_LINE="$(printf '%s\n' "$LOCAL_PLAYER_HANDLER" | grep -nF 'Boolean.TRUE' | cut -d: -f1 || true)"
+          SET_LINE="$(printf '%s\n' "$LOCAL_PLAYER_HANDLER" | grep -nF 'CallbackInfoReturnable.setReturnValue' | cut -d: -f1 || true)"
+          if [ -z "$BOX_LINE" ] || [ -z "$SET_LINE" ] || [ "$BOX_LINE" -ge "$SET_LINE" ] || \
+             printf '%s\n' "$LOCAL_PLAYER_HANDLER" | grep -Fq 'iconst_1'; then
+            echo "Lushsaur sprint callback must pass boxed Boolean.TRUE to CallbackInfoReturnable, never a primitive int."
+            printf '%s\n' "$LOCAL_PLAYER_HANDLER"
+            exit 1
+          fi
+          echo "Verified Lushsaur sprint callback boxes its boolean return value as Boolean.TRUE."
+
           LUSH_SPRINT_CONTROL="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.common.entity.mob.lushsaur.LushsaurEntity)"
           if ! printf '%s\n' "$LUSH_SPRINT_CONTROL" | grep -F -A5 'public boolean m_264410_();' | grep -Fq 'iconst_1'; then
             echo "Lushsaur canSprint override must return true for vanilla mounted sprint input."
