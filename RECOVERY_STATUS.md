@@ -34,6 +34,26 @@ The three mobs and their ordinary behavior are reported working. Do not alter th
 
 
 
+
+## Latest deliverable — Direct Legacy JAR Prune build 15
+
+- Implementation commit: `e7384e3692db4a1bcfece9159475efb5d0570642`
+- CI guard correction commit: `6cb6a2b2fcfa17a9ecbcd094e356bad1bc49ef51`
+- GitHub Actions run: `43489550907` (success)
+- Artifact ID: `14069416706`
+- Artifact ZIP digest: `sha256:47bd6bb9a1cfe2f999c1cd62b5307ed93f5528d8541d7353e4e3e4ed3376069e`
+- Output JAR: `ec_ad-legacy-forge-1.20.1.jar`
+- Output JAR size: `2,492,577` bytes
+- Output JAR SHA-256: `f965df099e2f0d307d863a5001d1de618b3378fbafc619505f9a5feae008c3de`
+
+Build 15 includes the missing `DinoMenu.m_7648_(Player,int)` quick-move implementation, restores the Forge client tick subscriber `ADClientForgeBus` that dispatches LMB/RMB key mappings, keeps the server-side `MountControlMessage.execute(ServerPlayer)` dispatch and concrete ride-attack handlers, and adds the Lushsaur-only no-saddle controlling-passenger override.
+
+The Lushsaur override is bytecode-verified. When saddled it delegates to `AbstractComplexMount.m_6688_()` unchanged. When unsaddled it returns the first passenger only when the Lushsaur is adult, not sitting, and the passenger is a Player who owns it. The original `MountComponent.travel()` uses `m_6688_()` to read the controlling Player's movement input. No corresponding override is added to Chorusoatl; the shared saddle behavior is unchanged.
+
+CI verifies the quick-move descriptor, client tick handler and lambda, mounted-attack handlers and server dispatch, Lushsaur control guards and superclass saddle path, absence of a Lushsaur override in Chorusoatl, ZIP integrity, retained assets, creative-tab order, and absence of excluded classes. The artifact's ZIP integrity was also checked after download; Astemir RE is not embedded.
+
+**Runtime status:** structurally verified only. The user must test this exact build in-game. In particular: shift-click saddles into the saddle slot for applicable mounts; test LMB/RMB mounted attacks; test riding an adult tamed Lushsaur without a saddle; and confirm Chorusoatl retains its prior saddle requirement. Do not call these runtime-confirmed until the user reports the test results.
+
 ## Build 14 change — Lushsaur no-saddle control
 
 - Build 14 implementation commit: `e7384e3692db4a1bcfece9159475efb5d0570642` (initial CI guard needed a shell-check correction; no artifact was published)
