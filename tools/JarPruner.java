@@ -151,6 +151,7 @@ public final class JarPruner {
 
         patchNoOpMethod(nodes.get(ROOT + "ArchiesDinosaurs"), "init",
             "(Lnet/minecraftforge/fml/event/lifecycle/FMLCommonSetupEvent;)V");
+        patchCommonClass(nodes.get(ROOT + "CommonClass"));
         patchCommonClient(nodes.get(ROOT + "client/CommonClient"));
         patchClientModBus(nodes.get(ROOT + "client/ADClientModBus"));
         patchClientModBusRegistrations(nodes.get(ROOT + "client/ADClientModBus"));
@@ -710,6 +711,26 @@ public final class JarPruner {
             }
             if (check != null && skip != null && soundCall != null) {
                 removeInclusive(method.instructions, check, soundCall);
+            }
+        }
+    }
+
+    private static void patchCommonClass(ClassNode owner) {
+        if (owner == null) return;
+        for (MethodNode method : owner.methods) {
+            if (!method.name.equals("init") || !method.desc.equals("()V")) continue;
+            for (AbstractInsnNode insn : method.instructions.toArray()) {
+                if (insn instanceof MethodInsnNode call &&
+                    call.getOpcode() == Opcodes.INVOKESTATIC &&
+                    call.owner.equals(ROOT + "common/recipe/ADRecipeTypes") &&
+                    call.name.equals("init")) {
+                    method.instructions.remove(call);
+                } else if (insn instanceof MethodInsnNode call &&
+                    call.getOpcode() == Opcodes.INVOKESTATIC &&
+                    call.owner.equals(ROOT + "common/recipe/ADRecipeSerializers") &&
+                    call.name.equals("init")) {
+                    method.instructions.remove(call);
+                }
             }
         }
     }
