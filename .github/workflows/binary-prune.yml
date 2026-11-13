@@ -201,10 +201,14 @@ jobs:
             fi
           done
           LUSH_GAIT_VERBOSE="$(javap -classpath build/classes-pruned.jar -p -v "$LUSHSAUR_CLIENT")"
-          if ! printf '%s\n' "$LUSH_GAIT_VERBOSE" | grep -Fq 'archiesDinoMod$shouldUseRunAnimation'; then
-            echo "Lushsaur locomotion states do not reference the rider-sprint predicate."
-            exit 1
-          fi
+          case "$LUSH_GAIT_VERBOSE" in
+            *'REF_invokeStatic com/eternal_creations/archies_dino_mod/client/model/render/entity/mob/LushsaurClient.archiesDinoMod$shouldUseRunAnimation:'*) ;;
+            *)
+              echo "Lushsaur locomotion states do not reference the rider-sprint predicate."
+              printf '%s\n' "$LUSH_GAIT_VERBOSE"
+              exit 1
+              ;;
+          esac
           LUSH_LOCOMOTION="$(printf '%s\n' "$LUSH_GAIT" | sed -n '/buildLocomotionState(/,/^  private /p')"
           RUN_CONDITION_COUNT="$(printf '%s\n' "$LUSH_LOCOMOTION" | grep -F -o 'check:(Lcom/eternal_creations/archies_dino_mod/common/entity/mob/lushsaur/LushsaurEntity;)Lcom/astemir/astemirlib/re/core/function/Condition;' | wc -l)"
           test "$RUN_CONDITION_COUNT" -eq 2
