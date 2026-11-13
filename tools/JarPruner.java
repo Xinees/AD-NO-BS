@@ -192,6 +192,9 @@ public final class JarPruner {
         patchLushsaurRunAnimation(nodes.get(ROOT + "client/model/render/entity/mob/LushsaurClient"));
         patchLushsaurRiderRunAnimation(nodes.get(ROOT + "client/animation/player/riding/OnLushsaurPlayerAnimations"));
         patchSculksaurExplosionEffects(nodes.get(ROOT + "client/particle/effect/SculksaurEffects"));
+        patchSmoothMoveControl(nodes.get(ROOT + "common/entity/ai/control/SmoothMoveControl"));
+        patchSmoothBodyControl(nodes.get(ROOT + "common/entity/ai/control/SmoothBodyControl"));
+        patchSmoothLookControl(nodes.get(ROOT + "common/entity/ai/control/SmoothLookControl"));
         patchLushsaurLocalPlayerSprintMixin(nodes.get(ROOT + "mixin/client/LocalPlayerMixin"));
         patchPlayerMixin(nodes.get(ROOT + "mixin/PlayerMixin"));
         removeMethods(nodes.get(ROOT + "mixin/client/LevelRendererMixin"),
@@ -1364,6 +1367,192 @@ public final class JarPruner {
         sphere.maxStack = 9;
         sphere.maxLocals = 2;
         owner.methods.add(sphere);
+    }
+
+    private static void patchSmoothMoveControl(ClassNode owner) {
+        if (owner == null) throw new IllegalStateException("SmoothMoveControl class is missing");
+
+        String helperName = "archiesDinoMod$instantYaw";
+        String helperDescriptor = "(FFF)F";
+        owner.methods.removeIf(method ->
+            method.name.equals(helperName) && method.desc.equals(helperDescriptor));
+
+        MethodNode helper = new MethodNode(
+            Opcodes.ACC_PRIVATE,
+            helperName,
+            helperDescriptor,
+            null,
+            null
+        );
+        helper.instructions.add(new VarInsnNode(Opcodes.FLOAD, 2));
+        helper.instructions.add(new InsnNode(Opcodes.FRETURN));
+        helper.maxStack = 1;
+        helper.maxLocals = 4;
+        owner.methods.add(helper);
+
+        patchYawCalls(owner, "tick3DMovement", "(DDDDZ)V", 2, 0);
+        patchYawCalls(owner, "tickClimber", "(DDD)V", 1, 0);
+        patchYawCalls(owner, "tickWalker", "(DDDD)V", 1, 0);
+    }
+
+    private static void patchYawCalls(
+        ClassNode owner, String methodName, String methodDescriptor, int expectedCalls, int keepSmoothCalls
+    ) {
+        MethodNode method = owner.methods.stream()
+            .filter(candidate -> candidate.name.equals(methodName) &&
+                candidate.desc.equals(methodDescriptor))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException(
+                "SmoothMoveControl method is missing: " + methodName + methodDescriptor));
+
+        int seen = 0;
+        int replaced = 0;
+        for (AbstractInsnNode insn : method.instructions.toArray()) {
+            if (!(insn instanceof MethodInsnNode call) ||
+                !call.owner.equals(owner.name) ||
+                !call.name.equals("smoothRotlerp") ||
+                !call.desc.equals("(FFF)F")) continue;
+
+            if (seen >= keepSmoothCalls) {
+                method.instructions.set(insn, new MethodInsnNode(
+                    Opcodes.INVOKESPECIAL,
+                    owner.name,
+                    "archiesDinoMod$instantYaw",
+                    "(FFF)F",
+                    false
+                ));
+                replaced++;
+            }
+            seen++;
+        }
+
+        if (seen != expectedCalls || replaced != expectedCalls - keepSmoothCalls) {
+            throw new IllegalStateException(
+                "Unexpected yaw interpolation calls in " + methodName +
+                ": found " + seen + ", replaced " + replaced);
+        }
+    }
+
+    private static void patchSmoothBodyControl(ClassNode owner) {
+        if (owner == null) throw new IllegalStateException("SmoothBodyControl class is missing");
+
+        MethodNode tick = owner.methods.stream()
+            .filter(method -> method.name.equals("m_8121_") && method.desc.equals("()V"))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("SmoothBodyControl tick method is missing"));
+
+        clearMethod(tick);
+        InsnList code = tick.instructions;
+        LabelNode skipPlayerPassenger = new LabelNode();
+        LabelNode snapBody = new LabelNode();
+        LabelNode done = new LabelNode();
+        String conditionInternal = "com/astemir/astemirlib/re/core/function/Condition";
+        String mobInternal = "net/minecraft/world/entity/Mob";
+
+        code.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        code.add(new FieldInsnNode(Opcodes.GETFIELD, owner.name, "canRotate",
+            "L" + conditionInternal + ";"));
+        code.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE,
+            conditionInternal, "check", "()Z", true));
+        code.add(new JumpInsnNode(Opcodes.IFEQ, done));
+
+        code.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        code.add(new FieldInsnNode(Opcodes.GETFIELD, owner.name, "mob", "L" + mobInternal + ";"));
+        code.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
+            mobInternal, "m_20160_", "()Z", false));
+        code.add(new JumpInsnNode(Opcodes.IFEQ, snapBody));
+
+        code.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        code.add(new FieldInsnNode(Opcodes.GETFIELD, owner.name, "mob", "L" + mobInternal + ";"));
+        code.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
+            mobInternal, "m_6688_", "()Lnet/minecraft/world/entity/LivingEntity;", false));
+        code.add(new TypeInsnNode(Opcodes.INSTANCEOF, "net/minecraft/world/entity/player/Player"));
+        code.add(new JumpInsnNode(Opcodes.IFEQ, skipPlayerPassenger));
+        code.add(new JumpInsnNode(Opcodes.GOTO, done));
+
+        code.add(skipPlayerPassenger);
+        code.add(new FrameNode(Opcodes.F_FULL, 1, new Object[] { owner.name }, 0, new Object[0]));
+        code.add(snapBody);
+        code.add(new FrameNode(Opcodes.F_FULL, 1, new Object[] { owner.name }, 0, new Object[0]));
+        code.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        code.add(new FieldInsnNode(Opcodes.GETFIELD, owner.name, "mob", "L" + mobInternal + ";"));
+        code.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        code.add(new FieldInsnNode(Opcodes.GETFIELD, owner.name, "mob", "L" + mobInternal + ";"));
+        code.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
+            mobInternal, "m_146908_", "()F", false));
+        code.add(new FieldInsnNode(Opcodes.PUTFIELD, mobInternal, "f_20883_", "F"));
+
+        code.add(done);
+        code.add(new FrameNode(Opcodes.F_FULL, 1, new Object[] { owner.name }, 0, new Object[0]));
+        code.add(new InsnNode(Opcodes.RETURN));
+        tick.maxStack = 2;
+        tick.maxLocals = 1;
+    }
+
+    private static void patchSmoothLookControl(ClassNode owner) {
+        if (owner == null) throw new IllegalStateException("SmoothLookControl class is missing");
+
+        MethodNode tick = owner.methods.stream()
+            .filter(method -> method.name.equals("m_8128_") && method.desc.equals("()V"))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("SmoothLookControl tick method is missing"));
+
+        clearMethod(tick);
+        InsnList code = tick.instructions;
+        LabelNode noRotation = new LabelNode();
+        LabelNode invokeVanilla = new LabelNode();
+        String conditionInternal = "com/astemir/astemirlib/re/core/function/Condition";
+        String lookControlInternal = "net/minecraft/world/entity/ai/control/LookControl";
+
+        code.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        code.add(new FieldInsnNode(Opcodes.GETFIELD, owner.name, "canRotate",
+            "L" + conditionInternal + ";"));
+        code.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE,
+            conditionInternal, "check", "()Z", true));
+        code.add(new JumpInsnNode(Opcodes.IFEQ, noRotation));
+
+        code.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        code.add(new FieldInsnNode(Opcodes.GETFIELD, owner.name, "f_186068_", "I"));
+        code.add(new JumpInsnNode(Opcodes.IFLE, noRotation));
+
+        code.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        code.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        code.add(new FieldInsnNode(Opcodes.GETFIELD, owner.name, "f_24941_", "D"));
+        code.add(new FieldInsnNode(Opcodes.PUTFIELD, owner.name, "smoothX", "D"));
+
+        code.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        code.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        code.add(new FieldInsnNode(Opcodes.GETFIELD, owner.name, "f_24942_", "D"));
+        code.add(new FieldInsnNode(Opcodes.PUTFIELD, owner.name, "smoothY", "D"));
+
+        code.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        code.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        code.add(new FieldInsnNode(Opcodes.GETFIELD, owner.name, "f_24943_", "D"));
+        code.add(new FieldInsnNode(Opcodes.PUTFIELD, owner.name, "smoothZ", "D"));
+
+        code.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        code.add(new LdcInsnNode(360.0f));
+        code.add(new FieldInsnNode(Opcodes.PUTFIELD, lookControlInternal, "f_24938_", "F"));
+
+        code.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        code.add(new LdcInsnNode(360.0f));
+        code.add(new FieldInsnNode(Opcodes.PUTFIELD, lookControlInternal, "f_24939_", "F"));
+        code.add(new JumpInsnNode(Opcodes.GOTO, invokeVanilla));
+
+        code.add(noRotation);
+        code.add(new FrameNode(Opcodes.F_FULL, 1, new Object[] { owner.name }, 0, new Object[0]));
+        code.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        code.add(new InsnNode(Opcodes.ICONST_0));
+        code.add(new FieldInsnNode(Opcodes.PUTFIELD, owner.name, "hasTarget", "Z"));
+
+        code.add(invokeVanilla);
+        code.add(new FrameNode(Opcodes.F_FULL, 1, new Object[] { owner.name }, 0, new Object[0]));
+        code.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        code.add(new MethodInsnNode(Opcodes.INVOKESPECIAL,
+            lookControlInternal, "m_8128_", "()V", false));
+        code.add(new InsnNode(Opcodes.RETURN));
+        tick.maxStack = 3;
+        tick.maxLocals = 1;
     }
 
     private static void patchLushsaurLocalPlayerSprintMixin(ClassNode owner) {
