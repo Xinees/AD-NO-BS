@@ -1,4 +1,4 @@
-name: Direct Legacy JAR Prune - build 6
+name: Direct Legacy JAR Prune - build 7
 
 on:
   push:
@@ -100,6 +100,15 @@ jobs:
           test "$BLOCK_COUNT" -eq 2
           if printf '%s\\n' "$BLOCK_RENDER_CALLS" | grep -F "createRenderer:(Lcom/astemir/astemirlib/re/client/model/AstemirModel;)Lnet/minecraft/client/renderer/blockentity/BlockEntityRenderer;"; then
             echo "Found stale egg renderer descriptor in CommonClient."
+            exit 1
+          fi
+          COMMON_CLIENT='com.eternal_creations.archies_dino_mod.client.CommonClient'
+          BLOCK_HELPER_DESC='(Lcom/eternal_creations/archies_dino_mod/util/ResourceSupplier;Lnet/minecraft/client/renderer/blockentity/BlockEntityRenderer;)V'
+          javap -classpath build/classes-pruned.jar -p -s "$COMMON_CLIENT" | grep -F "descriptor: $BLOCK_HELPER_DESC"
+          BLOCK_HELPER_CALLS="$(printf '%s\\n' "$BLOCK_RENDER_CALLS" | grep -F -o "registerBlockEntityRenderer:$BLOCK_HELPER_DESC" | wc -l)"
+          test "$BLOCK_HELPER_CALLS" -eq 2
+          if printf '%s\\n' "$BLOCK_RENDER_CALLS" | grep -F "registerBlockEntityRenderer:(Ljava/util/function/Supplier;Lnet/minecraft/client/renderer/blockentity/BlockEntityRenderer;)V"; then
+            echo "Found mismatched ResourceSupplier/Supplier block-entity renderer call."
             exit 1
           fi
 

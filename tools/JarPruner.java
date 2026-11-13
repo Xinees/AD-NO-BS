@@ -175,6 +175,7 @@ public final class JarPruner {
 
         Set<String> retained = dependencyClosure(roots, nodes);
         stripUnreferencedMethods(retained, nodes);
+        verifySelfStaticCalls(retained, nodes);
         printPruneDiagnostics(retained, nodes);
 
         Map<String, byte[]> transformedClasses = new HashMap<>();
@@ -352,7 +353,7 @@ public final class JarPruner {
         code.add(new MethodInsnNode(Opcodes.INVOKESTATIC, ROOT + "client/model/render/block/DinoEggClient",
             "createRenderer", "(Lcom/astemir/astemirlib/re/client/model/AstemirModel;)Lcom/astemir/astemirlib/re/client/model/render/renderer/AstemirBlockEntityRenderer;", false));
         code.add(new MethodInsnNode(Opcodes.INVOKESTATIC, ROOT + "client/CommonClient", "registerBlockEntityRenderer",
-            "(Ljava/util/function/Supplier;Lnet/minecraft/client/renderer/blockentity/BlockEntityRenderer;)V", false));
+            "(L" + ROOT + "util/ResourceSupplier;Lnet/minecraft/client/renderer/blockentity/BlockEntityRenderer;)V", false));
     }
 
     private static void patchClientModBusRegistrations(ClassNode owner) {
@@ -1290,6 +1291,32 @@ public final class JarPruner {
             if (owner == null) continue;
             Set<String> processed = PROCESSED_METHODS.getOrDefault(name, Set.of());
             owner.methods.removeIf(method -> !processed.contains(method.name + method.desc));
+        }
+    }
+
+    private static void verifySelfStaticCalls(Set<String> retained, Map<String, ClassNode> nodes) {
+        List<String> unresolved = new ArrayList<>();
+        for (String name : retained) {
+            ClassNode owner = nodes.get(name);
+            if (owner == null) continue;
+            for (MethodNode method : owner.methods) {
+                for (AbstractInsnNode insn : method.instructions) {
+                    if (!(insn instanceof MethodInsnNode call) ||
+                        call.getOpcode() != Opcodes.INVOKESTATIC ||
+                        !call.owner.equals(owner.name)) continue;
+
+                    boolean declared = owner.methods.stream().anyMatch(candidate ->
+                        candidate.name.equals(call.name) && candidate.desc.equals(call.desc));
+                    if (!declared) {
+                        unresolved.add(owner.name + "." + method.name + method.desc +
+                            " -> " + call.name + call.desc);
+                    }
+                }
+            }
+        }
+        if (!unresolved.isEmpty()) {
+            throw new IllegalStateException("Unresolved static self-calls after pruning:\n" +
+                String.join("\n", unresolved));
         }
     }
 
