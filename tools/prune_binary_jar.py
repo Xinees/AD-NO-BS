@@ -35,35 +35,22 @@ SOUND_PREFIXES = (
 KEEP_MIXINS = {
     "mixins": [
         "AbstractArrowMixin",
-        "BlockMixin",
         "BreedGoalAccessor",
         "CriteriaTriggersAccessor",
-        "DamageEnchantmentMixin",
-        "DamageSourcesMixin",
-        "EnchantmentCategoryMixin",
-        "EnchantmentHelperMixin",
         "EntityAccessor",
-        "EntityMixin",
-        "LivingEntityMixin",
-        "PlayerInterfaceMixin",
         "PlayerListMixin",
         "PlayerMixin",
-        "ServerPlayerInterfaceMixin",
-        "VibrationSystemListenerMixin",
         "sculksaur.PrimaryLevelDataMixin",
         "sculksaur.SculkShriekerBlockEntityMixin",
         "sculksaur.WalkNodeEvaluatorAccessor",
         "sculksaur.WardenMixin",
     ],
     "client": [
-        "MultiplayerGameModeMixin",
         "client.CameraMixin",
         "client.ClientAdvancementsAccessor",
         "client.KeyMappingMixin",
         "client.LevelRendererMixin",
         "client.LivingEntityRendererMixin",
-        "client.LocalPlayerMixin",
-        "client.MinecraftMixin",
     ],
 }
 KEEP_FORGE_MIXINS = {
@@ -324,7 +311,24 @@ with zipfile.ZipFile(target, "r") as check:
     if missing_items:
         raise SystemExit(f"Required item models missing: {missing_items}")
 
+report = Path("build/resource-prune-report.txt")
+report.parent.mkdir(parents=True, exist_ok=True)
+report.write_text(
+    "\n".join([
+        f"Input JAR: {source}",
+        f"Output JAR: {target}",
+        f"Resource entries kept: {len(kept)}",
+        f"Resource entries removed: {len(removed)}",
+        f"Output size: {target.stat().st_size} bytes",
+        "",
+        "Removed resource entries:",
+        *sorted(removed),
+    ]) + "\n",
+    encoding="utf-8",
+)
+
 print(f"Output JAR: {target}")
 print(f"Resource entries kept: {len(kept)}")
 print(f"Resource entries removed: {len(removed)}")
 print(f"Output size: {target.stat().st_size} bytes")
+print(f"Report: {report}")
