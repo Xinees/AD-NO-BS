@@ -8,20 +8,18 @@ This file is the explicit task list for the next Legacy work. The order below is
 
 ## Current baseline and test status
 
-### Build 110 — latest CI-verified JAR; runtime retest required
+### Build 111 — latest CI-verified JAR; runtime test pending
 
-- CI: [run #110 — success](https://github.com/Xinees/AD-NO-BS/actions/runs/43525560144); final guard commit: `416b2f50693c313dd4210d4952adfff2495f6612`.
-- Fix commit: [`42bbcebb`](https://github.com/Xinees/AD-NO-BS/commit/42bbcebbbea01edfe0f903b08fdde732b0a45594).
-- Artifact ID: `14085555038`; ZIP digest: `sha256:6df695e5ec2be061c7779fa27a7ce0dae2711f842f90005109458e6f3d7227d4`.
-- Output JAR size: `2,493,408` bytes; SHA-256: `edefc1d1cd4b4b8df3df20d6e8815055927a81cf618b8d92767567c7e26db059`.
-- The user's Build105 launch passed mod construction, resource reload, Astemir shader/model loading, world creation, and player login before a new `VerifyError` in the generated Lushsaur sprint Mixin handler.
-- Root cause: the custom handler passed primitive `ICONST_1` to erased `CallbackInfoReturnable.setReturnValue(Object)`. Build110 now passes `Boolean.TRUE`; its downloaded bytecode was inspected with `javap -v`.
-- The injection target `m_264231_(Entity)` was checked against the 1.20.1 mappings and is `LocalPlayer.vehicleCanSprint(Entity)`, returning boolean. The controlling-passenger comparison is unchanged.
-- CI explicitly enforces the boxed Boolean callback and rejects a primitive `iconst_1` in that handler. Full CI and JAR structural/resource checks passed.
-- Build105-to-Build110 archive comparison found exactly one changed entry, `LocalPlayerMixin.class`; all 473 entries remain and there are no added/removed resources. This isolates the corrective patch.
-- The later null-player NPE in the Build105 log followed the invalid Mixin callback and is downstream until proven otherwise. The old Build99 missing-model/shader/registry errors were not seen in the Build105 launch; Astemir reported successful loading of all models and shaders.
-- **Runtime status:** Build110 has not yet been tested in Minecraft. Confirm world entry and Lushsaur sprint behavior first, then run the existing Sonic Boom, mounted gait, and mob-turning checks.
-- The square-glyph report remains unclassified; the Build105 log contains no font-loading exception. Confirm whether it persists before changing the selected resource pack.
+- CI: [run #116 — success](https://github.com/Xinees/AD-NO-BS/actions/runs/43528408869); workflow/guard commit: `8a22d56e01f1bc9b5d08db522ec87fccfef97e50`.
+- Code commits: [`127bb60d`](https://github.com/Xinees/AD-NO-BS/commit/127bb60d49cae787e26b8e3feaa594ea4b86174d), [`669bc901`](https://github.com/Xinees/AD-NO-BS/commit/669bc901d48893c3b7f81056b1f7a720ac72283a).
+- Artifact ID: `14085958100`; ZIP digest: `sha256:cc0bf23229b7cbc931f70035227a29b42e5933d039fd3f2f411376bb375e9f7b`.
+- JAR size: `2,493,447` bytes; SHA-256: `5b01626519d9b02934f932c58d5ffe8fd9210851ba3630725f2347726a03c456`.
+- Build110 runtime feedback: Lushsaur and turning are confirmed working; Sculksaur sometimes pitched its head unnaturally toward the ground.
+- Build111 fixes the over-snapped vertical look: horizontal yaw stays instant, while `smoothY` is interpolated with the existing `interpolationSpeed` and the original `maxSpeedLimit` is restored for pitch.
+- Build111 replaces `SCULK_SOUL` with vanilla `SONIC_BOOM` particles. It creates two concentric expanding spherical layers, 384 particles each (768 total), at radial offsets 0.30 and 0.06 blocks. Particle speed increases from 0.72 to 0.82. Camera shake is preserved; old post-process distortion and ground-wave emitters remain disconnected.
+- Build110-to-Build111 comparison: 473 entries in both JARs, no added/removed entries, and only `SculksaurEffects.class` plus `SmoothLookControl.class` changed.
+- CI verifies the pitch interpolation, horizontal yaw limit, two particle layers, `SONIC_BOOM` particle type, and JAR structure. Original input JAR and Astemir RE remain untouched/separate.
+- **Runtime status:** Build111 has passed CI and post-download archive/bytecode inspection only. It still needs an in-game check for Sculksaur's spawn/idle gaze and the shape/speed/spacing of Sonic Boom; re-confirm Lushsaur sprint and the other turning behavior afterward.
 
 ### Smooth turning — main controls changed, task still open
 
