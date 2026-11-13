@@ -230,6 +230,24 @@ jobs:
             'archiesDinoMod$spawnSculksaurSonicBoomParticle(' \
             '(Lnet/minecraft/world/level/Level;DDDI)V'
 
+          SCULK_SPHERE="$(javap -classpath build/classes-pruned.jar -p -c "$SCULK_EFFECTS" | sed -n '/archiesDinoMod[$]spawnSculksaurSonicBoomSphere(/,/^  private /p')"
+          INDY_LINE="$(printf '%s\\n' "$SCULK_SPHERE" | grep -n 'InvokeDynamic.*accept:.*java/util/function/IntConsumer' | cut -d: -f1)"
+          STORE_LINE="$(printf '%s\\n' "$SCULK_SPHERE" | grep -n 'astore 7' | cut -d: -f1)"
+          RANGE_LINE="$(printf '%s\\n' "$SCULK_SPHERE" | grep -n 'IntStream.range' | cut -d: -f1)"
+          LOAD_LINE="$(printf '%s\\n' "$SCULK_SPHERE" | grep -n 'aload 7' | cut -d: -f1)"
+          FOREACH_LINE="$(printf '%s\\n' "$SCULK_SPHERE" | grep -n 'IntStream.forEach' | cut -d: -f1)"
+          if [ -z "$INDY_LINE" ] || [ -z "$STORE_LINE" ] || [ -z "$RANGE_LINE" ] || \
+             [ -z "$LOAD_LINE" ] || [ -z "$FOREACH_LINE" ] || \
+             [ "$STORE_LINE" -ne "$((INDY_LINE + 1))" ] || \
+             [ "$INDY_LINE" -ge "$RANGE_LINE" ] || \
+             [ "$RANGE_LINE" -ge "$LOAD_LINE" ] || \
+             [ "$LOAD_LINE" -ge "$FOREACH_LINE" ]; then
+            echo "Sculksaur Sonic Boom lambda/stream bytecode has an invalid operand-stack order."
+            printf '%s\\n' "$SCULK_SPHERE"
+            exit 1
+          fi
+          echo "Verified Sonic Boom lambda is captured before IntStream.range, stored locally, and passed to forEach."
+
           SCULK_FINAL="$(javap -classpath build/classes-pruned.jar -p -c "$SCULK_EFFECTS" | sed -n '/lambda[$]explosionFinalEvent[$]12(/,/^  private /p')"
           for required_call in 'archiesDinoMod$spawnSculksaurSonicBoomSphere' 'ShakeUtil.shakeExplosion'; do
             if ! printf '%s\n' "$SCULK_FINAL" | grep -Fq "$required_call"; then
