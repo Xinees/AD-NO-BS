@@ -190,6 +190,60 @@ jobs:
           )
           mkdir -p build/smoke/mods
           cp build/libs/ec_ad-legacy-forge-1.20.1.jar build/smoke/mods/
+          python3 - <<'PY'
+          import io
+          import os
+          from pathlib import Path
+          import tempfile
+          import zipfile
+
+          smoke_jar = Path("build/smoke/mods/ec_ad-legacy-forge-1.20.1.jar")
+          nested_name = "META-INF/jarjar/astemirlib_re-1.20.1-forge-1.2.98-SNAPSHOT.jar"
+
+          def strip_manifest(data):
+              lines = data.decode("utf-8", errors="replace").splitlines()
+              kept = []
+              skip_continuation = False
+              for line in lines:
+                  if not line.startswith(" ") and line.lower().startswith("mixinconfigs:"):
+                      skip_continuation = True
+                      continue
+                  if skip_continuation and line.startswith(" "):
+                      continue
+                  skip_continuation = False
+                  kept.append(line)
+              return ("\r\n".join(kept) + "\r\n\r\n").encode("utf-8")
+
+          def strip_nested_mixins(data):
+              src = io.BytesIO(data)
+              dst = io.BytesIO()
+              with zipfile.ZipFile(src, "r") as original, zipfile.ZipFile(dst, "w", zipfile.ZIP_DEFLATED) as changed:
+                  for info in original.infolist():
+                      content = original.read(info.filename)
+                      if info.filename == "META-INF/MANIFEST.MF":
+                          content = strip_manifest(content)
+                      changed.writestr(info, content)
+              return dst.getvalue()
+
+          with zipfile.ZipFile(smoke_jar, "r") as original:
+              entries = [(info, original.read(info.filename)) for info in original.infolist()]
+          fd, temp_name = tempfile.mkstemp(prefix="smoke-no-mixins-", suffix=".jar", dir=smoke_jar.parent)
+          os.close(fd)
+          try:
+              with zipfile.ZipFile(temp_name, "w", zipfile.ZIP_DEFLATED) as changed:
+                  for info, content in entries:
+                      if info.filename == "META-INF/MANIFEST.MF":
+                          content = strip_manifest(content)
+                      elif info.filename == nested_name:
+                          content = strip_nested_mixins(content)
+                      changed.writestr(info, content)
+              os.replace(temp_name, smoke_jar)
+          except Exception:
+              Path(temp_name).unlink(missing_ok=True)
+              raise
+
+          print("Diagnostic-only smoke copy: disabled parent and Astemir MixinConfigs")
+          PY
           printf 'eula=true\n' > build/smoke/eula.txt
           python3 - <<'PY'
           import pathlib
