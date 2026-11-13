@@ -1336,12 +1336,6 @@ public final class JarPruner {
         s.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
             entityInternal, "m_20189_", "()D", false));
 
-        s.add(new InsnNode(Opcodes.ICONST_0));
-        s.add(new IntInsnNode(Opcodes.SIPUSH, 1536));
-        s.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
-            "java/util/stream/IntStream", "range",
-            "(II)Ljava/util/stream/IntStream;", true));
-
         Handle metafactory = new Handle(
             Opcodes.H_INVOKESTATIC,
             "java/lang/invoke/LambdaMetafactory",
@@ -1360,6 +1354,13 @@ public final class JarPruner {
                 owner.name, particleName, particleDescriptor, false),
             Type.getMethodType("(I)V")
         ));
+        s.add(new VarInsnNode(Opcodes.ASTORE, 7));
+        s.add(new InsnNode(Opcodes.ICONST_0));
+        s.add(new IntInsnNode(Opcodes.SIPUSH, 1536));
+        s.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
+            "java/util/stream/IntStream", "range",
+            "(II)Ljava/util/stream/IntStream;", true));
+        s.add(new VarInsnNode(Opcodes.ALOAD, 7));
         s.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE,
             "java/util/stream/IntStream", "forEach",
             "(Ljava/util/function/IntConsumer;)V", true));
