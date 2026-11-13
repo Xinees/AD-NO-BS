@@ -21,8 +21,15 @@ public final class JarPruner {
         Map.entry(ROOT + "common/entity/ADEntityTypes", Set.of(
             "SPAWN_INFO", "LUSHSAUR", "CHORUSOATL", "SCULKSAUR", "CHORUSOATL_SPIT"
         )),
+        Map.entry(ROOT + "common/entity/ADActionTypes", Set.of(
+            "ATTACK_HEADBUTT", "ATTACK_BITE", "ATTACK_TAIL", "ATTACK_TAIL_STOMP",
+            "ATTACK_HIT", "ATTACK_SHOOT", "ATTACK_FLY", "ATTACK_SONIC_BOOM",
+            "ATTACK_BITE_RUN", "SCREAM", "SHAKE", "ROAR", "EAT", "DEATH",
+            "DEATH_AIR", "SPAWN", "UP", "DOWN", "SENSE", "LISTEN", "HURT",
+            "EMERGE", "BURY"
+        )),
         Map.entry(ROOT + "common/entity/ADSensorTypes", Set.of("SCULKSAUR_SENSOR")),
-        Map.entry(ROOT + "common/entity/ADActivities", Set.of("CHASE", "SCREAM", "FLEE")),
+        Map.entry(ROOT + "common/entity/ADActivities", Set.of("CHASE")),
         Map.entry(ROOT + "common/entity/ADMemoryModuleTypes", Set.of("IS_ENRAGED", "WALK_COMMAND")),
         Map.entry(ROOT + "common/effect/ADMobEffects", Set.of("DAZED")),
         Map.entry(ROOT + "common/ADGameEvents", Set.of()),
@@ -94,7 +101,6 @@ public final class JarPruner {
         ROOT + "mixin/sculksaur/WalkNodeEvaluatorAccessor",
         ROOT + "mixin/sculksaur/WardenMixin",
         ROOT + "mixin/client/CameraMixin",
-        ROOT + "mixin/client/ClientAdvancementsAccessor",
         ROOT + "mixin/client/KeyMappingMixin",
         ROOT + "mixin/client/LevelRendererMixin",
         ROOT + "mixin/client/LivingEntityRendererMixin",
@@ -145,7 +151,7 @@ public final class JarPruner {
             "(Lnet/minecraftforge/fml/event/lifecycle/FMLCommonSetupEvent;)V");
         patchCommonClient(nodes.get(ROOT + "client/CommonClient"));
         patchPlayerAnimations(nodes.get(ROOT + "client/animation/player/ADPlayerAnimations"));
-        patchCreativeTab(nodes.get(ROOT + "common/tab/ADCreativeTabs"));
+        patchCreativeTab(nodes.get(ROOT + "common/tab/ADCreativeTabs"), nodes.get(ROOT + "common/items/ADItems"));
         patchNetworkHelper(nodes.get(ROOT + "platform/ForgeNetworkHelper"));
         patchAbstractArrowMixin(nodes.get(ROOT + "mixin/AbstractArrowMixin"));
         patchPlayerMixin(nodes.get(ROOT + "mixin/PlayerMixin"));
@@ -217,6 +223,13 @@ public final class JarPruner {
     }
 
     private static void pruneRegistryInitializer(ClassNode owner, Set<String> keepFields) {
+        if (owner == null) return;
+
+        Set<String> removedFields = new HashSet<>();
+        for (FieldNode field : owner.fields) {
+            if (!keepFields.contains(field.name)) removedFields.add(field.name);
+        }
+
         for (MethodNode method : owner.methods) {
             if (!method.name.equals("<clinit>")) continue;
 
@@ -226,11 +239,11 @@ public final class JarPruner {
                     field.getOpcode() == Opcodes.PUTSTATIC &&
                     field.owner.equals(owner.name)) {
 
-                    if (!keepFields.contains(field.name)) {
+                    if (removedFields.contains(field.name)) {
                         for (AbstractInsnNode remove : segment) {
                             method.instructions.remove(remove);
                         }
-                        method.instructions.insertBefore(field, new InsnNode(Opcodes.ACONST_NULL));
+                        method.instructions.remove(field);
                     }
                     segment.clear();
                 } else {
@@ -238,6 +251,8 @@ public final class JarPruner {
                 }
             }
         }
+
+        owner.fields.removeIf(field -> removedFields.contains(field.name));
     }
 
     private static void patchNoOpMethod(ClassNode owner, String name, String descriptor) {
@@ -285,44 +300,47 @@ public final class JarPruner {
         }
     }
 
-    private static void patchCreativeTab(ClassNode owner) {
-        if (owner == null) return;
+    private static void patchCreativeTab(ClassNode owner, ClassNode items) {
+        if (owner == null || items == null) return;
+
+        Map<String, String> itemDescriptors = new HashMap<>();
+        for (FieldNode field : items.fields) {
+            itemDescriptors.put(field.name, field.desc);
+        }
+
+        String outputOwner = "net/minecraft/world/item/CreativeModeTab$Output";
+        String acceptName = "m_246326_";
+        String acceptDesc = "(Lnet/minecraft/world/level/ItemLike;)V";
+
         for (MethodNode method : owner.methods) {
-            List<MethodInsnNode> addCalls = new ArrayList<>();
+            if (!method.desc.contains("CreativeModeTab$Output")) continue;
+
             for (AbstractInsnNode insn : method.instructions.toArray()) {
                 if (insn instanceof MethodInsnNode call &&
-                    call.owner.contains("CreativeModeTab$Output") &&
+                    call.owner.equals(outputOwner) &&
                     (call.name.equals("m_246326_") || call.name.equals("accept"))) {
-                    addCalls.add(call);
+                    acceptName = call.name;
+                    acceptDesc = call.desc;
+                    break;
                 }
             }
 
-            MethodInsnNode previousAdd = null;
-            for (MethodInsnNode add : addCalls) {
-                String itemField = null;
-                for (AbstractInsnNode cursor = add.getPrevious(); cursor != null; cursor = cursor.getPrevious()) {
-                    if (cursor instanceof MethodInsnNode prior &&
-                        prior.owner.contains("CreativeModeTab$Output") &&
-                        (prior.name.equals("m_246326_") || prior.name.equals("accept"))) {
-                        break;
-                    }
-                    if (cursor instanceof FieldInsnNode field &&
-                        field.getOpcode() == Opcodes.GETSTATIC &&
-                        field.owner.equals(ROOT + "common/items/ADItems")) {
-                        itemField = field.name;
-                        break;
-                    }
+            clearMethod(method);
+            for (String itemName : CREATIVE_ITEMS) {
+                String descriptor = itemDescriptors.get(itemName);
+                if (descriptor == null) {
+                    throw new IllegalStateException("Creative tab item field missing: " + itemName);
                 }
-
-                if (itemField != null && !CREATIVE_ITEMS.contains(itemField)) {
-                    AbstractInsnNode start = previousAdd == null
-                        ? method.instructions.getFirst()
-                        : previousAdd.getNext();
-                    removeInclusive(method.instructions, start, add);
-                } else {
-                    previousAdd = add;
-                }
+                InsnList code = method.instructions;
+                code.add(new VarInsnNode(Opcodes.ALOAD, 1));
+                code.add(new FieldInsnNode(Opcodes.GETSTATIC, items.name, itemName, descriptor));
+                code.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, ROOT + "util/ResourceSupplier",
+                    "get", "()Ljava/lang/Object;", true));
+                code.add(new TypeInsnNode(Opcodes.CHECKCAST, "net/minecraft/world/level/ItemLike"));
+                code.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, outputOwner, acceptName, acceptDesc, true));
             }
+            method.instructions.add(new InsnNode(Opcodes.RETURN));
+            method.maxLocals = 2;
         }
     }
 
