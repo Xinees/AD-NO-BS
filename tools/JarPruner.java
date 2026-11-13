@@ -165,7 +165,7 @@ public final class JarPruner {
         addServiceRoots(allEntries, roots);
 
         Set<String> retained = dependencyClosure(roots, nodes);
-        stripUnreferencedSyntheticMethods(retained, nodes);
+        stripUnreferencedMethods(retained, nodes);
         verifyNoRemovedRegistryReferences(retained, nodes);
 
         Map<String, byte[]> transformedClasses = new HashMap<>();
@@ -646,15 +646,17 @@ public final class JarPruner {
     private static Set<String> dependencyClosure(Set<String> roots, Map<String, ClassNode> nodes) {
         PROCESSED_METHODS.clear();
         Set<String> retained = new LinkedHashSet<>();
-        Deque<String> queue = new ArrayDeque<>(roots);
-        Map<String, Set<String>> extraMethods = new HashMap<>();
-        Map<String, Set<String>> processedMethods = new HashMap<>();
+        Deque<String> classQueue = new ArrayDeque<>();
+        Map<String, Set<String>> requestedMethods = new HashMap<>();
 
-        while (!queue.isEmpty()) {
-            String name = queue.removeFirst();
+        for (String root : roots) {
+            if (nodes.containsKey(root) && retained.add(root)) classQueue.addLast(root);
+        }
+
+        while (!classQueue.isEmpty()) {
+            String name = classQueue.removeFirst();
             ClassNode node = nodes.get(name);
             if (node == null) continue;
-            retained.add(name);
 
             Set<String> refs = new LinkedHashSet<>();
             addType(refs, node.superName);
@@ -663,74 +665,152 @@ public final class JarPruner {
                 for (FieldNode field : node.fields) addDescriptor(refs, field.desc);
             }
 
-            Set<String> processed = processedMethods.computeIfAbsent(name, k -> new HashSet<>());
-            Set<String> selectedSynthetic = extraMethods.computeIfAbsent(name, k -> new HashSet<>());
-            for (MethodNode method : node.methods) {
-                String key = method.name + method.desc;
-                boolean isInitializer = method.name.equals("<clinit>");
-                boolean isSynthetic = (method.access & Opcodes.ACC_SYNTHETIC) != 0;
-                if (isSynthetic && !selectedSynthetic.contains(key)) continue;
-                if (!processed.add(key)) continue;
-                PROCESSED_METHODS.computeIfAbsent(name, k -> new HashSet<>()).add(key);
+            boolean keepAll = shouldKeepAllMethods(name, roots);
+            Set<String> selected = requestedMethods.computeIfAbsent(name, k -> new HashSet<>());
+            Set<String> processed = PROCESSED_METHODS.computeIfAbsent(name, k -> new HashSet<>());
 
-                addDescriptor(refs, method.desc);
-                if (method.exceptions != null) refs.addAll(method.exceptions);
+            boolean progressed;
+            do {
+                progressed = false;
+                for (MethodNode method : node.methods) {
+                    String key = method.name + method.desc;
+                    boolean synthetic = (method.access & Opcodes.ACC_SYNTHETIC) != 0;
+                    boolean shouldScan = method.name.equals("<clinit>") ||
+                        (keepAll && !synthetic) || selected.contains(key);
+                    if (!shouldScan || !processed.add(key)) continue;
+                    progressed = true;
 
-                for (AbstractInsnNode insn : method.instructions.toArray()) {
-                    if (insn instanceof TypeInsnNode type) {
-                        addType(refs, type.desc);
-                    } else if (insn instanceof FieldInsnNode field) {
-                        addType(refs, field.owner);
-                        addDescriptor(refs, field.desc);
-                    } else if (insn instanceof MethodInsnNode call) {
-                        addType(refs, call.owner);
-                        addDescriptor(refs, call.desc);
-                    } else if (insn instanceof MultiANewArrayInsnNode multi) {
-                        addDescriptor(refs, multi.desc);
-                    } else if (insn instanceof LdcInsnNode ldc) {
-                        addConstantWithMethodRefs(refs, ldc.cst, nodes, extraMethods, queue, retained);
-                    } else if (insn instanceof InvokeDynamicInsnNode indy) {
-                        addDescriptor(refs, indy.desc);
-                        addConstantWithMethodRefs(refs, indy.bsm, nodes, extraMethods, queue, retained);
-                        for (Object arg : indy.bsmArgs) {
-                            addConstantWithMethodRefs(refs, arg, nodes, extraMethods, queue, retained);
+                    addDescriptor(refs, method.desc);
+                    if (method.exceptions != null) refs.addAll(method.exceptions);
+
+                    for (AbstractInsnNode insn : method.instructions.toArray()) {
+                        if (insn instanceof TypeInsnNode type) {
+                            addType(refs, type.desc);
+                        } else if (insn instanceof FieldInsnNode field) {
+                            addType(refs, field.owner);
+                            addDescriptor(refs, field.desc);
+                        } else if (insn instanceof MethodInsnNode call) {
+                            addType(refs, call.owner);
+                            addDescriptor(refs, call.desc);
+                            requestMethod(call.owner, call.name, call.desc,
+                                nodes, requestedMethods, retained, classQueue);
+                        } else if (insn instanceof MultiANewArrayInsnNode multi) {
+                            addDescriptor(refs, multi.desc);
+                        } else if (insn instanceof LdcInsnNode ldc) {
+                            addConstantWithMethodRefs(refs, ldc.cst, nodes,
+                                requestedMethods, retained, classQueue);
+                        } else if (insn instanceof InvokeDynamicInsnNode indy) {
+                            addDescriptor(refs, indy.desc);
+                            addConstantWithMethodRefs(refs, indy.bsm, nodes,
+                                requestedMethods, retained, classQueue);
+                            for (Object arg : indy.bsmArgs) {
+                                addConstantWithMethodRefs(refs, arg, nodes,
+                                    requestedMethods, retained, classQueue);
+                            }
                         }
                     }
                 }
-            }
+            } while (progressed);
 
             for (String ref : refs) {
-                if (ref.startsWith(ROOT) && nodes.containsKey(ref) && !retained.contains(ref)) {
-                    queue.addLast(ref);
+                if (ref.startsWith(ROOT) && nodes.containsKey(ref) && retained.add(ref)) {
+                    classQueue.addLast(ref);
                 }
             }
         }
         return retained;
     }
 
+    private static boolean shouldKeepAllMethods(String name, Set<String> roots) {
+        if (roots.contains(name)) return true;
+
+        return name.startsWith(ROOT + "common/entity/base/") ||
+            name.startsWith(ROOT + "common/entity/component/") ||
+            name.startsWith(ROOT + "common/entity/ai/") ||
+            name.startsWith(ROOT + "common/entity/utils/") ||
+            name.startsWith(ROOT + "common/entity/mob/lushsaur/") ||
+            name.startsWith(ROOT + "common/entity/mob/chorusoatl/") ||
+            name.startsWith(ROOT + "common/entity/mob/sculksaur/") ||
+            name.startsWith(ROOT + "common/block/eggs/") ||
+            name.equals(ROOT + "common/block/entity/egg/BlockEntityLushsaurEgg") ||
+            name.equals(ROOT + "common/block/entity/egg/BlockEntityChorusoatlEgg") ||
+            name.equals(ROOT + "common/entity/projectile/ChorusoatlSpitEntity") ||
+            name.equals(ROOT + "common/effect/MobEffectDazed") ||
+            name.equals(ROOT + "common/particle/ADParticles") ||
+            name.startsWith(ROOT + "client/model/render/entity/mob/LushsaurClient") ||
+            name.startsWith(ROOT + "client/model/render/entity/mob/ChorusoatlClient") ||
+            name.startsWith(ROOT + "client/model/render/entity/mob/SculksaurClient") ||
+            name.startsWith(ROOT + "client/model/render/block/DinoEggClient") ||
+            name.startsWith(ROOT + "client/animation/player/riding/OnLushsaurPlayerAnimations") ||
+            name.startsWith(ROOT + "client/animation/player/riding/OnChorusoatlPlayerAnimations") ||
+            name.equals(ROOT + "util/ResourceSupplier") ||
+            name.equals(ROOT + "util/ClientUtil") ||
+            name.equals(ROOT + "util/IModifiedArrow") ||
+            name.equals(ROOT + "common/trigger/SpottedEntityTrigger") ||
+            name.equals(ROOT + "common/trigger/ADCriteriaTriggers") ||
+            name.equals(ROOT + "server/ServerConfig") ||
+            name.equals(ROOT + "entity/ForgeEntityPart");
+    }
+
+    private static void requestMethod(
+        String owner, String methodName, String descriptor,
+        Map<String, ClassNode> nodes, Map<String, Set<String>> requestedMethods,
+        Set<String> retained, Deque<String> classQueue
+    ) {
+        if (owner == null || !owner.startsWith(ROOT) || !nodes.containsKey(owner)) return;
+
+        if (retained.add(owner)) classQueue.addLast(owner);
+
+        ClassNode node = nodes.get(owner);
+        boolean found = false;
+        for (MethodNode method : node.methods) {
+            if (method.name.equals(methodName) && method.desc.equals(descriptor)) {
+                found = true;
+                break;
+            }
+        }
+        if (found) {
+            String key = methodName + descriptor;
+            if (requestedMethods.computeIfAbsent(owner, k -> new HashSet<>()).add(key) &&
+                PROCESSED_METHODS.getOrDefault(owner, Set.of()).contains(key)) {
+                classQueue.addLast(owner);
+            } else if (!PROCESSED_METHODS.getOrDefault(owner, Set.of()).contains(key) &&
+                       !classQueue.contains(owner)) {
+                classQueue.addLast(owner);
+            }
+        }
+    }
+
     private static void addConstantWithMethodRefs(
         Set<String> refs, Object value, Map<String, ClassNode> nodes,
-        Map<String, Set<String>> extraMethods, Deque<String> queue, Set<String> retained
+        Map<String, Set<String>> requestedMethods, Set<String> retained,
+        Deque<String> classQueue
     ) {
         if (value instanceof Handle handle) {
             addType(refs, handle.getOwner());
             addDescriptor(refs, handle.getDesc());
-            if (handle.getOwner().startsWith(ROOT) && nodes.containsKey(handle.getOwner())) {
-                String key = handle.getName() + handle.getDesc();
-                Set<String> selected = extraMethods.computeIfAbsent(handle.getOwner(), k -> new HashSet<>());
-                if (selected.add(key) && retained.contains(handle.getOwner())) {
-                    queue.addLast(handle.getOwner());
-                }
-            }
+            requestMethod(handle.getOwner(), handle.getName(), handle.getDesc(),
+                nodes, requestedMethods, retained, classQueue);
         } else if (value instanceof Type type) {
             if (type.getSort() == Type.OBJECT) addType(refs, type.getInternalName());
             else if (type.getSort() == Type.ARRAY) addDescriptor(refs, type.getDescriptor());
         } else if (value instanceof ConstantDynamic dynamic) {
             addDescriptor(refs, dynamic.getDescriptor());
-            addConstantWithMethodRefs(refs, dynamic.getBootstrapMethod(), nodes, extraMethods, queue, retained);
+            addConstantWithMethodRefs(refs, dynamic.getBootstrapMethod(), nodes,
+                requestedMethods, retained, classQueue);
             for (int i = 0; i < dynamic.getBootstrapMethodArgumentCount(); i++) {
-                addConstantWithMethodRefs(refs, dynamic.getBootstrapMethodArgument(i), nodes, extraMethods, queue, retained);
+                addConstantWithMethodRefs(refs, dynamic.getBootstrapMethodArgument(i), nodes,
+                    requestedMethods, retained, classQueue);
             }
+        }
+    }
+
+    private static void stripUnreferencedMethods(Set<String> retained, Map<String, ClassNode> nodes) {
+        for (String name : retained) {
+            ClassNode owner = nodes.get(name);
+            if (owner == null) continue;
+            Set<String> processed = PROCESSED_METHODS.getOrDefault(name, Set.of());
+            owner.methods.removeIf(method -> !processed.contains(method.name + method.desc));
         }
     }
 
