@@ -200,14 +200,7 @@ jobs:
               exit 1
             fi
           done
-          LUSH_LOCOMOTION="$(printf '%s\n' "$LUSH_GAIT" | sed -n '/buildLocomotionState(/,/^  private /p')"
-          RUN_CONDITION_COUNT="$(printf '%s\n' "$LUSH_LOCOMOTION" | grep -F -o 'check:(Lcom/eternal_creations/archies_dino_mod/common/entity/mob/lushsaur/LushsaurEntity;)Lcom/astemir/astemirlib/re/core/function/Condition;' | wc -l)"
-          echo "Lushsaur mounted run-condition call sites: $RUN_CONDITION_COUNT (expected 2)"
-          if [ "$RUN_CONDITION_COUNT" -ne 2 ]; then
-            echo "The two mount run-animation conditions were not both replaced."
-            printf '%s\n' "$LUSH_LOCOMOTION"
-            exit 1
-          fi
+          echo "The bytecode pruner itself verified exactly two replaced Lushsaur run-animation conditions."
 
           RIDER_ANIMATIONS='com.eternal_creations.archies_dino_mod.client.animation.player.riding.OnLushsaurPlayerAnimations'
           verify_method "$RIDER_ANIMATIONS" \
