@@ -250,16 +250,14 @@ jobs:
                           config["client"] = []
                           config["server"] = []
                           content = (json.dumps(config, indent=2) + "\n").encode("utf-8")
-                      # Astemir RE mixins stay disabled for this diagnostic server launch.
-                      elif info.filename == nested_name:
-                          content = strip_nested_mixins(content)
+                      # Keep the original Astemir RE manifest and MixinConfigs for this launch.
                       changed.writestr(info, content)
               os.replace(temp_name, smoke_jar)
           except Exception:
               Path(temp_name).unlink(missing_ok=True)
               raise
 
-          print("Diagnostic-only smoke copy: required Sculksaur mixins plus arrow and mount accessors; PlayerMixin excluded; Astemir RE MixinConfigs disabled")
+          print("Diagnostic-only smoke copy: required Sculksaur mixins plus arrow and mount accessors; PlayerMixin excluded; Astemir RE MixinConfigs enabled")
           PY
           printf 'eula=true\n' > build/smoke/eula.txt
           python3 - <<'PY'
