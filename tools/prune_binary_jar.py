@@ -39,7 +39,6 @@ KEEP_MIXINS = {
         "CriteriaTriggersAccessor",
         "EntityAccessor",
         "PlayerListMixin",
-        "PlayerMixin",
         "sculksaur.PrimaryLevelDataMixin",
         "sculksaur.SculkShriekerBlockEntityMixin",
         "sculksaur.WalkNodeEvaluatorAccessor",
