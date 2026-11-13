@@ -1077,15 +1077,6 @@ public final class JarPruner {
                 "Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;",
             false
         );
-        InvokeDynamicInsnNode runCondition = new InvokeDynamicInsnNode(
-            "check",
-            "(" + entityDescriptor + ")L" + conditionInternal + ";",
-            lambdaMetafactory,
-            Type.getMethodType("()Z"),
-            new Handle(Opcodes.H_INVOKESTATIC, owner.name, helperName, helperDescriptor, false),
-            Type.getMethodType("()Z")
-        );
-
         int patchedConditions = 0;
         for (AbstractInsnNode insn : build.instructions.toArray()) {
             if (!(insn instanceof MethodInsnNode call) ||
@@ -1101,7 +1092,14 @@ public final class JarPruner {
             }
 
             build.instructions.set(receiver, new VarInsnNode(Opcodes.ALOAD, 1));
-            build.instructions.set(call, runCondition);
+            build.instructions.set(call, new InvokeDynamicInsnNode(
+                "check",
+                "(" + entityDescriptor + ")L" + conditionInternal + ";",
+                lambdaMetafactory,
+                Type.getMethodType("()Z"),
+                new Handle(Opcodes.H_INVOKESTATIC, owner.name, helperName, helperDescriptor, false),
+                Type.getMethodType("()Z")
+            ));
             patchedConditions++;
         }
 
