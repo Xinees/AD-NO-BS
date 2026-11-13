@@ -175,7 +175,7 @@ public final class JarPruner {
 
         Set<String> retained = dependencyClosure(roots, nodes);
         stripUnreferencedMethods(retained, nodes);
-        verifyCommonClientRendererCalls(nodes);
+        verifyCommonClientRendererCalls(retained, nodes);
         printPruneDiagnostics(retained, nodes);
 
         Map<String, byte[]> transformedClasses = new HashMap<>();
@@ -1294,7 +1294,7 @@ public final class JarPruner {
         }
     }
 
-    private static void verifyCommonClientRendererCalls(Map<String, ClassNode> nodes) {
+    private static void verifyCommonClientRendererCalls(Set<String> retained, Map<String, ClassNode> nodes) {
         String commonClientName = ROOT + "client/CommonClient";
         ClassNode commonClient = nodes.get(commonClientName);
         if (commonClient == null) {
@@ -1309,6 +1309,49 @@ public final class JarPruner {
         if (!helperDeclared) {
             throw new IllegalStateException("CommonClient is missing registerBlockEntityRenderer" +
                 helperDescriptor);
+        }
+
+        String resourceSupplierName = ROOT + "util/ResourceSupplier";
+        List<String> invalidSupplierCalls = new ArrayList<>();
+        for (String retainedName : retained) {
+            ClassNode retainedClass = nodes.get(retainedName);
+            if (retainedClass == null) continue;
+            for (MethodNode retainedMethod : retainedClass.methods) {
+                for (AbstractInsnNode insn : retainedMethod.instructions) {
+                    if (!(insn instanceof MethodInsnNode call) ||
+                        !call.owner.equals(resourceSupplierName) ||
+                        !call.name.equals("get")) continue;
+                    if (call.getOpcode() != Opcodes.INVOKEVIRTUAL ||
+                        call.itf ||
+                        !call.desc.equals("()Ljava/lang/Object;")) {
+                        invalidSupplierCalls.add(retainedClass.name + "." +
+                            retainedMethod.name + retainedMethod.desc + " -> opcode=" +
+                            call.getOpcode() + ", itf=" + call.itf + ", descriptor=" + call.desc);
+                    }
+                }
+            }
+        }
+        if (!invalidSupplierCalls.isEmpty()) {
+            throw new IllegalStateException("ResourceSupplier.get must be invokevirtual " +
+                "on the ResourceSupplier class:\\n" + String.join("\\n", invalidSupplierCalls));
+        }
+
+        MethodNode entityRendererRegistration = commonClient.methods.stream()
+            .filter(candidate -> candidate.name.equals("registerEntityRenderers") &&
+                candidate.desc.equals("()V"))
+            .findFirst().orElseThrow(() ->
+                new IllegalStateException("Missing CommonClient.registerEntityRenderers()"));
+        int providerLambdas = 0;
+        for (AbstractInsnNode insn : entityRendererRegistration.instructions) {
+            if (!(insn instanceof InvokeDynamicInsnNode dynamic) ||
+                !dynamic.desc.equals("()Lnet/minecraft/client/renderer/entity/EntityRendererProvider;")) continue;
+            providerLambdas++;
+            if (!dynamic.name.equals("m_174009_")) {
+                throw new IllegalStateException("EntityRendererProvider lambda has wrong SAM name: " + dynamic.name);
+            }
+        }
+        if (providerLambdas != 1) {
+            throw new IllegalStateException("Expected exactly one NoopRenderer provider lambda, found " + providerLambdas);
         }
 
         int calls = 0;
