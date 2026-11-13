@@ -19,6 +19,8 @@ java {
     withSourcesJar()
 }
 
+jarJar.enable()
+
 minecraft {
     mappings channel: project.mapping_channel, version: project.mapping_version
     copyIdeResources = true
@@ -63,34 +65,63 @@ sourceSets.main.resources {
 }
 
 repositories {
+    flatDir { dirs projectDir }
     mavenCentral()
     maven { url = 'https://maven.minecraftforge.net/' }
     maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
 }
 
 configurations {
-    decompileTarget
+    fartTool
 }
 
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-    // Local runtime dependency supplied with the original project.
+    // Compile against the original library and bundle its untouched runtime JAR.
     implementation fg.deobf(files('astemirlib_re-1.20.1-forge-1.2.98-SNAPSHOT.jar'))
+    jarJar(group: 'local', name: 'astemirlib_re-1.20.1-forge', version: '1.2.98-SNAPSHOT')
 
-    // The original Forge JAR is resolved through ForgeGradle so CFR sees
-    // development (official/Mojmap) names instead of production SRG names.
-    decompileTarget fg.deobf(files('transfer/ec_ad-forge-1.20.1-1.0.4.jar'))
+    // Forge production bytecode uses SRG names; this tool remaps a working copy
+    // to the official names before CFR creates recovery sources.
+    fartTool 'net.minecraftforge:ForgeAutoRenamingTool:1.1.2:all'
 
     compileOnly 'org.spongepowered:mixin:0.8.5'
 }
 
+tasks.register('remapOriginalJar', JavaExec) {
+    group = 'recovery'
+    description = 'Remaps a working copy of the original mod JAR from SRG to official mappings.'
+    dependsOn tasks.named('createSrgToMcp')
+
+    File inputJar = file('transfer/ec_ad-forge-1.20.1-1.0.4.jar')
+    File mappingFile = file("${buildDir}/createSrgToMcp/output.srg")
+    File outputJar = file("${buildDir}/recovery/ec_ad-official.jar")
+
+    inputs.file inputJar
+    inputs.file mappingFile
+    outputs.file outputJar
+
+    classpath = configurations.fartTool
+    mainClass = 'net.minecraftforge.fart.Main'
+    args '--input', inputJar.absolutePath,
+         '--output', outputJar.absolutePath,
+         '--map', mappingFile.absolutePath
+
+    doFirst {
+        if (!inputJar.isFile()) throw new GradleException("Missing original mod JAR: ${inputJar}")
+        if (!mappingFile.isFile()) throw new GradleException("Missing SRG-to-official mappings: ${mappingFile}")
+        outputJar.parentFile.mkdirs()
+    }
+}
+
 tasks.register('recoverSources') {
     group = 'recovery'
+    dependsOn tasks.named('remapOriginalJar')
     description = 'Deobfuscates and decompiles the original mod JAR, then extracts its resources.'
 
     onlyIf {
-        !file('src/main/java/com/eternal_creations/archies_dino_mod/ArchiesDinosaurs.java').exists()
+        project.hasProperty('forceRecover') || !file('src/main/java/com/eternal_creations/archies_dino_mod/ArchiesDinosaurs.java').exists()
     }
 
     doLast {
@@ -98,7 +129,7 @@ tasks.register('recoverSources') {
         File sourceOutput = file('src/main/java')
         File resourceOutput = file('src/main/resources')
         File cfrJar = file("${buildDir}/tools/cfr-0.152.jar")
-        File mappedJar = configurations.decompileTarget.singleFile
+        File mappedJar = file("${buildDir}/recovery/ec_ad-official.jar")
 
         if (!inputJar.isFile()) {
             throw new GradleException("Missing original mod JAR: ${inputJar}")
@@ -115,6 +146,8 @@ tasks.register('recoverSources') {
             }
         }
 
+        delete sourceOutput
+        delete resourceOutput
         sourceOutput.mkdirs()
         javaexec {
             classpath = files(cfrJar)
@@ -174,6 +207,10 @@ jar {
 }
 
 jar.finalizedBy('reobfJar')
+
+tasks.named('build').configure {
+    dependsOn tasks.named('jarJar')
+}
 
 publishing {
     publications {
