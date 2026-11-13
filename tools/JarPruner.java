@@ -163,6 +163,7 @@ public final class JarPruner {
         patchEntitySettings(nodes.get(ROOT + "server/ServerConfig$EntitySettings"));
         patchServerConfig(nodes.get(ROOT + "server/ServerConfig"));
         patchNetworkHelper(nodes.get(ROOT + "platform/ForgeNetworkHelper"));
+        patchKeyMappings(nodes.get(ROOT + "client/ADKeyMappings"));
         patchAbstractArrowMixin(nodes.get(ROOT + "mixin/AbstractArrowMixin"));
         patchPlayerMixin(nodes.get(ROOT + "mixin/PlayerMixin"));
         removeMethods(nodes.get(ROOT + "mixin/client/LevelRendererMixin"),
@@ -869,6 +870,49 @@ public final class JarPruner {
     private static void removeMethods(ClassNode owner, Set<String> methodNames) {
         if (owner == null) return;
         owner.methods.removeIf(method -> methodNames.contains(method.name));
+    }
+
+    private static void patchKeyMappings(ClassNode owner) {
+        if (owner == null) return;
+
+        boolean removedField = owner.fields.removeIf(field -> field.name.equals("ARMOR_ABILITY"));
+        if (!removedField) {
+            throw new IllegalStateException("Expected ARMOR_ABILITY key mapping field was not found");
+        }
+
+        boolean removedHandler = owner.methods.removeIf(method ->
+            method.name.equals("lambda$static$0") &&
+            method.desc.equals("(Lnet/minecraft/client/player/LocalPlayer;Lnet/minecraft/client/multiplayer/ClientLevel;)V")
+        );
+        if (!removedHandler) {
+            throw new IllegalStateException("Expected armor-ability key handler was not found");
+        }
+
+        boolean removedRegistration = false;
+        for (MethodNode method : owner.methods) {
+            if (!method.name.equals("<clinit>")) continue;
+            AbstractInsnNode start = null;
+            AbstractInsnNode end = null;
+            for (AbstractInsnNode insn : method.instructions.toArray()) {
+                if (start == null && insn instanceof LdcInsnNode ldc &&
+                    "armor".equals(ldc.cst)) {
+                    start = insn;
+                }
+                if (start != null && insn instanceof FieldInsnNode field &&
+                    field.getOpcode() == Opcodes.PUTSTATIC &&
+                    field.owner.equals(owner.name) && field.name.equals("ARMOR_ABILITY")) {
+                    end = field;
+                    break;
+                }
+            }
+            if (start != null && end != null) {
+                removeInclusive(method.instructions, start, end);
+                removedRegistration = true;
+            }
+        }
+        if (!removedRegistration) {
+            throw new IllegalStateException("Could not isolate the armor-ability key registration");
+        }
     }
 
     private static void patchNetworkHelper(ClassNode owner) {
