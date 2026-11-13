@@ -221,7 +221,7 @@ jobs:
             java -jar ../forge-installer.jar --installServer
           )
           cp build/libs/ec_ad-legacy-forge-1.20.1.jar build/smoke/mods/
-          printf 'eula=true\\n' > build/smoke/eula.txt
+          printf 'eula=true\n' > build/smoke/eula.txt
           python3 - <<'PY'
           import pathlib
           import subprocess
@@ -317,7 +317,6 @@ jobs:
             build/libs/ec_ad-legacy-forge-1.20.1.jar
             build/resource-prune-report.txt
             build/audit/original-bytecode-audit.txt
-            astemirlib_re-1.20.1-forge-1.2.98-SNAPSHOT.jar
-            build/smoke/server-smoke.log
+            build/smoke/server-smoke-*.log
           if-no-files-found: ignore
           retention-days: 30
