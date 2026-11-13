@@ -299,7 +299,7 @@ jobs:
               exit 1
             fi
           done
-          for required_layer_marker in 'irem' 'idiv' 'sipush        384' 'double 0.82d' 'double 0.3d' 'double 0.06d'; do
+          for required_layer_marker in 'irem' 'idiv' 'sipush        384' 'double 0.82d' 'double 0.3d' 'double 0.24d'; do
             if ! printf '%s\n' "$SCULK_PARTICLE" | grep -Fq "$required_layer_marker"; then
               echo "Sculksaur Sonic Boom does not contain the expected two-layer shell marker: $required_layer_marker"
               printf '%s\n' "$SCULK_PARTICLE"
