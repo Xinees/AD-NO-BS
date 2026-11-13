@@ -252,7 +252,7 @@ jobs:
                       content = log_path.read_text(encoding="utf-8", errors="replace")
                       if "Done (" in content and not sent:
                           for line in commands:
-                              process.stdin.write(line + "\\n")
+                              process.stdin.write(line + "\n")
                               process.stdin.flush()
                               time.sleep(1)
                           sent = True
