@@ -1,4 +1,4 @@
-name: Direct Legacy JAR Prune - build 25
+name: Direct Legacy JAR Prune - build 26
 
 on:
   push:
@@ -288,12 +288,14 @@ jobs:
             exit 1
           fi
 
-          SCULK_FACTORY_VERBOSE="$(javap -classpath build/classes-pruned.jar -p -c -v "$SCULK_EFFECTS")"
-          python3 - "$SCULK_FACTORY_VERBOSE" <<'PY'
+          SCULK_FACTORY_VERBOSE_FILE="$RUNNER_TEMP/sculksaur-factory-verbose.txt"
+          javap -classpath build/classes-pruned.jar -p -c -v "$SCULK_EFFECTS" > "$SCULK_FACTORY_VERBOSE_FILE"
+          python3 "$SCULK_FACTORY_VERBOSE_FILE" <<'PY'
+          import pathlib
           import re
           import sys
 
-          disassembly = sys.argv[1]
+          disassembly = pathlib.Path(sys.argv[1]).read_text(encoding="utf-8")
 
           def factory_bootstrap_index(name):
               signature = re.compile(
