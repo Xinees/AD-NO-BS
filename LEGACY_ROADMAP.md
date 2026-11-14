@@ -7,9 +7,10 @@
 - The 13-pixel rider displacement was a mistaken interpretation of the desired pig-like passenger pose. It has been removed entirely. Original server and client seat coordinates are now expected to remain untouched.
 - Chorusoatl's original lateral flight banking through `flyingRoll` has been restored. The latest successful roll-preservation test is [CI #189](https://github.com/Xinees/AD-NO-BS/actions/runs/43615959523).
 - Lushsaur and Sculksaur still have only the `RollOnRotation` root operation removed. Their other root operations, including `SmoothBodyRotation` and `GRUMM_ROTATION`, are retained; the GRUMM array index is adjusted after removing the roll entry.
-- The reported occasional 180-degree turns and erratic head tracking are not explained by the roll-removal patch itself. The separate Build99 changes make `SmoothMoveControl` return target yaw directly, rewrite `SmoothBodyControl.m_8121_()` to assign body yaw directly, and make `SmoothLookControl.m_8128_()` apply horizontal targets directly. These are the primary suspects and are being compared against the untouched source JAR before any new turning behavior is committed.
-- Astemir is considering a limited, rate-capped smooth turn to eliminate instant 180-degree snaps. No new turn-rate behavior has been added yet; avoid reintroducing the former sluggish interpolation without measuring its actual per-tick behavior.
-- Current candidate after removing the seat displacement: [CI #192](https://github.com/Xinees/AD-NO-BS/actions/runs/43617463431). The added controller audit is [CI #193](https://github.com/Xinees/AD-NO-BS/actions/runs/43617497398).
+- The occasional 180-degree turns and erratic head tracking were traced to separate Build99 patches, not to removal of `RollOnRotation`. Those patches had bypassed `SmoothMoveControl.smoothRotlerp`, replaced `SmoothBodyControl.m_8121_()` with direct body-yaw assignment, and made the horizontal coordinates in `SmoothLookControl.m_8128_()` update immediately.
+- Reverted all three Build99 controller patches in implementation commit [`a57cc2d`](https://github.com/Xinees/AD-NO-BS/commit/a57cc2dd202a7e72fd8d37cb934b9957a9b93be7). The original controller classes are now retained from the source JAR: shortest-angle yaw interpolation (maximum step 45 degrees per tick), original body/head stabilization, and original XYZ look-target interpolation.
+- The `RollOnRotation` removal remains a renderer-only change for Lushsaur and Sculksaur; Chorusoatl's original `flyingRoll` flight banking remains intact. No new custom turn-rate value was added. The existing original turn is already bounded; decide whether it needs further tuning only after observing the restored behavior in-game.
+- The unified current candidate is [CI #195](https://github.com/Xinees/AD-NO-BS/actions/runs/43617699213), from implementation commit `a57cc2d` and workflow/guard commit `321187d`. It passed all checks, verified 468 JAR entries, and produced a 2,480,632-byte JAR in [draft release #195](https://github.com/Xinees/AD-NO-BS/releases/tag/untagged-570a2f8e246daef7f136).
 
 ---
 
@@ -186,16 +187,18 @@ Runner output: `ec_ad-legacy-forge-1.20.1.jar`, **468 entries**, **2,480,309 byt
 - Build110-to-Build111 comparison: 473 entries in both JARs, no added/removed entries, and only `SculksaurEffects.class` plus `SmoothLookControl.class` changed.
 - **Runtime status:** Build111 passed CI and post-download archive/bytecode inspection only. It still needed an in-game check for Sculksaur's spawn/idle gaze and the shape/speed/spacing of Sonic Boom.
 
-### Smooth turning — main controls changed, task still open
+### Mob turning and head tracking — original controllers restored
 
-Build103 includes the Build99 direct-turning changes:
-- `SmoothMoveControl`: replaced yaw interpolation in grounded walking, climbing, and aerial movement with a direct target-yaw result. Separate aerial pitch interpolation remains.
-- `SmoothBodyControl`: body yaw is assigned directly from current mob yaw when `canRotate` allows it. Existing action rotation locks and the Player-passenger body-rotation exception remain.
-- `SmoothLookControl`: target coordinates are applied directly and vanilla yaw/pitch limits are raised to 360 degrees while the original rotation gate and target timer allow turning.
-- **Open audit:** Sculksaur's original `createLocomotion()` also calls `EntityLocomotion.Builder.turnFactor(0.003f)`. The implementation belongs to the external Astemir RE dependency. The exact Astemir RE 1.2.98 JAR is not present in this workspace, so its precise effect is not verified. This parameter remains unchanged; Priority 2 is **partially implemented, not closed**.
-- The original mod JAR and Astemir RE dependency remain untouched. Astemir RE remains a separate mandatory dependency and is not bundled.
+The Build99/Build103 direct-turning rewrite is superseded and has been removed from the active pruner in commit `a57cc2d`.
 
-**Runtime status:** Build103 has not yet been tested in Minecraft. Once the launch/resource issues are retested, confirm mounted Lushsaur turning, idle/wander/chase/target-switch turns for all three mobs, locked actions, and the Sculksaur turn behavior after the `turnFactor` audit.
+- `SmoothMoveControl`: original shortest-angle `smoothRotlerp` is restored for grounded walking, climbing, and aerial yaw. The original helper clamps each yaw step to 45 degrees per tick. Original vertical/pitch handling is also retained.
+- `SmoothBodyControl`: the entire original body/head stabilization algorithm is retained, including action rotation gates, the Player-passenger lock, head-stability timing, and smooth body/head recovery.
+- `SmoothLookControl`: the original interpolation of `smoothX`, `smoothY`, and `smoothZ` is retained, along with its original yaw/pitch limits and rotation guards.
+- The removal of `RollOnRotation` is separate and renderer-only; it does not replace or disable these AI controls.
+- **Open audit:** Sculksaur's original `createLocomotion()` also calls `EntityLocomotion.Builder.turnFactor(0.003f)`. The implementation belongs to the external Astemir RE dependency. The exact Astemir RE 1.2.98 JAR is not present in this workspace, so its precise effect remains unverified. Do not alter this value without inspecting that exact dependency.
+- No new custom turning speed has been added. First test the restored original motion. If further smoothing is still required, it should be a narrowly scoped, shortest-angle rate cap rather than a rewrite of all three controllers.
+
+**CI status:** [run #195](https://github.com/Xinees/AD-NO-BS/actions/runs/43617699213) passes controller-preservation and structural checks. **Runtime status:** still requires in-game acceptance testing for idle/wander/chase/target-switch turns, head tracking, action locks, all three mobs, and the Sculksaur `turnFactor` question.
 
 ### Previous completed visual change — Build 94
 
@@ -268,11 +271,11 @@ Do not remove or rewrite the entire `SculksaurEffects` system. Keep unrelated id
 5. Confirm all unrelated Sculksaur particle effects still work.
 6. Confirm attack damage, knockback, range, sound, cooldown, and timing match the pre-change behavior.
 
-## Priority 2 — remove smooth turning from all retained mobs
+## Priority 2 — natural, bounded turning and stable head tracking
 
-**Build 99 implements the main control-path change; this task is not yet closed.** The slow interpolation in the custom movement, body, and look controls has been replaced with direct yaw/look targeting for all three retained mobs. Do not call the work complete until the separate Sculksaur `turnFactor(0.003f)` setting is understood and checked, and the result has been tested in-game.
+**Current implementation:** original `SmoothMoveControl`, `SmoothBodyControl`, and `SmoothLookControl` behavior has been restored. Build99/Build103 direct-turning patches are no longer part of the active pruner. The latest unified candidate is [CI #195](https://github.com/Xinees/AD-NO-BS/actions/runs/43617699213).
 
-The smooth turning currently looks bad. The request is to remove it, not to make it slightly faster. Do not respond by merely adjusting the interpolation values.
+The requirement is no longer to force instant turns. Sudden 180-degree snaps should be avoided while preserving responsive movement and the original body/head stabilization. The original `smoothRotlerp` already uses shortest-angle yaw interpolation with a maximum 45-degree step per tick. Do not replace it with an arbitrary, slower interpolation before testing this restored baseline.
 
 This applies to all three retained mobs:
 
@@ -280,14 +283,13 @@ This applies to all three retained mobs:
 - Chorusoatl
 - Sculksaur
 
-The original classes for all three override `m_7560_()` and construct the custom `SmoothBodyControl`. They also use the custom `SmoothMoveControl` and `SmoothLookControl`. These shared controls are the primary source of the slow interpolation.
+The original classes use the custom `SmoothMoveControl`, `SmoothBodyControl`, and `SmoothLookControl`. Their original algorithms are now retained. The no-roll visual patch is separate and must not modify these controls.
 
-### Build 99 implementation
+### Current controller state
 
-- `SmoothMoveControl`: replaced the yaw interpolation call in grounded walking, climbing, and aerial movement with a direct target-yaw return. The separate pitch interpolation in aerial movement is preserved.
-- `SmoothBodyControl`: body yaw is assigned directly from the mob's current yaw when `canRotate` permits it. Its original action rotation lock and the exception while the mob is being controlled by a Player passenger remain.
-- `SmoothLookControl`: look target coordinates are applied directly and vanilla maximum yaw/pitch changes are set to 360 degrees while `canRotate` and the target timer allow rotation. Existing getter-level `canRotate` guards remain.
-- CI run #99 verifies the replaced bytecode, direct yaw helper, preserved aerial pitch easing, body/player lock branches, and look-control rotation gates.
+- `SmoothMoveControl`: original `smoothRotlerp` calls restored for 3D movement, climbing, and walking; maximum yaw step is 45 degrees per tick.
+- `SmoothBodyControl`: original head-stability timer, smooth body rotation, smooth return of head toward the front, action lock, and Player-passenger exception restored.
+- `SmoothLookControl`: original interpolation for X/Y/Z look target and original yaw/pitch speed limits restored.
 
 ### Unresolved Sculksaur locomotion parameter
 
