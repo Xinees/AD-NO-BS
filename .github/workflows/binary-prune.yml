@@ -239,8 +239,14 @@ jobs:
           SCULK_EFFECTS='com.eternal_creations.archies_dino_mod.client.particle.effect.SculksaurEffects'
           SCULK_CONTEXT='Lcom/astemir/astemirlib/re/client/model/core/animation/event/AnimationEvent$Context;'
           verify_method "$SCULK_EFFECTS" \
-            'archiesDinoMod$spawnSculksaurSonicBoomSphere(' \
+            'archiesDinoMod$spawnSculksaurSonicBoomFirstSphere(' \
             "($SCULK_CONTEXT)V"
+          verify_method "$SCULK_EFFECTS" \
+            'archiesDinoMod$spawnSculksaurSonicBoomSecondSphere(' \
+            "($SCULK_CONTEXT)V"
+          verify_method "$SCULK_EFFECTS" \
+            'archiesDinoMod$spawnSculksaurSonicBoomSphereAt(' \
+            '(Lnet/minecraft/world/level/Level;DDD)V'
           verify_method "$SCULK_EFFECTS" \
             'archiesDinoMod$spawnSculksaurSonicBoomParticle(' \
             '(Lnet/minecraft/world/level/Level;DDDI)V'
