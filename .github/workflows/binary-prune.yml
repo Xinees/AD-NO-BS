@@ -286,7 +286,7 @@ jobs:
           echo "Verified Lushsaur/Sculksaur lateral root roll is removed while original Chorusoatl flying roll remains."
 
           LUSH_ENTITY_BYTECODE="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.common.entity.mob.lushsaur.LushsaurEntity)"
-          LUSH_MOUNT_METHOD="$(awk '/ createMount\\(/ { capture=1; print; next } capture && /^  (public|private|protected) / { exit } capture { print }' <<< "$LUSH_ENTITY_BYTECODE")"
+          LUSH_MOUNT_METHOD="$(awk '/ createMount\(/ { capture=1; print; next } capture && /^  (public|private|protected) / { exit } capture { print }' <<< "$LUSH_ENTITY_BYTECODE")"
           if [[ "$LUSH_MOUNT_METHOD" != *"passengerOffset"* ||
                 "$LUSH_MOUNT_METHOD" != *"fconst_1"* ||
                 "$LUSH_MOUNT_METHOD" == *"0.1875f"* ]]; then
