@@ -994,8 +994,12 @@ public final class JarPruner {
             .findFirst()
             .orElseThrow(() -> new IllegalStateException("ADPlayerAnimations.init() is missing"));
         clearMethod(init);
+        init.instructions.add(new InsnNode(Opcodes.ICONST_2));
+        init.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
+            ROOT + "client/animation/player/attachable/LushsaurMaceAnimations",
+            "init", "(I)V", false));
         init.instructions.add(new InsnNode(Opcodes.RETURN));
-        init.maxStack = 0;
+        init.maxStack = 1;
         init.maxLocals = 0;
     }
 
