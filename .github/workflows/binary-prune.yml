@@ -131,7 +131,7 @@ jobs:
             local descriptor="$3"
             local output
             output="$(javap -classpath build/classes-pruned.jar -p -s "$class_name")"
-            if ! printf '%s\n' "$output" | grep -F -A1 "$method_name" | grep -Fq "descriptor: $descriptor"; then
+            if ! grep -F -A1 "$method_name" <<< "$output" | grep -F "descriptor: $descriptor" >/dev/null; then
               echo "Missing required callback $class_name.$method_name $descriptor"
               exit 1
             fi
@@ -171,11 +171,11 @@ jobs:
             fi
           done
 
-          LOCAL_PLAYER_HANDLER="$(printf '%s\n' "$LOCAL_PLAYER_SPRINT" | awk '
+          LOCAL_PLAYER_HANDLER="$(awk '
             /^[[:space:]]+public void archiesDinoMod\$allowLushsaurSprint\(/ { capture=1 }
             capture && /^[[:space:]]+(private|public|protected) / && $0 !~ /archiesDinoMod\$allowLushsaurSprint\(/ { exit }
             capture { print }
-          ')"
+          ' <<< "$LOCAL_PLAYER_SPRINT")"
           BOX_LINE="$(printf '%s\n' "$LOCAL_PLAYER_HANDLER" | grep -nF 'Boolean.TRUE' | cut -d: -f1 || true)"
           SET_LINE="$(printf '%s\n' "$LOCAL_PLAYER_HANDLER" | grep -nF 'CallbackInfoReturnable.setReturnValue' | cut -d: -f1 || true)"
           if [ -z "$BOX_LINE" ] || [ -z "$SET_LINE" ] || [ "$BOX_LINE" -ge "$SET_LINE" ] || \
@@ -187,7 +187,7 @@ jobs:
           echo "Verified Lushsaur sprint callback boxes its boolean return value as Boolean.TRUE."
 
           LUSH_SPRINT_CONTROL="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.common.entity.mob.lushsaur.LushsaurEntity)"
-          if ! printf '%s\n' "$LUSH_SPRINT_CONTROL" | grep -F -A5 'public boolean m_264410_();' | grep -Fq 'iconst_1'; then
+          if ! grep -F -A5 'public boolean m_264410_();' <<< "$LUSH_SPRINT_CONTROL" | grep -F 'iconst_1' >/dev/null; then
             echo "Lushsaur canSprint override must return true for vanilla mounted sprint input."
             printf '%s\n' "$LUSH_SPRINT_CONTROL"
             exit 1
@@ -220,7 +220,7 @@ jobs:
           AD_PLAYER_ANIMATIONS='com.eternal_creations.archies_dino_mod.client.animation.player.ADPlayerAnimations'
           AD_PLAYER_BYTECODE="$(javap -classpath build/classes-pruned.jar -p -c "$AD_PLAYER_ANIMATIONS")"
           for forbidden_layer in 'OnLushsaurPlayerAnimations.init' 'OnChorusoatlPlayerAnimations.init'; do
-            if printf '%s\n' "$AD_PLAYER_BYTECODE" | grep -Fq "$forbidden_layer"; then
+            if grep -Fq "$forbidden_layer" <<< "$AD_PLAYER_BYTECODE"; then
               echo "Special mount-specific player animation is still registered: $forbidden_layer"
               printf '%s\n' "$AD_PLAYER_BYTECODE"
               exit 1
@@ -230,7 +230,7 @@ jobs:
 
           MOUNT_COMPONENT='com.eternal_creations.archies_dino_mod.common.entity.component.MountComponent'
           MOUNT_COMPONENT_BYTECODE="$(javap -classpath build/classes-pruned.jar -p -c "$MOUNT_COMPONENT")"
-          MOUNT_TICK="$(printf '%s\n' "$MOUNT_COMPONENT_BYTECODE" | awk '/tickRidden\(/ { capture=1; print; next } capture && /^  (public|private|protected) / { exit } capture { print }')" 
+          MOUNT_TICK="$(awk '/tickRidden\(/ { capture=1; print; next } capture && /^  (public|private|protected) / { exit } capture { print }' <<< "$MOUNT_COMPONENT_BYTECODE")" 
           for required_control in 'Player.f_20900_' 'Player.f_20902_' 'LushsaurEntity' 'ChorusoatlEntity'; do
             if ! printf '%s\n' "$MOUNT_TICK" | grep -Fq "$required_control"; then
               echo "Movement-gated mount steering is missing $required_control"
@@ -245,14 +245,14 @@ jobs:
           CHORUS_ROLL_CLIENT='com.eternal_creations.archies_dino_mod.client.model.render.entity.mob.ChorusoatlClient'
           for C in "$LUSH_ROLL_CLIENT" "$SCULK_ROLL_CLIENT"; do
             DISASSEMBLY="$(javap -classpath build/classes-pruned.jar -p -c "$C")"
-            if printf '%s\n' "$DISASSEMBLY" | grep -Fq 'RollOnRotation'; then
+            if grep -Fq 'RollOnRotation' <<< "$DISASSEMBLY"; then
               echo "Unwanted lateral root roll remains in $C"
               printf '%s\n' "$DISASSEMBLY"
               exit 1
             fi
           done
           CHORUS_ROLL="$(javap -classpath build/classes-pruned.jar -p -c "$CHORUS_ROLL_CLIENT")"
-          if printf '%s\n' "$CHORUS_ROLL" | grep -Fq 'flyingRoll'; then
+          if grep -Fq 'flyingRoll' <<< "$CHORUS_ROLL"; then
             echo "Chorusoatl flying lateral roll remains in the model animation."
             printf '%s\n' "$CHORUS_ROLL"
             exit 1
@@ -275,7 +275,7 @@ jobs:
               exit 1
             fi
           done
-          LUSH_MENU="$(printf '%s\n' "$LUSH_ENTITY_BYTECODE" | awk '/m_213583_\(/ { capture=1; print; next } capture && /^  (public|private|protected) / { exit } capture { print }')"
+          LUSH_MENU="$(awk '/m_213583_\(/ { capture=1; print; next } capture && /^  (public|private|protected) / { exit } capture { print }' <<< "$LUSH_ENTITY_BYTECODE")"
           if [[ "$LUSH_MENU" != *"return"* ||
                 "$LUSH_MENU" == *"invoke"* ||
                 "$LUSH_MENU" == *"aload"* ||
@@ -303,7 +303,7 @@ jobs:
 
           LUSH_EFFECTS='com.eternal_creations.archies_dino_mod.client.particle.effect.LushsaurEffects'
           LUSH_EFFECTS_BYTECODE="$(javap -classpath build/classes-pruned.jar -p -c "$LUSH_EFFECTS")"
-          LUSH_RUN_TRAIL="$(printf '%s\n' "$LUSH_EFFECTS_BYTECODE" | awk '/lambda\$static\$3\(/ { capture=1; print; next } capture && /^  (private|public|protected) / { exit } capture { print }')"
+          LUSH_RUN_TRAIL="$(awk '/lambda\$static\$3\(/ { capture=1; print; next } capture && /^  (private|public|protected) / { exit } capture { print }' <<< "$LUSH_EFFECTS_BYTECODE")"
           if printf '%s\n' "$LUSH_RUN_TRAIL" | grep -Eq 'spawnParticle|spawnBlockParticle'; then
             echo "Lushsaur run dust/green particle callback is still active."
             printf '%s\n' "$LUSH_RUN_TRAIL"
@@ -316,11 +316,11 @@ jobs:
 
           CHORUS_EFFECTS='com.eternal_creations.archies_dino_mod.client.particle.effect.ChorusoatlEffects'
           CHORUS_EFFECTS_BYTECODE="$(javap -classpath build/classes-pruned.jar -p -c "$CHORUS_EFFECTS")"
-          CHORUS_WALK="$(printf '%s\n' "$CHORUS_EFFECTS_BYTECODE" | awk '
+          CHORUS_WALK="$(awk '
             /putstatic .*Field WALK_EFFECTS/ { if (capture) { print buffer $0; exit } }
             /invokestatic .*AnimationEventTrack.of:/ { buffer=$0 "\n"; capture=1; next }
             capture { buffer=buffer $0 "\n" }
-          ')"
+          ' <<< "$CHORUS_EFFECTS_BYTECODE")"
           if printf '%s\n' "$CHORUS_WALK" | grep -F 'EMITTER_STOMP' >/dev/null; then
             echo "Chorusoatl WALK_EFFECTS still emits footstep dust."
             printf '%s\n' "$CHORUS_WALK"
@@ -337,9 +337,9 @@ jobs:
 
           SCULK_EFFECTS='com.eternal_creations.archies_dino_mod.client.particle.effect.SculksaurEffects'
           SCULK_DISASSEMBLY="$(javap -classpath build/classes-pruned.jar -p -c "$SCULK_EFFECTS")"
-          SCULK_STEP="$(printf '%s\n' "$SCULK_DISASSEMBLY" | awk '/lambda\$stepEvent\$10\(/ { capture=1; print; next } capture && /^  (private|public|protected) / { exit } capture { print }')"
+          SCULK_STEP="$(awk '/lambda\$stepEvent\$10\(/ { capture=1; print; next } capture && /^  (private|public|protected) / { exit } capture { print }' <<< "$SCULK_DISASSEMBLY")"
           for forbidden_step_particle in 'spawnBlockParticle' 'spawnParticle'; do
-            if printf '%s\n' "$SCULK_STEP" | grep -Fq "$forbidden_step_particle"; then
+            if grep -Fq "$forbidden_step_particle" <<< "$SCULK_STEP"; then
               echo "Sculksaur footstep particle still exists: $forbidden_step_particle"
               printf '%s\n' "$SCULK_STEP"
               exit 1
@@ -355,11 +355,11 @@ jobs:
           
           SCULK_EFFECTS='com.eternal_creations.archies_dino_mod.client.particle.effect.SculksaurEffects'
           SCULK_DISASSEMBLY="$(javap -classpath build/classes-pruned.jar -p -c "$SCULK_EFFECTS")"
-          SCULK_FINAL="$(printf '%s\n' "$SCULK_DISASSEMBLY" | awk '
+          SCULK_FINAL="$(awk '
             /^[[:space:]]+private static void lambda\$explosionFinalEvent\$12\(/ { capture=1 }
             capture && /^[[:space:]]+(private|public|protected) / && $0 !~ /lambda\$explosionFinalEvent\$12\(/ { exit }
             capture { print }
-          ')"
+          ' <<< "$SCULK_DISASSEMBLY")"
           if ! printf '%s\n' "$SCULK_FINAL" | grep -F 'ShakeUtil.shakeExplosion' >/dev/null; then
             echo "Sculksaur explosion event must keep its original camera shake."
             printf '%s\n' "$SCULK_FINAL"
@@ -373,11 +373,11 @@ jobs:
             fi
           done
 
-          SCULK_GROUND="$(printf '%s\n' "$SCULK_DISASSEMBLY" | awk '
+          SCULK_GROUND="$(awk '
             /^[[:space:]]+private static void lambda\$explosionGroundEvent\$11\(/ { capture=1 }
             capture && /^[[:space:]]+(private|public|protected) / && $0 !~ /lambda\$explosionGroundEvent\$11\(/ { exit }
             capture { print }
-          ')"
+          ' <<< "$SCULK_DISASSEMBLY")"
           if printf '%s\n' "$SCULK_GROUND" | grep -F 'spawnParticle' >/dev/null; then
             echo "Sculksaur ground explosion callback still emits particles."
             printf '%s\n' "$SCULK_GROUND"
@@ -473,7 +473,7 @@ jobs:
               exit 1
             fi
           done
-          if printf '%s\n' "$SMOOTH_BODY" | grep -Fq 'Mth.m_14189_'; then
+          if grep -Fq 'Mth.m_14189_' <<< "$SMOOTH_BODY"; then
             echo "SmoothBodyControl still contains body-yaw interpolation."
             printf '%s\n' "$SMOOTH_BODY"
             exit 1
@@ -526,7 +526,7 @@ jobs:
             esac
           done
           CHORUS_CONTROL="$(javap -classpath build/classes-pruned.jar -p com.eternal_creations.archies_dino_mod.common.entity.mob.chorusoatl.ChorusoatlEntity)"
-          if printf '%s\n' "$CHORUS_CONTROL" | grep -Fq 'm_6688_('; then
+          if grep -Fq 'm_6688_(' <<< "$CHORUS_CONTROL"; then
             echo "Chorusoatl unexpectedly received the Lushsaur-only no-saddle override."
             exit 1
           fi
@@ -538,7 +538,7 @@ jobs:
           fi
 
           ARROW_MIXIN="$(javap -classpath build/classes-pruned.jar -p -c -v com.eternal_creations.archies_dino_mod.mixin.AbstractArrowMixin)"
-          if printf '%s\n' "$ARROW_MIXIN" | grep -Fq 'archies_Dino_Mod$RIB_BOW_ARROW'; then
+          if grep -Fq 'archies_Dino_Mod$RIB_BOW_ARROW' <<< "$ARROW_MIXIN"; then
             echo "Removed rib-bow data accessor is still referenced by AbstractArrowMixin."
             exit 1
           fi
