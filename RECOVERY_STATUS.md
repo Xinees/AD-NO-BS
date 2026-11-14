@@ -11,6 +11,17 @@
 
 ---
 
+## Follow-up from the first rider screenshot — 2026-11-14
+
+- Removed the mistaken 13-pixel seat displacement completely. The original Lushsaur server `passengerOffset(0, 0, 1)` and client mount-point offsets (saddled Z = 0, unsaddled Z = -0.6) must remain unchanged. The requested vanilla pig-like rider pose is achieved by disabling only the custom rider animation registration.
+- Restored Chorusoatl flight banking: the patch that replaced `flyingRoll.get(partialTick)` with zero was deleted. Successful CI [#189](https://github.com/Xinees/AD-NO-BS/actions/runs/43615959523) verifies the original `flyingRoll` field use and `ChasingFloat.get()` call remain.
+- Lushsaur and Sculksaur keep the no-`RollOnRotation` model change. That patch only edits the renderer's `onInitialize` root-operation array and preserves `SHAKING`, `SmoothBodyRotation`, and `GRUMM_ROTATION`; it does not rewrite AI or mob yaw/look controls.
+- The erratic body/head turning is more plausibly connected to separate Build99 direct-turning changes in `SmoothMoveControl`, `SmoothBodyControl`, and `SmoothLookControl`. CI [#193](https://github.com/Xinees/AD-NO-BS/actions/runs/43617497398) is configured to emit original and pruned method bytecode side by side for exact comparison.
+- CI [#191](https://github.com/Xinees/AD-NO-BS/actions/runs/43617393858) failed because of an incorrectly escaped AWK pattern in the new seat-position check, not because of mod bytecode. The check was corrected in workflow commit `9516d40`; CI #192 tests it. The later diagnostic workflow commit is `9256863`.
+- Smooth turning is a possible next design, not implemented yet. Prefer a bounded shortest-angle yaw step over restoring unmeasured sluggish interpolation.
+
+---
+
 ## Current branch status — 2026-11-14 (Build119)
 
 - Working branch: `binary-prune/legacy`.
@@ -19,7 +30,7 @@
 - **Build119** compiled successfully from the immutable original mod JAR. Renderer descriptors, functional bytecode guards for riding/particles, and final retained-JAR checks all passed in [GitHub Actions run #176](https://github.com/Xinees/AD-NO-BS/actions/runs/43608521634).
 - Runner output: `ec_ad-legacy-forge-1.20.1.jar`, 468 entries, 2,480,309 bytes. Artifact upload alone failed because GitHub Actions artifact storage quota was full; the runner-produced JAR was validated but is not downloadable as a workflow artifact. No SHA-256 was recorded for this runner copy.
 - **Runtime status:** Build119 has not yet been launched in Minecraft. Bytecode/structure verification is not proof of visual/gameplay behavior. Astemir must test the acceptance checklist in `LEGACY_ROADMAP.md`.
-- The current riding pass is implemented in `tools/JarPruner.java`: vanilla passenger pose for Lushsaur/Chorusoatl; 13-pixel backward seat correction for Lushsaur only; no Lushsaur mount menu and E opens player inventory; lateral roll removed from the three model paths; movement-input-gated horizontal-yaw steering for Lushsaur/Chorusoatl.
+- The current riding pass is implemented in `tools/JarPruner.java`: vanilla passenger pose for Lushsaur/Chorusoatl; original Lushsaur server/client passenger coordinates are retained (no 13-pixel displacement); no Lushsaur mount menu and E opens player inventory; lateral root roll removed only from Lushsaur/Sculksaur, while Chorusoatl's original `flyingRoll` flight banking is preserved; movement-input-gated horizontal-yaw steering for Lushsaur/Chorusoatl.
 - Lushsaur's internal saddle/equipment slot remains inside the shared mount implementation, but its custom GUI is inaccessible. This preserves equipment/control compatibility without exposing a separate Lushsaur inventory screen.
 - Particle cleanup is implemented: Lushsaur sleep Z and green charge-trail particles removed; Chorusoatl walking dust events removed while retaining step sounds; Sculksaur footstep particles removed while retaining sound/camera feedback. Lushsaur's step event had no particle emitter in the source.
 - **Sculksaur explosion particles are still entirely absent.** Wait for Astemir's original formula before restoring them; do not invent a replacement.
