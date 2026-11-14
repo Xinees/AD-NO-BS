@@ -344,7 +344,7 @@ jobs:
             printf '%s\n' "$LUSH_MENU"
             exit 1
           fi
-          echo "Verified Lushsaur-only 13-pixel seat correction and vanilla E inventory behavior."
+          echo "Verified original Lushsaur passenger offsets and vanilla E inventory behavior."
 
           LOCAL_PLAYER_MIXIN='com.eternal_creations.archies_dino_mod.mixin.client.LocalPlayerMixin'
           verify_method "$LOCAL_PLAYER_MIXIN" \
@@ -506,64 +506,48 @@ jobs:
                     SMOOTH_MOVE_CONTROL='com.eternal_creations.archies_dino_mod.common.entity.ai.control.SmoothMoveControl'
           SMOOTH_BODY_CONTROL='com.eternal_creations.archies_dino_mod.common.entity.ai.control.SmoothBodyControl'
           SMOOTH_LOOK_CONTROL='com.eternal_creations.archies_dino_mod.common.entity.ai.control.SmoothLookControl'
-          verify_method "$SMOOTH_MOVE_CONTROL" 'archiesDinoMod$instantYaw(' '(FFF)F'
+
           SMOOTH_MOVE="$(javap -classpath build/classes-pruned.jar -p -c "$SMOOTH_MOVE_CONTROL")"
-          SMOOTH_3D="$(printf '%s\n' "$SMOOTH_MOVE" | sed -n '/tick3DMovement(/,/^  protected void tickClimber(/p')"
-          SMOOTH_CLIMBER="$(printf '%s\n' "$SMOOTH_MOVE" | sed -n '/tickClimber(/,/^  protected void tickWalker(/p')"
-          SMOOTH_WALKER="$(printf '%s\n' "$SMOOTH_MOVE" | sed -n '/tickWalker(/,/^  private void tickStrafe(/p')"
-          if [ "$(printf '%s\n' "$SMOOTH_3D" | grep -F -o 'archiesDinoMod$instantYaw' | wc -l)" -ne 1 ] ||
-             [ "$(printf '%s\n' "$SMOOTH_3D" | grep -F -o 'smoothRotlerp' | wc -l)" -ne 1 ]; then
-            echo "SmoothMoveControl must instantly turn on yaw while keeping its original pitch interpolation."
-            printf '%s\n' "$SMOOTH_3D"
+          if grep -Fq 'archiesDinoMod$instantYaw' <<< "$SMOOTH_MOVE"; then
+            echo "The direct-turn helper must not be present; preserve original SmoothMoveControl."
+            printf '%s\\n' "$SMOOTH_MOVE"
             exit 1
           fi
-          for segment in "$SMOOTH_CLIMBER" "$SMOOTH_WALKER"; do
-            if ! printf '%s\n' "$segment" | grep -Fq 'archiesDinoMod$instantYaw'; then
-              echo "SmoothMoveControl still interpolates a grounded/climbing yaw."
-              printf '%s\n' "$segment"
-              exit 1
-            fi
-          done
+          SMOOTH_3D="$(printf '%s\\n' "$SMOOTH_MOVE" | sed -n '/tick3DMovement(/,/^  protected void tickClimber(/p')"
+          SMOOTH_CLIMBER="$(printf '%s\\n' "$SMOOTH_MOVE" | sed -n '/tickClimber(/,/^  protected void tickWalker(/p')"
+          SMOOTH_WALKER="$(printf '%s\\n' "$SMOOTH_MOVE" | sed -n '/tickWalker(/,/^  private void tickStrafe(/p')"
+          if [ "$(printf '%s\\n' "$SMOOTH_3D" | grep -F -o 'smoothRotlerp' | wc -l)" -ne 2 ] ||
+             [ "$(printf '%s\\n' "$SMOOTH_CLIMBER" | grep -F -o 'smoothRotlerp' | wc -l)" -ne 1 ] ||
+             [ "$(printf '%s\\n' "$SMOOTH_WALKER" | grep -F -o 'smoothRotlerp' | wc -l)" -ne 1 ]; then
+            echo "Original shortest-angle yaw interpolation must remain active in 3D, climbing, and walking."
+            printf '%s\\n' "$SMOOTH_3D" "$SMOOTH_CLIMBER" "$SMOOTH_WALKER"
+            exit 1
+          fi
 
           SMOOTH_BODY="$(javap -classpath build/classes-pruned.jar -p -c "$SMOOTH_BODY_CONTROL" | sed -n '/m_8121_(/,/^  private /p')"
-          for required_call in 'Condition.check' 'Mob.m_20160_' 'Mob.m_6688_' 'net/minecraft/world/entity/player/Player' 'Mob.m_146908_' 'Mob.f_20883_'; do
-            if ! printf '%s\n' "$SMOOTH_BODY" | grep -Fq "$required_call"; then
-              echo "SmoothBodyControl lost its immediate body snap or an existing rotation lock: $required_call"
-              printf '%s\n' "$SMOOTH_BODY"
+          for required_call in 'rotateBodySmoothly' 'rotateHeadTowardsFrontSmoothly' 'Mth.m_14189_' 'headStableTime'; do
+            if ! grep -Fq "$required_call" <<< "$SMOOTH_BODY"; then
+              echo "Original body/head stabilization logic was not retained: $required_call"
+              printf '%s\\n' "$SMOOTH_BODY"
               exit 1
             fi
           done
-          if grep -Fq 'Mth.m_14189_' <<< "$SMOOTH_BODY"; then
-            echo "SmoothBodyControl still contains body-yaw interpolation."
-            printf '%s\n' "$SMOOTH_BODY"
-            exit 1
-          fi
 
           SMOOTH_LOOK="$(javap -classpath build/classes-pruned.jar -p -c "$SMOOTH_LOOK_CONTROL")"
-          SMOOTH_LOOK_TICK="$(printf '%s\n' "$SMOOTH_LOOK" | sed -n '/m_8128_(/,/^  protected /p')"
-          for required_call in 'Condition.check' 'LookControl.m_8128_' 'Field smoothX' \
-            'Field smoothY' 'Field smoothZ' 'Field interpolationSpeed' 'Field maxSpeedLimit' \
-            'LookControl.f_24938_' 'LookControl.f_24939_' 'dmul' 'dadd'; do
-            if ! printf '%s\n' "$SMOOTH_LOOK_TICK" | grep -Fq "$required_call"; then
-              echo "SmoothLookControl is missing instant yaw with vertically eased pitch: $required_call"
-              printf '%s\n' "$SMOOTH_LOOK_TICK"
+          SMOOTH_LOOK_TICK="$(printf '%s\\n' "$SMOOTH_LOOK" | sed -n '/m_8128_(/,/^  protected /p')"
+          for required_call in 'Field smoothX' 'Field smoothY' 'Field smoothZ' 'Field interpolationSpeed'; do
+            if ! grep -Fq "$required_call" <<< "$SMOOTH_LOOK_TICK"; then
+              echo "Original XYZ look-target interpolation was not retained: $required_call"
+              printf '%s\\n' "$SMOOTH_LOOK_TICK"
               exit 1
             fi
           done
-          if [ "$(printf '%s\n' "$SMOOTH_LOOK_TICK" | grep -F -o 'float 360.0f' | wc -l)" -ne 1 ]; then
-            echo "SmoothLookControl must apply the instant 360-degree limit to horizontal yaw only."
-            printf '%s\n' "$SMOOTH_LOOK_TICK"
+          if grep -Fq 'float 360.0f' <<< "$SMOOTH_LOOK_TICK"; then
+            echo "Do not override vanilla look yaw/pitch limits to 360 degrees."
+            printf '%s\\n' "$SMOOTH_LOOK_TICK"
             exit 1
           fi
-          for getter in 'm_180897_' 'm_180896_'; do
-            SEGMENT="$(printf '%s\n' "$SMOOTH_LOOK" | sed -n "/$getter(/,/^  protected /p")"
-            if ! printf '%s\n' "$SEGMENT" | grep -Fq 'Condition.check'; then
-              echo "SmoothLookControl lost the canRotate guard in $getter."
-              printf '%s\n' "$SEGMENT"
-              exit 1
-            fi
-          done
-          echo "Verified instant horizontal yaw, eased vertical look pitch, and retained action/player rotation locks."
+          echo "Verified original bounded movement yaw, body/head stabilization and XYZ look interpolation are retained."
 
           LUSH_MOUNT_SPEED="$(printf '%s\n' "$LUSH_SPRINT_CONTROL" | sed -n '/lambda[$]createMount[$]21(/,/lambda[$]createMount[$]20(/p')"
           for required_call in 'm_6688_' 'm_20142_' 'getSpeedBoostTicks' 'java/lang/Integer.signum' 'java/lang/Math.max'; do
