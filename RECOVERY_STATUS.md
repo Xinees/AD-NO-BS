@@ -1,16 +1,17 @@
 # AD-NO-BS Legacy recovery status
 
-## Latest unified candidate — CI #195 — 2026-11-14
+## Latest visual passenger and Chorusoatl egg candidate — CI #207 — 2026-11-14
 
-- Implementation: [`a57cc2d`](https://github.com/Xinees/AD-NO-BS/commit/a57cc2dd202a7e72fd8d37cb934b9957a9b93be7) removes the three direct-turn controller patches and restores the original source-JAR behavior.
-- Workflow/verification: [`321187d`](https://github.com/Xinees/AD-NO-BS/commit/321187d2640f6242d1de4bb72d58162c5de51fd6) updates CI to require the original bounded yaw interpolation, body/head stabilization and XYZ look interpolation.
-- [GitHub Actions #195](https://github.com/Xinees/AD-NO-BS/actions/runs/43617699213) completed successfully. It passed source-JAR validation, pruning, original-vs-pruned controller audit, renderer/mixin/behavior checks, final JAR structure validation, and draft-release publication.
-- Strengthened follow-up [CI #196](https://github.com/Xinees/AD-NO-BS/actions/runs/43618034281) also completed successfully. It adds explicit checks that roll removal preserves `SHAKING`, `SmoothBodyRotation`, and `GRUMM_ROTATION` in both Lushsaur and Sculksaur renderers.
-- Output: 468 entries, 2,480,632 bytes. Download: [`ec_ad-legacy-forge-1.20.1.jar`](https://github.com/Xinees/AD-NO-BS/releases/download/untagged-1e8d9b082542dc0e91f9/ec_ad-legacy-forge-1.20.1.jar). Latest draft release: [Legacy CI build #196](https://github.com/Xinees/AD-NO-BS/releases/tag/untagged-1e8d9b082542dc0e91f9).
-- Candidate contents: vanilla passenger pose for Lushsaur/Chorusoatl; original Lushsaur passenger coordinates (no 13-pixel displacement); no Lushsaur mount GUI, E opens player's inventory; Lushsaur/Sculksaur lateral root roll removed while other root operations remain; Chorusoatl's original flight `flyingRoll` restored; movement-gated horizontal look steering for Lushsaur/Chorusoatl; original mob walking/body/head/look controllers restored.
-- **Runtime status:** structurally and bytecode validated, but still needs in-game acceptance. In particular, confirm the rider model aligns with its hitbox at the original mount anchors, Chorusoatl banks in flight, Lushsaur/Sculksaur remain upright laterally, and the three mobs' walk/head/body turning feels natural.
+- [GitHub Actions #207](https://github.com/Xinees/AD-NO-BS/actions/runs/43620810294) completed successfully. It passed source-JAR verification, pruning, original controller audit, renderer descriptor validation, riding/behavior bytecode checks, final 468-entry JAR validation, and draft-release publication.
+- Implementation commit [`d62003d`](https://github.com/Xinees/AD-NO-BS/commit/d62003dfdb6fe0ce160e2b311c9359d6439981a5) changes only the two client-side Lushsaur passenger `MountPoint` offsets; server `LushsaurEntity.createMount().passengerOffset(0, 0, 1)` remains untouched. Saddled visual Z is `+0.9375`; unsaddled visual Z is `+0.3374999761581421`, each 15 pixels farther backward than the original renderer anchor. The player's entity/hitbox is not moved by this patch.
+- Resource/egg commit [`d234cb8`](https://github.com/Xinees/AD-NO-BS/commit/d234cb8c732f2a414a7fecc2635de9b07073d4db) extends `data/ec_ad/tags/blocks/chorusoatl_egg_hatchable.json` to include End Stone, End Stone Bricks, Purpur Block, Purpur Pillar, Obsidian and Bedrock.
+- Original egg conditions: `minecraft:the_end` is in `chorusoatl_egg_preferred`, and `canHatch()` returns true immediately in that dimension, without substrate/light/chorus checks. Outside the End, the egg still requires zero block/sky light, a hatchable block directly below, and at least five `chorus_plant`/`chorus_flower` blocks within radius 3. The new substrate list changes only the directly-below block tag.
+- Workflow guard commit [`adf8e3b`](https://github.com/Xinees/AD-NO-BS/commit/adf8e3b2e6665477a28158c0b9ce447ac6d62877) checks the original server passenger offset, both exact 15-pixel visual offsets, all six egg substrates, and the existing preferred End dimension.
+- Output: 468 entries, 2,480,685 bytes. Download: [`ec_ad-legacy-forge-1.20.1.jar`](https://github.com/Xinees/AD-NO-BS/releases/download/untagged-77424350b9bac3fad2e7/ec_ad-legacy-forge-1.20.1.jar). Draft release: [Legacy CI build #207](https://github.com/Xinees/AD-NO-BS/releases/tag/untagged-77424350b9bac3fad2e7).
+- **Runtime status:** CI and bytecode checks passed, but this candidate still needs Minecraft testing. Confirm the rider model is 15 pixels backward within the unchanged hitbox both with and without a saddle, and test each egg substrate outside the End. There are no other newly confirmed regressions from the inspected code; absence of further bugs is not established until runtime testing.
 
 ---
+
 
 ## Latest runtime regression and corrected candidate — 2026-11-14
 
