@@ -19,6 +19,7 @@
 - Next riding pass recorded in `LEGACY_ROADMAP.md`: vanilla pig-like seated player pose on Lushsaur/Chorusoatl; Lushsaur-only rider seat offset of 13 model pixels backward to center the rider over its hitbox; remove lateral bank on retained mobs; movement-input-gated horizontal-look steering on both mounts.
 - Lushsaur-only UI change requested: remove its mount inventory/menu and make E open the player's ordinary inventory while riding. Preserve Chorusoatl/Sculksaur inventory behavior. Audit for dependencies on Lushsaur slots before removing them.
 - Particle cleanup backlog: Sculksaur explosive-attack particles are completely absent pending Astemir's original formula; remove footstep dust, Lushsaur sleep-Z particles, and Lushsaur green particles after locating their exact emitters.
+- Initial roll diagnosis clarified by the user's screenshots: the requested defect is whole-model lateral roll around the mob's forward/longitudinal axis, especially obvious during running, not slow yaw. Remove only this roll while preserving yaw turns and gait. Its code/animation source remains unverified.
 - Initial audit only: `ADPlayerAnimations.init()` registers both mount rider-animation classes; `SmoothBodyControl` handles yaw/body-heading logic, not a proven side-roll source. New tasks are not implemented.
 
 ---
