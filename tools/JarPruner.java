@@ -203,7 +203,7 @@ public final class JarPruner {
         patchLushsaurVisualPassengerOffset(lushsaurClient);
         patchLushsaurPassengerHitboxOffset(lushsaurEntity);
         patchAbstractComplexMountSaddleGate(nodes.get(ROOT + "common/entity/base/AbstractComplexMount"));
-        patchLushsaurNoSaddle(lushsaurEntity);
+        patchLushsaurNoEquipment(lushsaurEntity);
         patchEntityRegistryNamespace(nodes.get(ROOT + "platform/ForgeCommonHelper"));
         patchSculksaurExplosionEffects(
             nodes.get(ROOT + "client/particle/effect/SculksaurEffects"));
@@ -1311,7 +1311,7 @@ public final class JarPruner {
         interact.maxStack = Math.max(interact.maxStack, 1);
     }
 
-    private static void patchLushsaurNoSaddle(ClassNode owner) {
+    private static void patchLushsaurNoEquipment(ClassNode owner) {
         if (owner == null) throw new IllegalStateException("Lushsaur entity class is missing");
 
         owner.methods.removeIf(method ->
@@ -1331,87 +1331,116 @@ public final class JarPruner {
         owner.methods.removeIf(method ->
             method.name.equals("setSaddled") && method.desc.equals("(Z)V"));
         MethodNode setSaddled = new MethodNode(Opcodes.ACC_PUBLIC, "setSaddled", "(Z)V", null, null);
-        setSaddled.instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        setSaddled.instructions.add(new InsnNode(Opcodes.ICONST_0));
-        setSaddled.instructions.add(new MethodInsnNode(
-            Opcodes.INVOKESPECIAL,
-            ROOT + "common/entity/base/AbstractComplexMount",
-            "setSaddled",
-            "(Z)V",
-            false
-        ));
         setSaddled.instructions.add(new InsnNode(Opcodes.RETURN));
         owner.methods.add(setSaddled);
 
-        String slotAccessDesc = "(ILjava/util/function/Predicate;)Lnet/minecraft/world/entity/SlotAccess;";
         owner.methods.removeIf(method ->
-            method.name.equals("createEquipmentSlotAccess") && method.desc.equals(slotAccessDesc));
-        MethodNode equipmentSlotAccess = new MethodNode(
-            Opcodes.ACC_PROTECTED,
-            "createEquipmentSlotAccess",
-            slotAccessDesc,
+            method.name.equals("getInventorySize") && method.desc.equals("()I"));
+        MethodNode inventorySize = new MethodNode(Opcodes.ACC_PROTECTED, "getInventorySize", "()I", null, null);
+        inventorySize.instructions.add(new InsnNode(Opcodes.ICONST_0));
+        inventorySize.instructions.add(new InsnNode(Opcodes.IRETURN));
+        owner.methods.add(inventorySize);
+
+        owner.methods.removeIf(method ->
+            method.name.equals("updateContainerEquipment") && method.desc.equals("()V"));
+        MethodNode updateEquipment = new MethodNode(
+            Opcodes.ACC_PROTECTED, "updateContainerEquipment", "()V", null, null);
+        updateEquipment.instructions.add(new InsnNode(Opcodes.RETURN));
+        owner.methods.add(updateEquipment);
+
+        owner.methods.removeIf(method ->
+            method.name.equals("m_141942_") &&
+            method.desc.equals("(I)Lnet/minecraft/world/entity/SlotAccess;"));
+        MethodNode slotAccess = new MethodNode(
+            Opcodes.ACC_PUBLIC,
+            "m_141942_",
+            "(I)Lnet/minecraft/world/entity/SlotAccess;",
             null,
             null
         );
-        InsnList equipmentCode = equipmentSlotAccess.instructions;
-        LabelNode otherSlot = new LabelNode();
+        slotAccess.instructions.add(new FieldInsnNode(
+            Opcodes.GETSTATIC,
+            "net/minecraft/world/entity/SlotAccess",
+            "f_147290_",
+            "Lnet/minecraft/world/entity/SlotAccess;"
+        ));
+        slotAccess.instructions.add(new InsnNode(Opcodes.ARETURN));
+        owner.methods.add(slotAccess);
 
-        equipmentCode.add(new VarInsnNode(Opcodes.ILOAD, 1));
-        equipmentCode.add(new JumpInsnNode(Opcodes.IFNE, otherSlot));
-        equipmentCode.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        equipmentCode.add(new VarInsnNode(Opcodes.ILOAD, 1));
-        equipmentCode.add(new VarInsnNode(Opcodes.ALOAD, 2));
-        equipmentCode.add(new InvokeDynamicInsnNode(
-            "test",
-            "()Ljava/util/function/Predicate;",
-            new Handle(
-                Opcodes.H_INVOKESTATIC,
-                "java/lang/invoke/LambdaMetafactory",
-                "metafactory",
-                "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;",
-                false
-            ),
-            Type.getMethodType("(Ljava/lang/Object;)Z"),
-            new Handle(
-                Opcodes.H_INVOKEVIRTUAL,
-                "net/minecraft/world/item/ItemStack",
-                "m_41619_",
-                "()Z",
-                false
-            ),
-            Type.getMethodType("(Lnet/minecraft/world/item/ItemStack;)Z")
+        owner.methods.removeIf(method ->
+            method.name.equals("m_6844_") &&
+            method.desc.equals("(Lnet/minecraft/world/entity/EquipmentSlot;)Lnet/minecraft/world/item/ItemStack;"));
+        MethodNode getItemBySlot = new MethodNode(
+            Opcodes.ACC_PUBLIC,
+            "m_6844_",
+            "(Lnet/minecraft/world/entity/EquipmentSlot;)Lnet/minecraft/world/item/ItemStack;",
+            null,
+            null
+        );
+        getItemBySlot.instructions.add(new FieldInsnNode(
+            Opcodes.GETSTATIC,
+            "net/minecraft/world/item/ItemStack",
+            "f_41583_",
+            "Lnet/minecraft/world/item/ItemStack;"
         ));
-        equipmentCode.add(new MethodInsnNode(
-            Opcodes.INVOKEINTERFACE,
-            "java/util/function/Predicate",
-            "and",
-            "(Ljava/util/function/Predicate;)Ljava/util/function/Predicate;",
-            true
-        ));
-        equipmentCode.add(new MethodInsnNode(
-            Opcodes.INVOKESPECIAL,
-            ROOT + "common/entity/base/AbstractComplexMount",
-            "createEquipmentSlotAccess",
-            slotAccessDesc,
-            false
-        ));
-        equipmentCode.add(new InsnNode(Opcodes.ARETURN));
-        equipmentCode.add(otherSlot);
-        equipmentCode.add(new FrameNode(Opcodes.F_SAME, 0, null, 0, null));
-        equipmentCode.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        equipmentCode.add(new VarInsnNode(Opcodes.ILOAD, 1));
-        equipmentCode.add(new VarInsnNode(Opcodes.ALOAD, 2));
-        equipmentCode.add(new MethodInsnNode(
-            Opcodes.INVOKESPECIAL,
-            ROOT + "common/entity/base/AbstractComplexMount",
-            "createEquipmentSlotAccess",
-            slotAccessDesc,
-            false
-        ));
-        equipmentCode.add(new InsnNode(Opcodes.ARETURN));
-        equipmentSlotAccess.maxStack = 4;
-        equipmentSlotAccess.maxLocals = 3;
-        owner.methods.add(equipmentSlotAccess);
+        getItemBySlot.instructions.add(new InsnNode(Opcodes.ARETURN));
+        owner.methods.add(getItemBySlot);
+
+        owner.methods.removeIf(method ->
+            method.name.equals("m_8061_") &&
+            method.desc.equals("(Lnet/minecraft/world/entity/EquipmentSlot;Lnet/minecraft/world/item/ItemStack;)V"));
+        MethodNode setItemSlot = new MethodNode(
+            Opcodes.ACC_PUBLIC,
+            "m_8061_",
+            "(Lnet/minecraft/world/entity/EquipmentSlot;Lnet/minecraft/world/item/ItemStack;)V",
+            null,
+            null
+        );
+        setItemSlot.instructions.add(new InsnNode(Opcodes.RETURN));
+        owner.methods.add(setItemSlot);
+
+        owner.methods.removeIf(method ->
+            method.name.equals("m_255207_") &&
+            method.desc.equals("(Lnet/minecraft/world/item/ItemStack;)Lnet/minecraft/world/item/ItemStack;"));
+        MethodNode equipItemIfPossible = new MethodNode(
+            Opcodes.ACC_PUBLIC,
+            "m_255207_",
+            "(Lnet/minecraft/world/item/ItemStack;)Lnet/minecraft/world/item/ItemStack;",
+            null,
+            null
+        );
+        equipItemIfPossible.instructions.add(new VarInsnNode(Opcodes.ALOAD, 1));
+        equipItemIfPossible.instructions.add(new InsnNode(Opcodes.ARETURN));
+        owner.methods.add(equipItemIfPossible);
+
+        for (String methodName : Set.of("m_7252_", "m_7243_")) {
+            owner.methods.removeIf(method ->
+                method.name.equals(methodName) &&
+                method.desc.equals("(Lnet/minecraft/world/item/ItemStack;)Z"));
+            MethodNode rejectPickup = new MethodNode(
+                Opcodes.ACC_PUBLIC,
+                methodName,
+                "(Lnet/minecraft/world/item/ItemStack;)Z",
+                null,
+                null
+            );
+            rejectPickup.instructions.add(new InsnNode(Opcodes.ICONST_0));
+            rejectPickup.instructions.add(new InsnNode(Opcodes.IRETURN));
+            owner.methods.add(rejectPickup);
+        }
+
+        owner.methods.removeIf(method ->
+            method.name.equals("m_7581_") &&
+            method.desc.equals("(Lnet/minecraft/world/entity/item/ItemEntity;)V"));
+        MethodNode rejectItemPickup = new MethodNode(
+            Opcodes.ACC_PROTECTED,
+            "m_7581_",
+            "(Lnet/minecraft/world/entity/item/ItemEntity;)V",
+            null,
+            null
+        );
+        rejectItemPickup.instructions.add(new InsnNode(Opcodes.RETURN));
+        owner.methods.add(rejectItemPickup);
     }
 
     private static void patchNoRollRootOperation(ClassNode owner) {
