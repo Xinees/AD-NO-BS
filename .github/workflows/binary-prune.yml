@@ -7,7 +7,11 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
+
+concurrency:
+  group: legacy-prune-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   prune:
@@ -683,13 +687,28 @@ jobs:
               print(f"Final size: {jar.stat().st_size} bytes")
           PY
 
-      - name: Upload pruned Legacy JAR
-        uses: actions/upload-artifact@v4
-        with:
-          name: ec-ad-legacy-forge-1.20.1
-          path: |
-            build/libs/ec_ad-legacy-forge-1.20.1.jar
-            build/resource-prune-report.txt
-          if-no-files-found: error
-          retention-days: 30
+      - name: Publish validated Legacy JAR as a private draft release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          TAG="legacy-auto-${GITHUB_RUN_NUMBER}"
+          gh release create "$TAG" \
+            build/libs/ec_ad-legacy-forge-1.20.1.jar \
+            build/resource-prune-report.txt \
+            --draft \
+            --title "Legacy CI build #${GITHUB_RUN_NUMBER}" \
+            --target "$GITHUB_SHA" \
+            --notes "Automated draft build from branch `binary-prune/legacy`.\n\nSource commit: `$GITHUB_SHA`.\n\nThis is a structurally validated CI build, not a final public release. Minecraft runtime acceptance testing is still required."
+
+          while IFS= read -r old_tag; do
+            [ -n "$old_tag" ] || continue
+            [ "$old_tag" = "$TAG" ] && continue
+            gh release delete "$old_tag" --cleanup-tag --yes
+          done < <(
+            gh release list --limit 100 --json tagName,isDraft \
+              --jq '.[] | select(.isDraft == true and (.tagName | startswith("legacy-auto-"))) | .tagName'
+          )
 
