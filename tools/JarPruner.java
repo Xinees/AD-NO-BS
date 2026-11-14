@@ -197,7 +197,6 @@ public final class JarPruner {
         ClassNode sculksaurClient = nodes.get(ROOT + "client/model/render/entity/mob/SculksaurClient");
         patchLushsaurControllingPassenger(lushsaurEntity);
         patchLushsaurNoInventory(lushsaurEntity);
-        patchLushsaurSeatPosition(lushsaurEntity, lushsaurClient);
         patchLushsaurCanSprint(lushsaurEntity);
         patchLushsaurMountSpeed(lushsaurEntity);
         patchLushsaurRunAnimation(lushsaurClient);
@@ -832,63 +831,6 @@ public final class JarPruner {
         method.maxStack = 0;
         method.maxLocals = 2;
         owner.methods.add(method);
-    }
-
-    private static void patchLushsaurSeatPosition(ClassNode entityOwner, ClassNode rendererOwner) {
-        if (entityOwner == null || rendererOwner == null) {
-            throw new IllegalStateException("Lushsaur seat classes are missing");
-        }
-        MethodNode createMount = entityOwner.methods.stream()
-            .filter(method -> method.name.equals("createMount") &&
-                method.desc.endsWith("L" + ROOT + "common/entity/component/MountComponent;"))
-            .findFirst()
-            .orElseThrow(() -> new IllegalStateException("Lushsaur createMount() is missing"));
-        List<MethodInsnNode> passengerOffsetCalls = new ArrayList<>();
-        for (AbstractInsnNode instruction : createMount.instructions.toArray()) {
-            if (instruction instanceof MethodInsnNode call &&
-                call.owner.equals(ROOT + "common/entity/component/MountComponent$Definition") &&
-                call.name.equals("passengerOffset") &&
-                call.desc.equals("(FFF)L" + ROOT + "common/entity/component/MountComponent$Definition;")) {
-                passengerOffsetCalls.add(call);
-            }
-        }
-        if (passengerOffsetCalls.size() != 1) {
-            throw new IllegalStateException("Lushsaur must define exactly one passengerOffset");
-        }
-        AbstractInsnNode forwardOffset = previousCodeInstruction(passengerOffsetCalls.get(0));
-        if (forwardOffset == null || forwardOffset.getOpcode() != Opcodes.FCONST_1) {
-            throw new IllegalStateException("Unexpected original Lushsaur passenger Z offset");
-        }
-        createMount.instructions.set(forwardOffset, new LdcInsnNode(0.1875f));
-
-        MethodNode clinit = rendererOwner.methods.stream()
-            .filter(method -> method.name.equals("<clinit>") && method.desc.equals("()V"))
-            .findFirst()
-            .orElseThrow(() -> new IllegalStateException("LushsaurClient static initializer is missing"));
-        List<MethodInsnNode> vec3Constructors = new ArrayList<>();
-        for (AbstractInsnNode instruction : clinit.instructions.toArray()) {
-            if (instruction instanceof MethodInsnNode call &&
-                call.getOpcode() == Opcodes.INVOKESPECIAL &&
-                call.owner.equals("net/minecraft/world/phys/Vec3") &&
-                call.name.equals("<init>") && call.desc.equals("(DDD)V")) {
-                vec3Constructors.add(call);
-            }
-        }
-        if (vec3Constructors.size() != 2) {
-            throw new IllegalStateException("Expected exactly two Lushsaur passenger mount-point offsets");
-        }
-        AbstractInsnNode saddledZ = previousCodeInstruction(vec3Constructors.get(0));
-        AbstractInsnNode unsaddledZ = previousCodeInstruction(vec3Constructors.get(1));
-        if (saddledZ == null || saddledZ.getOpcode() != Opcodes.DCONST_0) {
-            throw new IllegalStateException("Unexpected original saddled Lushsaur mount-point Z offset");
-        }
-        if (!(unsaddledZ instanceof LdcInsnNode constant) ||
-            !(constant.cst instanceof Double value) ||
-            Math.abs(value - (-0.6000000238418579d)) > 0.000001d) {
-            throw new IllegalStateException("Unexpected original unsaddled Lushsaur mount-point Z offset");
-        }
-        clinit.instructions.set(saddledZ, new LdcInsnNode(-0.8125d));
-        clinit.instructions.set(unsaddledZ, new LdcInsnNode(-1.4125d));
     }
 
     private static void patchRiderLookSteering(ClassNode owner) {
