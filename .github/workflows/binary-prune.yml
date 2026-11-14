@@ -316,11 +316,24 @@ jobs:
 
           CHORUS_EFFECTS='com.eternal_creations.archies_dino_mod.client.particle.effect.ChorusoatlEffects'
           CHORUS_EFFECTS_BYTECODE="$(javap -classpath build/classes-pruned.jar -p -c "$CHORUS_EFFECTS")"
-          if grep -F 'getstatic' <<< "$CHORUS_EFFECTS_BYTECODE" | grep -F 'EMITTER_STOMP' >/dev/null; then
-            echo "Chorusoatl walking dust particle emitter is still used."
-            printf '%s\n' "$CHORUS_EFFECTS_BYTECODE"
+          CHORUS_WALK="$(printf '%s\n' "$CHORUS_EFFECTS_BYTECODE" | awk '
+            /putstatic .*Field WALK_EFFECTS/ { if (capture) { print buffer $0; exit } }
+            /invokestatic .*AnimationEventTrack.of:/ { buffer=$0 "\n"; capture=1; next }
+            capture { buffer=buffer $0 "\n" }
+          ')"
+          if printf '%s\n' "$CHORUS_WALK" | grep -F 'EMITTER_STOMP' >/dev/null; then
+            echo "Chorusoatl WALK_EFFECTS still emits footstep dust."
+            printf '%s\n' "$CHORUS_WALK"
             exit 1
           fi
+          for preserved_step_sound in 'CHORUSOATL_STEP_LIGHT' 'CHORUSOATL_STEP_HEAVY'; do
+            if ! printf '%s\n' "$CHORUS_WALK" | grep -Fq "$preserved_step_sound"; then
+              echo "Chorusoatl WALK_EFFECTS lost original step sound $preserved_step_sound."
+              printf '%s\n' "$CHORUS_WALK"
+              exit 1
+            fi
+          done
+          echo "Verified Chorusoatl walking dust removed while light/heavy footstep sounds remain."
 
           SCULK_EFFECTS='com.eternal_creations.archies_dino_mod.client.particle.effect.SculksaurEffects'
           SCULK_DISASSEMBLY="$(javap -classpath build/classes-pruned.jar -p -c "$SCULK_EFFECTS")"
