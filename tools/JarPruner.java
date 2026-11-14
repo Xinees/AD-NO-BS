@@ -994,7 +994,6 @@ public final class JarPruner {
             throw new IllegalStateException("Unexpected original unsaddled Lushsaur mount-point Z offset");
         }
 
-        clinit.instructions.set(saddledZ, new LdcInsnNode(0.9375d));
         clinit.instructions.set(unsaddledZ, new LdcInsnNode(0.3374999761581421d));
     }
 
