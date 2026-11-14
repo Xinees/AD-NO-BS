@@ -1227,18 +1227,22 @@ public final class JarPruner {
                 !call.name.equals("addBone") ||
                 !call.desc.equals(addBoneDescriptor)) continue;
 
-            AbstractInsnNode propertiesLoad = call.getPrevious();
-            while (propertiesLoad != null && propertiesLoad.getOpcode() < 0) {
-                propertiesLoad = propertiesLoad.getPrevious();
-            }
-            AbstractInsnNode boneNameLoad = propertiesLoad == null ? null : propertiesLoad.getPrevious();
-            while (boneNameLoad != null && boneNameLoad.getOpcode() < 0) {
-                boneNameLoad = boneNameLoad.getPrevious();
+            AbstractInsnNode candidate = call.getPrevious();
+            LdcInsnNode boneNameLoad = null;
+            for (int searched = 0; candidate != null && searched < 4; searched++) {
+                while (candidate != null && candidate.getOpcode() < 0) {
+                    candidate = candidate.getPrevious();
+                }
+                if (candidate == null) break;
+                if (candidate instanceof LdcInsnNode constant &&
+                    constant.cst instanceof String name && tailBones.contains(name)) {
+                    boneNameLoad = constant;
+                    break;
+                }
+                candidate = candidate.getPrevious();
             }
 
-            if (!(boneNameLoad instanceof LdcInsnNode boneConstant) ||
-                !(boneConstant.cst instanceof String boneName) ||
-                !tailBones.contains(boneName)) continue;
+            if (boneNameLoad == null) continue;
 
             InsnList discardTailBone = new InsnList();
             discardTailBone.add(new InsnNode(Opcodes.POP));
