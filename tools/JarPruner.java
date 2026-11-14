@@ -94,6 +94,8 @@ public final class JarPruner {
             "m_6966_(Lnet/minecraft/core/particles/ParticleOptions;Lnet/minecraft/client/multiplayer/ClientLevel;DDDDDD)Lnet/minecraft/client/particle/Particle;"
         ),
         ROOT + "client/particle/effect/SculksaurEffects", Set.of(
+            "lambda$explosionFinalEvent$12(Lcom/astemir/astemirlib/re/client/model/core/animation/event/AnimationEvent$Context;)V",
+            "lambda$explosionGroundEvent$11(Lcom/astemir/astemirlib/re/client/model/core/animation/event/AnimationEvent$Context;)V",
             "archiesDinoMod$rememberSonicBoomOrigin(Lnet/minecraft/world/entity/Entity;DDD)V",
             "archiesDinoMod$takeSonicBoomOrigin(Lnet/minecraft/world/entity/Entity;)[D",
             "archiesDinoMod$spawnSculksaurSonicBoomFirstSphere(Lcom/astemir/astemirlib/re/client/model/core/animation/event/AnimationEvent$Context;)V",
