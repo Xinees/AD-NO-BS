@@ -339,15 +339,16 @@ jobs:
           fi
 
           LUSH_MOUNT_POINTS="$(javap -classpath build/classes-pruned.jar -p -c "$LUSH_ROLL_CLIENT" | sed -n '/static {};/,/^  private static boolean /p')"
-          if [[ "$LUSH_MOUNT_POINTS" != *"dconst_0"* ||
-                "$LUSH_MOUNT_POINTS" != *"double -0.6000000238418579d"* ||
+          if [[ "$LUSH_MOUNT_POINTS" != *"double 0.9375d"* ||
+                "$LUSH_MOUNT_POINTS" != *"double 0.3374999761581421d"* ||
+                "$LUSH_MOUNT_POINTS" == *"double -0.6000000238418579d"* ||
                 "$LUSH_MOUNT_POINTS" == *"double -0.8125d"* ||
                 "$LUSH_MOUNT_POINTS" == *"double -1.4125d"* ]]; then
-            echo "Lushsaur client mount-point offsets must remain identical to the original."
+            echo "Lushsaur visual passenger anchors must shift exactly 15 pixels backward for both saddled and unsaddled riders."
             printf '%s\\n' "$LUSH_MOUNT_POINTS"
             exit 1
           fi
-          echo "Verified Lushsaur server passenger offset and both client mount-point offsets remain original; only the rider pose registration is changed."
+          echo "Verified the server passenger hitbox remains at the original center while only both client-rendered Lushsaur passenger anchors move 15 pixels backward."
 
           LUSH_MENU="$(awk '/m_213583_\(/ { capture=1; print; next } capture && /^  (public|private|protected) / { exit } capture { print }' <<< "$LUSH_ENTITY_BYTECODE")"
           if [[ "$LUSH_MENU" != *"return"* ||
@@ -358,7 +359,7 @@ jobs:
             printf '%s\n' "$LUSH_MENU"
             exit 1
           fi
-          echo "Verified original Lushsaur passenger offsets and vanilla E inventory behavior."
+          echo "Verified original server passenger offset, 15-pixel visual-only rider offset, and vanilla E inventory behavior."
 
           LOCAL_PLAYER_MIXIN='com.eternal_creations.archies_dino_mod.mixin.client.LocalPlayerMixin'
           verify_method "$LOCAL_PLAYER_MIXIN" \
@@ -668,6 +669,8 @@ jobs:
                   "com/eternal_creations/archies_dino_mod/common/entity/mob/sculksaur/SculksaurEntity.class",
                   "com/eternal_creations/archies_dino_mod/common/block/eggs/LushsaurEggBlock.class",
                   "com/eternal_creations/archies_dino_mod/common/block/eggs/ChorusoatlEggBlock.class",
+                  "data/ec_ad/tags/blocks/chorusoatl_egg_hatchable.json",
+                  "data/ec_ad/tags/dimension_type/chorusoatl_egg_preferred.json",
                   "assets/ec_ad/models/entity/lushsaur.astemirmodel",
                   "assets/ec_ad/models/entity/lushsaur_baby.astemirmodel",
                   "assets/ec_ad/models/entity/chorusoatl.astemirmodel",
@@ -684,6 +687,22 @@ jobs:
                   "assets/ec_ad/models/block/lushsaur_egg.json",
                   "assets/ec_ad/models/block/chorusoatl_egg.json",
               }
+              hatchable_tag = json.loads(z.read("data/ec_ad/tags/blocks/chorusoatl_egg_hatchable.json"))
+              expected_hatchable_blocks = {
+                  "minecraft:end_stone",
+                  "minecraft:end_stone_bricks",
+                  "minecraft:purpur_block",
+                  "minecraft:purpur_pillar",
+                  "minecraft:obsidian",
+                  "minecraft:bedrock",
+              }
+              missing_hatchable_blocks = sorted(expected_hatchable_blocks - set(hatchable_tag.get("values", [])))
+              if missing_hatchable_blocks:
+                  raise SystemExit("Chorusoatl egg hatchable tag is missing: " + ", ".join(missing_hatchable_blocks))
+              preferred_dimensions = json.loads(z.read("data/ec_ad/tags/dimension_type/chorusoatl_egg_preferred.json"))
+              if "minecraft:the_end" not in preferred_dimensions.get("values", []):
+                  raise SystemExit("Chorusoatl preferred End dimension tag was lost")
+
               metadata = json.loads(z.read("META-INF/jarjar/metadata.json"))
               nested_astemir = [
                   name for name in names
