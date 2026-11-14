@@ -3,15 +3,24 @@
 ## Latest visual passenger and Chorusoatl egg candidate — CI #207 — 2026-11-14
 
 - [GitHub Actions #207](https://github.com/Xinees/AD-NO-BS/actions/runs/43620810294) completed successfully. It passed source-JAR verification, pruning, original controller audit, renderer descriptor validation, riding/behavior bytecode checks, final 468-entry JAR validation, and draft-release publication.
-- Implementation commit [`d62003d`](https://github.com/Xinees/AD-NO-BS/commit/d62003dfdb6fe0ce160e2b311c9359d6439981a5) changes only the two client-side Lushsaur passenger `MountPoint` offsets; server `LushsaurEntity.createMount().passengerOffset(0, 0, 1)` remains untouched. Saddled visual Z is `+0.9375`; unsaddled visual Z is `+0.3374999761581421`, each 15 pixels farther backward than the original renderer anchor. The player's entity/hitbox is not moved by this patch.
+- Implementation commit [`d62003d`](https://github.com/Xinees/AD-NO-BS/commit/d62003dfdb6fe0ce160e2b311c9359d6439981a5) originally shifted both Lushsaur client passenger anchors. After Astemir clarified that Lushsaur is rideable only without a saddle, follow-up commit [`9eba750`](https://github.com/Xinees/AD-NO-BS/commit/9eba7504768fc62abaf18fd7bac4c0c420dfa663) removes the saddled-anchor change. Current source shifts only the unsaddled visual anchor to `+0.3374999761581421`; the server `passengerOffset(0, 0, 1)` and unused saddled anchor remain original. The player's entity/hitbox is not moved.
 - Resource/egg commit [`d234cb8`](https://github.com/Xinees/AD-NO-BS/commit/d234cb8c732f2a414a7fecc2635de9b07073d4db) extends `data/ec_ad/tags/blocks/chorusoatl_egg_hatchable.json` to include End Stone, End Stone Bricks, Purpur Block, Purpur Pillar, Obsidian and Bedrock.
 - Original egg conditions: `minecraft:the_end` is in `chorusoatl_egg_preferred`, and `canHatch()` returns true immediately in that dimension, without substrate/light/chorus checks. Outside the End, the egg still requires zero block/sky light, a hatchable block directly below, and at least five `chorus_plant`/`chorus_flower` blocks within radius 3. The new substrate list changes only the directly-below block tag.
-- Workflow guard commit [`adf8e3b`](https://github.com/Xinees/AD-NO-BS/commit/adf8e3b2e6665477a28158c0b9ce447ac6d62877) checks the original server passenger offset, both exact 15-pixel visual offsets, all six egg substrates, and the existing preferred End dimension.
+- Workflow guard commit [`adf8e3b`](https://github.com/Xinees/AD-NO-BS/commit/adf8e3b2e6665477a28158c0b9ce447ac6d62877) originally checked both visual offsets. Follow-up guard commit [`46b587d`](https://github.com/Xinees/AD-NO-BS/commit/46b587d2d40635f85fe530ce8229c5e16bf5fefa) changes the requirement to unsaddled-only: the server passenger offset remains original, the unused saddled anchor stays original, and only the unsaddled player model shifts 15 pixels.
 - Output: 468 entries, 2,480,685 bytes. Download: [`ec_ad-legacy-forge-1.20.1.jar`](https://github.com/Xinees/AD-NO-BS/releases/download/untagged-77424350b9bac3fad2e7/ec_ad-legacy-forge-1.20.1.jar). Draft release: [Legacy CI build #207](https://github.com/Xinees/AD-NO-BS/releases/tag/untagged-77424350b9bac3fad2e7).
-- **Runtime status:** CI and bytecode checks passed, but this candidate still needs Minecraft testing. Confirm the rider model is 15 pixels backward within the unchanged hitbox both with and without a saddle, and test each egg substrate outside the End. There are no other newly confirmed regressions from the inspected code; absence of further bugs is not established until runtime testing.
+- **Runtime status:** Build #207 passed CI, but its published JAR predates the unsaddled-only visual-anchor correction. Current source includes that correction and updated guards but has not yet been built. The next build must also implement the queued Lushsaur saddle restriction below. Runtime checks remain required for rider alignment and all egg substrates.
 
 ---
 
+
+## Queued for the next build — remove Lushsaur saddle support
+
+- **Not implemented yet.** Lushsaur must be rideable only without a saddle; remove every normal path that lets a saddle be equipped/applied to it.
+- Preserve unsaddled owner riding, movement input, sprint, passenger position and the 15-pixel visual-only offset. Keep the server passenger hitbox centered.
+- Scope the change to Lushsaur. Do not globally alter shared saddle/equipment behavior for Chorusoatl or other mounts. Do not assume that disabling the mount GUI is sufficient; inspect interaction and equipment-slot paths.
+- Acceptance: a saddle cannot equip or alter Lushsaur state and is not consumed on rejection; unsaddled owner riding still works; other mounts' saddle behavior remains unchanged.
+
+---
 
 ## Latest runtime regression and corrected candidate — 2026-11-14
 
