@@ -28,9 +28,11 @@ The user has clarified the desired behavior. Keep these as separate, narrowly sc
 
 ### Remove lateral banking/roll when mobs turn
 
-- Remove the unwanted sideways body lean/bank that appears during turning. The user describes it as a body tilt, not simply slow yaw interpolation.
+- Remove the unwanted sideways body roll/bank of the mob model. The supplied Lushsaur screenshots show the entire body visibly tilted around its longitudinal/forward axis; the marked red line illustrates the unwanted slant.
+- This is especially visible during running/locomotion, and may also appear while turning. Do not reduce this request to faster yaw interpolation or merely a turning-angle tweak.
 - Initial scope: all three retained mobs (Lushsaur, Chorusoatl, Sculksaur), unless the user later narrows it.
-- Do not disable normal horizontal turning, walking/running animations, head tracking, or unrelated pitch. Identify the actual source of the lateral roll before patching it.
+- Preserve normal horizontal yaw turns, the ordinary gait/run cycle, head tracking, and unrelated vertical pitch/bobbing. Isolate and remove only the lateral roll component.
+- The exact implementation source is still unverified: it could be a root/body bone animation or an entity/model transform. Inspect the original renderer/model animation and Astemir RE behavior before patching.
 
 ### Movement-gated rider-look steering — Lushsaur and Chorusoatl
 
