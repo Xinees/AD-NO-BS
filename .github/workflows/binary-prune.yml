@@ -257,14 +257,14 @@ jobs:
             capture && /^[[:space:]]+(private|public|protected) / && $0 !~ /archiesDinoMod\$spawnSculksaurSonicBoomSphereAt\(/ { exit }
             capture { print }
           ')"
-          for required_sphere_call in 'IntStream.range' 'IntStream.forEach' 'sipush        512'; do
+          for required_sphere_call in 'IntStream.range' 'IntStream.forEach' 'sipush        256'; do
             if ! printf '%s\n' "$SCULK_SPHERE" | grep -F "$required_sphere_call"; then
-              echo "SphereAt does not create exactly 512 points through the expected stream path: $required_sphere_call"
+              echo "SphereAt does not create exactly 256 points through the expected stream path: $required_sphere_call"
               printf '%s\n' "$SCULK_SPHERE"
               exit 1
             fi
           done
-          echo "Verified SphereAt creates 512 evenly distributed particles through IntStream.range/forEach."
+          echo "Verified SphereAt creates 256 evenly distributed particles through IntStream.range/forEach."
 
           SCULK_FINAL="$(javap -classpath build/classes-pruned.jar -p -c "$SCULK_EFFECTS" | sed -n '/lambda[$]explosionFinalEvent[$]12(/,/^  private /p')"
           for required_call in 'archiesDinoMod$spawnSculksaurSonicBoomFirstSphere' 'ShakeUtil.shakeExplosion'; do
@@ -368,7 +368,7 @@ jobs:
           PY
 
           SCULK_TRACK="$(javap -classpath build/classes-pruned.jar -p -c "$SCULK_EFFECTS")"
-          for required_track_marker in 'float 4.68f' 'float 5.12f' 'float 4.83f' 'EXPLOSION_EFFECTS'; do
+          for required_track_marker in 'float 4.68f' 'float 5.12f' 'float 4.93f' 'EXPLOSION_EFFECTS'; do
             if ! printf '%s\n' "$SCULK_TRACK" | grep -F "$required_track_marker"; then
               echo "Sculksaur Sonic Boom timing track is missing $required_track_marker"
               exit 1
@@ -376,11 +376,11 @@ jobs:
           done
           python3 - <<'PY'
           first = 4.68
-          second = 4.83
+          second = 4.93
           delay = second - first
-          if abs(delay - 0.15) > 0.00001:
-              raise SystemExit(f"Sonic Boom shells are not separated by 0.15 seconds: {delay}")
-          print(f"Verified second shell spawn delay: {delay:.2f} seconds (3 ticks at 20 TPS).")
+          if abs(delay - 0.25) > 0.00001:
+              raise SystemExit(f"Sonic Boom shells are not separated by 0.25 seconds: {delay}")
+          print(f"Verified second shell spawn delay: {delay:.2f} seconds (5 ticks at 20 TPS).")
           PY
 
           SCULK_PARTICLE="$(javap -classpath build/classes-pruned.jar -p -c "$SCULK_EFFECTS" | sed -n '/archiesDinoMod[$]spawnSculksaurSonicBoomParticle(/,/^  private /p')"
@@ -391,16 +391,16 @@ jobs:
               exit 1
             fi
           done
-          for required_layer_marker in 'double 0.33d' 'double 0.00390625d'; do
+          for required_layer_marker in 'double 0.5d' 'double 0.0078125d'; do
             if ! printf '%s\n' "$SCULK_PARTICLE" | grep -F "$required_layer_marker"; then
               echo "Sculksaur Sonic Boom particle speed/distribution is incorrect: $required_layer_marker"
               printf '%s\n' "$SCULK_PARTICLE"
               exit 1
             fi
           done
-          VELOCITY_COMPONENT_COUNT="$(printf '%s\n' "$SCULK_PARTICLE" | grep -F -o 'double 0.33d' | wc -l)"
+          VELOCITY_COMPONENT_COUNT="$(printf '%s\n' "$SCULK_PARTICLE" | grep -F -o 'double 0.5d' | wc -l)"
           if [ "$VELOCITY_COMPONENT_COUNT" -ne 3 ]; then
-            echo "Sculksaur Sonic Boom must use exactly three 0.33 XYZ velocity components."
+            echo "Sculksaur Sonic Boom must use exactly three 0.5 XYZ velocity components."
             printf '%s\n' "$SCULK_PARTICLE"
             exit 1
           fi
@@ -433,12 +433,12 @@ jobs:
           done
 
           SCULK_SPHERE="$(printf '%s\n' "$SCULK_TRACK" | sed -n '/archiesDinoMod[$]spawnSculksaurSonicBoomSphereAt(/,/^  private /p')"
-          if ! printf '%s\n' "$SCULK_SPHERE" | grep -F 'sipush        512'; then
-            echo "Each Sonic Boom sphere must contain exactly 512 particles."
+          if ! printf '%s\n' "$SCULK_SPHERE" | grep -F 'sipush        256'; then
+            echo "Each Sonic Boom sphere must contain exactly 256 particles."
             printf '%s\n' "$SCULK_SPHERE"
             exit 1
           fi
-          echo "Verified two 512-particle SONIC_BOOM spheres, same saved origin, 0.15-second stagger, and 6.60-block/second radial speed."
+          echo "Verified two 256-particle SONIC_BOOM spheres, same saved origin, 0.25-second stagger, and 10.00-block/second radial speed."
 
           SCULK_GROUND="$(javap -classpath build/classes-pruned.jar -p -c "$SCULK_EFFECTS" | sed -n '/lambda[$]explosionGroundEvent[$]11(/,/^  private /p')"
           if printf '%s\n' "$SCULK_GROUND" | grep -F 'AnimationEvent$Context.spawnParticle'; then
