@@ -1,5 +1,16 @@
 # AD-NO-BS Legacy recovery status
 
+## Latest runtime regression and corrected candidate — 2026-11-14
+
+- Build119 was launched by Astemir with Minecraft 1.20.1, Forge 47.4.28, Java 17.0.15 and Astemir RE 1.2.98. The log shows a JVM `VerifyError` in `MountComponent.tickRidden` at branch target 163 when Lushsaur/Chorusoatl mount entities were constructed.
+- Root cause: the former steering patch added an idle-input early return and hand-authored stack-map frames in the middle of the original method. The pruner uses `ClassWriter.COMPUTE_MAXS`, so a later original StackMap frame was left expecting two float locals that the new early-return path had not initialized.
+- Corrected by implementation commit [`dd18eec`](https://github.com/Xinees/AD-NO-BS/commit/dd18eec88d390fe8958e434a6aeb75632008d3d8): no early return and no manually added frames in `tickRidden`; branchless horizontal input gates are applied to the original head/body rotation results; rider pitch is zeroed only for Lushsaur and Chorusoatl.
+- Added a pruner invariant that the patch must preserve the original branch count and FrameNode count in `tickRidden`. The workflow separately verifies the expected two horizontal-input gates, pitch multiplier, and original three branches.
+- Latest successful CI: [run #187](https://github.com/Xinees/AD-NO-BS/actions/runs/43612358618). Output: 468 entries, 2,480,325 bytes. The validated JAR is in [draft release #187](https://github.com/Xinees/AD-NO-BS/releases/tag/untagged-229ce353686cf570f4f4).
+- **Runtime status:** corrected candidate is ready for Astemir's in-game retest. The CI result verifies the class/resource transformation and the stack-map-preservation invariants, but it is not a substitute for launching the candidate in Minecraft. Do not mark it final until the world loads and both mounts pass the riding tests.
+
+---
+
 ## Current branch status — 2026-11-14 (Build119)
 
 - Working branch: `binary-prune/legacy`.
