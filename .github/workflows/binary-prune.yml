@@ -351,6 +351,24 @@ jobs:
           fi
           echo "Verified 15-pixel passenger-hitbox correction and 3-pixel forward visual adjustment."
 
+          MOUNT_COMPONENT_INTERACT="$(awk '/public net.minecraft.world.InteractionResult mobInteract/ { capture=1; print; next } capture && /^  (public|private|protected) / { exit } capture { print }' <<< "$MOUNT_COMPONENT_BYTECODE")"
+          SADDLE_CAPABILITY_LINE="$(grep -nF 'Saddleable.m_6741_()' <<< "$MOUNT_COMPONENT_INTERACT" | head -n 1 | cut -d: -f1 || true)"
+          SADDLE_CONSUME_LINE="$(grep -nF 'ItemStack.m_41774_:(I)V' <<< "$MOUNT_COMPONENT_INTERACT" | head -n 1 | cut -d: -f1 || true)"
+          SADDLE_STATE_LINE="$(grep -nF 'Mount.setSaddled:(Z)V' <<< "$MOUNT_COMPONENT_INTERACT" | head -n 1 | cut -d: -f1 || true)"
+          SADDLE_SOUND_LINE="$(grep -nF 'Level.m_6269_:' <<< "$MOUNT_COMPONENT_INTERACT" | head -n 1 | cut -d: -f1 || true)"
+          if [[ "$MOUNT_COMPONENT_INTERACT" != *"Items.f_42450_"* ||
+                "$MOUNT_COMPONENT_INTERACT" != *"ItemStack.m_150930_"* ||
+                -z "$SADDLE_CAPABILITY_LINE" || -z "$SADDLE_CONSUME_LINE" ||
+                -z "$SADDLE_STATE_LINE" || -z "$SADDLE_SOUND_LINE" ||
+                "$SADDLE_CAPABILITY_LINE" -ge "$SADDLE_CONSUME_LINE" ||
+                "$SADDLE_CAPABILITY_LINE" -ge "$SADDLE_STATE_LINE" ||
+                "$SADDLE_CAPABILITY_LINE" -ge "$SADDLE_SOUND_LINE" ]]; then
+            echo "MountComponent must gate its vanilla saddle fallback before consumption, saddle state, and sound."
+            printf '%s\\n' "$MOUNT_COMPONENT_INTERACT"
+            exit 1
+          fi
+          echo "Verified MountComponent checks Saddleable.isSaddleable before consuming a saddle or changing state/playing sound."
+
           LUSH_INTERACT="$(awk '/public net.minecraft.world.InteractionResult m_6071_/ { capture=1; print; next } capture && /^  (public|private|protected) / { exit } capture { print }' <<< "$LUSH_ENTITY_BYTECODE")"
           if [[ "$LUSH_INTERACT" != *"isBuried"* ||
                 "$LUSH_INTERACT" != *"AbstractComplexMount.m_6071_"* ||
