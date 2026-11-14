@@ -38,6 +38,26 @@ jobs:
           unzip -p "$JAR" ec_ad.forge.mixins.json
           echo '===== CLIENT MIXIN CLASSES ====='
           jar tf "$JAR" | grep 'mixin/client/' | grep 'Mixin.class' | sort || true
+          echo '===== BLOCK AND DIMENSION TAG DEFINITIONS ====='
+          javap -classpath "$JAR" -p -c 'com.eternal_creations.archies_dino_mod.common.ADTags$Blocks'
+          javap -classpath "$JAR" -p -c 'com.eternal_creations.archies_dino_mod.common.ADTags$DimensionTypes'
+          echo '===== CHORUSOATL TAG RESOURCE FILES ====='
+          while IFS= read -r resource; do
+            echo "===== $resource ====="
+            unzip -p "$JAR" "$resource"
+          done < <(jar tf "$JAR" | grep -i 'chorusoatl' | grep '/tags/' | grep '\.json          echo '===== LOCAL PLAYER MIXIN ====='
+          javap -classpath "$JAR" -p -c -v com.eternal_creations.archies_dino_mod.mixin.client.LocalPlayerMixin
+          echo '===== LUSHSAUR CLIENT MOUNT-POINT CLASS ====='
+          javap -classpath "$JAR" -p -c com.eternal_creations.archies_dino_mod.client.model.render.entity.mob.LushsaurClient
+          echo '===== CHORUSOATL CLIENT MOUNT-POINT CLASS ====='
+          javap -classpath "$JAR" -p -c com.eternal_creations.archies_dino_mod.client.model.render.entity.mob.ChorusoatlClient)
+
+          echo '===== LIVING ENTITY RENDERER MIXIN ====='
+          javap -classpath "$JAR" -p -c -v com.eternal_creations.archies_dino_mod.mixin.client.LivingEntityRendererMixin
+
+          echo '===== LEVEL RENDERER MIXIN ====='
+          javap -classpath "$JAR" -p -c -v com.eternal_creations.archies_dino_mod.mixin.client.LevelRendererMixin
+
           echo '===== PLAYER MIXIN ====='
           javap -classpath "$JAR" -p -c -v com.eternal_creations.archies_dino_mod.mixin.PlayerMixin
           echo '===== LOCAL PLAYER MIXIN ====='
