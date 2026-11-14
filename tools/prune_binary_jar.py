@@ -318,6 +318,10 @@ def validate_entity_namespace(entries):
             for key, child in value.items():
                 if isinstance(key, str) and key.startswith("entity.ec_ad."):
                     raise RuntimeError(f"Old entity translation key remains in {name}: {key}")
+                if isinstance(key, str) and key.startswith(f"entity.{ENTITY_REGISTRY_NAMESPACE}."):
+                    entity_name = key.split(".")[-1]
+                    if entity_name in ENTITY_REGISTRY_NAMES:
+                        found_new_ids.add(f"{ENTITY_REGISTRY_NAMESPACE}:{entity_name}")
                 visit(child, name)
         elif isinstance(value, list):
             for child in value:
