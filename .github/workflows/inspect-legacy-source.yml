@@ -1,0 +1,48 @@
+name: Legacy source diagnostics
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - binary-prune/legacy
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout legacy workspace
+        uses: actions/checkout@v4
+        with:
+          ref: binary-prune/legacy
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Inspect original egg hatching and passenger rendering
+        shell: bash
+        run: |
+          set -euo pipefail
+          JAR="ec_ad-forge-1.20.1-1.0.4.jar"
+          echo '===== CHORUSOATL EGG CLASS ====='
+          javap -classpath "$JAR" -p -c com.eternal_creations.archies_dino_mod.common.block.eggs.ChorusoatlEggBlock
+          echo '===== EGG BASE CLASS ====='
+          javap -classpath "$JAR" -p -c com.eternal_creations.archies_dino_mod.common.block.eggs.DinoEggBlock || true
+          echo '===== OTHER EGG BLOCK CLASSES ====='
+          jar tf "$JAR" | grep 'common/block/eggs/' | sort
+          echo '===== ORIGINAL MIXIN CONFIGURATIONS ====='
+          unzip -p "$JAR" ec_ad.mixins.json
+          unzip -p "$JAR" ec_ad.forge.mixins.json
+          echo '===== CLIENT MIXIN CLASSES ====='
+          jar tf "$JAR" | grep 'mixin/client/' | grep 'Mixin.class' | sort || true
+          echo '===== PLAYER MIXIN ====='
+          javap -classpath "$JAR" -p -c -v com.eternal_creations.archies_dino_mod.mixin.PlayerMixin
+          echo '===== LOCAL PLAYER MIXIN ====='
+          javap -classpath "$JAR" -p -c -v com.eternal_creations.archies_dino_mod.mixin.client.LocalPlayerMixin
+          echo '===== LUSHSAUR CLIENT MOUNT-POINT CLASS ====='
+          javap -classpath "$JAR" -p -c com.eternal_creations.archies_dino_mod.client.model.render.entity.mob.LushsaurClient
+          echo '===== CHORUSOATL CLIENT MOUNT-POINT CLASS ====='
+          javap -classpath "$JAR" -p -c com.eternal_creations.archies_dino_mod.client.model.render.entity.mob.ChorusoatlClient
