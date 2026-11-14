@@ -422,7 +422,7 @@ jobs:
             fi
           done
           SCULK_MOVING_TICK="$(printf '%s\\n' "$SCULK_MOVING_PARTICLE_DISASSEMBLY" | sed -n '/public void m_5989_();/,/^}/p')"
-          for required_animation_marker in 'bipush        16' 'irem' 'Particle.f_107224_:I' 'Particle.f_107225_:I'; do
+          for required_animation_marker in 'bipush        16' 'irem' 'isub' 'Particle.f_107224_:I' 'Particle.f_107225_:I'; do
             if ! printf '%s\\n' "$SCULK_MOVING_TICK" | grep -F "$required_animation_marker"; then
               echo "Sculksaur Sonic Boom sprite animation must loop independently of its particle lifetime: $required_animation_marker"
               printf '%s\\n' "$SCULK_MOVING_TICK"

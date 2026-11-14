@@ -1747,6 +1747,8 @@ public final class JarPruner {
         tickCode.add(new VarInsnNode(Opcodes.ILOAD, 1));
         tickCode.add(new IntInsnNode(Opcodes.BIPUSH, 16));
         tickCode.add(new InsnNode(Opcodes.IREM));
+        tickCode.add(new InsnNode(Opcodes.ICONST_1));
+        tickCode.add(new InsnNode(Opcodes.ISUB));
         tickCode.add(new FieldInsnNode(Opcodes.PUTFIELD, particle, "f_107224_", "I"));
         tickCode.add(new VarInsnNode(Opcodes.ALOAD, 0));
         tickCode.add(new IntInsnNode(Opcodes.BIPUSH, 16));
