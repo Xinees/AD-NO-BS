@@ -286,21 +286,26 @@ jobs:
           echo "Verified Lushsaur/Sculksaur lateral root roll is removed while original Chorusoatl flying roll remains."
 
           LUSH_ENTITY_BYTECODE="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.common.entity.mob.lushsaur.LushsaurEntity)"
-          LUSH_CREATE_MOUNT="$LUSH_ENTITY_BYTECODE"
-          if [[ "$LUSH_CREATE_MOUNT" != *"float 0.1875f"* ||
-                "$LUSH_CREATE_MOUNT" != *"passengerOffset"* ]]; then
-            echo "Lushsaur passenger offset is not 13 pixels backward from the original position."
-            printf '%s\n' "$LUSH_CREATE_MOUNT"
+          LUSH_MOUNT_METHOD="$(awk '/ createMount\\(/ { capture=1; print; next } capture && /^  (public|private|protected) / { exit } capture { print }' <<< "$LUSH_ENTITY_BYTECODE")"
+          if [[ "$LUSH_MOUNT_METHOD" != *"passengerOffset"* ||
+                "$LUSH_MOUNT_METHOD" != *"fconst_1"* ||
+                "$LUSH_MOUNT_METHOD" == *"0.1875f"* ]]; then
+            echo "Lushsaur server passenger offset must remain identical to the original (0, 0, 1)."
+            printf '%s\\n' "$LUSH_MOUNT_METHOD"
             exit 1
           fi
+
           LUSH_MOUNT_POINTS="$(javap -classpath build/classes-pruned.jar -p -c "$LUSH_ROLL_CLIENT" | sed -n '/static {};/,/^  private static boolean /p')"
-          for required_offset in 'double -0.8125d' 'double -1.4125d'; do
-            if ! printf '%s\n' "$LUSH_MOUNT_POINTS" | grep -Fq "$required_offset"; then
-              echo "Lushsaur visual/camera passenger anchor is missing $required_offset"
-              printf '%s\n' "$LUSH_MOUNT_POINTS"
-              exit 1
-            fi
-          done
+          if [[ "$LUSH_MOUNT_POINTS" != *"dconst_0"* ||
+                "$LUSH_MOUNT_POINTS" != *"double -0.6000000238418579d"* ||
+                "$LUSH_MOUNT_POINTS" == *"double -0.8125d"* ||
+                "$LUSH_MOUNT_POINTS" == *"double -1.4125d"* ]]; then
+            echo "Lushsaur client mount-point offsets must remain identical to the original."
+            printf '%s\\n' "$LUSH_MOUNT_POINTS"
+            exit 1
+          fi
+          echo "Verified Lushsaur server passenger offset and both client mount-point offsets remain original; only the rider pose registration is changed."
+
           LUSH_MENU="$(awk '/m_213583_\(/ { capture=1; print; next } capture && /^  (public|private|protected) / { exit } capture { print }' <<< "$LUSH_ENTITY_BYTECODE")"
           if [[ "$LUSH_MENU" != *"return"* ||
                 "$LUSH_MENU" == *"invoke"* ||
