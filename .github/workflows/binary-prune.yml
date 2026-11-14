@@ -1,4 +1,4 @@
-name: Direct Legacy JAR Prune - build 24
+name: Direct Legacy JAR Prune - build 25
 
 on:
   push:
@@ -287,6 +287,83 @@ jobs:
             printf '%s\n' "$SCULK_SECOND"
             exit 1
           fi
+
+          SCULK_FACTORY_VERBOSE="$(javap -classpath build/classes-pruned.jar -p -c -v "$SCULK_EFFECTS")"
+          python3 - "$SCULK_FACTORY_VERBOSE" <<'PY'
+          import re
+          import sys
+
+          disassembly = sys.argv[1]
+
+          def factory_bootstrap_index(name):
+              signature = re.compile(
+                  r"^  private .*\b" + re.escape(name) + r"\(\);$",
+                  re.MULTILINE
+              )
+              matches = list(signature.finditer(disassembly))
+              if len(matches) != 1:
+                  raise SystemExit(f"Expected one {name} factory, found {len(matches)}")
+
+              start = matches[0].end()
+              next_method = re.search(
+                  r"^  (?:private|public|protected) ",
+                  disassembly[start:],
+                  re.MULTILINE
+              )
+              end = start + next_method.start() if next_method else len(disassembly)
+              method = disassembly[start:end]
+              handles = re.findall(r"// InvokeDynamic #(\d+):handle:", method)
+              if len(handles) != 1:
+                  raise SystemExit(
+                      f"{name} must contain exactly one event factory handle, found {handles}"
+                  )
+              return int(handles[0])
+
+          original_index = factory_bootstrap_index("explosionFinalEvent")
+          second_index = factory_bootstrap_index("archiesDinoMod$secondSonicBoomEvent")
+          if original_index == second_index:
+              raise SystemExit("The two Sonic Boom factories share one invokedynamic bootstrap.")
+
+          table_match = re.search(r"^BootstrapMethods:\s*$", disassembly, re.MULTILINE)
+          if not table_match:
+              raise SystemExit("The SculksaurEffects BootstrapMethods table is missing.")
+          table_lines = disassembly[table_match.end():].splitlines()
+
+          def bootstrap_entry(index):
+              starts = [
+                  i for i, line in enumerate(table_lines)
+                  if re.match(rf"^\s*{index}: #", line)
+              ]
+              if len(starts) != 1:
+                  raise SystemExit(f"Expected unique bootstrap entry {index}, found {len(starts)}")
+              start = starts[0]
+              end = next(
+                  (
+                      i for i in range(start + 1, len(table_lines))
+                      if re.match(r"^\s*\d+: #", table_lines[i])
+                  ),
+                  len(table_lines)
+              )
+              return "\n".join(table_lines[start:end])
+
+          original_entry = bootstrap_entry(original_index)
+          second_entry = bootstrap_entry(second_index)
+
+          if "lambda$explosionFinalEvent$12:" not in original_entry:
+              raise SystemExit("First sphere factory lost its original first-wave callback.")
+          if "archiesDinoMod$lambdaSecondSonicBoomEvent:" not in second_entry:
+              raise SystemExit("Second sphere factory lost its delayed second-wave callback.")
+          if (
+              "archiesDinoMod$lambdaSecondSonicBoomEvent:" in original_entry
+              or "lambda$explosionFinalEvent$12:" in second_entry
+          ):
+              raise SystemExit("The first and second Sonic Boom callbacks are crossed.")
+
+          print(
+              f"Verified independent Sonic Boom event factories: "
+              f"first bootstrap #{original_index}, second bootstrap #{second_index}."
+          )
+          PY
 
           SCULK_TRACK="$(javap -classpath build/classes-pruned.jar -p -c "$SCULK_EFFECTS")"
           for required_track_marker in 'float 4.68f' 'float 5.12f' 'float 5.18f' 'EXPLOSION_EFFECTS'; do
