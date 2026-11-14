@@ -76,5 +76,7 @@ jobs:
           jar tf "$JAR" | grep -F 'platform/' | sort || true
           echo '===== COMMON HELPER INTERFACE ====='
           javap -classpath "$JAR" -p -c com.eternal_creations.archies_dino_mod.platform.services.ICommonHelper || true
+          echo '===== FORGE COMMON HELPER IMPLEMENTATION ====='
+          javap -classpath "$JAR" -p -c com.eternal_creations.archies_dino_mod.platform.ForgeCommonHelper || true
           echo '===== MOD METADATA ====='
           unzip -p "$JAR" META-INF/mods.toml
