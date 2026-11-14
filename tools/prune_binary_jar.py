@@ -479,7 +479,7 @@ with zipfile.ZipFile(source, "r") as zin:
             )
             if mod_id_count != 1:
                 raise RuntimeError(f"Expected exactly one parent modId in mods.toml, found {mod_id_count}")
-            data = metadata.replace(OLD_NAMESPACE, NEW_NAMESPACE)
+            data = metadata.replace(OLD_NAMESPACE, NEW_NAMESPACE).encode("utf-8")
 
         elif name.startswith(MOD):
             if not keep_asset(name):
