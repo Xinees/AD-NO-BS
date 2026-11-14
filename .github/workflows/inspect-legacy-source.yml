@@ -53,6 +53,16 @@ jobs:
           javap -classpath "$JAR" -p -c -v com.eternal_creations.archies_dino_mod.mixin.PlayerMixin
           echo '===== LOCAL PLAYER MIXIN ====='
           javap -classpath "$JAR" -p -c -v com.eternal_creations.archies_dino_mod.mixin.client.LocalPlayerMixin
+          echo '===== LUSHSAUR ENTITY ====='
+          javap -classpath "$JAR" -p -c com.eternal_creations.archies_dino_mod.common.entity.mob.lushsaur.LushsaurEntity
+          echo '===== ABSTRACT COMPLEX MOUNT ====='
+          javap -classpath "$JAR" -p -c com.eternal_creations.archies_dino_mod.common.entity.base.AbstractComplexMount
+          echo '===== MOUNT COMPONENT ====='
+          javap -classpath "$JAR" -p -c com.eternal_creations.archies_dino_mod.common.entity.component.MountComponent
+          echo '===== MOUNT INTERFACE ====='
+          javap -classpath "$JAR" -p -c com.eternal_creations.archies_dino_mod.common.entity.base.Mount
+          echo '===== PASSENGER LAYER ====='
+          javap -classpath "$JAR" -p -c com.eternal_creations.archies_dino_mod.client.model.render.entity.layer.PassengerLayer
           echo '===== LUSHSAUR CLIENT ====='
           javap -classpath "$JAR" -p -c com.eternal_creations.archies_dino_mod.client.model.render.entity.mob.LushsaurClient
           echo '===== CHORUSOATL CLIENT ====='
