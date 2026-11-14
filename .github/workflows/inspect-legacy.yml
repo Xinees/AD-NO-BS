@@ -1,0 +1,78 @@
+name: Legacy read-only bytecode inspection
+
+on:
+  push:
+    branches:
+      - binary-prune/legacy
+    paths:
+      - .github/workflows/inspect-legacy.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout immutable Legacy workspace
+        uses: actions/checkout@v4
+        with:
+          ref: binary-prune/legacy
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Build pruned class archive in memory
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build/tools
+          curl --fail --location --retry 3 https://repo.maven.apache.org/maven2/org/ow2/asm/asm/9.7.1/asm-9.7.1.jar -o build/tools/asm.jar
+          curl --fail --location --retry 3 https://repo.maven.apache.org/maven2/org/ow2/asm/asm-tree/9.7.1/asm-tree-9.7.1.jar -o build/tools/asm-tree.jar
+          javac -encoding UTF-8 -cp build/tools/asm.jar:build/tools/asm-tree.jar -d build/tools tools/JarPruner.java
+          java -cp build/tools:build/tools/asm.jar:build/tools/asm-tree.jar JarPruner ec_ad-forge-1.20.1-1.0.4.jar build/classes-pruned.jar
+
+      - name: Dump riding, animation, inventory and renderer bytecode
+        shell: bash
+        run: |
+          set -euo pipefail
+          JAR=build/classes-pruned.jar
+          echo "=== Relevant class paths ==="
+          unzip -Z1 "$JAR" | grep -Ei 'Lushsaur|Chorusoatl|AbstractComplexMount|DinoMenu|DinoScreen|ADPlayerAnimations|OnLushsaurPlayerAnimations|OnChorusoatlPlayerAnimations|Mount|Inventory|Rider|PlayerMixin|ADKeyMappings|ADClientForgeBus' | grep '\.class$' | sort || true
+          for C in \
+            com.eternal_creations.archies_dino_mod.client.animation.player.ADPlayerAnimations \
+            com.eternal_creations.archies_dino_mod.client.animation.player.riding.OnLushsaurPlayerAnimations \
+            com.eternal_creations.archies_dino_mod.client.animation.player.riding.OnChorusoatlPlayerAnimations \
+            com.eternal_creations.archies_dino_mod.common.entity.mob.lushsaur.LushsaurEntity \
+            com.eternal_creations.archies_dino_mod.common.entity.mob.chorusoatl.ChorusoatlEntity \
+            com.eternal_creations.archies_dino_mod.common.entity.base.AbstractComplexMount \
+            com.eternal_creations.archies_dino_mod.common.menu.DinoMenu \
+            com.eternal_creations.archies_dino_mod.client.ADKeyMappings \
+            com.eternal_creations.archies_dino_mod.client.ADClientForgeBus \
+            com.eternal_creations.archies_dino_mod.client.model.render.entity.mob.LushsaurClient \
+            com.eternal_creations.archies_dino_mod.client.model.render.entity.mob.ChorusoatlClient
+          do
+            echo "===== SIGNATURES: $C ====="
+            javap -classpath "$JAR" -p -s "$C" 2>&1 || true
+          done
+          for C in \
+            com.eternal_creations.archies_dino_mod.client.animation.player.ADPlayerAnimations \
+            com.eternal_creations.archies_dino_mod.client.animation.player.riding.OnLushsaurPlayerAnimations \
+            com.eternal_creations.archies_dino_mod.client.animation.player.riding.OnChorusoatlPlayerAnimations \
+            com.eternal_creations.archies_dino_mod.common.entity.mob.lushsaur.LushsaurEntity \
+            com.eternal_creations.archies_dino_mod.common.entity.mob.chorusoatl.ChorusoatlEntity \
+            com.eternal_creations.archies_dino_mod.common.entity.base.AbstractComplexMount \
+            com.eternal_creations.archies_dino_mod.common.menu.DinoMenu \
+            com.eternal_creations.archies_dino_mod.client.ADKeyMappings \
+            com.eternal_creations.archies_dino_mod.client.ADClientForgeBus
+          do
+            echo "===== BYTECODE: $C ====="
+            javap -classpath "$JAR" -p -c "$C" 2>&1 || true
+          done
+          echo "=== Original model/animation asset names ==="
+          unzip -Z1 ec_ad-forge-1.20.1-1.0.4.jar | grep -Ei 'lushsaur|chorusoatl' | grep -Ei 'astemirmodel|animation|model' | sort | head -200
