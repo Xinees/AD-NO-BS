@@ -86,24 +86,9 @@ public final class JarPruner {
         ROOT + "common/entity/mob/lushsaur/LushsaurEntity", Set.of(
             "m_264410_()Z"
         ),
-        ROOT + "client/particle/SculksaurSonicBoomParticle", Set.of(
-            "m_5989_()V"
-        ),
-        ROOT + "client/particle/SculksaurSonicBoomParticle$Provider", Set.of(
-            "createParticle(Lnet/minecraft/core/particles/SimpleParticleType;Lnet/minecraft/client/multiplayer/ClientLevel;DDDDDD)Lnet/minecraft/client/particle/Particle;",
-            "m_6966_(Lnet/minecraft/core/particles/ParticleOptions;Lnet/minecraft/client/multiplayer/ClientLevel;DDDDDD)Lnet/minecraft/client/particle/Particle;"
-        ),
         ROOT + "client/particle/effect/SculksaurEffects", Set.of(
             "lambda$explosionFinalEvent$12(Lcom/astemir/astemirlib/re/client/model/core/animation/event/AnimationEvent$Context;)V",
-            "lambda$explosionGroundEvent$11(Lcom/astemir/astemirlib/re/client/model/core/animation/event/AnimationEvent$Context;)V",
-            "archiesDinoMod$rememberSonicBoomOrigin(Lnet/minecraft/world/entity/Entity;DDD)V",
-            "archiesDinoMod$takeSonicBoomOrigin(Lnet/minecraft/world/entity/Entity;)[D",
-            "archiesDinoMod$spawnSculksaurSonicBoomFirstSphere(Lcom/astemir/astemirlib/re/client/model/core/animation/event/AnimationEvent$Context;)V",
-            "archiesDinoMod$spawnSculksaurSonicBoomSecondSphere(Lcom/astemir/astemirlib/re/client/model/core/animation/event/AnimationEvent$Context;)V",
-            "archiesDinoMod$spawnSculksaurSonicBoomSphereAt(Lnet/minecraft/world/level/Level;DDD)V",
-            "archiesDinoMod$spawnSculksaurSonicBoomParticle(Lnet/minecraft/world/level/Level;DDDI)V",
-            "archiesDinoMod$secondSonicBoomEvent()Lcom/astemir/astemirlib/re/client/model/core/animation/event/AnimationEvent;",
-            "archiesDinoMod$lambdaSecondSonicBoomEvent(Lcom/astemir/astemirlib/re/client/model/core/animation/event/AnimationEvent$Context;)V"
+            "lambda$explosionGroundEvent$11(Lcom/astemir/astemirlib/re/client/model/core/animation/event/AnimationEvent$Context;)V"
         )
     );
 
@@ -211,8 +196,13 @@ public final class JarPruner {
         patchLushsaurRunAnimation(nodes.get(ROOT + "client/model/render/entity/mob/LushsaurClient"));
         patchLushsaurRiderRunAnimation(nodes.get(ROOT + "client/animation/player/riding/OnLushsaurPlayerAnimations"));
         patchSculksaurExplosionEffects(
-            nodes.get(ROOT + "client/particle/effect/SculksaurEffects"), nodes);
-        patchSculksaurSonicBoomProviderRegistration(nodes.get(ROOT + "client/ADClientModBus"));
+            nodes.get(ROOT + "client/particle/effect/SculksaurEffects"));
+        patchTailPhysics(
+            nodes.get(ROOT + "client/model/render/entity/mob/LushsaurClient"),
+            Set.of("tail1", "tail2", "mase", "tail"), 5);
+        patchTailPhysics(
+            nodes.get(ROOT + "client/model/render/entity/mob/SculksaurClient"),
+            Set.of("tail1", "tail2"), 2);
         patchSmoothMoveControl(nodes.get(ROOT + "common/entity/ai/control/SmoothMoveControl"));
         patchSmoothBodyControl(nodes.get(ROOT + "common/entity/ai/control/SmoothBodyControl"));
         patchSmoothLookControl(nodes.get(ROOT + "common/entity/ai/control/SmoothLookControl"));
@@ -1173,14 +1163,12 @@ public final class JarPruner {
         method.maxLocals = 2;
     }
 
-    private static void patchSculksaurExplosionEffects(ClassNode owner, Map<String, ClassNode> nodes) {
+    private static void patchSculksaurExplosionEffects(ClassNode owner) {
         if (owner == null) throw new IllegalStateException("SculksaurEffects class is missing");
 
         String contextInternal =
             "com/astemir/astemirlib/re/client/model/core/animation/event/AnimationEvent$Context";
         String entityInternal = "net/minecraft/world/entity/Entity";
-        String levelInternal = "net/minecraft/world/level/Level";
-
         String finalDescriptor = "(L" + contextInternal + ";)V";
         MethodNode finalEvent = owner.methods.stream()
             .filter(method -> method.name.equals("lambda$explosionFinalEvent$12") &&
@@ -1190,10 +1178,6 @@ public final class JarPruner {
 
         clearMethod(finalEvent);
         InsnList finalCode = finalEvent.instructions;
-        finalCode.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        finalCode.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
-            owner.name, "archiesDinoMod$spawnSculksaurSonicBoomFirstSphere",
-            finalDescriptor, false));
         finalCode.add(new VarInsnNode(Opcodes.ALOAD, 0));
         finalCode.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
             contextInternal, "getInstance", "()Ljava/lang/Object;", false));
@@ -1216,821 +1200,58 @@ public final class JarPruner {
         groundEvent.instructions.add(new InsnNode(Opcodes.RETURN));
         groundEvent.maxStack = 0;
         groundEvent.maxLocals = 1;
-
-        addSculksaurSonicBoomSphereHelpers(owner, contextInternal, entityInternal, levelInternal);
-        addSculksaurSonicBoomSecondEvent(owner, contextInternal);
-        addSculksaurSonicBoomParticleClasses(nodes);
     }
 
-    private static void addSculksaurSonicBoomSphereHelpers(
-        ClassNode owner, String contextInternal, String entityInternal, String levelInternal
-    ) {
-        String originField = "archiesDinoMod$sonicBoomOrigins";
-        String rememberName = "archiesDinoMod$rememberSonicBoomOrigin";
-        String takeName = "archiesDinoMod$takeSonicBoomOrigin";
-        String firstName = "archiesDinoMod$spawnSculksaurSonicBoomFirstSphere";
-        String secondName = "archiesDinoMod$spawnSculksaurSonicBoomSecondSphere";
-        String sphereName = "archiesDinoMod$spawnSculksaurSonicBoomSphereAt";
-        String particleName = "archiesDinoMod$spawnSculksaurSonicBoomParticle";
-        String consumerInternal = "java/util/function/IntConsumer";
-        String weakMapInternal = "java/util/WeakHashMap";
-        String doubleArray = "[D";
-        String firstDescriptor = "(L" + contextInternal + ";)V";
-        String particleDescriptor = "(L" + levelInternal + ";DDDI)V";
-        String sphereDescriptor = "(L" + levelInternal + ";DDD)V";
-        String rememberDescriptor = "(L" + entityInternal + ";DDD)V";
-        String takeDescriptor = "(L" + entityInternal + ";)[D";
+    private static void patchTailPhysics(ClassNode owner, Set<String> tailBones, int expectedRemoved) {
+        if (owner == null) throw new IllegalStateException("Tail physics renderer is missing");
 
-        owner.methods.removeIf(method ->
-            (method.name.equals(rememberName) && method.desc.equals(rememberDescriptor)) ||
-            (method.name.equals(takeName) && method.desc.equals(takeDescriptor)) ||
-            (method.name.equals(firstName) && method.desc.equals(firstDescriptor)) ||
-            (method.name.equals(secondName) && method.desc.equals(firstDescriptor)) ||
-            (method.name.equals(sphereName) && method.desc.equals(sphereDescriptor)) ||
-            (method.name.equals(particleName) && method.desc.equals(particleDescriptor)));
-        owner.fields.removeIf(field -> field.name.equals(originField));
-        owner.fields.add(new FieldNode(
-            Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC | Opcodes.ACC_FINAL,
-            originField,
-            "L" + weakMapInternal + ";",
-            null,
-            null
-        ));
+        List<MethodNode> setupMethods = owner.methods.stream()
+            .filter(method -> method.name.equals("setupPhysics"))
+            .toList();
+        if (setupMethods.size() != 1) {
+            throw new IllegalStateException(owner.name + " must have exactly one setupPhysics method");
+        }
 
-        MethodNode classInitializer = owner.methods.stream()
-            .filter(method -> method.name.equals("<clinit>") && method.desc.equals("()V"))
-            .findFirst()
-            .orElseThrow(() -> new IllegalStateException("SculksaurEffects static initializer is missing"));
-        InsnList mapInitializer = new InsnList();
-        mapInitializer.add(new TypeInsnNode(Opcodes.NEW, weakMapInternal));
-        mapInitializer.add(new InsnNode(Opcodes.DUP));
-        mapInitializer.add(new MethodInsnNode(Opcodes.INVOKESPECIAL,
-            weakMapInternal, "<init>", "()V", false));
-        mapInitializer.add(new FieldInsnNode(Opcodes.PUTSTATIC,
-            owner.name, originField, "L" + weakMapInternal + ";"));
-        classInitializer.instructions.insert(mapInitializer);
+        MethodNode setup = setupMethods.get(0);
+        String chainOwner =
+            "com/astemir/astemirlib/re/client/model/core/system/module/PhysicsModule$PhysicsChain";
+        String addBoneDescriptor =
+            "(Ljava/lang/String;Lcom/astemir/astemirlib/re/client/model/core/system/module/PhysicsModule$PhysicsProperties;)" +
+            "Lcom/astemir/astemirlib/re/client/model/core/system/module/PhysicsModule$PhysicsChain;";
+        int removed = 0;
 
-        MethodNode remember = new MethodNode(
-            Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC,
-            rememberName,
-            rememberDescriptor,
-            null,
-            null
-        );
-        InsnList rememberCode = remember.instructions;
-        rememberCode.add(new FieldInsnNode(Opcodes.GETSTATIC,
-            owner.name, originField, "L" + weakMapInternal + ";"));
-        rememberCode.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        rememberCode.add(new InsnNode(Opcodes.ICONST_3));
-        rememberCode.add(new IntInsnNode(Opcodes.NEWARRAY, Opcodes.T_DOUBLE));
-        rememberCode.add(new InsnNode(Opcodes.DUP));
-        rememberCode.add(new InsnNode(Opcodes.ICONST_0));
-        rememberCode.add(new VarInsnNode(Opcodes.DLOAD, 1));
-        rememberCode.add(new InsnNode(Opcodes.DASTORE));
-        rememberCode.add(new InsnNode(Opcodes.DUP));
-        rememberCode.add(new InsnNode(Opcodes.ICONST_1));
-        rememberCode.add(new VarInsnNode(Opcodes.DLOAD, 3));
-        rememberCode.add(new InsnNode(Opcodes.DASTORE));
-        rememberCode.add(new InsnNode(Opcodes.DUP));
-        rememberCode.add(new InsnNode(Opcodes.ICONST_2));
-        rememberCode.add(new VarInsnNode(Opcodes.DLOAD, 5));
-        rememberCode.add(new InsnNode(Opcodes.DASTORE));
-        rememberCode.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
-            weakMapInternal, "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", false));
-        rememberCode.add(new InsnNode(Opcodes.POP));
-        rememberCode.add(new InsnNode(Opcodes.RETURN));
-        remember.maxStack = 8;
-        remember.maxLocals = 7;
-        owner.methods.add(remember);
+        for (AbstractInsnNode instruction : setup.instructions.toArray()) {
+            if (!(instruction instanceof MethodInsnNode call) ||
+                call.getOpcode() != Opcodes.INVOKEVIRTUAL ||
+                !call.owner.equals(chainOwner) ||
+                !call.name.equals("addBone") ||
+                !call.desc.equals(addBoneDescriptor)) continue;
 
-        MethodNode take = new MethodNode(
-            Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC,
-            takeName,
-            takeDescriptor,
-            null,
-            null
-        );
-        InsnList takeCode = take.instructions;
-        takeCode.add(new FieldInsnNode(Opcodes.GETSTATIC,
-            owner.name, originField, "L" + weakMapInternal + ";"));
-        takeCode.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        takeCode.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
-            weakMapInternal, "get", "(Ljava/lang/Object;)Ljava/lang/Object;", false));
-        takeCode.add(new TypeInsnNode(Opcodes.CHECKCAST, doubleArray));
-        takeCode.add(new VarInsnNode(Opcodes.ASTORE, 1));
-        takeCode.add(new FieldInsnNode(Opcodes.GETSTATIC,
-            owner.name, originField, "L" + weakMapInternal + ";"));
-        takeCode.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        takeCode.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
-            weakMapInternal, "remove", "(Ljava/lang/Object;)Ljava/lang/Object;", false));
-        takeCode.add(new InsnNode(Opcodes.POP));
-        takeCode.add(new VarInsnNode(Opcodes.ALOAD, 1));
-        takeCode.add(new InsnNode(Opcodes.ARETURN));
-        take.maxStack = 2;
-        take.maxLocals = 2;
-        owner.methods.add(take);
-
-        MethodNode particle = new MethodNode(
-            Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC,
-            particleName,
-            particleDescriptor,
-            null,
-            null
-        );
-        InsnList p = particle.instructions;
-
-        p.add(new VarInsnNode(Opcodes.ILOAD, 7));
-        p.add(new InsnNode(Opcodes.I2D));
-        p.add(new LdcInsnNode(0.5d));
-        p.add(new InsnNode(Opcodes.DADD));
-        p.add(new LdcInsnNode(2.0d / 256.0d));
-        p.add(new InsnNode(Opcodes.DMUL));
-        p.add(new InsnNode(Opcodes.DCONST_1));
-        p.add(new InsnNode(Opcodes.DSUB));
-        p.add(new VarInsnNode(Opcodes.DSTORE, 8));
-
-        p.add(new InsnNode(Opcodes.DCONST_1));
-        p.add(new VarInsnNode(Opcodes.DLOAD, 8));
-        p.add(new VarInsnNode(Opcodes.DLOAD, 8));
-        p.add(new InsnNode(Opcodes.DMUL));
-        p.add(new InsnNode(Opcodes.DSUB));
-        p.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
-            "java/lang/Math", "sqrt", "(D)D", false));
-        p.add(new VarInsnNode(Opcodes.DSTORE, 10));
-
-        p.add(new VarInsnNode(Opcodes.ILOAD, 7));
-        p.add(new InsnNode(Opcodes.I2D));
-        p.add(new LdcInsnNode(2.399963229728653d));
-        p.add(new InsnNode(Opcodes.DMUL));
-        p.add(new VarInsnNode(Opcodes.DSTORE, 12));
-
-        p.add(new VarInsnNode(Opcodes.DLOAD, 12));
-        p.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
-            "java/lang/Math", "cos", "(D)D", false));
-        p.add(new VarInsnNode(Opcodes.DLOAD, 10));
-        p.add(new InsnNode(Opcodes.DMUL));
-        p.add(new VarInsnNode(Opcodes.DSTORE, 14));
-
-        p.add(new VarInsnNode(Opcodes.DLOAD, 12));
-        p.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
-            "java/lang/Math", "sin", "(D)D", false));
-        p.add(new VarInsnNode(Opcodes.DLOAD, 10));
-        p.add(new InsnNode(Opcodes.DMUL));
-        p.add(new VarInsnNode(Opcodes.DSTORE, 16));
-
-        p.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        p.add(new FieldInsnNode(Opcodes.GETSTATIC,
-            "net/minecraft/core/particles/ParticleTypes", "f_235902_",
-            "Lnet/minecraft/core/particles/SimpleParticleType;"));
-        p.add(new VarInsnNode(Opcodes.DLOAD, 1));
-        p.add(new VarInsnNode(Opcodes.DLOAD, 3));
-        p.add(new VarInsnNode(Opcodes.DLOAD, 5));
-        p.add(new VarInsnNode(Opcodes.DLOAD, 14));
-        p.add(new LdcInsnNode(0.6d));
-        p.add(new InsnNode(Opcodes.DMUL));
-        p.add(new VarInsnNode(Opcodes.DLOAD, 8));
-        p.add(new LdcInsnNode(0.6d));
-        p.add(new InsnNode(Opcodes.DMUL));
-        p.add(new VarInsnNode(Opcodes.DLOAD, 16));
-        p.add(new LdcInsnNode(0.6d));
-        p.add(new InsnNode(Opcodes.DMUL));
-        p.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
-            ROOT + "client/particle/SculksaurSonicBoomParticle$Provider", "spawn",
-            "(L" + levelInternal + ";Lnet/minecraft/core/particles/SimpleParticleType;DDDDDD)V", false));
-        p.add(new InsnNode(Opcodes.RETURN));
-        particle.maxStack = 14;
-        particle.maxLocals = 18;
-        owner.methods.add(particle);
-
-        MethodNode sphere = new MethodNode(
-            Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC,
-            sphereName,
-            sphereDescriptor,
-            null,
-            null
-        );
-        InsnList s = sphere.instructions;
-        Handle metafactory = new Handle(
-            Opcodes.H_INVOKESTATIC,
-            "java/lang/invoke/LambdaMetafactory",
-            "metafactory",
-            "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;" +
-                "Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;" +
-                "Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;",
-            false
-        );
-        s.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        s.add(new VarInsnNode(Opcodes.DLOAD, 1));
-        s.add(new VarInsnNode(Opcodes.DLOAD, 3));
-        s.add(new VarInsnNode(Opcodes.DLOAD, 5));
-        s.add(new InvokeDynamicInsnNode(
-            "accept",
-            "(L" + levelInternal + ";DDD)L" + consumerInternal + ";",
-            metafactory,
-            Type.getMethodType("(I)V"),
-            new Handle(Opcodes.H_INVOKESTATIC,
-                owner.name, particleName, particleDescriptor, false),
-            Type.getMethodType("(I)V")
-        ));
-        s.add(new VarInsnNode(Opcodes.ASTORE, 7));
-        s.add(new InsnNode(Opcodes.ICONST_0));
-        s.add(new IntInsnNode(Opcodes.SIPUSH, 256));
-        s.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
-            "java/util/stream/IntStream", "range",
-            "(II)Ljava/util/stream/IntStream;", true));
-        s.add(new VarInsnNode(Opcodes.ALOAD, 7));
-        s.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE,
-            "java/util/stream/IntStream", "forEach",
-            "(Ljava/util/function/IntConsumer;)V", true));
-        s.add(new InsnNode(Opcodes.RETURN));
-        sphere.maxStack = 9;
-        sphere.maxLocals = 8;
-        owner.methods.add(sphere);
-
-        MethodNode firstSphere = new MethodNode(
-            Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC,
-            firstName,
-            firstDescriptor,
-            null,
-            null
-        );
-        InsnList first = firstSphere.instructions;
-        first.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        first.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
-            contextInternal, "getInstance", "()Ljava/lang/Object;", false));
-        first.add(new TypeInsnNode(Opcodes.CHECKCAST, entityInternal));
-        first.add(new VarInsnNode(Opcodes.ASTORE, 1));
-
-        first.add(new VarInsnNode(Opcodes.ALOAD, 1));
-        first.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
-            entityInternal, "m_20185_", "()D", false));
-        first.add(new VarInsnNode(Opcodes.DSTORE, 2));
-
-        first.add(new VarInsnNode(Opcodes.ALOAD, 1));
-        first.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
-            entityInternal, "m_20186_", "()D", false));
-        first.add(new VarInsnNode(Opcodes.DSTORE, 4));
-
-        first.add(new VarInsnNode(Opcodes.ALOAD, 1));
-        first.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
-            entityInternal, "m_20206_", "()F", false));
-        first.add(new InsnNode(Opcodes.F2D));
-        first.add(new LdcInsnNode(0.5d));
-        first.add(new InsnNode(Opcodes.DMUL));
-        first.add(new VarInsnNode(Opcodes.DLOAD, 4));
-        first.add(new InsnNode(Opcodes.DADD));
-        first.add(new VarInsnNode(Opcodes.DSTORE, 4));
-
-        first.add(new VarInsnNode(Opcodes.ALOAD, 1));
-        first.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
-            entityInternal, "m_20189_", "()D", false));
-        first.add(new VarInsnNode(Opcodes.DSTORE, 6));
-
-        first.add(new VarInsnNode(Opcodes.ALOAD, 1));
-        first.add(new VarInsnNode(Opcodes.DLOAD, 2));
-        first.add(new VarInsnNode(Opcodes.DLOAD, 4));
-        first.add(new VarInsnNode(Opcodes.DLOAD, 6));
-        first.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
-            owner.name, rememberName, rememberDescriptor, false));
-
-        first.add(new VarInsnNode(Opcodes.ALOAD, 1));
-        first.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
-            entityInternal, "m_9236_", "()L" + levelInternal + ";", false));
-        first.add(new VarInsnNode(Opcodes.DLOAD, 2));
-        first.add(new VarInsnNode(Opcodes.DLOAD, 4));
-        first.add(new VarInsnNode(Opcodes.DLOAD, 6));
-        first.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
-            owner.name, sphereName, sphereDescriptor, false));
-        first.add(new InsnNode(Opcodes.RETURN));
-        firstSphere.maxStack = 8;
-        firstSphere.maxLocals = 8;
-        owner.methods.add(firstSphere);
-
-        MethodNode secondSphere = new MethodNode(
-            Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC,
-            secondName,
-            firstDescriptor,
-            null,
-            null
-        );
-        InsnList second = secondSphere.instructions;
-        LabelNode noSavedOrigin = new LabelNode();
-        second.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        second.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
-            contextInternal, "getInstance", "()Ljava/lang/Object;", false));
-        second.add(new TypeInsnNode(Opcodes.CHECKCAST, entityInternal));
-        second.add(new VarInsnNode(Opcodes.ASTORE, 1));
-        second.add(new VarInsnNode(Opcodes.ALOAD, 1));
-        second.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
-            owner.name, takeName, takeDescriptor, false));
-        second.add(new VarInsnNode(Opcodes.ASTORE, 2));
-        second.add(new VarInsnNode(Opcodes.ALOAD, 2));
-        second.add(new JumpInsnNode(Opcodes.IFNULL, noSavedOrigin));
-        second.add(new VarInsnNode(Opcodes.ALOAD, 1));
-        second.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
-            entityInternal, "m_9236_", "()L" + levelInternal + ";", false));
-        second.add(new VarInsnNode(Opcodes.ALOAD, 2));
-        second.add(new InsnNode(Opcodes.ICONST_0));
-        second.add(new InsnNode(Opcodes.DALOAD));
-        second.add(new VarInsnNode(Opcodes.ALOAD, 2));
-        second.add(new InsnNode(Opcodes.ICONST_1));
-        second.add(new InsnNode(Opcodes.DALOAD));
-        second.add(new VarInsnNode(Opcodes.ALOAD, 2));
-        second.add(new InsnNode(Opcodes.ICONST_2));
-        second.add(new InsnNode(Opcodes.DALOAD));
-        second.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
-            owner.name, sphereName, sphereDescriptor, false));
-        second.add(noSavedOrigin);
-        second.add(new FrameNode(Opcodes.F_SAME, 0, null, 0, null));
-        second.add(new InsnNode(Opcodes.RETURN));
-        secondSphere.maxStack = 5;
-        secondSphere.maxLocals = 3;
-        owner.methods.add(secondSphere);
-    }
-
-    private static void addSculksaurSonicBoomSecondEvent(ClassNode owner, String contextInternal) {
-        String eventType = "com/astemir/astemirlib/re/client/model/core/animation/event/AnimationEvent";
-        String factoryDescriptor = "()L" + eventType + ";";
-        String contextDescriptor =
-            "(Lcom/astemir/astemirlib/re/client/model/core/animation/event/AnimationEvent$Context;)V";
-        String factoryName = "archiesDinoMod$secondSonicBoomEvent";
-        String lambdaName = "archiesDinoMod$lambdaSecondSonicBoomEvent";
-
-        owner.methods.removeIf(method ->
-            (method.name.equals(factoryName) && method.desc.equals(factoryDescriptor)) ||
-            (method.name.equals(lambdaName) && method.desc.equals(contextDescriptor)));
-
-        MethodNode originalFactory = owner.methods.stream()
-            .filter(method -> method.name.equals("explosionFinalEvent") &&
-                method.desc.equals(factoryDescriptor))
-            .findFirst()
-            .orElseThrow(() -> new IllegalStateException("Original Sculksaur explosion event factory is missing"));
-
-        MethodNode secondFactory = new MethodNode(
-            Opcodes.ASM9,
-            originalFactory.access,
-            factoryName,
-            originalFactory.desc,
-            originalFactory.signature,
-            originalFactory.exceptions == null ? new String[0] :
-                originalFactory.exceptions.toArray(new String[0])
-        );
-        originalFactory.accept(secondFactory);
-        for (AbstractInsnNode instruction : secondFactory.instructions.toArray()) {
-            if (instruction instanceof InvokeDynamicInsnNode dynamic) {
-                dynamic.bsmArgs = dynamic.bsmArgs.clone();
+            AbstractInsnNode propertiesLoad = call.getPrevious();
+            while (propertiesLoad != null && propertiesLoad.getOpcode() < 0) {
+                propertiesLoad = propertiesLoad.getPrevious();
             }
-        }
-
-        String originalLambdaName = "lambda$explosionFinalEvent$12";
-        boolean originalFactoryHandlePreserved = false;
-        for (AbstractInsnNode instruction : originalFactory.instructions.toArray()) {
-            if (!(instruction instanceof InvokeDynamicInsnNode dynamic)) continue;
-            for (Object argument : dynamic.bsmArgs) {
-                if (argument instanceof Handle handle &&
-                    handle.getOwner().equals(owner.name) &&
-                    handle.getName().equals(originalLambdaName) &&
-                    handle.getDesc().equals(contextDescriptor)) {
-                    originalFactoryHandlePreserved = true;
-                }
+            AbstractInsnNode boneNameLoad = propertiesLoad == null ? null : propertiesLoad.getPrevious();
+            while (boneNameLoad != null && boneNameLoad.getOpcode() < 0) {
+                boneNameLoad = boneNameLoad.getPrevious();
             }
-        }
-        if (!originalFactoryHandlePreserved) {
-            throw new IllegalStateException("Cloning the second event altered the original Sonic Boom callback");
-        }
 
-        boolean lambdaHandleReplaced = false;
-        for (AbstractInsnNode instruction : secondFactory.instructions.toArray()) {
-            if (!(instruction instanceof InvokeDynamicInsnNode dynamic)) continue;
-            for (int i = 0; i < dynamic.bsmArgs.length; i++) {
-                if (!(dynamic.bsmArgs[i] instanceof Handle handle)) continue;
-                if (handle.getOwner().equals(owner.name) &&
-                    handle.getName().equals("lambda$explosionFinalEvent$12") &&
-                    handle.getDesc().equals(contextDescriptor)) {
-                    dynamic.bsmArgs[i] = new Handle(
-                        handle.getTag(), owner.name, lambdaName, contextDescriptor, false);
-                    lambdaHandleReplaced = true;
-                }
-            }
-        }
-        if (!lambdaHandleReplaced) {
-            throw new IllegalStateException("Could not clone the original Sculksaur animation-event lambda");
-        }
-        owner.methods.add(secondFactory);
+            if (!(boneNameLoad instanceof LdcInsnNode boneConstant) ||
+                !(boneConstant.cst instanceof String boneName) ||
+                !tailBones.contains(boneName)) continue;
 
-        MethodNode secondLambda = new MethodNode(
-            Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC,
-            lambdaName,
-            contextDescriptor,
-            null,
-            null
-        );
-        secondLambda.instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        secondLambda.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
-            owner.name, "archiesDinoMod$spawnSculksaurSonicBoomSecondSphere",
-            contextDescriptor, false));
-        secondLambda.instructions.add(new InsnNode(Opcodes.RETURN));
-        secondLambda.maxStack = 1;
-        secondLambda.maxLocals = 1;
-        owner.methods.add(secondLambda);
-
-        MethodNode classInitializer = owner.methods.stream()
-            .filter(method -> method.name.equals("<clinit>") && method.desc.equals("()V"))
-            .findFirst()
-            .orElseThrow(() -> new IllegalStateException("SculksaurEffects static initializer is missing"));
-        FieldInsnNode explosionTrackStore = null;
-        for (AbstractInsnNode instruction : classInitializer.instructions.toArray()) {
-            if (instruction instanceof FieldInsnNode field &&
-                field.getOpcode() == Opcodes.PUTSTATIC &&
-                field.owner.equals(owner.name) && field.name.equals("EXPLOSION_EFFECTS")) {
-                if (explosionTrackStore != null) {
-                    throw new IllegalStateException("Sculksaur explosion event track is initialized more than once");
-                }
-                explosionTrackStore = field;
-            }
-        }
-        if (explosionTrackStore == null) {
-            throw new IllegalStateException("Sculksaur explosion event track initialization is missing");
+            InsnList discardTailBone = new InsnList();
+            discardTailBone.add(new InsnNode(Opcodes.POP));
+            discardTailBone.add(new InsnNode(Opcodes.POP));
+            setup.instructions.insertBefore(call, discardTailBone);
+            setup.instructions.remove(call);
+            removed++;
         }
 
-        String eventTrackInternal =
-            "com/astemir/astemirlib/re/client/model/core/animation/event/AnimationEventTrack";
-        InsnList secondTrackEvent = new InsnList();
-        secondTrackEvent.add(new LdcInsnNode(4.88f));
-        secondTrackEvent.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
-            owner.name, factoryName, factoryDescriptor, false));
-        secondTrackEvent.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
-            eventTrackInternal, "addEvent",
-            "(FL" + eventType + ";)L" + eventTrackInternal + ";", false));
-        classInitializer.instructions.insertBefore(explosionTrackStore, secondTrackEvent);
-        classInitializer.maxStack = Math.max(classInitializer.maxStack, 3);
-    }
-
-    private static void addSculksaurSonicBoomParticleClasses(Map<String, ClassNode> nodes) {
-        String particleName = ROOT + "client/particle/SculksaurSonicBoomParticle";
-        String providerName = particleName + "$Provider";
-        if (nodes.containsKey(particleName) || nodes.containsKey(providerName)) {
-            throw new IllegalStateException("Generated Sculksaur Sonic Boom particle class name already exists");
+        if (removed != expectedRemoved) {
+            throw new IllegalStateException(owner.name + " expected to disable " + expectedRemoved +
+                " tail physics bones, but disabled " + removed);
         }
-
-        String clientLevel = "net/minecraft/client/multiplayer/ClientLevel";
-        String spriteSet = "net/minecraft/client/particle/SpriteSet";
-        String particle = "net/minecraft/client/particle/Particle";
-        String simpleParticleType = "net/minecraft/core/particles/SimpleParticleType";
-        String particleOptions = "net/minecraft/core/particles/ParticleOptions";
-        String level = "net/minecraft/world/level/Level";
-        String spriteSetDescriptor = "(L" + spriteSet + ";)V";
-        String movingConstructorDescriptor =
-            "(L" + clientLevel + ";DDDDDDL" + spriteSet + ";)V";
-
-        ClassNode movingParticle = new ClassNode(Opcodes.ASM9);
-        movingParticle.version = Opcodes.V17;
-        movingParticle.access = Opcodes.ACC_PUBLIC | Opcodes.ACC_SUPER;
-        movingParticle.name = particleName;
-        movingParticle.superName = "net/minecraft/client/particle/SonicBoomParticle";
-
-        MethodNode movingConstructor = new MethodNode(
-            Opcodes.ACC_PUBLIC, "<init>", movingConstructorDescriptor, null, null);
-        InsnList constructorCode = movingConstructor.instructions;
-        constructorCode.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        constructorCode.add(new VarInsnNode(Opcodes.ALOAD, 1));
-        constructorCode.add(new VarInsnNode(Opcodes.DLOAD, 2));
-        constructorCode.add(new VarInsnNode(Opcodes.DLOAD, 4));
-        constructorCode.add(new VarInsnNode(Opcodes.DLOAD, 6));
-        constructorCode.add(new InsnNode(Opcodes.DCONST_0));
-        constructorCode.add(new VarInsnNode(Opcodes.ALOAD, 14));
-        constructorCode.add(new MethodInsnNode(Opcodes.INVOKESPECIAL,
-            "net/minecraft/client/particle/SonicBoomParticle", "<init>",
-            "(L" + clientLevel + ";DDDDL" + spriteSet + ";)V", false));
-        constructorCode.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        constructorCode.add(new IntInsnNode(Opcodes.BIPUSH, 34));
-        constructorCode.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
-            particle, "m_107257_", "(I)V", false));
-        constructorCode.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        constructorCode.add(new VarInsnNode(Opcodes.DLOAD, 8));
-        constructorCode.add(new VarInsnNode(Opcodes.DLOAD, 10));
-        constructorCode.add(new VarInsnNode(Opcodes.DLOAD, 12));
-        constructorCode.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
-            particle, "m_172260_", "(DDD)V", false));
-        constructorCode.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        constructorCode.add(new InsnNode(Opcodes.ICONST_0));
-        constructorCode.add(new FieldInsnNode(Opcodes.PUTFIELD,
-            particle, "f_107219_", "Z"));
-        constructorCode.add(new InsnNode(Opcodes.RETURN));
-        movingConstructor.maxStack = 11;
-        movingConstructor.maxLocals = 15;
-        movingParticle.methods.add(movingConstructor);
-
-        MethodNode tick = new MethodNode(Opcodes.ACC_PUBLIC, "m_5989_", "()V", null, null);
-        InsnList tickCode = tick.instructions;
-        LabelNode animationCycle = new LabelNode();
-        LabelNode tickReturn = new LabelNode();
-
-        tickCode.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        tickCode.add(new FieldInsnNode(Opcodes.GETFIELD, particle, "f_107224_", "I"));
-        tickCode.add(new VarInsnNode(Opcodes.ISTORE, 1));
-        tickCode.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        tickCode.add(new FieldInsnNode(Opcodes.GETFIELD, particle, "f_107225_", "I"));
-        tickCode.add(new VarInsnNode(Opcodes.ISTORE, 2));
-        tickCode.add(new VarInsnNode(Opcodes.ILOAD, 1));
-        tickCode.add(new VarInsnNode(Opcodes.ILOAD, 2));
-        tickCode.add(new JumpInsnNode(Opcodes.IF_ICMPLT, animationCycle));
-        tickCode.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        tickCode.add(new InsnNode(Opcodes.ICONST_1));
-        tickCode.add(new FieldInsnNode(Opcodes.PUTFIELD, particle, "f_107220_", "Z"));
-        tickCode.add(new InsnNode(Opcodes.RETURN));
-
-        tickCode.add(animationCycle);
-        tickCode.add(new FrameNode(Opcodes.F_APPEND, 2,
-            new Object[] { Opcodes.INTEGER, Opcodes.INTEGER }, 0, new Object[0]));
-        tickCode.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        tickCode.add(new VarInsnNode(Opcodes.ILOAD, 1));
-        tickCode.add(new IntInsnNode(Opcodes.BIPUSH, 16));
-        tickCode.add(new InsnNode(Opcodes.IREM));
-        tickCode.add(new InsnNode(Opcodes.ICONST_1));
-        tickCode.add(new InsnNode(Opcodes.ISUB));
-        tickCode.add(new FieldInsnNode(Opcodes.PUTFIELD, particle, "f_107224_", "I"));
-        tickCode.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        tickCode.add(new IntInsnNode(Opcodes.BIPUSH, 16));
-        tickCode.add(new FieldInsnNode(Opcodes.PUTFIELD, particle, "f_107225_", "I"));
-        tickCode.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        tickCode.add(new MethodInsnNode(Opcodes.INVOKESPECIAL,
-            "net/minecraft/client/particle/HugeExplosionParticle", "m_5989_", "()V", false));
-        tickCode.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        tickCode.add(new VarInsnNode(Opcodes.ILOAD, 1));
-        tickCode.add(new InsnNode(Opcodes.ICONST_1));
-        tickCode.add(new InsnNode(Opcodes.IADD));
-        tickCode.add(new FieldInsnNode(Opcodes.PUTFIELD, particle, "f_107224_", "I"));
-        tickCode.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        tickCode.add(new VarInsnNode(Opcodes.ILOAD, 2));
-        tickCode.add(new FieldInsnNode(Opcodes.PUTFIELD, particle, "f_107225_", "I"));
-        tickCode.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        tickCode.add(new FieldInsnNode(Opcodes.GETFIELD, particle, "f_107220_", "Z"));
-        tickCode.add(new JumpInsnNode(Opcodes.IFNE, tickReturn));
-
-        tickCode.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        tickCode.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        tickCode.add(new FieldInsnNode(Opcodes.GETFIELD, particle, "f_107215_", "D"));
-        tickCode.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        tickCode.add(new FieldInsnNode(Opcodes.GETFIELD, particle, "f_107216_", "D"));
-        tickCode.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        tickCode.add(new FieldInsnNode(Opcodes.GETFIELD, particle, "f_107217_", "D"));
-        tickCode.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
-            particle, "m_6257_", "(DDD)V", false));
-        tickCode.add(tickReturn);
-        tickCode.add(new FrameNode(Opcodes.F_SAME, 0, null, 0, null));
-        tickCode.add(new InsnNode(Opcodes.RETURN));
-        tick.maxStack = 4;
-        tick.maxLocals = 3;
-        movingParticle.methods.add(tick);
-        nodes.put(particleName, movingParticle);
-
-        ClassNode provider = new ClassNode(Opcodes.ASM9);
-        provider.version = Opcodes.V17;
-        provider.access = Opcodes.ACC_PUBLIC | Opcodes.ACC_SUPER;
-        provider.name = providerName;
-        provider.superName = "java/lang/Object";
-        provider.interfaces = new ArrayList<>(List.of("net/minecraft/client/particle/ParticleProvider"));
-        provider.fields.add(new FieldNode(
-            Opcodes.ACC_PRIVATE | Opcodes.ACC_FINAL, "sprites", "L" + spriteSet + ";", null, null));
-        provider.fields.add(new FieldNode(
-            Opcodes.ACC_PRIVATE | Opcodes.ACC_FINAL, "vanillaProvider",
-            "Lnet/minecraft/client/particle/ParticleProvider;", null, null));
-        provider.fields.add(new FieldNode(
-            Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC | Opcodes.ACC_FINAL, "MOVING",
-            "Ljava/lang/ThreadLocal;", null, null));
-
-        MethodNode providerClassInitializer = new MethodNode(
-            Opcodes.ACC_STATIC, "<clinit>", "()V", null, null);
-        InsnList clinit = providerClassInitializer.instructions;
-        clinit.add(new TypeInsnNode(Opcodes.NEW, "java/lang/ThreadLocal"));
-        clinit.add(new InsnNode(Opcodes.DUP));
-        clinit.add(new MethodInsnNode(Opcodes.INVOKESPECIAL,
-            "java/lang/ThreadLocal", "<init>", "()V", false));
-        clinit.add(new FieldInsnNode(Opcodes.PUTSTATIC, providerName, "MOVING",
-            "Ljava/lang/ThreadLocal;"));
-        clinit.add(new InsnNode(Opcodes.RETURN));
-        providerClassInitializer.maxStack = 2;
-        providerClassInitializer.maxLocals = 0;
-        provider.methods.add(providerClassInitializer);
-
-        MethodNode providerConstructor = new MethodNode(
-            Opcodes.ACC_PUBLIC, "<init>", spriteSetDescriptor, null, null);
-        InsnList providerConstructorCode = providerConstructor.instructions;
-        providerConstructorCode.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        providerConstructorCode.add(new MethodInsnNode(Opcodes.INVOKESPECIAL,
-            "java/lang/Object", "<init>", "()V", false));
-        providerConstructorCode.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        providerConstructorCode.add(new VarInsnNode(Opcodes.ALOAD, 1));
-        providerConstructorCode.add(new FieldInsnNode(Opcodes.PUTFIELD,
-            providerName, "sprites", "L" + spriteSet + ";"));
-        providerConstructorCode.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        providerConstructorCode.add(new TypeInsnNode(Opcodes.NEW,
-            "net/minecraft/client/particle/SonicBoomParticle$Provider"));
-        providerConstructorCode.add(new InsnNode(Opcodes.DUP));
-        providerConstructorCode.add(new VarInsnNode(Opcodes.ALOAD, 1));
-        providerConstructorCode.add(new MethodInsnNode(Opcodes.INVOKESPECIAL,
-            "net/minecraft/client/particle/SonicBoomParticle$Provider",
-            "<init>", spriteSetDescriptor, false));
-        providerConstructorCode.add(new FieldInsnNode(Opcodes.PUTFIELD,
-            providerName, "vanillaProvider", "Lnet/minecraft/client/particle/ParticleProvider;"));
-        providerConstructorCode.add(new InsnNode(Opcodes.RETURN));
-        providerConstructor.maxStack = 3;
-        providerConstructor.maxLocals = 2;
-        provider.methods.add(providerConstructor);
-
-        String createParticleDescriptor =
-            "(L" + simpleParticleType + ";L" + clientLevel + ";DDDDDD)L" + particle + ";";
-        MethodNode createParticle = new MethodNode(
-            Opcodes.ACC_PUBLIC, "createParticle", createParticleDescriptor, null, null);
-        InsnList createCode = createParticle.instructions;
-        LabelNode vanillaFallback = new LabelNode();
-        createCode.add(new FieldInsnNode(Opcodes.GETSTATIC,
-            "java/lang/Boolean", "TRUE", "Ljava/lang/Boolean;"));
-        createCode.add(new FieldInsnNode(Opcodes.GETSTATIC,
-            providerName, "MOVING", "Ljava/lang/ThreadLocal;"));
-        createCode.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
-            "java/lang/ThreadLocal", "get", "()Ljava/lang/Object;", false));
-        createCode.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
-            "java/lang/Boolean", "equals", "(Ljava/lang/Object;)Z", false));
-        createCode.add(new JumpInsnNode(Opcodes.IFEQ, vanillaFallback));
-        createCode.add(new TypeInsnNode(Opcodes.NEW, particleName));
-        createCode.add(new InsnNode(Opcodes.DUP));
-        createCode.add(new VarInsnNode(Opcodes.ALOAD, 2));
-        createCode.add(new VarInsnNode(Opcodes.DLOAD, 3));
-        createCode.add(new VarInsnNode(Opcodes.DLOAD, 5));
-        createCode.add(new VarInsnNode(Opcodes.DLOAD, 7));
-        createCode.add(new VarInsnNode(Opcodes.DLOAD, 9));
-        createCode.add(new VarInsnNode(Opcodes.DLOAD, 11));
-        createCode.add(new VarInsnNode(Opcodes.DLOAD, 13));
-        createCode.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        createCode.add(new FieldInsnNode(Opcodes.GETFIELD,
-            providerName, "sprites", "L" + spriteSet + ";"));
-        createCode.add(new MethodInsnNode(Opcodes.INVOKESPECIAL,
-            particleName, "<init>", movingConstructorDescriptor, false));
-        createCode.add(new InsnNode(Opcodes.ARETURN));
-        createCode.add(vanillaFallback);
-        createCode.add(new FrameNode(Opcodes.F_SAME, 0, null, 0, null));
-        createCode.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        createCode.add(new FieldInsnNode(Opcodes.GETFIELD,
-            providerName, "vanillaProvider", "Lnet/minecraft/client/particle/ParticleProvider;"));
-        createCode.add(new VarInsnNode(Opcodes.ALOAD, 1));
-        createCode.add(new VarInsnNode(Opcodes.ALOAD, 2));
-        createCode.add(new VarInsnNode(Opcodes.DLOAD, 3));
-        createCode.add(new VarInsnNode(Opcodes.DLOAD, 5));
-        createCode.add(new VarInsnNode(Opcodes.DLOAD, 7));
-        createCode.add(new VarInsnNode(Opcodes.DLOAD, 9));
-        createCode.add(new VarInsnNode(Opcodes.DLOAD, 11));
-        createCode.add(new VarInsnNode(Opcodes.DLOAD, 13));
-        createCode.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE,
-            "net/minecraft/client/particle/ParticleProvider", "m_6966_",
-            "(L" + particleOptions + ";L" + clientLevel + ";DDDDDD)L" + particle + ";", true));
-        createCode.add(new InsnNode(Opcodes.ARETURN));
-        createParticle.maxStack = 18;
-        createParticle.maxLocals = 15;
-        provider.methods.add(createParticle);
-
-        String bridgeDescriptor =
-            "(L" + particleOptions + ";L" + clientLevel + ";DDDDDD)L" + particle + ";";
-        MethodNode bridge = new MethodNode(
-            Opcodes.ACC_PUBLIC | Opcodes.ACC_BRIDGE | Opcodes.ACC_SYNTHETIC,
-            "m_6966_", bridgeDescriptor, null, null);
-        InsnList bridgeCode = bridge.instructions;
-        bridgeCode.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        bridgeCode.add(new VarInsnNode(Opcodes.ALOAD, 1));
-        bridgeCode.add(new TypeInsnNode(Opcodes.CHECKCAST, simpleParticleType));
-        bridgeCode.add(new VarInsnNode(Opcodes.ALOAD, 2));
-        bridgeCode.add(new VarInsnNode(Opcodes.DLOAD, 3));
-        bridgeCode.add(new VarInsnNode(Opcodes.DLOAD, 5));
-        bridgeCode.add(new VarInsnNode(Opcodes.DLOAD, 7));
-        bridgeCode.add(new VarInsnNode(Opcodes.DLOAD, 9));
-        bridgeCode.add(new VarInsnNode(Opcodes.DLOAD, 11));
-        bridgeCode.add(new VarInsnNode(Opcodes.DLOAD, 13));
-        bridgeCode.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
-            providerName, "createParticle", createParticleDescriptor, false));
-        bridgeCode.add(new InsnNode(Opcodes.ARETURN));
-        bridge.maxStack = 15;
-        bridge.maxLocals = 15;
-        provider.methods.add(bridge);
-
-        String spawnDescriptor =
-            "(L" + level + ";L" + simpleParticleType + ";DDDDDD)V";
-        MethodNode spawn = new MethodNode(
-            Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC, "spawn", spawnDescriptor, null, null);
-        InsnList spawnCode = spawn.instructions;
-        LabelNode tryStart = new LabelNode();
-        LabelNode tryEnd = new LabelNode();
-        LabelNode handler = new LabelNode();
-        spawnCode.add(new FieldInsnNode(Opcodes.GETSTATIC,
-            providerName, "MOVING", "Ljava/lang/ThreadLocal;"));
-        spawnCode.add(new FieldInsnNode(Opcodes.GETSTATIC,
-            "java/lang/Boolean", "TRUE", "Ljava/lang/Boolean;"));
-        spawnCode.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
-            "java/lang/ThreadLocal", "set", "(Ljava/lang/Object;)V", false));
-        spawnCode.add(tryStart);
-        spawnCode.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        spawnCode.add(new VarInsnNode(Opcodes.ALOAD, 1));
-        spawnCode.add(new VarInsnNode(Opcodes.DLOAD, 2));
-        spawnCode.add(new VarInsnNode(Opcodes.DLOAD, 4));
-        spawnCode.add(new VarInsnNode(Opcodes.DLOAD, 6));
-        spawnCode.add(new VarInsnNode(Opcodes.DLOAD, 8));
-        spawnCode.add(new VarInsnNode(Opcodes.DLOAD, 10));
-        spawnCode.add(new VarInsnNode(Opcodes.DLOAD, 12));
-        spawnCode.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
-            level, "m_7106_",
-            "(L" + particleOptions + ";DDDDDD)V", false));
-        spawnCode.add(tryEnd);
-        spawnCode.add(new FieldInsnNode(Opcodes.GETSTATIC,
-            providerName, "MOVING", "Ljava/lang/ThreadLocal;"));
-        spawnCode.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
-            "java/lang/ThreadLocal", "remove", "()V", false));
-        spawnCode.add(new InsnNode(Opcodes.RETURN));
-        spawnCode.add(handler);
-        spawnCode.add(new FrameNode(Opcodes.F_FULL, 8,
-            new Object[] {
-                level, simpleParticleType,
-                Opcodes.DOUBLE, Opcodes.DOUBLE, Opcodes.DOUBLE,
-                Opcodes.DOUBLE, Opcodes.DOUBLE, Opcodes.DOUBLE
-            },
-            1, new Object[] { "java/lang/Throwable" }));
-        spawnCode.add(new VarInsnNode(Opcodes.ASTORE, 14));
-        spawnCode.add(new FieldInsnNode(Opcodes.GETSTATIC,
-            providerName, "MOVING", "Ljava/lang/ThreadLocal;"));
-        spawnCode.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
-            "java/lang/ThreadLocal", "remove", "()V", false));
-        spawnCode.add(new VarInsnNode(Opcodes.ALOAD, 14));
-        spawnCode.add(new InsnNode(Opcodes.ATHROW));
-        spawn.tryCatchBlocks.add(new TryCatchBlockNode(
-            tryStart, tryEnd, handler, "java/lang/Throwable"));
-        spawn.maxStack = 14;
-        spawn.maxLocals = 15;
-        provider.methods.add(spawn);
-
-        nodes.put(providerName, provider);
-    }
-
-    private static void patchSculksaurSonicBoomProviderRegistration(ClassNode owner) {
-        if (owner == null) {
-            throw new IllegalStateException("ADClientModBus class is missing for Sonic Boom provider registration");
-        }
-
-        String eventInternal = "net/minecraftforge/client/event/RegisterParticleProvidersEvent";
-        String particleTypeInternal = "net/minecraft/core/particles/ParticleType";
-        String particleEngineInternal = "net/minecraft/client/particle/ParticleEngine";
-        String spriteSetInternal = "net/minecraft/client/particle/SpriteSet";
-        String providerInternal = ROOT + "client/particle/SculksaurSonicBoomParticle$Provider";
-        String registrationDescriptor =
-            "(Lnet/minecraftforge/client/event/RegisterParticleProvidersEvent;)V";
-
-        MethodNode method = owner.methods.stream()
-            .filter(candidate -> candidate.name.equals("registerFactories") &&
-                candidate.desc.equals(registrationDescriptor))
-            .findFirst()
-            .orElseThrow(() -> new IllegalStateException("ADClientModBus.registerFactories is missing"));
-        AbstractInsnNode terminalInstruction = method.instructions.getLast();
-        while (terminalInstruction != null && terminalInstruction.getOpcode() < 0) {
-            terminalInstruction = terminalInstruction.getPrevious();
-        }
-        if (terminalInstruction == null || terminalInstruction.getOpcode() != Opcodes.RETURN) {
-            throw new IllegalStateException("ADClientModBus.registerFactories has an unexpected terminal instruction");
-        }
-        for (AbstractInsnNode instruction : method.instructions.toArray()) {
-            if (instruction instanceof MethodInsnNode call &&
-                call.owner.equals(eventInternal) && call.name.equals("registerSpriteSet")) {
-                throw new IllegalStateException("Sonic Boom sprite-set provider is already registered");
-            }
-        }
-
-        Handle metafactory = new Handle(
-            Opcodes.H_INVOKESTATIC,
-            "java/lang/invoke/LambdaMetafactory",
-            "metafactory",
-            "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;" +
-                "Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;" +
-                "Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;",
-            false
-        );
-        InsnList registration = new InsnList();
-        registration.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        registration.add(new FieldInsnNode(Opcodes.GETSTATIC,
-            "net/minecraft/core/particles/ParticleTypes", "f_235902_",
-            "Lnet/minecraft/core/particles/SimpleParticleType;"));
-        registration.add(new InvokeDynamicInsnNode(
-            "m_107419_",
-            "()L" + particleEngineInternal + "$SpriteParticleRegistration;",
-            metafactory,
-            Type.getMethodType(
-                "(L" + spriteSetInternal + ";)Lnet/minecraft/client/particle/ParticleProvider;"),
-            new Handle(Opcodes.H_NEWINVOKESPECIAL,
-                providerInternal, "<init>", "(L" + spriteSetInternal + ";)V", false),
-            Type.getMethodType("(L" + spriteSetInternal + ";)L" + providerInternal + ";")
-        ));
-        registration.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
-            eventInternal, "registerSpriteSet",
-            "(L" + particleTypeInternal + ";L" + particleEngineInternal +
-                "$SpriteParticleRegistration;)V", false));
-        method.instructions.insertBefore(terminalInstruction, registration);
-        method.maxStack = Math.max(method.maxStack, 3);
     }
 
     private static void patchSmoothMoveControl(ClassNode owner) {
