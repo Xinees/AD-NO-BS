@@ -120,60 +120,60 @@ def rewrite_astemir_model(data, name):
 
     offset = len(magic)
     if offset + 4 > len(data):
-        raise RuntimeError(f"Truncated Astemir model version in {name}")
-    version = struct.unpack_from("<I", data, offset)[0]
+        raise RuntimeError(f"Truncated Astemir model asset count in {name}")
+    asset_count = struct.unpack_from("<I", data, offset)[0]
     offset += 4
-    if version != 2:
-        raise RuntimeError(f"Unsupported Astemir model version {version} in {name}")
+    if asset_count == 0 or asset_count > 256:
+        raise RuntimeError(f"Invalid Astemir model asset count {asset_count} in {name}")
 
-    while offset + 4 <= len(data):
-        length = struct.unpack_from("<I", data, offset)[0]
-        content_offset = offset + 4
-        if content_offset >= len(data):
-            raise RuntimeError(f"Missing Astemir model record in {name}")
-
-        if data[content_offset:content_offset + 1] in (b"{", b"["):
-            json_end = content_offset + length
-            if json_end != len(data):
-                raise RuntimeError(
-                    f"Astemir model JSON length mismatch in {name}: "
-                    f"declared={length}, remaining={len(data) - content_offset}"
-                )
-            model_json = data[content_offset:json_end]
-            try:
-                json.loads(model_json.decode("utf-8"))
-            except Exception as exc:
-                raise RuntimeError(f"Invalid embedded Astemir model JSON in {name}: {exc}") from exc
-
-            rewritten_json = model_json.replace(
-                OLD_NAMESPACE.encode("ascii"),
-                NEW_NAMESPACE.encode("ascii"),
-            )
-            try:
-                json.loads(rewritten_json.decode("utf-8"))
-            except Exception as exc:
-                raise RuntimeError(f"Namespace rewrite damaged embedded model JSON in {name}: {exc}") from exc
-
-            return data[:offset] + struct.pack("<I", len(rewritten_json)) + rewritten_json
-
-        filename_length = length
+    for asset_index in range(asset_count):
+        if offset + 4 > len(data):
+            raise RuntimeError(f"Truncated embedded asset-name length in {name}")
+        filename_length = struct.unpack_from("<I", data, offset)[0]
+        offset += 4
         if filename_length == 0 or filename_length > 1024:
             raise RuntimeError(f"Invalid embedded asset-name length in {name}: {filename_length}")
-        filename_end = content_offset + filename_length
+        filename_end = offset + filename_length
         if filename_end + 4 > len(data):
             raise RuntimeError(f"Truncated embedded asset name in {name}")
         try:
-            filename = data[content_offset:filename_end].decode("utf-8")
+            filename = data[offset:filename_end].decode("utf-8")
         except UnicodeDecodeError as exc:
             raise RuntimeError(f"Invalid embedded asset filename in {name}") from exc
-
         payload_length = struct.unpack_from("<I", data, filename_end)[0]
-        payload_end = filename_end + 4 + payload_length
+        payload_start = filename_end + 4
+        payload_end = payload_start + payload_length
         if payload_end > len(data):
             raise RuntimeError(f"Truncated embedded asset {filename} in {name}")
         offset = payload_end
 
-    raise RuntimeError(f"Embedded model JSON section is missing from {name}")
+    if offset + 4 > len(data):
+        raise RuntimeError(f"Embedded model JSON length is missing from {name}")
+    json_length = struct.unpack_from("<I", data, offset)[0]
+    json_offset = offset + 4
+    json_end = json_offset + json_length
+    if json_end != len(data):
+        raise RuntimeError(
+            f"Astemir model JSON length mismatch in {name}: "
+            f"declared={json_length}, remaining={len(data) - json_offset}"
+        )
+
+    model_json = data[json_offset:json_end]
+    try:
+        json.loads(model_json.decode("utf-8"))
+    except Exception as exc:
+        raise RuntimeError(f"Invalid embedded Astemir model JSON in {name}: {exc}") from exc
+
+    rewritten_json = model_json.replace(
+        OLD_NAMESPACE.encode("ascii"),
+        NEW_NAMESPACE.encode("ascii"),
+    )
+    try:
+        json.loads(rewritten_json.decode("utf-8"))
+    except Exception as exc:
+        raise RuntimeError(f"Namespace rewrite damaged embedded model JSON in {name}: {exc}") from exc
+
+    return data[:offset] + struct.pack("<I", len(rewritten_json)) + rewritten_json
 
 
 ENTITY_REGISTRY_NAMESPACE = "archie_dinosaurs"
