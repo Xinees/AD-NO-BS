@@ -1,4 +1,4 @@
-name: Direct Legacy JAR Prune - build 16
+name: Direct Legacy JAR Prune - build 17
 
 on:
   push:
@@ -292,26 +292,26 @@ jobs:
           fi
 
           SCULK_PARTICLE="$(javap -classpath build/classes-pruned.jar -p -c "$SCULK_EFFECTS" | sed -n '/archiesDinoMod[$]spawnSculksaurSonicBoomParticle(/,/^  private /p')"
-          for required_call in 'ParticleTypes.f_235902_' 'Level.m_7106_' 'Math.cos' 'Math.sin'; do
+          for required_call in 'ParticleTypes.f_235898_' 'Level.m_7106_' 'Math.cos' 'Math.sin'; do
             if ! printf '%s\n' "$SCULK_PARTICLE" | grep -Fq "$required_call"; then
               echo "Sculksaur Sonic Boom particle helper is missing $required_call"
               printf '%s\n' "$SCULK_PARTICLE"
               exit 1
             fi
           done
-          for required_layer_marker in 'irem' 'idiv' 'sipush        384' 'double 0.82d' 'double 0.3d' 'double 0.24d'; do
+          for required_layer_marker in 'irem' 'idiv' 'sipush        768' 'double 0.38d' 'double 0.55d' 'double 0.5d'; do
             if ! printf '%s\n' "$SCULK_PARTICLE" | grep -Fq "$required_layer_marker"; then
               echo "Sculksaur Sonic Boom does not contain the expected two-layer shell marker: $required_layer_marker"
               printf '%s\n' "$SCULK_PARTICLE"
               exit 1
             fi
           done
-          if ! printf '%s\n' "$SCULK_SPHERE" | grep -Fq 'sipush        768'; then
-            echo "Sculksaur Sonic Boom must spawn 768 particles total across its two layers."
+          if ! printf '%s\n' "$SCULK_SPHERE" | grep -Fq 'sipush        1536'; then
+            echo "Sculksaur Sonic Boom must spawn 1536 particles total across its two layers."
             printf '%s\n' "$SCULK_SPHERE"
             exit 1
           fi
-          echo "Verified 768 vanilla SONIC_BOOM particles in two 384-particle expanding spherical layers; old distortion and ground emitters are absent."
+          echo "Verified 1536 vanilla SCULK_SOUL particles in two 768-particle expanding spherical layers separated by 0.5 blocks; old distortion and ground emitters are absent."
 
           SMOOTH_MOVE_CONTROL='com.eternal_creations.archies_dino_mod.common.entity.ai.control.SmoothMoveControl'
           SMOOTH_BODY_CONTROL='com.eternal_creations.archies_dino_mod.common.entity.ai.control.SmoothBodyControl'

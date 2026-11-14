@@ -1219,12 +1219,12 @@ public final class JarPruner {
         InsnList p = particle.instructions;
 
         p.add(new VarInsnNode(Opcodes.ILOAD, 7));
-        p.add(new IntInsnNode(Opcodes.SIPUSH, 384));
+        p.add(new IntInsnNode(Opcodes.SIPUSH, 768));
         p.add(new InsnNode(Opcodes.IREM));
         p.add(new VarInsnNode(Opcodes.ISTORE, 18));
 
         p.add(new VarInsnNode(Opcodes.ILOAD, 7));
-        p.add(new IntInsnNode(Opcodes.SIPUSH, 384));
+        p.add(new IntInsnNode(Opcodes.SIPUSH, 768));
         p.add(new InsnNode(Opcodes.IDIV));
         p.add(new VarInsnNode(Opcodes.ISTORE, 19));
 
@@ -1232,7 +1232,7 @@ public final class JarPruner {
         p.add(new InsnNode(Opcodes.I2D));
         p.add(new LdcInsnNode(0.5d));
         p.add(new InsnNode(Opcodes.DADD));
-        p.add(new LdcInsnNode(2.0d / 384.0d));
+        p.add(new LdcInsnNode(2.0d / 768.0d));
         p.add(new InsnNode(Opcodes.DMUL));
         p.add(new InsnNode(Opcodes.DCONST_1));
         p.add(new InsnNode(Opcodes.DSUB));
@@ -1267,17 +1267,17 @@ public final class JarPruner {
         p.add(new InsnNode(Opcodes.DMUL));
         p.add(new VarInsnNode(Opcodes.DSTORE, 16));
 
-        p.add(new LdcInsnNode(0.30d));
+        p.add(new LdcInsnNode(0.55d));
         p.add(new VarInsnNode(Opcodes.ILOAD, 19));
         p.add(new InsnNode(Opcodes.I2D));
-        p.add(new LdcInsnNode(0.24d));
+        p.add(new LdcInsnNode(0.50d));
         p.add(new InsnNode(Opcodes.DMUL));
         p.add(new InsnNode(Opcodes.DSUB));
         p.add(new VarInsnNode(Opcodes.DSTORE, 20));
 
         p.add(new VarInsnNode(Opcodes.ALOAD, 0));
         p.add(new FieldInsnNode(Opcodes.GETSTATIC,
-            "net/minecraft/core/particles/ParticleTypes", "f_235902_",
+            "net/minecraft/core/particles/ParticleTypes", "f_235898_",
             "Lnet/minecraft/core/particles/SimpleParticleType;"));
 
         p.add(new VarInsnNode(Opcodes.DLOAD, 1));
@@ -1299,13 +1299,13 @@ public final class JarPruner {
         p.add(new InsnNode(Opcodes.DADD));
 
         p.add(new VarInsnNode(Opcodes.DLOAD, 14));
-        p.add(new LdcInsnNode(0.82d));
+        p.add(new LdcInsnNode(0.38d));
         p.add(new InsnNode(Opcodes.DMUL));
         p.add(new VarInsnNode(Opcodes.DLOAD, 8));
-        p.add(new LdcInsnNode(0.82d));
+        p.add(new LdcInsnNode(0.38d));
         p.add(new InsnNode(Opcodes.DMUL));
         p.add(new VarInsnNode(Opcodes.DLOAD, 16));
-        p.add(new LdcInsnNode(0.82d));
+        p.add(new LdcInsnNode(0.38d));
         p.add(new InsnNode(Opcodes.DMUL));
 
         p.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
@@ -1374,7 +1374,7 @@ public final class JarPruner {
         ));
         s.add(new VarInsnNode(Opcodes.ASTORE, 7));
         s.add(new InsnNode(Opcodes.ICONST_0));
-        s.add(new IntInsnNode(Opcodes.SIPUSH, 768));
+        s.add(new IntInsnNode(Opcodes.SIPUSH, 1536));
         s.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
             "java/util/stream/IntStream", "range",
             "(II)Ljava/util/stream/IntStream;", true));
