@@ -1,4 +1,4 @@
-name: Direct Legacy JAR Prune - build 27
+name: Direct Legacy JAR Prune - build 28
 
 on:
   push:
@@ -75,7 +75,7 @@ jobs:
           mkdir -p build/libs
           python3 tools/prune_binary_jar.py \
             build/classes-pruned.jar \
-            build/libs/ec_ad-legacy-forge-1.20.1.jar
+            build/libs/archie_dinosaurs-legacy-forge-1.20.1.jar
 
       - name: Audit original and retained mob turn controllers
         shell: bash
@@ -425,12 +425,13 @@ jobs:
             exit 1
           fi
           OTHER_REGISTRIES="$(printf '%s\\n' "$FORGE_COMMON_BYTECODE" | sed -n '/getstatic .*ForgeRegistries.ITEMS/,/putstatic .*Field ITEMS:/p')"
-          if [[ "$OTHER_REGISTRIES" != *"String ec_ad"* ]]; then
-            echo "Item registry namespace was unexpectedly changed from ec_ad."
+          if [[ "$OTHER_REGISTRIES" != *"String archie_dinosaurs"* ||
+                "$OTHER_REGISTRIES" == *"String ec_ad"* ]]; then
+            echo "Item registry namespace must also be archie_dinosaurs."
             printf '%s\\n' "$OTHER_REGISTRIES"
             exit 1
           fi
-          echo "Verified only entity-type registration moved to archie_dinosaurs; item and other registry namespaces remain ec_ad."
+          echo "Verified both entity-type and item registry namespaces use archie_dinosaurs."
 
           LOCAL_PLAYER_MIXIN='com.eternal_creations.archies_dino_mod.mixin.client.LocalPlayerMixin'
           verify_method "$LOCAL_PLAYER_MIXIN" \
@@ -705,7 +706,7 @@ jobs:
           import json
           import hashlib
 
-          jar = Path("build/libs/ec_ad-legacy-forge-1.20.1.jar")
+          jar = Path("build/libs/archie_dinosaurs-legacy-forge-1.20.1.jar")
           with zipfile.ZipFile(jar) as z:
               bad = z.testzip()
               if bad:
@@ -718,7 +719,7 @@ jobs:
               )
               if sonic_boom_classes:
                   raise SystemExit("Removed Sculksaur explosion particle classes remain: " + ", ".join(sonic_boom_classes))
-              for config_name in ("ec_ad.mixins.json", "ec_ad.forge.mixins.json"):
+              for config_name in ("archie_dinosaurs.mixins.json", "archie_dinosaurs.forge.mixins.json"):
                   config = json.loads(z.read(config_name))
                   package = config.get("package", "").replace(".", "/").strip("/")
                   for section in ("mixins", "client", "server"):
@@ -731,8 +732,8 @@ jobs:
                   "META-INF/jarjar/metadata.json",
                   "META-INF/jarjar/mixinextras-forge-0.4.1.jar",
                   "META-INF/mods.toml",
-                  "ec_ad.mixins.json",
-                  "ec_ad.forge.mixins.json",
+                  "archie_dinosaurs.mixins.json",
+                  "archie_dinosaurs.forge.mixins.json",
                   "pack.mcmeta",
                   "com/eternal_creations/archies_dino_mod/ArchiesDinosaurs.class",
                   "com/eternal_creations/archies_dino_mod/common/entity/mob/lushsaur/LushsaurEntity.class",
@@ -740,25 +741,25 @@ jobs:
                   "com/eternal_creations/archies_dino_mod/common/entity/mob/sculksaur/SculksaurEntity.class",
                   "com/eternal_creations/archies_dino_mod/common/block/eggs/LushsaurEggBlock.class",
                   "com/eternal_creations/archies_dino_mod/common/block/eggs/ChorusoatlEggBlock.class",
-                  "data/ec_ad/tags/blocks/chorusoatl_egg_hatchable.json",
-                  "data/ec_ad/tags/dimension_type/chorusoatl_egg_preferred.json",
-                  "assets/ec_ad/models/entity/lushsaur.astemirmodel",
-                  "assets/ec_ad/models/entity/lushsaur_baby.astemirmodel",
-                  "assets/ec_ad/models/entity/chorusoatl.astemirmodel",
-                  "assets/ec_ad/models/entity/chorusoatl_baby.astemirmodel",
-                  "assets/ec_ad/models/entity/sculksaur.astemirmodel",
-                  "assets/ec_ad/models/block/lushsaur_egg.astemirmodel",
-                  "assets/ec_ad/models/block/chorusoatl_egg.astemirmodel",
-                  "assets/ec_ad/models/item/lush_core.json",
-                  "assets/ec_ad/models/item/chorus_fossil.json",
-                  "assets/ec_ad/models/item/sculk_toxin.json",
-                  "assets/ec_ad/models/item/lushsaur_spawn_egg.json",
-                  "assets/ec_ad/models/item/chorusoatl_spawn_egg.json",
-                  "assets/ec_ad/models/item/sculksaur_spawn_egg.json",
-                  "assets/ec_ad/models/block/lushsaur_egg.json",
-                  "assets/ec_ad/models/block/chorusoatl_egg.json",
+                  "data/archie_dinosaurs/tags/blocks/chorusoatl_egg_hatchable.json",
+                  "data/archie_dinosaurs/tags/dimension_type/chorusoatl_egg_preferred.json",
+                  "assets/archie_dinosaurs/models/entity/lushsaur.astemirmodel",
+                  "assets/archie_dinosaurs/models/entity/lushsaur_baby.astemirmodel",
+                  "assets/archie_dinosaurs/models/entity/chorusoatl.astemirmodel",
+                  "assets/archie_dinosaurs/models/entity/chorusoatl_baby.astemirmodel",
+                  "assets/archie_dinosaurs/models/entity/sculksaur.astemirmodel",
+                  "assets/archie_dinosaurs/models/block/lushsaur_egg.astemirmodel",
+                  "assets/archie_dinosaurs/models/block/chorusoatl_egg.astemirmodel",
+                  "assets/archie_dinosaurs/models/item/lush_core.json",
+                  "assets/archie_dinosaurs/models/item/chorus_fossil.json",
+                  "assets/archie_dinosaurs/models/item/sculk_toxin.json",
+                  "assets/archie_dinosaurs/models/item/lushsaur_spawn_egg.json",
+                  "assets/archie_dinosaurs/models/item/chorusoatl_spawn_egg.json",
+                  "assets/archie_dinosaurs/models/item/sculksaur_spawn_egg.json",
+                  "assets/archie_dinosaurs/models/block/lushsaur_egg.json",
+                  "assets/archie_dinosaurs/models/block/chorusoatl_egg.json",
               }
-              hatchable_tag = json.loads(z.read("data/ec_ad/tags/blocks/chorusoatl_egg_hatchable.json"))
+              hatchable_tag = json.loads(z.read("data/archie_dinosaurs/tags/blocks/chorusoatl_egg_hatchable.json"))
               expected_hatchable_blocks = {
                   "minecraft:end_stone",
                   "minecraft:end_stone_bricks",
@@ -770,7 +771,7 @@ jobs:
               missing_hatchable_blocks = sorted(expected_hatchable_blocks - set(hatchable_tag.get("values", [])))
               if missing_hatchable_blocks:
                   raise SystemExit("Chorusoatl egg hatchable tag is missing: " + ", ".join(missing_hatchable_blocks))
-              preferred_dimensions = json.loads(z.read("data/ec_ad/tags/dimension_type/chorusoatl_egg_preferred.json"))
+              preferred_dimensions = json.loads(z.read("data/archie_dinosaurs/tags/dimension_type/chorusoatl_egg_preferred.json"))
               if "minecraft:the_end" not in preferred_dimensions.get("values", []):
                   raise SystemExit("Chorusoatl preferred End dimension tag was lost")
 
@@ -791,6 +792,17 @@ jobs:
               astemir_dependency = 'modId = "astemirlib_re"'
               if astemir_dependency not in mods_toml or 'mandatory = true' not in mods_toml:
                   raise SystemExit("Parent mod must keep Astemir RE as an external required dependency")
+              if 'modId = "archie_dinosaurs"' not in mods_toml or 'modId = "ec_ad"' in mods_toml:
+                  raise SystemExit("Forge metadata must identify this mod as archie_dinosaurs")
+
+              stale_names = sorted(name for name in names if "ec_ad" in name)
+              if stale_names:
+                  raise SystemExit("Old mod identifier remains in JAR paths: " + ", ".join(stale_names))
+              for entry_name in sorted(names):
+                  if entry_name.endswith(".jar"):
+                      continue
+                  if b"ec_ad" in z.read(entry_name):
+                      raise SystemExit(f"Old mod identifier remains in JAR contents: {entry_name}")
 
               missing = sorted(required - names)
               if missing:
@@ -822,7 +834,7 @@ jobs:
               )
               extra_assets = sorted(
                   name for name in names
-                  if name.startswith("assets/ec_ad/") and any(token in name.lower() for token in banned_assets)
+                  if name.startswith("assets/archie_dinosaurs/") and any(token in name.lower() for token in banned_assets)
               )
               if extra_assets:
                   raise SystemExit("Unexpected assets left in JAR:\n" + "\n".join(extra_assets))
@@ -836,7 +848,7 @@ jobs:
           import zipfile
           import json
 
-          jar = "build/libs/ec_ad-legacy-forge-1.20.1.jar"
+          jar = "build/libs/archie_dinosaurs-legacy-forge-1.20.1.jar"
           expected = {
               "archie_dinosaurs:lushsaur",
               "archie_dinosaurs:chorusoatl",
@@ -880,7 +892,7 @@ jobs:
                           if node in expected:
                               found.add(node)
 
-                  if name.startswith("assets/ec_ad/lang/") or name.startswith("data/ec_ad/"):
+                  if name.startswith("assets/archie_dinosaurs/lang/") or name.startswith("data/archie_dinosaurs/"):
                       visit(value)
 
           missing = sorted(expected - found)
@@ -898,7 +910,7 @@ jobs:
 
           TAG="legacy-auto-${GITHUB_RUN_NUMBER}"
           gh release create "$TAG" \
-            build/libs/ec_ad-legacy-forge-1.20.1.jar \
+            build/libs/archie_dinosaurs-legacy-forge-1.20.1.jar \
             build/resource-prune-report.txt \
             --draft \
             --title "Legacy CI build #${GITHUB_RUN_NUMBER}" \

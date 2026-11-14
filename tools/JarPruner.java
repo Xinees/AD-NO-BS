@@ -244,7 +244,11 @@ public final class JarPruner {
             if (node == null) continue;
             ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS);
             node.accept(writer);
-            transformedClasses.put(internalName + ".class", writer.toByteArray());
+            byte[] rewrittenClass = rewriteClassUtf8Namespace(writer.toByteArray());
+            if (containsAscii(rewrittenClass, "ec_ad")) {
+                throw new IllegalStateException("Old mod namespace remains in class " + internalName);
+            }
+            transformedClasses.put(internalName + ".class", rewrittenClass);
         }
         for (Map.Entry<String, byte[]> transformed : transformedClasses.entrySet()) {
             allEntries.putIfAbsent(transformed.getKey(), transformed.getValue());
@@ -300,6 +304,139 @@ public final class JarPruner {
         System.out.println("Retained classes: " + keptCount);
         System.out.println("Removed classes: " + removedCount);
         System.out.println("Output: " + output);
+    }
+
+    private static byte[] rewriteClassUtf8Namespace(byte[] classBytes) {
+        if (classBytes.length < 10 ||
+            classBytes[0] != (byte) 0xCA ||
+            classBytes[1] != (byte) 0xFE ||
+            classBytes[2] != (byte) 0xBA ||
+            classBytes[3] != (byte) 0xBE) {
+            throw new IllegalArgumentException("Invalid class-file header");
+        }
+
+        byte[] oldToken = "ec_ad".getBytes(java.nio.charset.StandardCharsets.US_ASCII);
+        byte[] newToken = "archie_dinosaurs".getBytes(java.nio.charset.StandardCharsets.US_ASCII);
+        int constantPoolCount = readUnsignedShort(classBytes, 8);
+        int offset = 10;
+        java.io.ByteArrayOutputStream rewritten = new java.io.ByteArrayOutputStream(classBytes.length + 256);
+        rewritten.write(classBytes, 0, 8);
+        writeUnsignedShort(rewritten, constantPoolCount);
+
+        for (int index = 1; index < constantPoolCount; index++) {
+            if (offset >= classBytes.length) {
+                throw new IllegalArgumentException("Truncated class-file constant pool");
+            }
+
+            int tag = classBytes[offset++] & 0xFF;
+            rewritten.write(tag);
+
+            switch (tag) {
+                case 1 -> {
+                    int length = readUnsignedShort(classBytes, offset);
+                    offset += 2;
+                    if (offset + length > classBytes.length) {
+                        throw new IllegalArgumentException("Truncated CONSTANT_Utf8 entry");
+                    }
+                    byte[] original = java.util.Arrays.copyOfRange(classBytes, offset, offset + length);
+                    byte[] replaced = replaceBytes(original, oldToken, newToken);
+                    if (replaced.length > 0xFFFF) {
+                        throw new IllegalArgumentException("Rewritten CONSTANT_Utf8 entry is too long");
+                    }
+                    writeUnsignedShort(rewritten, replaced.length);
+                    rewritten.write(replaced, 0, replaced.length);
+                    offset += length;
+                }
+                case 3, 4 -> {
+                    copyClassBytes(rewritten, classBytes, offset, 4);
+                    offset += 4;
+                }
+                case 5, 6 -> {
+                    copyClassBytes(rewritten, classBytes, offset, 8);
+                    offset += 8;
+                    index++;
+                }
+                case 7, 8, 16, 19, 20 -> {
+                    copyClassBytes(rewritten, classBytes, offset, 2);
+                    offset += 2;
+                }
+                case 9, 10, 11, 12, 17, 18 -> {
+                    copyClassBytes(rewritten, classBytes, offset, 4);
+                    offset += 4;
+                }
+                case 15 -> {
+                    copyClassBytes(rewritten, classBytes, offset, 3);
+                    offset += 3;
+                }
+                default -> throw new IllegalArgumentException("Unknown class-file constant tag: " + tag);
+            }
+        }
+
+        if (offset > classBytes.length) {
+            throw new IllegalArgumentException("Truncated class-file constant pool payload");
+        }
+        rewritten.write(classBytes, offset, classBytes.length - offset);
+        return rewritten.toByteArray();
+    }
+
+    private static int readUnsignedShort(byte[] bytes, int offset) {
+        if (offset < 0 || offset + 2 > bytes.length) {
+            throw new IllegalArgumentException("Truncated class-file u2 value");
+        }
+        return ((bytes[offset] & 0xFF) << 8) | (bytes[offset + 1] & 0xFF);
+    }
+
+    private static void writeUnsignedShort(java.io.ByteArrayOutputStream out, int value) {
+        out.write((value >>> 8) & 0xFF);
+        out.write(value & 0xFF);
+    }
+
+    private static void copyClassBytes(
+        java.io.ByteArrayOutputStream out,
+        byte[] source,
+        int offset,
+        int length
+    ) {
+        if (offset < 0 || length < 0 || offset + length > source.length) {
+            throw new IllegalArgumentException("Truncated class-file constant");
+        }
+        out.write(source, offset, length);
+    }
+
+    private static byte[] replaceBytes(byte[] source, byte[] oldToken, byte[] newToken) {
+        java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream(source.length);
+        int offset = 0;
+        while (offset < source.length) {
+            boolean match = offset + oldToken.length <= source.length;
+            if (match) {
+                for (int i = 0; i < oldToken.length; i++) {
+                    if (source[offset + i] != oldToken[i]) {
+                        match = false;
+                        break;
+                    }
+                }
+            }
+            if (match) {
+                out.write(newToken, 0, newToken.length);
+                offset += oldToken.length;
+            } else {
+                out.write(source[offset] & 0xFF);
+                offset++;
+            }
+        }
+        return out.toByteArray();
+    }
+
+    private static boolean containsAscii(byte[] source, String value) {
+        byte[] target = value.getBytes(java.nio.charset.StandardCharsets.US_ASCII);
+        outer:
+        for (int offset = 0; offset + target.length <= source.length; offset++) {
+            for (int i = 0; i < target.length; i++) {
+                if (source[offset + i] != target[i]) continue outer;
+            }
+            return true;
+        }
+        return false;
     }
 
     private static void pruneRegistryInitializer(ClassNode owner, Set<String> keepFields) {

@@ -13,7 +13,12 @@ target = Path(sys.argv[2])
 if not source.is_file():
     raise SystemExit(f"Input JAR not found: {source}")
 
-MOD = "assets/ec_ad/"
+OLD_NAMESPACE = "ec_ad"
+NEW_NAMESPACE = "archie_dinosaurs"
+SOURCE_MOD = f"assets/{OLD_NAMESPACE}/"
+SOURCE_DATA = f"data/{OLD_NAMESPACE}/"
+MOD = f"assets/{NEW_NAMESPACE}/"
+DATA = f"data/{NEW_NAMESPACE}/"
 ITEMS = {
     "lush_core",
     "chorus_fossil",
@@ -76,7 +81,7 @@ def filter_mixin_config(data, template, name):
 
 ENTITY_REGISTRY_NAMESPACE = "archie_dinosaurs"
 ENTITY_REGISTRY_NAMES = MOBS | {"chorusoatl_spit"}
-OLD_ENTITY_IDS = {f"ec_ad:{name}" for name in ENTITY_REGISTRY_NAMES}
+OLD_ENTITY_IDS = {f"{OLD_NAMESPACE}:{name}" for name in ENTITY_REGISTRY_NAMES}
 NEW_ENTITY_IDS = {f"{ENTITY_REGISTRY_NAMESPACE}:{name}" for name in ENTITY_REGISTRY_NAMES}
 
 
@@ -84,19 +89,13 @@ def rewrite_entity_namespace(value):
     if isinstance(value, dict):
         rewritten = {}
         for key, child in value.items():
-            new_key = key
-            if isinstance(key, str):
-                for entity_name in ENTITY_REGISTRY_NAMES:
-                    old_key = f"entity.ec_ad.{entity_name}"
-                    if key == old_key:
-                        new_key = f"entity.{ENTITY_REGISTRY_NAMESPACE}.{entity_name}"
-                        break
+            new_key = key.replace(OLD_NAMESPACE, NEW_NAMESPACE) if isinstance(key, str) else key
             rewritten[new_key] = rewrite_entity_namespace(child)
         return rewritten
     if isinstance(value, list):
         return [rewrite_entity_namespace(child) for child in value]
-    if isinstance(value, str) and value in OLD_ENTITY_IDS:
-        return f"{ENTITY_REGISTRY_NAMESPACE}:{value.split(':', 1)[1]}"
+    if isinstance(value, str):
+        return value.replace(OLD_NAMESPACE, NEW_NAMESPACE)
     return value
 
 
@@ -110,8 +109,8 @@ def key_is_allowed(key):
         "message.ec_ad.pet_teleport_success",
         "message.ec_ad.pet_world_unavailable",
         "message.ec_ad.status.buried",
-        "ec_ad.mount_primary_attack",
-        "ec_ad.mount_special_attack",
+        "archie_dinosaurs.mount_primary_attack",
+        "archie_dinosaurs.mount_special_attack",
     }:
         return True
 
@@ -225,7 +224,7 @@ def keep_asset(path):
     return False
 
 def keep_data_path(path):
-    rel = path[len("data/ec_ad/"):]
+    rel = path[len(DATA):]
     low = rel.lower()
     base = low.rsplit("/", 1)[-1]
 
@@ -290,7 +289,7 @@ def filter_loot_entry(entry):
     if isinstance(entry, dict):
         if entry.get("type") == "minecraft:item":
             item = entry.get("name")
-            if isinstance(item, str) and item.startswith("ec_ad:") and item.split(":", 1)[1] not in ITEMS:
+            if isinstance(item, str) and item.startswith("archie_dinosaurs:") and item.split(":", 1)[1] not in ITEMS:
                 return {"type": "minecraft:empty", "weight": entry.get("weight", 1)}
         return {key: filter_loot_entry(value) for key, value in entry.items()}
     if isinstance(entry, list):
@@ -335,7 +334,7 @@ def validate_entity_namespace(entries):
     for name, data in entries.items():
         if not name.endswith(".json"):
             continue
-        if name.startswith("assets/ec_ad/lang/") or name.startswith("data/ec_ad/"):
+        if name.startswith("assets/archie_dinosaurs/lang/") or name.startswith("data/archie_dinosaurs/"):
             visit(read_json(data, name), name)
 
     missing = sorted(NEW_ENTITY_IDS - found_new_ids)
@@ -345,14 +344,14 @@ def validate_entity_namespace(entries):
 
 def validate_loot_tables(entries):
     for name, data in entries.items():
-        if not (name.startswith("data/ec_ad/loot_tables/") and name.endswith(".json")):
+        if not (name.startswith("data/archie_dinosaurs/loot_tables/") and name.endswith(".json")):
             continue
         value = read_json(data, name)
         def visit(node):
             if isinstance(node, dict):
                 if node.get("type") == "minecraft:item":
                     item = node.get("name")
-                    if isinstance(item, str) and item.startswith("ec_ad:") and item.split(":", 1)[1] not in ITEMS:
+                    if isinstance(item, str) and item.startswith("archie_dinosaurs:") and item.split(":", 1)[1] not in ITEMS:
                         raise RuntimeError(f"Loot table {name} still references removed item {item}")
                 for child in node.values():
                     visit(child)
@@ -363,7 +362,7 @@ def validate_loot_tables(entries):
 
 
 def extend_chorusoatl_hatchable(data):
-    value = read_json(data, "data/ec_ad/tags/blocks/chorusoatl_egg_hatchable.json")
+    value = read_json(data, "data/archie_dinosaurs/tags/blocks/chorusoatl_egg_hatchable.json")
     values = value.get("values")
     if not isinstance(values, list):
         raise RuntimeError("Chorusoatl hatchable block tag must contain a values array")
@@ -384,15 +383,20 @@ def extend_chorusoatl_hatchable(data):
 
 def filter_tag_json(data, name):
     value = rewrite_entity_namespace(read_json(data, name))
+    allowed = ITEMS | EGGS | MOBS | {"chorusoatl_spit"}
     if isinstance(value, dict) and isinstance(value.get("values"), list):
         value["values"] = [
             item for item in value["values"]
-            if not (isinstance(item, str) and item.startswith("ec_ad:"))
+            if not (
+                isinstance(item, str)
+                and item.startswith(f"{NEW_NAMESPACE}:")
+                and item.split(":", 1)[1] not in allowed
+            )
         ]
     return dump_json(value)
 
 def filter_root_advancement(data):
-    value = read_json(data, "data/ec_ad/advancements/root.json")
+    value = read_json(data, "data/archie_dinosaurs/advancements/root.json")
     criteria = {}
     for mob in sorted(MOBS):
         criteria[f"spot_{mob}"] = {
@@ -405,36 +409,36 @@ def filter_root_advancement(data):
                     }
                 ]
             },
-            "trigger": "ec_ad:spotted_entity",
+            "trigger": "archie_dinosaurs:spotted_entity",
         }
     value["criteria"] = criteria
     value["requirements"] = [list(criteria)]
     display = value.setdefault("display", {})
-    display["icon"] = {"item": "ec_ad:lush_core"}
-    display["background"] = "ec_ad:textures/gui/back.png"
+    display["icon"] = {"item": "archie_dinosaurs:lush_core"}
+    display["background"] = "archie_dinosaurs:textures/gui/back.png"
     return dump_json(value)
 
 
 def validate_advancement_graph(entries):
     docs = {}
     for name, data in entries.items():
-        if name.startswith("data/ec_ad/advancements/") and name.endswith(".json"):
-            docs[name[len("data/ec_ad/advancements/"):-5]] = read_json(data, name)
+        if name.startswith("data/archie_dinosaurs/advancements/") and name.endswith(".json"):
+            docs[name[len("data/archie_dinosaurs/advancements/"):-5]] = read_json(data, name)
     valid_icons = {
-        "ec_ad:lush_core", "ec_ad:chorus_fossil", "ec_ad:sculk_toxin",
-        "ec_ad:lushsaur_egg", "ec_ad:chorusoatl_egg",
-        "ec_ad:lushsaur_spawn_egg", "ec_ad:chorusoatl_spawn_egg",
-        "ec_ad:sculksaur_spawn_egg",
+        "archie_dinosaurs:lush_core", "archie_dinosaurs:chorus_fossil", "archie_dinosaurs:sculk_toxin",
+        "archie_dinosaurs:lushsaur_egg", "archie_dinosaurs:chorusoatl_egg",
+        "archie_dinosaurs:lushsaur_spawn_egg", "archie_dinosaurs:chorusoatl_spawn_egg",
+        "archie_dinosaurs:sculksaur_spawn_egg",
     }
     for name, doc in docs.items():
         parent = doc.get("parent")
-        if parent and parent.startswith("ec_ad:") and parent.split(":", 1)[1] not in docs:
+        if parent and parent.startswith("archie_dinosaurs:") and parent.split(":", 1)[1] not in docs:
             raise RuntimeError(f"Advancement {name} references missing parent {parent}")
         icon = doc.get("display", {}).get("icon", {}).get("item")
-        if icon and icon.startswith("ec_ad:") and icon not in valid_icons:
+        if icon and icon.startswith("archie_dinosaurs:") and icon not in valid_icons:
             raise RuntimeError(f"Advancement {name} references removed item {icon}")
     for name in entries:
-        if name.startswith("data/ec_ad/recipes/archie_trade/"):
+        if name.startswith("data/archie_dinosaurs/recipes/archie_trade/"):
             raise RuntimeError(f"Removed Archie trade recipe leaked into output: {name}")
 
 
@@ -442,17 +446,38 @@ kept = {}
 removed = []
 with zipfile.ZipFile(source, "r") as zin:
     for info in zin.infolist():
-        name = info.filename
+        source_name = info.filename
         if info.is_dir():
             continue
+
+        name = source_name
+        if source_name.startswith(SOURCE_MOD):
+            name = MOD + source_name[len(SOURCE_MOD):]
+        elif source_name.startswith(SOURCE_DATA):
+            name = DATA + source_name[len(SOURCE_DATA):]
+        elif source_name == f"{OLD_NAMESPACE}.mixins.json":
+            name = f"{NEW_NAMESPACE}.mixins.json"
+        elif source_name == f"{OLD_NAMESPACE}.forge.mixins.json":
+            name = f"{NEW_NAMESPACE}.forge.mixins.json"
 
         if name.upper().endswith((".SF", ".RSA", ".DSA")) or name.upper() == "META-INF/INDEX.LIST":
             removed.append(name)
             continue
 
-        data = zin.read(name)
+        data = zin.read(source_name)
 
-        if name.startswith(MOD):
+        if name == "META-INF/mods.toml":
+            metadata = data.decode("utf-8")
+            metadata, mod_id_count = re.subn(
+                r'(?m)^(\\s*modId\\s*=\\s*")ec_ad(")',
+                r'\\1archie_dinosaurs\\2',
+                metadata,
+            )
+            if mod_id_count != 1:
+                raise RuntimeError(f"Expected exactly one parent modId in mods.toml, found {mod_id_count}")
+            data = metadata.replace(OLD_NAMESPACE, NEW_NAMESPACE)
+
+        elif name.startswith(MOD):
             if not keep_asset(name):
                 removed.append(name)
                 continue
@@ -470,27 +495,27 @@ with zipfile.ZipFile(source, "r") as zin:
                 sounds = {k: v for k, v in sounds.items() if k.startswith(SOUND_PREFIXES)}
                 data = dump_json(sounds)
 
-        elif name.startswith("data/ec_ad/"):
+        elif name.startswith("data/archie_dinosaurs/"):
             if not keep_data_path(name):
                 removed.append(name)
                 continue
-            if name == "data/ec_ad/advancements/root.json":
+            if name == "data/archie_dinosaurs/advancements/root.json":
                 data = filter_root_advancement(data)
-            elif name.startswith("data/ec_ad/loot_tables/") and name.endswith(".json"):
+            elif name.startswith("data/archie_dinosaurs/loot_tables/") and name.endswith(".json"):
                 data = filter_loot_table(data, name)
-            elif name == "data/ec_ad/tags/blocks/chorusoatl_egg_hatchable.json":
+            elif name == "data/archie_dinosaurs/tags/blocks/chorusoatl_egg_hatchable.json":
                 data = extend_chorusoatl_hatchable(data)
             elif "/tags/" in name and name.endswith(".json"):
                 data = filter_tag_json(data, name)
 
-        elif name.startswith("data/") and not name.startswith("data/ec_ad/"):
+        elif name.startswith("data/") and not name.startswith("data/archie_dinosaurs/"):
             removed.append(name)
             continue
 
-        elif name == "ec_ad.mixins.json":
+        elif name == "archie_dinosaurs.mixins.json":
             data = filter_mixin_config(data, KEEP_MIXINS, name)
 
-        elif name == "ec_ad.forge.mixins.json":
+        elif name == "archie_dinosaurs.forge.mixins.json":
             data = filter_mixin_config(data, KEEP_FORGE_MIXINS, name)
 
         elif name.startswith("assets/") and not name.startswith(MOD):
@@ -502,7 +527,7 @@ with zipfile.ZipFile(source, "r") as zin:
             continue
 
         if name.endswith(".json") and (
-            name.startswith("assets/ec_ad/") or name.startswith("data/ec_ad/")
+            name.startswith("assets/archie_dinosaurs/") or name.startswith("data/archie_dinosaurs/")
         ):
             data = dump_json(rewrite_entity_namespace(read_json(data, name)))
 
@@ -519,21 +544,36 @@ with zipfile.ZipFile(target, "r") as check:
     names = set(check.namelist())
     required = {
         "META-INF/mods.toml",
-        "ec_ad.mixins.json",
-        "ec_ad.forge.mixins.json",
+        "archie_dinosaurs.mixins.json",
+        "archie_dinosaurs.forge.mixins.json",
         "pack.mcmeta",
     }
     missing = sorted(required - names)
     if missing:
         raise SystemExit(f"Required resources missing from output: {missing}")
 
+    stale_names = sorted(name for name in names if OLD_NAMESPACE in name)
+    if stale_names:
+        raise SystemExit("Old mod namespace remains in JAR entry names: " + repr(stale_names))
+
+    for name in sorted(names):
+        if name.endswith(".jar"):
+            continue
+        payload = check.read(name)
+        if OLD_NAMESPACE.encode("ascii") in payload:
+            raise SystemExit(f"Old mod namespace remains in JAR entry content: {name}")
+
+    metadata = check.read("META-INF/mods.toml").decode("utf-8")
+    if 'modId = "archie_dinosaurs"' not in metadata or 'modId = "ec_ad"' in metadata:
+        raise SystemExit("Forge mods.toml does not declare only the archie_dinosaurs mod ID")
+
     allowed_item_models = {
-        f"assets/ec_ad/models/item/{item}.json" for item in ITEMS
+        f"assets/archie_dinosaurs/models/item/{item}.json" for item in ITEMS
     }
     missing_items = sorted(allowed_item_models - names)
     if missing_items:
         raise SystemExit(f"Required item models missing: {missing_items}")
-    hatchable_tag_path = "data/ec_ad/tags/blocks/chorusoatl_egg_hatchable.json"
+    hatchable_tag_path = "data/archie_dinosaurs/tags/blocks/chorusoatl_egg_hatchable.json"
     with check.open(hatchable_tag_path) as file:
         hatchable_tag = json.load(file)
     expected_hatchable_blocks = {
@@ -549,9 +589,9 @@ with zipfile.ZipFile(target, "r") as check:
     if missing_hatchable_blocks:
         raise SystemExit(f"Chorusoatl egg hatchable tag is missing blocks: {missing_hatchable_blocks}")
 
-    if "assets/ec_ad/textures/gui/back.png" not in names:
+    if "assets/archie_dinosaurs/textures/gui/back.png" not in names:
         raise SystemExit("Retained advancement background texture is missing")
-    if "data/ec_ad/advancements/root.json" not in names:
+    if "data/archie_dinosaurs/advancements/root.json" not in names:
         raise SystemExit("Retained root advancement is missing")
 
 validate_advancement_graph(kept)
