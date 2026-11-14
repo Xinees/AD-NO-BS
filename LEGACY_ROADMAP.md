@@ -8,7 +8,21 @@ This file is the explicit task list for the next Legacy work. The order below is
 
 ## Current baseline and test status
 
-### Build 117 — current implementation; CI validation passed, artifact upload quota-blocked
+### Build 118 — current implementation; CI validation passed, artifact upload quota-blocked
+
+- Implementation commit: [`1f39f51`](https://github.com/Xinees/AD-NO-BS/commit/1f39f518cdc12d2e9016be4f1dee19a423b3de7c). CI guard commit: [`57641de`](https://github.com/Xinees/AD-NO-BS/commit/57641de2df0b562dbc1023c7ec8b2ca41d2a256d).
+- GitHub Actions [run #152](https://github.com/Xinees/AD-NO-BS/actions/runs/43594713011) passed compilation, pruning, retained renderer descriptors, bytecode guards, and final 473-entry JAR validation. Artifact upload alone failed because GitHub Actions storage quota was full. Runner output: 473 entries, 2,492,713 bytes.
+- Local JAR: `ec_ad-legacy-forge-1.20.1-build118.jar`; size 2,492,895 bytes; SHA-256 `d0208dbdd64f2e3ac7b79f980c1ba40796471893d42cfe6603d3db0f73895f96`. The local JAR was produced by applying the final bytecode changes to the verified Build117 output and repacking; its ZIP bytes are not claimed identical to the runner output.
+- Compared with Build117, only `ADClientModBus.class`, `LushsaurClient.class`, `SculksaurClient.class`, and `SculksaurEffects.class` change; the two generated Sonic Boom particle classes are removed; all remaining resource entries are byte-identical.
+- Sculksaur explosion particles are fully disconnected: the final event now performs only the original camera shake, the ground callback does nothing, the delayed second-pulse event is removed, and `SculksaurSonicBoomParticle` plus its provider are absent. The vanilla SONIC_BOOM provider is restored. The original 4.68s explosion/camera event and 5.12s tendril/vibration event remain; other Sculksaur particle tracks are unchanged.
+- Tail physics is disabled on Lushsaur's adult chain (`tail1`, `tail2`, `mase`) and baby chain (`tail`, `tail2`), and on Sculksaur's `tail1`/`tail2` chain. Lushsaur's separate `string`/`beetroot` physics and Sculksaur's leg IK are preserved. Chorusoatl's renderer has no PhysicsModule tail chain.
+- Attack damage, range, knockback, targeting, AI, cooldown, sound, and unrelated mob behavior are unchanged.
+- Local verification: ZIP integrity, 473-entry count, expected class removals/changes, no explosion particle classes/helpers, no tail bone names in the two setupPhysics methods, preservation of Lushsaur item-chain bones and Sculksaur leg IK. Resources remain byte-identical to Build117.
+- **Runtime status:** Build118 has not been launched in Minecraft. Test the tail pose/animation and other visual regressions in-game.
+
+### Build 117 — previous implementation; superseded by Build118
+
+
 
 - Speed/animation implementation: [`240b410`](https://github.com/Xinees/AD-NO-BS/commit/240b410263ee03d2e42b406b704ddd14e917f4ab); corrected frame indexing: [`a342122`](https://github.com/Xinees/AD-NO-BS/commit/a3421223430d58aa6b42baec9c2267e394ce4d7f); 20-block lifetime adjustment: [`51f9d4e`](https://github.com/Xinees/AD-NO-BS/commit/51f9d4ecf5fe6a14c3be20115db7567c773ae208).
 - GitHub Actions [run #146](https://github.com/Xinees/AD-NO-BS/actions/runs/43592112280) passed compilation, pruning, bytecode checks, and retained-JAR validation. Artifact upload alone failed because GitHub Actions storage quota was full. Runner output: 475 entries, 2,495,933 bytes.
