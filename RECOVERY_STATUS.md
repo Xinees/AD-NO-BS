@@ -16,7 +16,8 @@
 - **Font/display symptom:** the earlier report of square-like glyphs remains unclassified. Do not change the resource pack without a reproducing screenshot/log.
 - **Open audit — Sculksaur locomotion:** the original `SculksaurEntity.createLocomotion()` sets `EntityLocomotion.Builder.turnFactor(0.003f)`. Its behavior belongs to the separate Astemir RE dependency. This setting remains unchanged until the exact Astemir RE 1.2.98 dependency is inspected; the turn-factor audit remains open.
 - Next planned task after the turning audit: Lushsaur-only Happy-Ghast-like platform collision. The proposed `SPIN.get(this)` gate remains plan-only and has not been implemented.
-- Next riding pass recorded in `LEGACY_ROADMAP.md`: vanilla pig-like seated player pose on Lushsaur/Chorusoatl; remove lateral bank on retained mobs; movement-input-gated horizontal-look steering on both mounts. No 13-pixel rider offset is wanted.
+- Next riding pass recorded in `LEGACY_ROADMAP.md`: vanilla pig-like seated player pose on Lushsaur/Chorusoatl; Lushsaur-only rider seat offset of 13 model pixels backward to center the rider over its hitbox; remove lateral bank on retained mobs; movement-input-gated horizontal-look steering on both mounts.
+- Lushsaur-only UI change requested: remove its mount inventory/menu and make E open the player's ordinary inventory while riding. Preserve Chorusoatl/Sculksaur inventory behavior. Audit for dependencies on Lushsaur slots before removing them.
 - Particle cleanup backlog: Sculksaur explosive-attack particles are completely absent pending Astemir's original formula; remove footstep dust, Lushsaur sleep-Z particles, and Lushsaur green particles after locating their exact emitters.
 - Initial audit only: `ADPlayerAnimations.init()` registers both mount rider-animation classes; `SmoothBodyControl` handles yaw/body-heading logic, not a proven side-roll source. New tasks are not implemented.
 
