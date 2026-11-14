@@ -71,8 +71,6 @@ jobs:
           javap -classpath "$JAR" -p -c com.eternal_creations.archies_dino_mod.common.entity.ADEntityTypes
           echo '===== RESOURCE SUPPLIER ====='
           javap -classpath "$JAR" -p -c com.eternal_creations.archies_dino_mod.util.ResourceSupplier
-          echo '===== ENTITY REGISTRY AND MOD ID REFERENCES ====='
-          jar tf "$JAR" | grep -E 'ADMod|ADEntityTypes|ResourceSupplier|Mod\.class$|mods\.toml | sort
           echo '===== MOD METADATA ====='
           echo '===== PLATFORM CLASSES ====='
           jar tf "$JAR" | grep -F 'platform/' | sort || true
