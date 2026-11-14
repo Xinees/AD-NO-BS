@@ -14,8 +14,17 @@ The user has clarified the desired behavior. Keep these as separate, narrowly sc
 
 - While the player rides either Lushsaur or Chorusoatl, disable the special custom player action animations triggered by LMB/RMB and other mount-specific rider animation layers that make the player swing/act.
 - The player should retain the ordinary vanilla passenger/sitting pose, visually comparable to riding a vanilla pig.
-- This is an animation/pose request, **not** a positional offset. Do not move the rider 13 model pixels backward; that earlier interpretation was explicitly corrected and is not a requirement.
+- The player should retain the ordinary vanilla passenger/sitting pose, visually comparable to riding a vanilla pig. No special LMB/RMB arm/action animation or mount-specific rider flourish.
+- **Lushsaur-only rider seat offset:** move the rider's seat position exactly 13 model pixels backward relative to the Lushsaur's forward direction, so the player visually sits centered over the Lushsaur hitbox. This is a separate mount-position adjustment, not part of the sitting animation. Do not apply this offset to Chorusoatl.
 - Preserve ordinary player animations when dismounted and avoid changing rider behavior for unrelated entities.
+
+### Lushsaur inventory removal and E-key behavior
+
+- Remove the Lushsaur-specific mount inventory/menu (the GUI currently titled `Lushsaur`, shown in the supplied screenshot) and its mount storage interface for Lushsaur only.
+- When the player is riding Lushsaur and presses E, open the player's ordinary inventory instead of opening a Lushsaur mount/container screen.
+- Do not apply this removal to Chorusoatl or Sculksaur; preserve their existing inventory behavior unless separately requested.
+- Audit all related paths: interaction/open-menu dispatch, key handling, container/menu registration where applicable, Lushsaur inventory storage/slots, saddle or equipment dependencies, and client screen registration. Do not merely hide the GUI while leaving inaccessible inventory state or broken menu packets.
+- Check whether any existing Lushsaur mechanics depend on its inventory slots before removing them; report any dependency that would be broken instead of silently deleting it. The desired user-facing result remains: no Lushsaur mount inventory, E opens player inventory.
 
 ### Remove lateral banking/roll when mobs turn
 
