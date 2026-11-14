@@ -469,8 +469,8 @@ with zipfile.ZipFile(source, "r") as zin:
         if name == "META-INF/mods.toml":
             metadata = data.decode("utf-8")
             metadata, mod_id_count = re.subn(
-                r'(?m)^(\\s*modId\\s*=\\s*")ec_ad(")',
-                r'\\1archie_dinosaurs\\2',
+                r'(?m)^([ \t]*modId[ \t]*=[ \t]*)"ec_ad"',
+                r'\1"archie_dinosaurs"',
                 metadata,
             )
             if mod_id_count != 1:
