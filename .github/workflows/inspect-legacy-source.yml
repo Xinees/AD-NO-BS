@@ -37,9 +37,9 @@ jobs:
           echo '===== CLIENT MIXIN CLASSES ====='
           jar tf "$JAR" | grep "mixin/client/" | grep "Mixin.class" | sort || true
           echo '===== BLOCK TAG DEFINITIONS ====='
-          javap -classpath "$JAR" -p -c "com.eternal_creations.archies_dino_mod.common.ADTags$Blocks"
+          javap -classpath "$JAR" -p -c 'com.eternal_creations.archies_dino_mod.common.ADTags$Blocks'
           echo '===== DIMENSION TAG DEFINITIONS ====='
-          javap -classpath "$JAR" -p -c "com.eternal_creations.archies_dino_mod.common.ADTags$DimensionTypes"
+          javap -classpath "$JAR" -p -c 'com.eternal_creations.archies_dino_mod.common.ADTags$DimensionTypes'
           echo '===== DATA TAG RESOURCES ====='
           for resource in $(jar tf "$JAR" | grep "data/ec_ad/tags/"); do
             echo "===== $resource ====="
