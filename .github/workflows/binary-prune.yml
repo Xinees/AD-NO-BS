@@ -774,7 +774,6 @@ jobs:
                   "assets/archie_dinosaurs/models/block/lushsaur_egg.json",
                   "assets/archie_dinosaurs/models/block/chorusoatl_egg.json",
               }
-              english = json.loads(z.read("assets/archie_dinosaurs/lang/en_us.json"))
               required_translations = {
                   "item_group.archie_dinosaurs_items",
                   "item.archie_dinosaurs.lushsaur_spawn_egg",
@@ -786,12 +785,19 @@ jobs:
                   "block.archie_dinosaurs.lushsaur_egg",
                   "block.archie_dinosaurs.chorusoatl_egg",
               }
-              missing_translations = sorted(
-                  key for key in required_translations
-                  if not isinstance(english.get(key), str) or not english[key].strip() or english[key] == key
-              )
-              if missing_translations:
-                  raise SystemExit("Missing real English translations: " + repr(missing_translations))
+              for locale in ("en_us", "ru_ru"):
+                  language_path = f"assets/archie_dinosaurs/lang/{locale}.json"
+                  language = json.loads(z.read(language_path))
+                  missing_translations = sorted(
+                      key for key in required_translations
+                      if not isinstance(language.get(key), str)
+                      or not language[key].strip()
+                      or language[key] == key
+                  )
+                  if missing_translations:
+                      raise SystemExit(
+                          f"Missing real {locale} translations: " + repr(missing_translations)
+                      )
 
               hatchable_tag = json.loads(z.read("data/archie_dinosaurs/tags/blocks/chorusoatl_egg_hatchable.json"))
               expected_hatchable_blocks = {

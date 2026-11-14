@@ -597,9 +597,38 @@ with zipfile.ZipFile(source, "r") as zin:
             if name.startswith(MOD + "lang/"):
                 lang = rewrite_entity_namespace(read_json(data, name))
                 lang = {k: v for k, v in lang.items() if key_is_allowed(k)}
-                if name.endswith("/en_us.json"):
+
+                locale = name.rsplit("/", 1)[-1].removesuffix(".json").lower()
+                translations = {
+                    "en_us": {
+                        "item_group.archie_dinosaurs_items": "Archies Dinosaurs",
+                        "item.archie_dinosaurs.lushsaur_spawn_egg": "Lushsaur Spawn Egg",
+                        "item.archie_dinosaurs.chorusoatl_spawn_egg": "Chorusoatl Spawn Egg",
+                        "item.archie_dinosaurs.sculksaur_spawn_egg": "Sculksaur Spawn Egg",
+                        "item.archie_dinosaurs.lush_core": "Lush Core",
+                        "item.archie_dinosaurs.chorus_fossil": "Chorus Fossil",
+                        "item.archie_dinosaurs.sculk_toxin": "Sculk Toxin",
+                        "block.archie_dinosaurs.lushsaur_egg": "Lushsaur Egg",
+                        "block.archie_dinosaurs.chorusoatl_egg": "Chorusoatl Egg",
+                    },
+                    "ru_ru": {
+                        "item_group.archie_dinosaurs_items": "Динозавры Арчи",
+                        "item.archie_dinosaurs.lushsaur_spawn_egg": "Яйцо призыва Пышнозавра",
+                        "item.archie_dinosaurs.chorusoatl_spawn_egg": "Яйцо призыва Хоросоатля",
+                        "item.archie_dinosaurs.sculksaur_spawn_egg": "Яйцо призыва Скалкозавра",
+                        "item.archie_dinosaurs.lush_core": "Ядро Пышнозавра",
+                        "item.archie_dinosaurs.chorus_fossil": "Окаменелость Хоросоатля",
+                        "item.archie_dinosaurs.sculk_toxin": "Токсин Скалкозавра",
+                        "block.archie_dinosaurs.lushsaur_egg": "Яйцо Пышнозавра",
+                        "block.archie_dinosaurs.chorusoatl_egg": "Яйцо Хоросоатля",
+                    },
+                }
+                for key, value in translations.get(locale, {}).items():
+                    lang.setdefault(key, value)
+
+                if locale == "en_us":
                     lang["advancement.root.desc"] = "Meet the dinosaurs"
-                elif name.endswith("/ru_ru.json"):
+                elif locale == "ru_ru":
                     lang["advancement.root.desc"] = "Познакомьтесь с динозаврами"
                 data = dump_json(lang)
             elif name == MOD + "sounds.json":
@@ -684,8 +713,6 @@ with zipfile.ZipFile(target, "r") as check:
     if 'modId = "archie_dinosaurs"' not in metadata or 'modId = "ec_ad"' in metadata:
         raise SystemExit("Forge mods.toml does not declare only the archie_dinosaurs mod ID")
 
-    english = read_json(check.read("assets/archie_dinosaurs/lang/en_us.json"),
-                        "assets/archie_dinosaurs/lang/en_us.json")
     required_translations = {
         "item_group.archie_dinosaurs_items",
         "item.archie_dinosaurs.lushsaur_spawn_egg",
@@ -697,12 +724,20 @@ with zipfile.ZipFile(target, "r") as check:
         "block.archie_dinosaurs.lushsaur_egg",
         "block.archie_dinosaurs.chorusoatl_egg",
     }
-    missing_translations = sorted(
-        key for key in required_translations
-        if not isinstance(english.get(key), str) or not english[key].strip() or english[key] == key
-    )
-    if missing_translations:
-        raise SystemExit("Missing real English translations for retained entries: " + repr(missing_translations))
+    for locale in ("en_us", "ru_ru"):
+        language_path = f"assets/archie_dinosaurs/lang/{locale}.json"
+        language = read_json(check.read(language_path), language_path)
+        missing_translations = sorted(
+            key for key in required_translations
+            if not isinstance(language.get(key), str)
+            or not language[key].strip()
+            or language[key] == key
+        )
+        if missing_translations:
+            raise SystemExit(
+                f"Missing real {locale} translations for retained entries: "
+                + repr(missing_translations)
+            )
 
     allowed_item_models = {
         f"assets/archie_dinosaurs/models/item/{item}.json" for item in ITEMS
