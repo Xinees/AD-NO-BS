@@ -237,225 +237,95 @@ jobs:
           fi
 
           SCULK_EFFECTS='com.eternal_creations.archies_dino_mod.client.particle.effect.SculksaurEffects'
-          SCULK_CONTEXT='Lcom/astemir/astemirlib/re/client/model/core/animation/event/AnimationEvent$Context;'
-          verify_method "$SCULK_EFFECTS" \
-            'archiesDinoMod$spawnSculksaurSonicBoomFirstSphere(' \
-            "($SCULK_CONTEXT)V"
-          verify_method "$SCULK_EFFECTS" \
-            'archiesDinoMod$spawnSculksaurSonicBoomSecondSphere(' \
-            "($SCULK_CONTEXT)V"
-          verify_method "$SCULK_EFFECTS" \
-            'archiesDinoMod$spawnSculksaurSonicBoomSphereAt(' \
-            '(Lnet/minecraft/world/level/Level;DDD)V'
-          verify_method "$SCULK_EFFECTS" \
-            'archiesDinoMod$spawnSculksaurSonicBoomParticle(' \
-            '(Lnet/minecraft/world/level/Level;DDDI)V'
-
           SCULK_DISASSEMBLY="$(javap -classpath build/classes-pruned.jar -p -c "$SCULK_EFFECTS")"
-          SCULK_SPHERE="$(printf '%s\n' "$SCULK_DISASSEMBLY" | awk '
-            /^[[:space:]]+private .*archiesDinoMod\$spawnSculksaurSonicBoomSphereAt\(/ { capture=1 }
-            capture && /^[[:space:]]+(private|public|protected) / && $0 !~ /archiesDinoMod\$spawnSculksaurSonicBoomSphereAt\(/ { exit }
+          SCULK_FINAL="$(printf '%s\\n' "$SCULK_DISASSEMBLY" | awk '
+            /^[[:space:]]+private static void lambda\\$explosionFinalEvent\\$12\\(/ { capture=1 }
+            capture && /^[[:space:]]+(private|public|protected) / && $0 !~ /lambda\\$explosionFinalEvent\\$12\\(/ { exit }
             capture { print }
           ')"
-          for required_sphere_call in 'IntStream.range' 'IntStream.forEach' 'sipush        256'; do
-            if ! printf '%s\n' "$SCULK_SPHERE" | grep -F "$required_sphere_call"; then
-              echo "SphereAt does not create exactly 256 points through the expected stream path: $required_sphere_call"
-              printf '%s\n' "$SCULK_SPHERE"
-              exit 1
-            fi
-          done
-          echo "Verified SphereAt creates 256 evenly distributed particles through IntStream.range/forEach."
-
-          SCULK_FINAL="$(javap -classpath build/classes-pruned.jar -p -c "$SCULK_EFFECTS" | sed -n '/lambda[$]explosionFinalEvent[$]12(/,/^  private /p')"
-          for required_call in 'archiesDinoMod$spawnSculksaurSonicBoomFirstSphere' 'ShakeUtil.shakeExplosion'; do
-            if ! printf '%s\n' "$SCULK_FINAL" | grep -F "$required_call"; then
-              echo "Sculksaur first Sonic Boom event is missing required visual/camera behavior: $required_call"
-              printf '%s\n' "$SCULK_FINAL"
-              exit 1
-            fi
-          done
-          for forbidden_call in 'Shockwave.of' 'ColoredLight.of' 'AnimationEvent$Context.spawnParticle'; do
-            if printf '%s\n' "$SCULK_FINAL" | grep -F "$forbidden_call"; then
-              echo "Legacy Sculksaur Sonic Boom effect remains in first event: $forbidden_call"
+          if ! printf '%s\\n' "$SCULK_FINAL" | grep -Fq 'ShakeUtil.shakeExplosion'; then
+            echo "Sculksaur explosion event must keep its original camera shake."
+            printf '%s\\n' "$SCULK_FINAL"
+            exit 1
+          fi
+          for forbidden_call in 'spawnSculksaurSonicBoom' 'spawnParticle' 'Shockwave.of' 'ColoredLight.of'; do
+            if printf '%s\\n' "$SCULK_FINAL" | grep -Fq "$forbidden_call"; then
+              echo "Sculksaur explosion event still contains removed particle/post-process behavior: $forbidden_call"
+              printf '%s\\n' "$SCULK_FINAL"
               exit 1
             fi
           done
 
-          SCULK_SECOND="$(javap -classpath build/classes-pruned.jar -p -c "$SCULK_EFFECTS" | sed -n '/archiesDinoMod[$]lambdaSecondSonicBoomEvent(/,/^  private /p')"
-          if ! printf '%s\n' "$SCULK_SECOND" | grep -F 'archiesDinoMod$spawnSculksaurSonicBoomSecondSphere'; then
-            echo "Second Sculksaur Sonic Boom event does not spawn its delayed sphere."
-            printf '%s\n' "$SCULK_SECOND"
+          SCULK_GROUND="$(printf '%s\\n' "$SCULK_DISASSEMBLY" | awk '
+            /^[[:space:]]+private static void lambda\\$explosionGroundEvent\\$11\\(/ { capture=1 }
+            capture && /^[[:space:]]+(private|public|protected) / && $0 !~ /lambda\\$explosionGroundEvent\\$11\\(/ { exit }
+            capture { print }
+          ')"
+          if printf '%s\\n' "$SCULK_GROUND" | grep -Fq 'spawnParticle'; then
+            echo "Sculksaur ground explosion callback still emits particles."
+            printf '%s\\n' "$SCULK_GROUND"
             exit 1
           fi
 
-          SCULK_FACTORY_VERBOSE_FILE="$RUNNER_TEMP/sculksaur-factory-verbose.txt"
-          javap -classpath build/classes-pruned.jar -p -c -v "$SCULK_EFFECTS" > "$SCULK_FACTORY_VERBOSE_FILE"
-          python3 - "$SCULK_FACTORY_VERBOSE_FILE" <<'PY'
-          import pathlib
-          import re
-          import sys
-
-          disassembly = pathlib.Path(sys.argv[1]).read_text(encoding="utf-8")
-
-          def factory_bootstrap_index(name):
-              signature = re.compile(
-                  r"^  private .*\b" + re.escape(name) + r"\(\);$",
-                  re.MULTILINE
-              )
-              matches = list(signature.finditer(disassembly))
-              if len(matches) != 1:
-                  raise SystemExit(f"Expected one {name} factory, found {len(matches)}")
-
-              start = matches[0].end()
-              next_method = re.search(
-                  r"^  (?:private|public|protected) ",
-                  disassembly[start:],
-                  re.MULTILINE
-              )
-              end = start + next_method.start() if next_method else len(disassembly)
-              method = disassembly[start:end]
-              handles = re.findall(r"// InvokeDynamic #(\d+):handle:", method)
-              if len(handles) != 1:
-                  raise SystemExit(
-                      f"{name} must contain exactly one event factory handle, found {handles}"
-                  )
-              return int(handles[0])
-
-          original_index = factory_bootstrap_index("explosionFinalEvent")
-          second_index = factory_bootstrap_index("archiesDinoMod$secondSonicBoomEvent")
-          if original_index == second_index:
-              raise SystemExit("The two Sonic Boom factories share one invokedynamic bootstrap.")
-
-          table_match = re.search(r"^BootstrapMethods:\s*$", disassembly, re.MULTILINE)
-          if not table_match:
-              raise SystemExit("The SculksaurEffects BootstrapMethods table is missing.")
-          table_lines = disassembly[table_match.end():].splitlines()
-
-          def bootstrap_entry(index):
-              starts = [
-                  i for i, line in enumerate(table_lines)
-                  if re.match(rf"^\s*{index}: #", line)
-              ]
-              if len(starts) != 1:
-                  raise SystemExit(f"Expected unique bootstrap entry {index}, found {len(starts)}")
-              start = starts[0]
-              end = next(
-                  (
-                      i for i in range(start + 1, len(table_lines))
-                      if re.match(r"^\s*\d+: #", table_lines[i])
-                  ),
-                  len(table_lines)
-              )
-              return "\n".join(table_lines[start:end])
-
-          original_entry = bootstrap_entry(original_index)
-          second_entry = bootstrap_entry(second_index)
-
-          if "lambda$explosionFinalEvent$12:" not in original_entry:
-              raise SystemExit("First sphere factory lost its original first-wave callback.")
-          if "archiesDinoMod$lambdaSecondSonicBoomEvent:" not in second_entry:
-              raise SystemExit("Second sphere factory lost its delayed second-wave callback.")
-          if (
-              "archiesDinoMod$lambdaSecondSonicBoomEvent:" in original_entry
-              or "lambda$explosionFinalEvent$12:" in second_entry
-          ):
-              raise SystemExit("The first and second Sonic Boom callbacks are crossed.")
-
-          print(
-              f"Verified independent Sonic Boom event factories: "
-              f"first bootstrap #{original_index}, second bootstrap #{second_index}."
-          )
-          PY
-
-          SCULK_TRACK="$(javap -classpath build/classes-pruned.jar -p -c "$SCULK_EFFECTS")"
-          for required_track_marker in 'float 4.68f' 'float 5.12f' 'float 4.88f' 'EXPLOSION_EFFECTS'; do
-            if ! printf '%s\n' "$SCULK_TRACK" | grep -F "$required_track_marker"; then
-              echo "Sculksaur Sonic Boom timing track is missing $required_track_marker"
+          for forbidden_effect_symbol in 'SculksaurSonicBoomParticle' 'spawnSculksaurSonicBoom' 'secondSonicBoomEvent'; do
+            if printf '%s\\n' "$SCULK_DISASSEMBLY" | grep -Fq "$forbidden_effect_symbol"; then
+              echo "Removed custom Sculksaur explosion particle implementation remains: $forbidden_effect_symbol"
               exit 1
             fi
           done
-          python3 - <<'PY'
-          first = 4.68
-          second = 4.88
-          delay = second - first
-          if abs(delay - 0.20) > 0.00001:
-              raise SystemExit(f"Sonic Boom shells are not separated by 0.20 seconds: {delay}")
-          print(f"Verified second shell spawn delay: {delay:.2f} seconds (4 ticks at 20 TPS).")
-          PY
-
-          SCULK_PARTICLE="$(javap -classpath build/classes-pruned.jar -p -c "$SCULK_EFFECTS" | sed -n '/archiesDinoMod[$]spawnSculksaurSonicBoomParticle(/,/^  private /p')"
-          for required_call in 'ParticleTypes.f_235902_' 'SculksaurSonicBoomParticle$Provider.spawn' 'Math.cos' 'Math.sin'; do
-            if ! printf '%s\n' "$SCULK_PARTICLE" | grep -F "$required_call"; then
-              echo "Sculksaur Sonic Boom particle helper is missing $required_call"
-              printf '%s\n' "$SCULK_PARTICLE"
+          for required_track_marker in 'float 4.68f' 'float 5.12f' 'EXPLOSION_EFFECTS'; do
+            if ! printf '%s\\n' "$SCULK_DISASSEMBLY" | grep -Fq "$required_track_marker"; then
+              echo "Original Sculksaur explosion/tendril event track lost $required_track_marker"
               exit 1
             fi
           done
-          for required_layer_marker in 'double 0.6d' 'double 0.0078125d'; do
-            if ! printf '%s\n' "$SCULK_PARTICLE" | grep -F "$required_layer_marker"; then
-              echo "Sculksaur Sonic Boom particle speed/distribution is incorrect: $required_layer_marker"
-              printf '%s\n' "$SCULK_PARTICLE"
-              exit 1
-            fi
-          done
-          VELOCITY_COMPONENT_COUNT="$(printf '%s\n' "$SCULK_PARTICLE" | grep -F -o 'double 0.6d' | wc -l)"
-          if [ "$VELOCITY_COMPONENT_COUNT" -ne 3 ]; then
-            echo "Sculksaur Sonic Boom must use exactly three 0.6 XYZ velocity components."
-            printf '%s\n' "$SCULK_PARTICLE"
+          if printf '%s\\n' "$SCULK_DISASSEMBLY" | grep -Fq 'float 4.88f'; then
+            echo "Delayed second explosion-particle event still exists."
             exit 1
           fi
-          if printf '%s\n' "$SCULK_PARTICLE" | grep -F -e 'double 0.55d' -e 'double 0.05d'; then
-            echo "Both shells must spawn from the same center, not from separate initial radii."
-            printf '%s\n' "$SCULK_PARTICLE"
-            exit 1
-          fi
+          echo "Verified all Sculksaur explosion particles and delayed particle wave are removed; original camera shake and event track remain."
 
-
-          SCULK_MOVING_PARTICLE='com.eternal_creations.archies_dino_mod.client.particle.SculksaurSonicBoomParticle'
-          SCULK_MOVING_PARTICLE_DISASSEMBLY="$(javap -classpath build/classes-pruned.jar -p -c "$SCULK_MOVING_PARTICLE")"
-          SCULK_MOVING_CONSTRUCTOR="$(printf '%s\n' "$SCULK_MOVING_PARTICLE_DISASSEMBLY" | sed -n '/SculksaurSonicBoomParticle(net.minecraft.client.multiplayer.ClientLevel/,/^  public void m_5989_/p')"
-          for required_lifetime_marker in 'bipush        34' 'Particle.m_107257_:(I)V'; do
-            if ! printf '%s\n' "$SCULK_MOVING_CONSTRUCTOR" | grep -F "$required_lifetime_marker"; then
-              echo "Sculksaur Sonic Boom particles must explicitly set a 34-tick lifetime: $required_lifetime_marker"
-              printf '%s\n' "$SCULK_MOVING_CONSTRUCTOR"
+          LUSHSAUR_CLIENT='com.eternal_creations.archies_dino_mod.client.model.render.entity.mob.LushsaurClient'
+          SCULKSAUR_CLIENT='com.eternal_creations.archies_dino_mod.client.model.render.entity.mob.SculksaurClient'
+          LUSH_PHYSICS="$(javap -classpath build/classes-pruned.jar -p -c "$LUSHSAUR_CLIENT" | awk '
+            /^[[:space:]]+private void setupPhysics\\(/ { capture=1 }
+            capture && /^[[:space:]]+(public|protected|private) / && $0 !~ /setupPhysics\\(/ { exit }
+            capture { print }
+          ')"
+          SCULK_PHYSICS="$(javap -classpath build/classes-pruned.jar -p -c "$SCULKSAUR_CLIENT" | awk '
+            /^[[:space:]]+private void setupPhysics\\(/ { capture=1 }
+            capture && /^[[:space:]]+(public|protected|private) / && $0 !~ /setupPhysics\\(/ { exit }
+            capture { print }
+          ')"
+          for tail_bone in 'String tail1' 'String tail2' 'String mase' 'String tail'; do
+            if printf '%s\\n' "$LUSH_PHYSICS" | grep -Fq "$tail_bone"; then
+              echo "Lushsaur tail physics bone remains enabled: $tail_bone"
+              printf '%s\\n' "$LUSH_PHYSICS"
               exit 1
             fi
           done
-          SCULK_MOVING_TICK="$(printf '%s\\n' "$SCULK_MOVING_PARTICLE_DISASSEMBLY" | sed -n '/public void m_5989_();/,/^}/p')"
-          for required_animation_marker in 'bipush        16' 'irem' 'isub' 'Particle.f_107224_:I' 'Particle.f_107225_:I'; do
-            if ! printf '%s\\n' "$SCULK_MOVING_TICK" | grep -F "$required_animation_marker"; then
-              echo "Sculksaur Sonic Boom sprite animation must loop independently of its particle lifetime: $required_animation_marker"
-              printf '%s\\n' "$SCULK_MOVING_TICK"
+          for preserved_lush_bone in 'String string' 'String beetroot'; do
+            if ! printf '%s\\n' "$LUSH_PHYSICS" | grep -Fq "$preserved_lush_bone"; then
+              echo "Lushsaur non-tail item physics was unexpectedly removed: $preserved_lush_bone"
+              printf '%s\\n' "$LUSH_PHYSICS"
               exit 1
             fi
           done
-          echo "Verified 16-frame Sonic Boom animation cycling independently of the 34-tick particle lifetime."
-
-          echo "Verified explicit 34-tick moving Sonic Boom particle lifetime (20.40-block maximum travel at 12.00 blocks/second)."
-
-          SCULK_ORIGIN="$(javap -classpath build/classes-pruned.jar -p -c "$SCULK_EFFECTS")"
-          for required_call in 'WeakHashMap.put' 'WeakHashMap.get' 'WeakHashMap.remove' \
-            'archiesDinoMod$rememberSonicBoomOrigin' 'archiesDinoMod$takeSonicBoomOrigin'; do
-            if ! printf '%s\n' "$SCULK_ORIGIN" | grep -F "$required_call"; then
-              echo "The two Sonic Boom waves do not retain and reuse a common spawn origin: $required_call"
+          for tail_bone in 'String tail1' 'String tail2'; do
+            if printf '%s\\n' "$SCULK_PHYSICS" | grep -Fq "$tail_bone"; then
+              echo "Sculksaur tail physics bone remains enabled: $tail_bone"
+              printf '%s\\n' "$SCULK_PHYSICS"
               exit 1
             fi
           done
-
-          SCULK_SPHERE="$(printf '%s\n' "$SCULK_TRACK" | sed -n '/archiesDinoMod[$]spawnSculksaurSonicBoomSphereAt(/,/^  private /p')"
-          if ! printf '%s\n' "$SCULK_SPHERE" | grep -F 'sipush        256'; then
-            echo "Each Sonic Boom sphere must contain exactly 256 particles."
-            printf '%s\n' "$SCULK_SPHERE"
-            exit 1
-          fi
-          echo "Verified two 256-particle SONIC_BOOM spheres, same saved origin, 0.20-second stagger, and 12.00-block/second radial speed."
-
-          SCULK_GROUND="$(javap -classpath build/classes-pruned.jar -p -c "$SCULK_EFFECTS" | sed -n '/lambda[$]explosionGroundEvent[$]11(/,/^  private /p')"
-          if printf '%s\n' "$SCULK_GROUND" | grep -F 'AnimationEvent$Context.spawnParticle'; then
-            echo "Legacy ground-wave emitters remain connected to Sculksaur Sonic Boom."
-            exit 1
-          fi
-
+          for preserved_leg in 'LegSolverModule.addLeg' 'String leg_left' 'String leg_right'; do
+            if ! printf '%s\\n' "$SCULK_PHYSICS" | grep -Fq "$preserved_leg"; then
+              echo "Sculksaur leg IK was unexpectedly removed: $preserved_leg"
+              printf '%s\\n' "$SCULK_PHYSICS"
+              exit 1
+            fi
+          done
+          echo "Verified Lushsaur and Sculksaur tail physics are disabled; Lushsaur item physics and Sculksaur leg IK remain."
                     SMOOTH_MOVE_CONTROL='com.eternal_creations.archies_dino_mod.common.entity.ai.control.SmoothMoveControl'
           SMOOTH_BODY_CONTROL='com.eternal_creations.archies_dino_mod.common.entity.ai.control.SmoothBodyControl'
           SMOOTH_LOOK_CONTROL='com.eternal_creations.archies_dino_mod.common.entity.ai.control.SmoothLookControl'
@@ -595,6 +465,12 @@ jobs:
                   raise SystemExit(f"Corrupt ZIP entry: {bad}")
 
               names = set(z.namelist())
+              sonic_boom_classes = sorted(
+                  name for name in names
+                  if name.endswith(".class") and "SculksaurSonicBoomParticle" in name
+              )
+              if sonic_boom_classes:
+                  raise SystemExit("Removed Sculksaur explosion particle classes remain: " + ", ".join(sonic_boom_classes))
               for config_name in ("ec_ad.mixins.json", "ec_ad.forge.mixins.json"):
                   config = json.loads(z.read(config_name))
                   package = config.get("package", "").replace(".", "/").strip("/")
