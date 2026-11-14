@@ -386,7 +386,11 @@ def filter_loot_entry(entry):
     if isinstance(entry, dict):
         if entry.get("type") == "minecraft:item":
             item = entry.get("name")
-            if isinstance(item, str) and item.startswith("archie_dinosaurs:") and item.split(":", 1)[1] not in ITEMS:
+            if (
+                isinstance(item, str)
+                and item.startswith((f"{OLD_NAMESPACE}:", f"{NEW_NAMESPACE}:"))
+                and item.split(":", 1)[1] not in ITEMS
+            ):
                 return {"type": "minecraft:empty", "weight": entry.get("weight", 1)}
         return {key: filter_loot_entry(value) for key, value in entry.items()}
     if isinstance(entry, list):
