@@ -613,6 +613,31 @@ with zipfile.ZipFile(target, "r") as check:
             print(f"Prefix hex: {payload[:64].hex()}")
             print(f"Context hex: {context.hex()}")
             print(f"Context repr: {context!r}")
+            if name.endswith(".astemirmodel"):
+                for token in (b"ec_ad", b"animations", b'{"', b"PNG", b"\x89PNG", b"IEND"):
+                    positions = []
+                    cursor = 0
+                    while True:
+                        cursor = payload.find(token, cursor)
+                        if cursor < 0:
+                            break
+                        positions.append(cursor)
+                        cursor += len(token)
+                    print(f"Token {token!r}: {positions[:40]}")
+                for label, position in (
+                    ("first json object", payload.find(b'{"')),
+                    ("animation block", payload.find(b'"animations"')),
+                    ("namespace", offset),
+                    ("first PNG", payload.find(b"\x89PNG")),
+                ):
+                    if position >= 0:
+                        print(f"{label} @{position}: {payload[max(0, position - 96):position + 160]!r}")
+                png = payload.find(b"\x89PNG")
+                if png >= 0:
+                    iend = payload.find(b"IEND", png)
+                    print(f"first PNG IEND marker @{iend}, end+CRC @{iend + 8 if iend >= 0 else -1}")
+                    if iend >= 0:
+                        print(f"bytes after first PNG: {payload[iend + 8:iend + 96].hex()}")
             raise SystemExit(f"Old mod namespace remains in JAR entry content: {name}")
 
     metadata = check.read("META-INF/mods.toml").decode("utf-8")
