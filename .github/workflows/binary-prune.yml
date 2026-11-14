@@ -1,4 +1,4 @@
-name: Direct Legacy JAR Prune - build 19
+name: Direct Legacy JAR Prune - build 20
 
 on:
   push:
@@ -336,7 +336,7 @@ jobs:
 
           SONIC_PROVIDER='com.eternal_creations.archies_dino_mod.client.particle.SculksaurSonicBoomParticle$Provider'
           SONIC_PROVIDER_BYTECODE="$(javap -classpath build/classes-pruned.jar -p -c "$SONIC_PROVIDER")"
-          for required_call in 'ThreadLocal.set' 'ThreadLocal.remove' 'Level.m_7106_' 'SonicBoomParticle$Provider.<init>' 'ParticleProvider.m_6966_'; do
+          for required_call in 'ThreadLocal.set' 'ThreadLocal.remove' 'Level.m_7106_' 'SonicBoomParticle$Provider."<init>"' 'ParticleProvider.m_6966_'; do
             if ! printf '%s\n' "$SONIC_PROVIDER_BYTECODE" | grep -F "$required_call"; then
               echo "Sonic Boom provider is missing marker/fallback behavior: $required_call"
               printf '%s\n' "$SONIC_PROVIDER_BYTECODE"
