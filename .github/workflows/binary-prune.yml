@@ -352,7 +352,7 @@ jobs:
           echo "Verified 15-pixel passenger-hitbox correction and 3-pixel forward visual adjustment."
 
           MOUNT_COMPONENT_INTERACT="$(awk '/public net.minecraft.world.InteractionResult mobInteract/ { capture=1; print; next } capture && /^  (public|private|protected) / { exit } capture { print }' <<< "$MOUNT_COMPONENT_BYTECODE")"
-          SADDLE_CAPABILITY_LINE="$(grep -nF 'Saddleable.m_6741_()' <<< "$MOUNT_COMPONENT_INTERACT" | head -n 1 | cut -d: -f1 || true)"
+          SADDLE_CAPABILITY_LINE="$(grep -nF 'Saddleable.m_6741_:' <<< "$MOUNT_COMPONENT_INTERACT" | head -n 1 | cut -d: -f1 || true)"
           SADDLE_CONSUME_LINE="$(grep -nF 'ItemStack.m_41774_:(I)V' <<< "$MOUNT_COMPONENT_INTERACT" | head -n 1 | cut -d: -f1 || true)"
           SADDLE_STATE_LINE="$(grep -nF 'Mount.setSaddled:(Z)V' <<< "$MOUNT_COMPONENT_INTERACT" | head -n 1 | cut -d: -f1 || true)"
           SADDLE_SOUND_LINE="$(grep -nF 'Level.m_6269_:' <<< "$MOUNT_COMPONENT_INTERACT" | head -n 1 | cut -d: -f1 || true)"
