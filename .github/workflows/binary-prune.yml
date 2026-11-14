@@ -364,7 +364,7 @@ jobs:
           ABSTRACT_SADDLE_INTERACT="$(awk '/public net.minecraft.world.InteractionResult m_6071_/ { capture=1; print; next } capture && /^  (public|private|protected) / { exit } capture { print }' <<< "$ABSTRACT_MOUNT_BYTECODE")"
           SADDLE_ITEM_POS="$(grep -n -m1 'ItemStack.m_150930_' <<< "$ABSTRACT_SADDLE_INTERACT" | cut -d: -f1)"
           SADDLEABLE_POS="$(grep -n -m1 'Saddleable.m_6741_' <<< "$ABSTRACT_SADDLE_INTERACT" | cut -d: -f1)"
-          SADDLE_SET_POS="$(grep -n -m1 'Mount.setSaddled\|AbstractComplexMount.setSaddled' <<< "$ABSTRACT_SADDLE_INTERACT" | cut -d: -f1)"
+          SADDLE_SET_POS="$(grep -n -m1 'Method setSaddled:' <<< "$ABSTRACT_SADDLE_INTERACT" | cut -d: -f1)"
           SADDLE_SOUND_POS="$(grep -n -m1 'm_6269_' <<< "$ABSTRACT_SADDLE_INTERACT" | cut -d: -f1)"
           if [[ -z "$SADDLE_ITEM_POS" || -z "$SADDLEABLE_POS" || -z "$SADDLE_SET_POS" || -z "$SADDLE_SOUND_POS" ]] ||
              (( SADDLE_ITEM_POS >= SADDLEABLE_POS || SADDLEABLE_POS >= SADDLE_SET_POS || SADDLE_SET_POS >= SADDLE_SOUND_POS )); then
@@ -402,7 +402,7 @@ jobs:
             echo "Lushsaur saddle-slot filter is not based on ItemStack.isEmpty()."
             exit 1
           fi
-          echo "Verified original Lushsaur interaction behavior is preserved and both shared saddle-consumption paths obey Saddleable.isSaddleable; Lushsaur remains permanently unsaddled and its saddle slot rejects non-empty stacks."
+          echo "Verified original Lushsaur mobInteract is preserved, the shared saddle branch checks isSaddleable before setSaddled/sound, and Lushsaur remains permanently unsaddled with an empty-only saddle slot."
 
           LUSH_MENU="$(awk '/m_213583_\(/ { capture=1; print; next } capture && /^  (public|private|protected) / { exit } capture { print }' <<< "$LUSH_ENTITY_BYTECODE")"
           if [[ "$LUSH_MENU" != *"return"* ||
