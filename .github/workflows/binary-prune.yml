@@ -243,13 +243,13 @@ jobs:
             capture && /^[[:space:]]+(private|public|protected) / && $0 !~ /lambda\$explosionFinalEvent\$12\(/ { exit }
             capture { print }
           ')"
-          if ! printf '%s\n' "$SCULK_FINAL" | grep -Fq 'ShakeUtil.shakeExplosion'; then
+          if ! printf '%s\n' "$SCULK_FINAL" | grep -F 'ShakeUtil.shakeExplosion' >/dev/null; then
             echo "Sculksaur explosion event must keep its original camera shake."
             printf '%s\n' "$SCULK_FINAL"
             exit 1
           fi
           for forbidden_call in 'spawnSculksaurSonicBoom' 'spawnParticle' 'Shockwave.of' 'ColoredLight.of'; do
-            if printf '%s\n' "$SCULK_FINAL" | grep -Fq "$forbidden_call"; then
+            if printf '%s\n' "$SCULK_FINAL" | grep -F "$forbidden_call" >/dev/null; then
               echo "Sculksaur explosion event still contains removed particle/post-process behavior: $forbidden_call"
               printf '%s\n' "$SCULK_FINAL"
               exit 1
@@ -261,25 +261,25 @@ jobs:
             capture && /^[[:space:]]+(private|public|protected) / && $0 !~ /lambda\$explosionGroundEvent\$11\(/ { exit }
             capture { print }
           ')"
-          if printf '%s\n' "$SCULK_GROUND" | grep -Fq 'spawnParticle'; then
+          if printf '%s\n' "$SCULK_GROUND" | grep -F 'spawnParticle' >/dev/null; then
             echo "Sculksaur ground explosion callback still emits particles."
             printf '%s\n' "$SCULK_GROUND"
             exit 1
           fi
 
           for forbidden_effect_symbol in 'SculksaurSonicBoomParticle' 'spawnSculksaurSonicBoom' 'secondSonicBoomEvent'; do
-            if printf '%s\n' "$SCULK_DISASSEMBLY" | grep -Fq "$forbidden_effect_symbol"; then
+            if printf '%s\n' "$SCULK_DISASSEMBLY" | grep -F "$forbidden_effect_symbol" >/dev/null; then
               echo "Removed custom Sculksaur explosion particle implementation remains: $forbidden_effect_symbol"
               exit 1
             fi
           done
           for required_track_marker in 'float 4.68f' 'float 5.12f' 'EXPLOSION_EFFECTS'; do
-            if ! printf '%s\n' "$SCULK_DISASSEMBLY" | grep -Fq "$required_track_marker"; then
+            if ! printf '%s\n' "$SCULK_DISASSEMBLY" | grep -F "$required_track_marker" >/dev/null; then
               echo "Original Sculksaur explosion/tendril event track lost $required_track_marker"
               exit 1
             fi
           done
-          if printf '%s\n' "$SCULK_DISASSEMBLY" | grep -Fq 'float 4.88f'; then
+          if printf '%s\n' "$SCULK_DISASSEMBLY" | grep -F 'float 4.88f' >/dev/null; then
             echo "Delayed second explosion-particle event still exists."
             exit 1
           fi
@@ -298,28 +298,28 @@ jobs:
             capture { print }
           ')"
           for tail_bone in 'String tail1' 'String tail2' 'String mase' 'String tail'; do
-            if printf '%s\n' "$LUSH_PHYSICS" | grep -Fq "$tail_bone"; then
+            if printf '%s\n' "$LUSH_PHYSICS" | grep -F "$tail_bone" >/dev/null; then
               echo "Lushsaur tail physics bone remains enabled: $tail_bone"
               printf '%s\n' "$LUSH_PHYSICS"
               exit 1
             fi
           done
           for preserved_lush_bone in 'String string' 'String beetroot'; do
-            if ! printf '%s\n' "$LUSH_PHYSICS" | grep -Fq "$preserved_lush_bone"; then
+            if ! printf '%s\n' "$LUSH_PHYSICS" | grep -F "$preserved_lush_bone" >/dev/null; then
               echo "Lushsaur non-tail item physics was unexpectedly removed: $preserved_lush_bone"
               printf '%s\n' "$LUSH_PHYSICS"
               exit 1
             fi
           done
           for tail_bone in 'String tail1' 'String tail2'; do
-            if printf '%s\n' "$SCULK_PHYSICS" | grep -Fq "$tail_bone"; then
+            if printf '%s\n' "$SCULK_PHYSICS" | grep -F "$tail_bone" >/dev/null; then
               echo "Sculksaur tail physics bone remains enabled: $tail_bone"
               printf '%s\n' "$SCULK_PHYSICS"
               exit 1
             fi
           done
           for preserved_leg in 'LegSolverModule.addLeg' 'String leg_left' 'String leg_right'; do
-            if ! printf '%s\n' "$SCULK_PHYSICS" | grep -Fq "$preserved_leg"; then
+            if ! printf '%s\n' "$SCULK_PHYSICS" | grep -F "$preserved_leg" >/dev/null; then
               echo "Sculksaur leg IK was unexpectedly removed: $preserved_leg"
               printf '%s\n' "$SCULK_PHYSICS"
               exit 1
