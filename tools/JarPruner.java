@@ -1576,6 +1576,29 @@ public final class JarPruner {
                 originalFactory.exceptions.toArray(new String[0])
         );
         originalFactory.accept(secondFactory);
+        for (AbstractInsnNode instruction : secondFactory.instructions.toArray()) {
+            if (instruction instanceof InvokeDynamicInsnNode dynamic) {
+                dynamic.bsmArgs = dynamic.bsmArgs.clone();
+            }
+        }
+
+        String originalLambdaName = "lambda$explosionFinalEvent$12";
+        boolean originalFactoryHandlePreserved = false;
+        for (AbstractInsnNode instruction : originalFactory.instructions.toArray()) {
+            if (!(instruction instanceof InvokeDynamicInsnNode dynamic)) continue;
+            for (Object argument : dynamic.bsmArgs) {
+                if (argument instanceof Handle handle &&
+                    handle.getOwner().equals(owner.name) &&
+                    handle.getName().equals(originalLambdaName) &&
+                    handle.getDesc().equals(contextDescriptor)) {
+                    originalFactoryHandlePreserved = true;
+                }
+            }
+        }
+        if (!originalFactoryHandlePreserved) {
+            throw new IllegalStateException("Cloning the second event altered the original Sonic Boom callback");
+        }
+
         boolean lambdaHandleReplaced = false;
         for (AbstractInsnNode instruction : secondFactory.instructions.toArray()) {
             if (!(instruction instanceof InvokeDynamicInsnNode dynamic)) continue;
