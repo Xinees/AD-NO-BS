@@ -1,14 +1,13 @@
 # AD-NO-BS Legacy recovery status
 
-# AD-NO-BS Legacy recovery status
-
 ## Current branch status — 2026-11-14
 
 - Working branch: `binary-prune/legacy`.
-- Latest completed build: Direct Legacy JAR Prune **build 112** (GitHub Actions run #119).
-- Implementation and CI commit: [`38765501`](https://github.com/Xinees/AD-NO-BS/commit/387655018631865ded4b744d93205ae82d77f59c).
-- GitHub Actions: [run #119 — success](https://github.com/Xinees/AD-NO-BS/actions/runs/43532650945).
-- Artifact ID: `14088725208`; ZIP digest: `sha256:22b0e4a62498574e57d68827bd46afb7f6a591ee501fd32953eceb1bdbce7290`.
+- Latest completed build: Direct Legacy JAR Prune **build 112** (latest verification: GitHub Actions run #120).
+- Implementation commit: [`38765501`](https://github.com/Xinees/AD-NO-BS/commit/387655018631865ded4b744d93205ae82d77f59c).
+- CI guard and status commit: [`ba07d144`](https://github.com/Xinees/AD-NO-BS/commit/ba07d144676c32356459feb684c859d5eb303da6).
+- GitHub Actions: [run #120 — success](https://github.com/Xinees/AD-NO-BS/actions/runs/43532956122); run #120 reran the same JAR with stronger shell-count/velocity guards.
+- Artifact ID: `14087684487`; ZIP digest: `sha256:8fdfb30d3899feece3b00fc92c58099e4c2d7666be5bc04d080db60f52dc3ea7`.
 - Output JAR: `ec_ad-legacy-forge-1.20.1.jar`; size: `2,493,438` bytes; SHA-256: `df6532bc1d96a7c9b6b984aa0eda29ca7b2194af46228eed9b04e6999e825577`.
 - **Build112 Sonic Boom visual fix:** Build111's `SONIC_BOOM` particle did not respond to the supplied XYZ velocity as a moving particle. Minecraft 1.20.1's SonicBoomParticle is a HugeExplosionParticle with one extra scalar constructor argument, not a normal three-axis moving particle. Build112 therefore uses vanilla `SCULK_SOUL`, whose provider accepts X/Y/Z velocity components.
 - The effect uses two hollow Fibonacci-distributed spherical shells, with 768 particles per shell (1,536 total). Initial radii are 0.55 and 0.05 blocks, leaving a 0.50-block gap. All three radial velocity components use 0.38 blocks/tick at spawn.
