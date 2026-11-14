@@ -6,6 +6,52 @@
 
 This file is the explicit task list for the next Legacy work. The order below is intentional. Do not quietly reduce these requests to cosmetic tweaks, and do not mix unrelated behavior changes into one patch.
 
+## Next riding and visual cleanup pass — requested 2026-11-14 (not implemented)
+
+The user has clarified the desired behavior. Keep these as separate, narrowly scoped changes and do not bundle them with particle cleanup.
+
+### Rider presentation — Lushsaur and Chorusoatl
+
+- While the player rides either Lushsaur or Chorusoatl, disable the special custom player action animations triggered by LMB/RMB and other mount-specific rider animation layers that make the player swing/act.
+- The player should retain the ordinary vanilla passenger/sitting pose, visually comparable to riding a vanilla pig.
+- This is an animation/pose request, **not** a positional offset. Do not move the rider 13 model pixels backward; that earlier interpretation was explicitly corrected and is not a requirement.
+- Preserve ordinary player animations when dismounted and avoid changing rider behavior for unrelated entities.
+
+### Remove lateral banking/roll when mobs turn
+
+- Remove the unwanted sideways body lean/bank that appears during turning. The user describes it as a body tilt, not simply slow yaw interpolation.
+- Initial scope: all three retained mobs (Lushsaur, Chorusoatl, Sculksaur), unless the user later narrows it.
+- Do not disable normal horizontal turning, walking/running animations, head tracking, or unrelated pitch. Identify the actual source of the lateral roll before patching it.
+
+### Movement-gated rider-look steering — Lushsaur and Chorusoatl
+
+- The controlling player's **horizontal yaw only** determines the mount's heading while movement input is active.
+- When stationary, rotating the camera must not rotate the mount's head/body. Keep the mount's last facing direction.
+- When the rider supplies movement input (forward/back/strafe), the whole mob should turn to the player's current horizontal look direction and be steerable that way.
+- The turning condition is input-based, not displacement-based: if the rider continues holding movement into a wall/obstacle, the mount should still turn toward the look direction.
+- Releasing movement input stops look-following; do not continue rotating merely because the rider moves the camera.
+- Ignore vertical camera pitch. Do not pitch the mount up/down to follow the player's vertical look.
+- Apply this behavior to both Lushsaur and Chorusoatl, not Sculksaur.
+
+### Initial code audit — observations, not conclusions
+
+- `JarPruner.patchPlayerAnimations()` clears `ADPlayerAnimations.init()` and registers `OnLushsaurPlayerAnimations.init(1)` and `OnChorusoatlPlayerAnimations.init(1)`. These are the obvious registration points for the special rider layers; inspect their actual contents before deciding whether to no-op the registrations or remove only selected tracks.
+- `patchLushsaurRiderRunAnimation()` changes the Lushsaur rider-run predicate to read the controlling passenger's sprint state. Removing the whole Lushsaur rider layer would also remove that custom run animation, which appears consistent with the requested vanilla-like seated pose but must be checked against the full rider layer before patching.
+- Existing `SmoothMoveControl`, `SmoothBodyControl`, and `SmoothLookControl` patches address yaw/look control. The current `SmoothBodyControl` has a player-controlling-passenger early return; this is not proof of the side-roll source.
+- The documented `EntityLocomotion.Builder.turnFactor(0.003f)` occurs only in Sculksaur's `createLocomotion()` and belongs to external Astemir RE. It must not be assumed to cause Lushsaur's or Chorusoatl's banking.
+- The exact source of the lateral bank and the precise meaning of the external `turnFactor` are still unverified. Inspect the original entity/model animation bytecode and exact Astemir RE 1.2.98 dependency read-only before choosing a patch point.
+- Keep each behavior isolated and add specific bytecode guards plus in-game regression tests. Do not modify the immutable original mod JAR or external Astemir RE JAR.
+
+### Particle cleanup backlog carried forward
+
+- Build118 currently has no Sculksaur explosive-attack particles. Do not invent a replacement. Restore the original effect only after Astemir supplies the original particle formula/implementation.
+- Remove footstep dust particles from all retained mobs.
+- Remove the sleep `Z` particles above Lushsaur.
+- Remove the green particles emitted by Lushsaur; identify their exact particle source/type before changing it.
+- Tail physics remains disabled as in Build118.
+
+No code or JAR changes have been made for this pass yet.
+
 ## Current baseline and test status
 
 ### Build 118 — current implementation; CI validation passed, artifact upload quota-blocked
