@@ -10,11 +10,10 @@ This file is the explicit task list for the next Legacy work. The order below is
 
 ### Build 112 — latest CI-verified JAR; runtime test pending
 
-- Latest CI: [run #120 — success](https://github.com/Xinees/AD-NO-BS/actions/runs/43532956122); run #119 first built the code fix, while #120 passed the strengthened particle-count and velocity checks.
-- Implementation commit: [`38765501`](https://github.com/Xinees/AD-NO-BS/commit/387655018631865ded4b744d93205ae82d77f59c).
-- CI guard/status commit: [`ba07d144`](https://github.com/Xinees/AD-NO-BS/commit/ba07d144676c32356459feb684c859d5eb303da6).
-- Artifact ID: `14087684487`; ZIP digest: `sha256:8fdfb30d3899feece3b00fc92c58099e4c2d7666be5bc04d080db60f52dc3ea7`.
-- Output JAR: `ec_ad-legacy-forge-1.20.1.jar`; size: `2,493,438` bytes; SHA-256: `df6532bc1d96a7c9b6b984aa0eda29ca7b2194af46228eed9b04e6999e825577`.
+- Latest CI: [run #122 — success](https://github.com/Xinees/AD-NO-BS/actions/runs/43533375677).
+- Implementation and strengthened CI commit: [`71ab3d2d`](https://github.com/Xinees/AD-NO-BS/commit/71ab3d2d483615054f3a4fc0d664286fb4c89172).
+- Artifact ID: `14089055419`; ZIP digest: `sha256:46ece3e402ebad1a3c25bc0341e5539366d37ade33f046c5b305a93373e0ef57`.
+- Output JAR: `ec_ad-legacy-forge-1.20.1.jar`; size: `2,493,438` bytes; SHA-256: `112f021a32fd6933b23e42271b0c63b7c6efd43aa77dd3479d09d64c3c7c3735`.
 - Build112 fixes the Build111 particle-motion failure. In Minecraft 1.20.1, `SONIC_BOOM` is a `SonicBoomParticle` derived from `HugeExplosionParticle`; its constructor takes one additional scalar, not a full XYZ velocity vector. Passing radial XYZ values to it cannot produce a moving spherical shell. Build112 uses vanilla `SCULK_SOUL`, whose particle provider accepts all three velocity components.
 - The effect is two hollow Fibonacci-distributed spherical shells with 768 particles each (1,536 total). The initial radii are 0.55 and 0.05 blocks, so the layers start 0.50 blocks apart. Each particle receives the same normalized radial direction scaled by 0.32 blocks/tick at spawn (about 14% faster than ordinary sprinting).
 - Camera shake is preserved. The old post-process distortion, colored light, jaw emitter fallback, and ground-wave emitters remain disconnected. No animation-event timing, attack AI, damage, range, knockback, cooldown, attack animation, or sound logic was changed.

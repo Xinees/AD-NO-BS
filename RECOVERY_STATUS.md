@@ -3,12 +3,11 @@
 ## Current branch status — 2026-11-14
 
 - Working branch: `binary-prune/legacy`.
-- Latest completed build: Direct Legacy JAR Prune **build 112** (latest verification: GitHub Actions run #120).
-- Implementation commit: [`38765501`](https://github.com/Xinees/AD-NO-BS/commit/387655018631865ded4b744d93205ae82d77f59c).
-- CI guard and status commit: [`ba07d144`](https://github.com/Xinees/AD-NO-BS/commit/ba07d144676c32356459feb684c859d5eb303da6).
-- GitHub Actions: [run #120 — success](https://github.com/Xinees/AD-NO-BS/actions/runs/43532956122); run #120 reran the same JAR with stronger shell-count/velocity guards.
-- Artifact ID: `14087684487`; ZIP digest: `sha256:8fdfb30d3899feece3b00fc92c58099e4c2d7666be5bc04d080db60f52dc3ea7`.
-- Output JAR: `ec_ad-legacy-forge-1.20.1.jar`; size: `2,493,438` bytes; SHA-256: `df6532bc1d96a7c9b6b984aa0eda29ca7b2194af46228eed9b04e6999e825577`.
+- Latest completed build: Direct Legacy JAR Prune **build 112** (latest code verification: GitHub Actions run #122).
+- Implementation and strengthened CI commit: [`71ab3d2d`](https://github.com/Xinees/AD-NO-BS/commit/71ab3d2d483615054f3a4fc0d664286fb4c89172).
+- GitHub Actions: [run #122 — success](https://github.com/Xinees/AD-NO-BS/actions/runs/43533375677).
+- Artifact ID: `14089055419`; ZIP digest: `sha256:46ece3e402ebad1a3c25bc0341e5539366d37ade33f046c5b305a93373e0ef57`.
+- Output JAR: `ec_ad-legacy-forge-1.20.1.jar`; size: `2,493,438` bytes; SHA-256: `112f021a32fd6933b23e42271b0c63b7c6efd43aa77dd3479d09d64c3c7c3735`.
 - **Build112 Sonic Boom visual fix:** Build111's `SONIC_BOOM` particle did not respond to the supplied XYZ velocity as a moving particle. Minecraft 1.20.1's SonicBoomParticle is a HugeExplosionParticle with one extra scalar constructor argument, not a normal three-axis moving particle. Build112 therefore uses vanilla `SCULK_SOUL`, whose provider accepts X/Y/Z velocity components.
 - The effect uses two hollow Fibonacci-distributed spherical shells, with 768 particles per shell (1,536 total). Initial radii are 0.55 and 0.05 blocks, leaving a 0.50-block gap. All three radial velocity components use 0.32 blocks/tick at spawn (about 14% faster than the ordinary sprinting speed of 5.612 blocks/second).
 - The original camera shake remains. The old Sonic Boom post-process distortion, colored light, jaw emitter fallback, and ground-wave emitters remain disconnected. The animation event callbacks/timestamps, attack AI, damage, range, knockback, cooldown, animation, and sound were not changed.
