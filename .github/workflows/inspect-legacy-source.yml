@@ -22,6 +22,22 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
+      - name: Inspect vanilla SaddleItem and Saddleable bytecode
+        shell: bash
+        run: |
+          set -euo pipefail
+          CLIENT_JAR="/tmp/minecraft-1.20.1-client.jar"
+          curl --fail --location --silent --show-error \
+            "https://piston-data.mojang.com/v1/objects/0c3ec587af28e5a785c0b4a7b8a30f9a8f78f838/client.jar" \
+            -o "$CLIENT_JAR"
+          echo '===== VANILLA SADDLE ITEM ====='
+          javap -classpath "$CLIENT_JAR" -p -c -s cgs
+          echo '===== VANILLA SADDLEABLE INTERFACE ====='
+          javap -classpath "$CLIENT_JAR" -p -c -s bgq
+          echo '===== VANILLA ITEM BASE ====='
+          javap -classpath "$CLIENT_JAR" -p -c -s cgm
+          sha1sum "$CLIENT_JAR"
+
       - name: Inspect original egg hatching and passenger rendering
         shell: bash
         run: |
