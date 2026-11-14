@@ -113,21 +113,30 @@ jobs:
           ORIGINAL_JAR="ec_ad-forge-1.20.1-1.0.4.jar"
           PRUNED_JAR="build/classes-pruned.jar"
 
-          echo "===== Original Choro egg block ====="
+          echo "===== Original Chorusoatl egg block ====="
           javap -classpath "$ORIGINAL_JAR" -p -c com.eternal_creations.archies_dino_mod.common.block.eggs.ChorusoatlEggBlock
 
-          echo "===== Original egg block base class ====="
+          echo "===== Original base egg block ====="
           javap -classpath "$ORIGINAL_JAR" -p -c com.eternal_creations.archies_dino_mod.common.block.eggs.DinoEggBlock || true
 
-          echo "===== Pruned Choro egg block ====="
+          echo "===== Pruned Chorusoatl egg block ====="
           javap -classpath "$PRUNED_JAR" -p -c com.eternal_creations.archies_dino_mod.common.block.eggs.ChorusoatlEggBlock
 
           echo "===== Original mixin configuration ====="
           unzip -p "$ORIGINAL_JAR" ec_ad.mixins.json
           unzip -p "$ORIGINAL_JAR" ec_ad.forge.mixins.json
 
-          echo "===== Original client mixin class list ====="
-          jar tf "$ORIGINAL_JAR" | grep 'mixin/client/' | grep 'Mixin.class
+          echo "===== Original client mixin classes ====="
+          jar tf "$ORIGINAL_JAR" | grep "mixin/client/" | grep "Mixin.class" | sort || true
+
+          echo "===== Original PlayerMixin ====="
+          javap -classpath "$ORIGINAL_JAR" -p -c -v com.eternal_creations.archies_dino_mod.mixin.PlayerMixin
+
+          echo "===== Original LocalPlayerMixin ====="
+          javap -classpath "$ORIGINAL_JAR" -p -c -v com.eternal_creations.archies_dino_mod.mixin.client.LocalPlayerMixin
+
+      - name: Verify retained renderer method descriptors
+        shell: bash
         run: |
           set -euo pipefail
           PROVIDER_DESC='()Lcom/astemir/astemirlib/re/client/model/render/renderer/AstemirEntityRenderer$Provider;'
