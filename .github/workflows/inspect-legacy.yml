@@ -99,5 +99,52 @@ jobs:
             unzip -p ec_ad-forge-1.20.1-1.0.4.jar "$F" 2>/dev/null | head -c 40000 || true
             echo
           done
+          for C in \
+            com.eternal_creations.archies_dino_mod.common.entity.component.EntityComponentHolder \
+            com.eternal_creations.archies_dino_mod.common.entity.component.MountComponent \
+            'com.eternal_creations.archies_dino_mod.common.entity.component.MountComponent$Definition' \
+            com.eternal_creations.archies_dino_mod.common.entity.base.AbstractComplexMount \
+            com.eternal_creations.archies_dino_mod.common.entity.base.Mount \
+            com.eternal_creations.archies_dino_mod.common.menu.ADMenus \
+            com.eternal_creations.archies_dino_mod.client.screen.DinoScreen \
+            com.eternal_creations.archies_dino_mod.mixin.PlayerListMixin \
+            com.eternal_creations.archies_dino_mod.mixin.client.LocalPlayerMixin \
+            com.eternal_creations.archies_dino_mod.client.particle.ADParticleEmitters \
+            com.eternal_creations.archies_dino_mod.client.particle.effect.LushsaurEffects \
+            com.eternal_creations.archies_dino_mod.client.particle.effect.ChorusoatlEffects \
+            com.eternal_creations.archies_dino_mod.client.model.render.entity.mob.SculksaurClient
+          do
+            echo "===== SIGNATURES: $C ====="
+            javap -classpath "$JAR" -p -s "$C" 2>&1 || true
+            echo "===== BYTECODE: $C ====="
+            javap -classpath "$JAR" -p -c "$C" 2>&1 || true
+          done
+          echo "=== Nested contents of retained .astemirmodel archives ==="
+          for F in \
+            assets/ec_ad/models/entity/lushsaur.astemirmodel \
+            assets/ec_ad/models/entity/lushsaur_baby.astemirmodel \
+            assets/ec_ad/models/entity/chorusoatl.astemirmodel \
+            assets/ec_ad/models/entity/chorusoatl_baby.astemirmodel \
+            assets/ec_ad/models/entity/sculksaur.astemirmodel
+          do
+            TMP="/tmp/$(basename "$F").zip"
+            unzip -p ec_ad-forge-1.20.1-1.0.4.jar "$F" > "$TMP"
+            echo "===== NESTED PATHS: $F ====="
+            unzip -Z1 "$TMP" 2>/dev/null | head -200 || true
+            while IFS= read -r INNER
+            do
+              case "$INNER" in
+                *.json|*.astemiranim|*.animation.json)
+                  echo "===== NESTED ASSET: $F :: $INNER ====="
+                  unzip -p "$TMP" "$INNER" 2>/dev/null | head -c 16000 || true
+                  echo
+                  ;;
+              esac
+            done < <(unzip -Z1 "$TMP" 2>/dev/null || true)
+          done
+          echo "=== Particle asset paths ==="
+          unzip -Z1 ec_ad-forge-1.20.1-1.0.4.jar | grep -Ei 'particle|lushsaur|chorusoatl' | sort | head -300 || true
+          echo "=== Particle emitter and animation source names ==="
+          unzip -p ec_ad-forge-1.20.1-1.0.4.jar assets/ec_ad/particles/particle_emitters.json 2>/dev/null | head -c 16000 || true
           echo "=== Original model/animation asset names ==="
           unzip -Z1 ec_ad-forge-1.20.1-1.0.4.jar | grep -Ei 'lushsaur|chorusoatl' | grep -Ei 'astemirmodel|animation|model' | sort | head -200
