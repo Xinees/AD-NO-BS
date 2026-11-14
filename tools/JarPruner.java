@@ -1244,10 +1244,30 @@ public final class JarPruner {
 
             if (boneNameLoad == null) continue;
 
-            InsnList discardTailBone = new InsnList();
-            discardTailBone.add(new InsnNode(Opcodes.POP));
-            discardTailBone.add(new InsnNode(Opcodes.POP));
-            setup.instructions.insertBefore(call, discardTailBone);
+            List<AbstractInsnNode> operandSetup = new ArrayList<>();
+            for (AbstractInsnNode cursor = boneNameLoad.getNext(); cursor != null && cursor != call;
+                 cursor = cursor.getNext()) {
+                if (cursor.getOpcode() >= 0) operandSetup.add(cursor);
+            }
+
+            boolean localProperties = operandSetup.size() == 1 &&
+                operandSetup.get(0) instanceof VarInsnNode load &&
+                load.getOpcode() == Opcodes.ALOAD;
+            boolean createdProperties = operandSetup.size() == 2 &&
+                operandSetup.get(0) instanceof VarInsnNode moduleLoad &&
+                moduleLoad.getOpcode() == Opcodes.ALOAD &&
+                operandSetup.get(1) instanceof MethodInsnNode createProperties &&
+                createProperties.getOpcode() == Opcodes.INVOKEVIRTUAL &&
+                createProperties.name.equals("createProperties") &&
+                createProperties.desc.equals("()Lcom/astemir/astemirlib/re/client/model/core/system/module/PhysicsModule$PhysicsProperties;");
+
+            if (!localProperties && !createdProperties) {
+                throw new IllegalStateException(owner.name + " has an unexpected addBone operand sequence for " +
+                    boneNameLoad.cst);
+            }
+
+            for (AbstractInsnNode operand : operandSetup) setup.instructions.remove(operand);
+            setup.instructions.remove(boneNameLoad);
             setup.instructions.remove(call);
             removed++;
         }
