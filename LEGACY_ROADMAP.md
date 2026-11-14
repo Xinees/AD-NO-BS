@@ -10,9 +10,9 @@ This file is the explicit task list for the next Legacy work. The order below is
 
 ### Build 114 — latest CI-verified JAR; runtime test pending
 
-- Latest CI: [run #136 — success](https://github.com/Xinees/AD-NO-BS/actions/runs/43538851094).
+- Latest CI: [run #139 — success](https://github.com/Xinees/AD-NO-BS/actions/runs/43539402377).
 - Final implementation commit: [`bbfc8b57`](https://github.com/Xinees/AD-NO-BS/commit/bbfc8b573e9953341515e394ab71ce95f1520a8d).
-- Artifact ID: `14090903394`; ZIP digest: `sha256:d813ffe31ef092bd664a300bca5a58f0eb1ee64a3f509cafce49c4daa902a348`.
+- Artifact ID: `14091057287`; ZIP digest: `sha256:73cf3445b65e0fb8f028dbb501df50ef8a3682fa15359c946e7b12ded60a7c05`.
 - Output JAR: `ec_ad-legacy-forge-1.20.1.jar`; size: `2,495,858` bytes; SHA-256: `1e5d6351b7dccef1224380def5e3364f52adad0ad525ff8ce8c33bc9a1453743`.
 - Build114 now creates **two sequential hollow spherical pulses from one and the same XYZ origin**. The first event remains at `4.68s`; the second event is scheduled at `5.18s`, exactly `0.50s` (10 ticks at 20 TPS) later. This is not a pair of spatially offset shells.
 - The first event reads the Sculksaur's XYZ position and half-height-adjusted Y once, saves those exact coordinates in a `WeakHashMap`, and creates the first sphere there. The second event consumes and removes that saved origin and creates the trailing sphere at those same coordinates; it does not re-read the entity position after the delay.
@@ -24,6 +24,7 @@ This file is the explicit task list for the next Legacy work. The order below is
 - No attack AI, target selection, original event time, damage, range, knockback, cooldown, attack action, sound, or unrelated Sculksaur animation/particle track was changed. The second sphere is a visual-only event.
 - Build113-to-Build114 archive comparison: 475 entries before and after; no entries added or removed; exactly one changed class, `SculksaurEffects.class`. No resource, model, texture, sound, or JSON entry changed.
 - CI run #136 verifies the exact particle type/provider, 128 positive stream iterations per sphere (`SIPUSH 128`), 10-tick delay, saved/reused origin, callbacks, equal radial velocity components, camera-shake behavior, ZIP integrity, retained content, and existing mob controls/renderers. The downloaded JAR was independently inspected with `javap` and compared entry-by-entry with Build113.
+- The final guard-only CI run #139 also checks the `javap -v` `BootstrapMethods` table: the first and second event factories must use different bootstrap indices and point to their respective callbacks. Its downloaded JAR has the same SHA-256 as the independently inspected Build114 archive.
 - **Runtime status:** CI and downloaded-JAR checks passed. Build114 has **not** yet been launched in Minecraft. In-game confirmation is still required for the visible shell shape, same-origin appearance, half-second delay, motion, density at roughly five blocks, and attack/unrelated-mob regression checks.
 
 ### Build 113 — superseded sequential-pulse precursor

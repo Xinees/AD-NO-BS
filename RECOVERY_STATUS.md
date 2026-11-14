@@ -3,9 +3,9 @@
 ## Current branch status — 2026-11-14
 
 - Working branch: `binary-prune/legacy`.
-- Latest completed build: Direct Legacy JAR Prune **build 114**; GitHub Actions run [#136 — success](https://github.com/Xinees/AD-NO-BS/actions/runs/43538851094).
+- Latest completed build: Direct Legacy JAR Prune **build 114**; GitHub Actions run [#139 — success](https://github.com/Xinees/AD-NO-BS/actions/runs/43539402377).
 - Final implementation commit: [`bbfc8b57`](https://github.com/Xinees/AD-NO-BS/commit/bbfc8b573e9953341515e394ab71ce95f1520a8d).
-- Artifact ID: `14090903394`; ZIP digest: `sha256:d813ffe31ef092bd664a300bca5a58f0eb1ee64a3f509cafce49c4daa902a348`.
+- Artifact ID: `14091057287`; ZIP digest: `sha256:73cf3445b65e0fb8f028dbb501df50ef8a3682fa15359c946e7b12ded60a7c05`.
 - Output JAR: `ec_ad-legacy-forge-1.20.1.jar`; size: `2,495,858` bytes; SHA-256: `1e5d6351b7dccef1224380def5e3364f52adad0ad525ff8ce8c33bc9a1453743`.
 - **Build114 corrects the wave geometry and timing.** The two hollow spherical waves now spawn from the exact same saved XYZ origin. The first starts at the original Sonic Boom event (`4.68s)); the second starts at `5.18s`, exactly `0.50s` later (10 game ticks at 20 TPS). This is a sequential double pulse, not two shells with different initial radii.
 - Each sphere creates exactly 128 Fibonacci-distributed `SONIC_BOOM` particles; 256 particles total per attack. The two waves reuse the same saved origin, even if the Sculksaur moves during the half-second delay. The origin is stored against the entity in a `WeakHashMap` and removed when the second event consumes it.
@@ -15,6 +15,7 @@
 - **Callback isolation was explicitly fixed and verified.** The first event factory keeps its own `lambda$explosionFinalEvent$12` callback; the second factory has an independent `invokedynamic` bootstrap handle targeting `archiesDinoMod$lambdaSecondSonicBoomEvent`. The cloned bootstrap-argument array is independent, so changing the second callback cannot silently redirect the first.
 - Build113-to-Build114 JAR comparison: 475 entries in both archives; no added or removed entries; exactly one changed class, `SculksaurEffects.class`. No resources, models, textures, sounds, JSON, or other mob/gameplay classes changed.
 - CI run #136 verifies the shared saved origin, the 10-tick event separation, 128 particles per sphere, positive `SIPUSH 128` stream bound, three equal radial-velocity scale components, vanilla `SONIC_BOOM` type/provider behavior, callback wiring, camera shake, ZIP integrity, retained content, and existing controls/renderers. The downloaded JAR was independently inspected with `javap` and compared entry-by-entry against Build113.
+- The final guard-only CI run #139 also checks the `javap -v` `BootstrapMethods` table: the first and second event factories must use different bootstrap indices and point to their respective callbacks. Its downloaded JAR has the same SHA-256 as the independently inspected Build114 archive.
 - **Runtime status:** Build114 passed CI and downloaded-JAR structural/bytecode checks, but has **not** been launched in Minecraft by this audit. The in-game test must confirm both pulses visibly expand from the same attack origin, are separated by about half a second, are not too dense, and do not alter the attack or other mobs.
 - Build113 was an intermediate version with two simultaneous shells at separate radii. It is superseded and does not match the corrected sequential-pulse requirement.
 - Build112 is rejected for this task: it used `SCULK_SOUL` instead of the explicitly requested `SONIC_BOOM`. Do not use Build112/123 as the accepted particle fix.
