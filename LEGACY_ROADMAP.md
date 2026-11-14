@@ -1,5 +1,21 @@
 # AD-NO-BS Legacy — roadmap and behavior requirements
 
+## Runtime regression found after Build119 and root-cause correction — 2026-11-14
+
+Astemir's first Minecraft runtime launch of Build119 reached the integrated world, then failed while constructing retained mount entities. The supplied launch log identifies `java.lang.VerifyError: Inconsistent stackmap frames at branch target 163` in `MountComponent.tickRidden`. The same class failure affected both Lushsaur and Chorusoatl creation. The chunk-read message was a consequence of this class-verification failure, not evidence of a corrupt world.
+
+**Root cause:** the earlier `patchRiderLookSteering` inserted an early `RETURN` for idle riders and manually inserted `FrameNode` entries into the middle of the original `tickRidden` method. The pruner writes classes with `ClassWriter.COMPUTE_MAXS`, not `COMPUTE_FRAMES`, so the original method's later StackMap frame was retained. The new early-return path could reach the old body-rotation branch with local slots 5 and 6 still `TOP`, while the retained frame at bytecode offset 163 declared both as `float`. The JVM correctly rejected the class.
+
+**Correction:** implementation commit [`dd18eec`](https://github.com/Xinees/AD-NO-BS/commit/dd18eec88d390fe8958e434a6aeb75632008d3d8) removes the early return and all manually injected frames from `tickRidden`. Horizontal-input gating is now applied branchlessly to the existing `canMountRotateHead` and `canMountRotateBody` results, for Lushsaur and Chorusoatl only. Pitch is neutralized with a branchless multiplier for those two mounts. Other mounts retain the original capability results and rider pitch.
+
+The pruner now asserts that this patch does not change the method's original branch count or FrameNode count. The workflow additionally checks the two input gates, pitch multiplier, and the original three branches.
+
+**CI candidate #187:** [run #187](https://github.com/Xinees/AD-NO-BS/actions/runs/43612358618) completed successfully. It verified 468 JAR entries and a final size of 2,480,325 bytes, and uploaded the JAR to the draft release [`legacy-auto-187`](https://github.com/Xinees/AD-NO-BS/releases/tag/untagged-229ce353686cf570f4f4).
+
+**Runtime status:** the stack-map root cause is corrected and the candidate passes the CI bytecode/structure guards. It still requires a fresh in-game launch and riding acceptance test; do not mark it runtime-accepted until that test is reported successful.
+
+---
+
 **Working branch:** `binary-prune/legacy`  
 **Target:** Forge 1.20.1  
 **Last reviewed:** 2026-11-14
