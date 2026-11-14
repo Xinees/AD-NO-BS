@@ -292,7 +292,7 @@ jobs:
             printf '%s\n' "$LUSH_RUN_TRAIL"
             exit 1
           fi
-          if printf '%s\n' "$LUSH_EFFECTS_BYTECODE" | grep -Fq 'getstatic' | grep -Fq 'EMITTER_REST'; then
+          if printf '%s\n' "$LUSH_EFFECTS_BYTECODE" | grep -F 'getstatic' | grep -Fq 'EMITTER_REST'; then
             echo "Lushsaur sleep Z emitter is still referenced."
             exit 1
           fi
