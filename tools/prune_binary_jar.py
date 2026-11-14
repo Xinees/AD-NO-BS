@@ -603,7 +603,16 @@ with zipfile.ZipFile(target, "r") as check:
         if name.endswith(".jar"):
             continue
         payload = check.read(name)
-        if OLD_NAMESPACE.encode("ascii") in payload:
+        marker = OLD_NAMESPACE.encode("ascii")
+        offset = payload.find(marker)
+        if offset >= 0:
+            start = max(0, offset - 48)
+            end = min(len(payload), offset + len(marker) + 48)
+            context = payload[start:end]
+            print(f"Namespace diagnostic for {name}: size={len(payload)}, offset={offset}")
+            print(f"Prefix hex: {payload[:64].hex()}")
+            print(f"Context hex: {context.hex()}")
+            print(f"Context repr: {context!r}")
             raise SystemExit(f"Old mod namespace remains in JAR entry content: {name}")
 
     metadata = check.read("META-INF/mods.toml").decode("utf-8")
