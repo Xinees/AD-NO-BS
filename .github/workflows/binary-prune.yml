@@ -754,6 +754,8 @@ jobs:
               "LUSH_CORE",
               "SCULK_TOXIN",
               "CHORUS_FOSSIL",
+              "LUSHSAUR_MACE",
+              "OOZE_TIPPED_ARROW",
           ]
           positions = [tab.find("ADItems." + name) for name in expected]
           if any(position < 0 for position in positions):
@@ -761,6 +763,85 @@ jobs:
           if positions != sorted(positions):
               raise SystemExit("Creative tab item order is incorrect: " + repr(positions))
           print("Verified creative tab order:", " -> ".join(expected))
+          PY
+
+      - name: Verify Lush Mace and Ooze Tipped Arrow behavior
+        shell: bash
+        run: |
+          set -euo pipefail
+          MACE="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.common.items.weapon.LushsaurMaceItem)"
+          for required in 'm_7579_' 'm_7203_' 'getAttackDamageBonus' 'executeSpinAttack' 'canSmashAttack' 'getCombatAction' 'MACE_ATTACK' 'MACE_SPIN' 'PlayerActions.registerActionState'; do
+            if ! grep -Fq "$required" <<< "$MACE"; then
+              echo "Lush Mace lost required combat logic: $required"
+              exit 1
+            fi
+          done
+          ARROW="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.common.entity.projectile.PusTippedArrowEntity)"
+          for required in 'm_8060_' 'm_5790_' 'm_7761_' 'm_7941_' 'PUS_ARROW_AGGRO' 'ADTags$EntityTypes.SCULK' 'OOZE_TIPPED_ARROW'; do
+            if ! grep -Fq "$required" <<< "$ARROW"; then
+              echo "Ooze Tipped Arrow lost required projectile logic: $required"
+              exit 1
+            fi
+          done
+          ARROW_ITEM="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.common.items.PusArrowItem)"
+          if ! grep -Fq 'PusTippedArrowEntity' <<< "$ARROW_ITEM"; then
+            echo "Ooze Arrow item no longer creates the custom projectile."
+            exit 1
+          fi
+          ITEMS="$(javap -classpath build/classes-pruned.jar -p com.eternal_creations.archies_dino_mod.common.items.ADItems)"
+          for required in 'LUSHSAUR_MACE' 'OOZE_TIPPED_ARROW'; do
+            if ! grep -Fq "$required" <<< "$ITEMS"; then
+              echo "ADItems is missing retained field: $required"
+              exit 1
+            fi
+          done
+          ENTITIES="$(javap -classpath build/classes-pruned.jar -p com.eternal_creations.archies_dino_mod.common.entity.ADEntityTypes)"
+          if ! grep -Fq 'PUS_TIPPED_ARROW' <<< "$ENTITIES"; then
+            echo "Pus Tipped Arrow entity type was pruned."
+            exit 1
+          fi
+          EVENTS="$(javap -classpath build/classes-pruned.jar -p com.eternal_creations.archies_dino_mod.common.ADGameEvents)"
+          if ! grep -Fq 'PUS_ARROW_AGGRO' <<< "$EVENTS"; then
+            echo "Pus Arrow aggro game event was pruned."
+            exit 1
+          fi
+          SOUNDS="$(javap -classpath build/classes-pruned.jar -p com.eternal_creations.archies_dino_mod.common.sound.ADSoundEvents)"
+          for required in 'MACE_ATTACK' 'MACE_SPIN'; do
+            if ! grep -Fq "$required" <<< "$SOUNDS"; then
+              echo "Lush Mace sound event was pruned: $required"
+              exit 1
+            fi
+          done
+          CLIENT="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.client.CommonClient)"
+          for required in 'PUS_TIPPED_ARROW' 'lambda$registerEntityRenderers$0' 'registerLegacyAttachables' 'LushsaurMaceAttachable'; do
+            if ! grep -Fq "$required" <<< "$CLIENT"; then
+              echo "Legacy client registration is missing: $required"
+              exit 1
+            fi
+          done
+          python3 - <<'PY'
+          import json
+          import zipfile
+
+          with zipfile.ZipFile("build/classes-pruned.jar") as jar:
+              expected = {
+                  "archie_dinosaurs.mixins.json": {
+                      "DamageSourcesMixin",
+                      "PlayerInterfaceMixin",
+                      "ServerPlayerInterfaceMixin",
+                  },
+                  "archie_dinosaurs.forge.mixins.json": {
+                      "PlayerAttackDamageBonusMixin",
+                      "forge.ADWeaponItemMixin",
+                  },
+              }
+              for name, required in expected.items():
+                  config = json.loads(jar.read(name))
+                  kept = set(config.get("mixins", [])) | set(config.get("client", [])) | set(config.get("server", []))
+                  missing = sorted(required - kept)
+                  if missing:
+                      raise SystemExit(f"{name} is missing required combat mixins: {missing}")
+          print("Verified original Lush Mace and Ooze Arrow gameplay hooks.")
           PY
 
       - name: Verify Legacy JAR structure and retained content
@@ -807,6 +888,17 @@ jobs:
                   "com/eternal_creations/archies_dino_mod/common/entity/mob/lushsaur/LushsaurEntity.class",
                   "com/eternal_creations/archies_dino_mod/common/entity/mob/chorusoatl/ChorusoatlEntity.class",
                   "com/eternal_creations/archies_dino_mod/common/entity/mob/sculksaur/SculksaurEntity.class",
+                  "com/eternal_creations/archies_dino_mod/common/entity/projectile/PusTippedArrowEntity.class",
+                  "com/eternal_creations/archies_dino_mod/common/items/PusArrowItem.class",
+                  "com/eternal_creations/archies_dino_mod/common/items/weapon/LushsaurMaceItem.class",
+                  "com/eternal_creations/archies_dino_mod/common/items/util/ADWeaponItem.class",
+                  "com/eternal_creations/archies_dino_mod/client/model/attachable/LushsaurMaceAttachable.class",
+                  "com/eternal_creations/archies_dino_mod/client/animation/player/attachable/LushsaurMaceAnimations.class",
+                  "com/eternal_creations/archies_dino_mod/mixin/DamageSourcesMixin.class",
+                  "com/eternal_creations/archies_dino_mod/mixin/PlayerInterfaceMixin.class",
+                  "com/eternal_creations/archies_dino_mod/mixin/ServerPlayerInterfaceMixin.class",
+                  "com/eternal_creations/archies_dino_mod/mixin/PlayerAttackDamageBonusMixin.class",
+                  "com/eternal_creations/archies_dino_mod/mixin/forge/ADWeaponItemMixin.class",
                   "com/eternal_creations/archies_dino_mod/common/block/eggs/LushsaurEggBlock.class",
                   "com/eternal_creations/archies_dino_mod/common/block/eggs/ChorusoatlEggBlock.class",
                   "data/archie_dinosaurs/tags/blocks/chorusoatl_egg_hatchable.json",
@@ -824,6 +916,20 @@ jobs:
                   "assets/archie_dinosaurs/models/item/lushsaur_spawn_egg.json",
                   "assets/archie_dinosaurs/models/item/chorusoatl_spawn_egg.json",
                   "assets/archie_dinosaurs/models/item/sculksaur_spawn_egg.json",
+                  "assets/archie_dinosaurs/models/item/lush_mace.json",
+                  "assets/archie_dinosaurs/models/item/ooze_tipped_arrow.json",
+                  "assets/archie_dinosaurs/textures/item/lush_mace.png",
+                  "assets/archie_dinosaurs/textures/item/ooze_tipped_arrow.png",
+                  "assets/archie_dinosaurs/textures/entity/projectiles/pus_tipped_arrow.png",
+                  "assets/archie_dinosaurs/models/attachable/lushsaur_mace.astemirmodel",
+                  "assets/archie_dinosaurs/animations/player/attachable/lushsaur_mace.astemiranim",
+                  "assets/archie_dinosaurs/textures/item/model/lushsaur_mace.png",
+                  "assets/archie_dinosaurs/sounds/item/lushsaur_mace/spin.ogg",
+                  "data/archie_dinosaurs/recipes/lush_mace.json",
+                  "data/archie_dinosaurs/recipes/ooze_tipped_arrow.json",
+                  "data/archie_dinosaurs/advancements/recipes/combat/lush_mace.json",
+                  "data/archie_dinosaurs/advancements/recipes/combat/ooze_tipped_arrow.json",
+                  "data/archie_dinosaurs/damage_type/pus_arrow.json",
                   "assets/archie_dinosaurs/models/block/lushsaur_egg.json",
                   "assets/archie_dinosaurs/models/block/chorusoatl_egg.json",
               }
@@ -835,6 +941,12 @@ jobs:
                   "item.archie_dinosaurs.lush_core",
                   "item.archie_dinosaurs.chorus_fossil",
                   "item.archie_dinosaurs.sculk_toxin",
+                  "item.archie_dinosaurs.lush_mace",
+                  "item.archie_dinosaurs.ooze_tipped_arrow",
+                  "item.archie_dinosaurs.desc.lush_mace",
+                  "entity.archie_dinosaurs.pus_tipped_arrow",
+                  "subtitles.archie_dinosaurs.item.lushsaur_mace.attack",
+                  "subtitles.archie_dinosaurs.item.lushsaur_mace.spin",
                   "block.archie_dinosaurs.lushsaur_egg",
                   "block.archie_dinosaurs.chorusoatl_egg",
               }
@@ -913,15 +1025,25 @@ jobs:
                   "LushsaurMace",
                   "PusTippedArrowEntity",
               )
+              allowed_combat_classes = {
+                  "com/eternal_creations/archies_dino_mod/common/items/weapon/LushsaurMaceItem.class",
+                  "com/eternal_creations/archies_dino_mod/common/entity/projectile/PusTippedArrowEntity.class",
+                  "com/eternal_creations/archies_dino_mod/client/animation/player/attachable/LushsaurMaceAnimations.class",
+              }
               leftovers = sorted(
                   name for name in names
-                  if name.endswith(".class") and any(part in name for part in forbidden_parts)
+                  if name.endswith(".class")
+                  and any(part in name for part in forbidden_parts)
+                  and name not in allowed_combat_classes
+                  and not (
+                      name.startswith("com/eternal_creations/archies_dino_mod/client/model/attachable/LushsaurMaceAttachable")
+                  )
               )
               if leftovers:
                   raise SystemExit("Unexpected classes left in JAR:\n" + "\n".join(leftovers))
 
               banned_assets = (
-                  "lush_mace", "ooze_tipped_arrow", "chorus_scythe", "rib_bow",
+                  "chorus_scythe", "rib_bow",
                   "sculk_bow", "scorching_horn", "therimoss_claws",
                   "coralosaur", "obsidiceratops", "sculkraptor", "therimoss", "archie",
               )
@@ -949,6 +1071,7 @@ jobs:
               "archie_dinosaurs:chorusoatl",
               "archie_dinosaurs:sculksaur",
               "archie_dinosaurs:chorusoatl_spit",
+              "archie_dinosaurs:pus_tipped_arrow",
           }
           found = set()
           old = {
@@ -956,6 +1079,7 @@ jobs:
               "ec_ad:chorusoatl",
               "ec_ad:sculksaur",
               "ec_ad:chorusoatl_spit",
+              "ec_ad:pus_tipped_arrow",
           }
 
           with zipfile.ZipFile(jar) as archive:
