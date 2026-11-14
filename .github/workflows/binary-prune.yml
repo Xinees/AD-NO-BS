@@ -1,4 +1,4 @@
-name: Direct Legacy JAR Prune - build 18
+name: Direct Legacy JAR Prune - build 19
 
 on:
   push:
@@ -292,7 +292,7 @@ jobs:
           fi
 
           SCULK_PARTICLE="$(javap -classpath build/classes-pruned.jar -p -c "$SCULK_EFFECTS" | sed -n '/archiesDinoMod[$]spawnSculksaurSonicBoomParticle(/,/^  private /p')"
-          for required_call in 'ParticleTypes.f_235898_' 'Level.m_7106_' 'Math.cos' 'Math.sin'; do
+          for required_call in 'ParticleTypes.f_235902_' 'SculksaurSonicBoomParticle$Provider.spawn' 'Math.cos' 'Math.sin'; do
             if ! printf '%s\n' "$SCULK_PARTICLE" | grep -Fq "$required_call"; then
               echo "Sculksaur Sonic Boom particle helper is missing $required_call"
               printf '%s\n' "$SCULK_PARTICLE"
@@ -313,8 +313,8 @@ jobs:
             printf '%s\n' "$SCULK_PARTICLE"
             exit 1
           fi
-          if printf '%s\n' "$SCULK_PARTICLE" | grep -Fq 'ParticleTypes.f_235902_'; then
-            echo "Sculksaur moving shell still references the non-moving SONIC_BOOM particle."
+          if printf '%s\n' "$SCULK_PARTICLE" | grep -Fq 'ParticleTypes.f_235898_'; then
+            echo "Sculksaur moving shell must not substitute SCULK_SOUL for SONIC_BOOM."
             exit 1
           fi
           if ! printf '%s\n' "$SCULK_SPHERE" | grep -Fq 'sipush        1536'; then
@@ -322,7 +322,48 @@ jobs:
             printf '%s\n' "$SCULK_SPHERE"
             exit 1
           fi
-          echo "Verified 1536 vanilla SCULK_SOUL particles in two 768-particle expanding spherical layers separated by 0.5 blocks; old distortion and ground emitters are absent."
+          echo "Verified 1536 SONIC_BOOM particles in two 768-particle expanding spherical layers separated by 0.5 blocks; old distortion and ground emitters are absent."
+
+          SONIC_REGISTRATION="$(javap -classpath build/classes-pruned.jar -p -c -v com.eternal_creations.archies_dino_mod.client.ADClientModBus)"
+          SONIC_FACTORIES="$(printf '%s\n' "$SONIC_REGISTRATION" | sed -n '/registerFactories(/,/^  public /p')"
+          for required_call in 'ParticleTypes.f_235902_' 'RegisterParticleProvidersEvent.registerSpriteSet' 'SculksaurSonicBoomParticle$Provider'; do
+            if ! printf '%s\n' "$SONIC_REGISTRATION" | grep -Fq "$required_call"; then
+              echo "Missing exact Sonic Boom sprite-set provider registration: $required_call"
+              printf '%s\n' "$SONIC_FACTORIES"
+              exit 1
+            fi
+          done
+
+          SONIC_PROVIDER='com.eternal_creations.archies_dino_mod.client.particle.SculksaurSonicBoomParticle$Provider'
+          SONIC_PROVIDER_BYTECODE="$(javap -classpath build/classes-pruned.jar -p -c "$SONIC_PROVIDER")"
+          for required_call in 'ThreadLocal.set' 'ThreadLocal.remove' 'Level.m_7106_' 'SonicBoomParticle$Provider.<init>' 'ParticleProvider.m_6966_'; do
+            if ! printf '%s\n' "$SONIC_PROVIDER_BYTECODE" | grep -Fq "$required_call"; then
+              echo "Sonic Boom provider is missing marker/fallback behavior: $required_call"
+              printf '%s\n' "$SONIC_PROVIDER_BYTECODE"
+              exit 1
+            fi
+          done
+          if ! printf '%s\n' "$SONIC_PROVIDER_BYTECODE" | grep -Fq 'SculksaurSonicBoomParticle."<init>"'; then
+            echo "Marked Sculksaur particles are not created by the Sonic Boom provider."
+            printf '%s\n' "$SONIC_PROVIDER_BYTECODE"
+            exit 1
+          fi
+
+          MOVING_PARTICLE='com.eternal_creations.archies_dino_mod.client.particle.SculksaurSonicBoomParticle'
+          MOVING_PARTICLE_BYTECODE="$(javap -classpath build/classes-pruned.jar -p -c "$MOVING_PARTICLE")"
+          for required_call in 'SonicBoomParticle."<init>"' 'Particle.m_172260_' 'Particle.m_6257_' 'HugeExplosionParticle.m_5989_'; do
+            if ! printf '%s\n' "$MOVING_PARTICLE_BYTECODE" | grep -Fq "$required_call"; then
+              echo "Moving Sonic Boom particle lost its vanilla base behavior or movement: $required_call"
+              printf '%s\n' "$MOVING_PARTICLE_BYTECODE"
+              exit 1
+            fi
+          done
+          if ! printf '%s\n' "$MOVING_PARTICLE_BYTECODE" | grep -Fq 'Particle.f_107219_'; then
+            echo "Moving Sonic Boom particle must disable block collision so its radial speed remains constant."
+            printf '%s\n' "$MOVING_PARTICLE_BYTECODE"
+            exit 1
+          fi
+          echo "Verified vanilla fallback for unrelated Sonic Boom calls and constant-velocity movement only for marked Sculksaur particles."
 
           SMOOTH_MOVE_CONTROL='com.eternal_creations.archies_dino_mod.common.entity.ai.control.SmoothMoveControl'
           SMOOTH_BODY_CONTROL='com.eternal_creations.archies_dino_mod.common.entity.ai.control.SmoothBodyControl'
