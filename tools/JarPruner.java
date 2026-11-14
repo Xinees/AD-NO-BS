@@ -109,6 +109,7 @@ public final class JarPruner {
         ROOT + "client/ADClientForgeBus",
         ROOT + "client/CommonClient",
         ROOT + "client/animation/player/ADPlayerAnimations",
+        ROOT + "client/model/system/ADModifiers$1",
         ROOT + "platform/Services",
         ROOT + "platform/ForgeCommonHelper",
         ROOT + "platform/ForgeClientHelper",
@@ -224,6 +225,7 @@ public final class JarPruner {
         patchSmoothBodyControl(nodes.get(ROOT + "common/entity/ai/control/SmoothBodyControl"));
         patchSmoothLookControl(nodes.get(ROOT + "common/entity/ai/control/SmoothLookControl"));
         patchLushsaurLocalPlayerSprintMixin(nodes.get(ROOT + "mixin/client/LocalPlayerMixin"));
+        patchLushsaurOpenPlayerInventory(nodes.get(ROOT + "mixin/client/LocalPlayerMixin"));
         patchPlayerMixin(nodes.get(ROOT + "mixin/PlayerMixin"));
         removeMethods(nodes.get(ROOT + "mixin/client/LevelRendererMixin"),
             Set.of("archiesDinoMod$onEntityRender"));
@@ -2016,6 +2018,81 @@ public final class JarPruner {
 
         method.maxStack = 2;
         method.maxLocals = 3;
+        owner.methods.add(method);
+    }
+
+    private static void patchLushsaurOpenPlayerInventory(ClassNode owner) {
+        if (owner == null) throw new IllegalStateException("LocalPlayerMixin class is missing");
+        String descriptor =
+            "(Lorg/spongepowered/asm/mixin/injection/callback/CallbackInfo;)V";
+        owner.methods.removeIf(method ->
+            method.name.equals("archiesDinoMod$openLushsaurPlayerInventory") &&
+                method.desc.equals(descriptor));
+
+        MethodNode method = new MethodNode(
+            Opcodes.ACC_PUBLIC,
+            "archiesDinoMod$openLushsaurPlayerInventory",
+            descriptor,
+            null,
+            null
+        );
+        InsnList code = method.instructions;
+        LabelNode done = new LabelNode();
+        String localPlayer = "net/minecraft/client/player/LocalPlayer";
+        String lushsaur = ROOT + "common/entity/mob/lushsaur/LushsaurEntity";
+        String minecraft = "net/minecraft/client/Minecraft";
+        String inventoryScreen = "net/minecraft/client/gui/screens/inventory/InventoryScreen";
+        String screen = "net/minecraft/client/gui/screens/Screen";
+        String callbackInfo = "org/spongepowered/asm/mixin/injection/callback/CallbackInfo";
+
+        code.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        code.add(new TypeInsnNode(Opcodes.CHECKCAST, localPlayer));
+        code.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
+            localPlayer, "m_20202_", "()Lnet/minecraft/world/entity/Entity;", false));
+        code.add(new TypeInsnNode(Opcodes.INSTANCEOF, lushsaur));
+        code.add(new JumpInsnNode(Opcodes.IFEQ, done));
+
+        code.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
+            minecraft, "m_91087_", "()L" + minecraft + ";", false));
+        code.add(new TypeInsnNode(Opcodes.NEW, inventoryScreen));
+        code.add(new InsnNode(Opcodes.DUP));
+        code.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        code.add(new TypeInsnNode(Opcodes.CHECKCAST, "net/minecraft/world/entity/player/Player"));
+        code.add(new MethodInsnNode(Opcodes.INVOKESPECIAL,
+            inventoryScreen, "<init>", "(Lnet/minecraft/world/entity/player/Player;)V", false));
+        code.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
+            minecraft, "m_91152_", "(L" + screen + ";)V", false));
+        code.add(new VarInsnNode(Opcodes.ALOAD, 1));
+        code.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
+            callbackInfo, "cancel", "()V", false));
+
+        code.add(done);
+        code.add(new FrameNode(Opcodes.F_FULL, 2,
+            new Object[] { owner.name, callbackInfo }, 0, new Object[0]));
+        code.add(new InsnNode(Opcodes.RETURN));
+
+        AnnotationNode at = new AnnotationNode(
+            "Lorg/spongepowered/asm/mixin/injection/At;");
+        at.values = new ArrayList<>();
+        at.values.add("value");
+        at.values.add("HEAD");
+
+        AnnotationNode inject = new AnnotationNode(
+            "Lorg/spongepowered/asm/mixin/injection/Inject;");
+        inject.values = new ArrayList<>();
+        inject.values.add("method");
+        inject.values.add(List.of("m_108628_"));
+        inject.values.add("at");
+        inject.values.add(List.of(at));
+        inject.values.add("cancellable");
+        inject.values.add(Boolean.TRUE);
+        inject.values.add("remap");
+        inject.values.add(Boolean.FALSE);
+        method.visibleAnnotations = new ArrayList<>();
+        method.visibleAnnotations.add(inject);
+
+        method.maxStack = 4;
+        method.maxLocals = 2;
         owner.methods.add(method);
     }
 
