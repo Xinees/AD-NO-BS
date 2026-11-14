@@ -399,8 +399,8 @@ jobs:
             fi
           done
           VELOCITY_COMPONENT_COUNT="$(printf '%s\n' "$SCULK_PARTICLE" | grep -F -o 'double 0.5d' | wc -l)"
-          if [ "$VELOCITY_COMPONENT_COUNT" -ne 3 ]; then
-            echo "Sculksaur Sonic Boom must use exactly three 0.5 XYZ velocity components."
+          if [ "$VELOCITY_COMPONENT_COUNT" -ne 4 ]; then
+            echo "Sculksaur Sonic Boom must use three 0.5 XYZ velocity components plus the separate 0.5 Fibonacci offset."
             printf '%s\n' "$SCULK_PARTICLE"
             exit 1
           fi
