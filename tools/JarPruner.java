@@ -202,7 +202,6 @@ public final class JarPruner {
         patchLushsaurRunAnimation(lushsaurClient);
         patchLushsaurVisualPassengerOffset(lushsaurClient);
         patchLushsaurPassengerHitboxOffset(lushsaurEntity);
-        patchAbstractComplexMountSaddleGate(nodes.get(ROOT + "common/entity/base/AbstractComplexMount"));
         patchMountComponentSaddleGate(nodes.get(ROOT + "common/entity/component/MountComponent"));
         patchLushsaurNoEquipment(lushsaurEntity);
         patchEntityRegistryNamespace(nodes.get(ROOT + "platform/ForgeCommonHelper"));
@@ -1257,59 +1256,6 @@ public final class JarPruner {
         registerEntityType.instructions.remove(oldNameLoad);
         registerEntityType.instructions.remove(oldPrefix);
         registerEntityType.maxStack = Math.max(registerEntityType.maxStack, 4);
-    }
-
-    private static void patchAbstractComplexMountSaddleGate(ClassNode owner) {
-        if (owner == null) throw new IllegalStateException("AbstractComplexMount class is missing");
-
-        String descriptor =
-            "(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;";
-        MethodNode interact = owner.methods.stream()
-            .filter(method -> method.name.equals("m_6071_") && method.desc.equals(descriptor))
-            .findFirst()
-            .orElseThrow(() -> new IllegalStateException("AbstractComplexMount.mobInteract is missing"));
-
-        int patched = 0;
-        for (AbstractInsnNode instruction : interact.instructions.toArray()) {
-            if (!(instruction instanceof MethodInsnNode itemCheck) ||
-                itemCheck.getOpcode() != Opcodes.INVOKEVIRTUAL ||
-                !itemCheck.owner.equals("net/minecraft/world/item/ItemStack") ||
-                !itemCheck.name.equals("m_150930_") ||
-                !itemCheck.desc.equals("(Lnet/minecraft/world/item/Item;)Z")) {
-                continue;
-            }
-
-            AbstractInsnNode itemField = previousCodeInstruction(itemCheck);
-            AbstractInsnNode branchInstruction = nextCodeInstruction(itemCheck);
-            if (!(itemField instanceof FieldInsnNode saddleItem) ||
-                saddleItem.getOpcode() != Opcodes.GETSTATIC ||
-                !saddleItem.owner.equals("net/minecraft/world/item/Items") ||
-                !saddleItem.name.equals("f_42751_") ||
-                !(branchInstruction instanceof JumpInsnNode itemNotSaddle) ||
-                itemNotSaddle.getOpcode() != Opcodes.IFEQ) {
-                continue;
-            }
-
-            InsnList capabilityGate = new InsnList();
-            capabilityGate.add(new VarInsnNode(Opcodes.ALOAD, 0));
-            capabilityGate.add(new MethodInsnNode(
-                Opcodes.INVOKEINTERFACE,
-                "net/minecraft/world/entity/Saddleable",
-                "m_6741_",
-                "()Z",
-                true
-            ));
-            capabilityGate.add(new JumpInsnNode(Opcodes.IFEQ, itemNotSaddle.label));
-            interact.instructions.insert(itemNotSaddle, capabilityGate);
-            patched++;
-        }
-
-        if (patched != 1) {
-            throw new IllegalStateException(
-                "Expected one AbstractComplexMount saddle item branch, patched " + patched
-            );
-        }
-        interact.maxStack = Math.max(interact.maxStack, 1);
     }
 
     private static void patchMountComponentSaddleGate(ClassNode owner) {
