@@ -373,19 +373,6 @@ jobs:
             exit 1
           fi
 
-          MOUNT_COMPONENT_BYTECODE="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.common.entity.component.MountComponent)"
-          MOUNT_TICK_RIDDEN="$(awk '/public void tickRidden\(/ { capture=1; print; next } capture && /^  (public|private|protected) / { exit } capture { print }' <<< "$MOUNT_COMPONENT_BYTECODE")"
-          TICK_SADDLEABLE_POS="$(grep -n -m1 'Saddleable.m_6741_' <<< "$MOUNT_TICK_RIDDEN" | cut -d: -f1)"
-          TICK_CONSUME_POS="$(grep -n -m1 'ItemStack.m_41774_' <<< "$MOUNT_TICK_RIDDEN" | cut -d: -f1)"
-          TICK_SET_POS="$(grep -n -m1 'Mount.setSaddled' <<< "$MOUNT_TICK_RIDDEN" | cut -d: -f1)"
-          TICK_SOUND_POS="$(grep -n -m1 'm_6269_' <<< "$MOUNT_TICK_RIDDEN" | cut -d: -f1)"
-          if [[ -z "$TICK_SADDLEABLE_POS" || -z "$TICK_CONSUME_POS" || -z "$TICK_SET_POS" || -z "$TICK_SOUND_POS" ]] ||
-             (( TICK_SADDLEABLE_POS >= TICK_CONSUME_POS || TICK_SADDLEABLE_POS >= TICK_SET_POS || TICK_SADDLEABLE_POS >= TICK_SOUND_POS )); then
-            echo "MountComponent.tickRidden must gate saddle consumption, state changes, and sound by Saddleable.isSaddleable."
-            printf '%s\\n' "$MOUNT_TICK_RIDDEN"
-            exit 1
-          fi
-
           LUSH_SADDLEABLE="$(awk '/ m_6741_/ { capture=1; print; next } capture && /^  (public|private|protected) / { exit } capture { print }' <<< "$LUSH_ENTITY_BYTECODE")"
           if [[ "$LUSH_SADDLEABLE" != *"iconst_0"* || "$LUSH_SADDLEABLE" != *"ireturn"* ]]; then
             echo "Lushsaur must report that it cannot be saddled."

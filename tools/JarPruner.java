@@ -203,7 +203,6 @@ public final class JarPruner {
         patchLushsaurVisualPassengerOffset(lushsaurClient);
         patchLushsaurPassengerHitboxOffset(lushsaurEntity);
         patchAbstractComplexMountSaddleGate(nodes.get(ROOT + "common/entity/base/AbstractComplexMount"));
-        patchMountComponentSaddleGate(nodes.get(ROOT + "common/entity/component/MountComponent"));
         patchLushsaurNoSaddle(lushsaurEntity);
         patchEntityRegistryNamespace(nodes.get(ROOT + "platform/ForgeCommonHelper"));
         patchSculksaurExplosionEffects(
@@ -1310,64 +1309,6 @@ public final class JarPruner {
             );
         }
         interact.maxStack = Math.max(interact.maxStack, 1);
-    }
-
-    private static void patchMountComponentSaddleGate(ClassNode owner) {
-        if (owner == null) throw new IllegalStateException("MountComponent class is missing");
-
-        String descriptor =
-            "(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/phys/Vec3;)V";
-        MethodNode tickRidden = owner.methods.stream()
-            .filter(method -> method.name.equals("tickRidden") && method.desc.equals(descriptor))
-            .findFirst()
-            .orElseThrow(() -> new IllegalStateException("MountComponent.tickRidden is missing"));
-
-        int patched = 0;
-        for (AbstractInsnNode instruction : tickRidden.instructions.toArray()) {
-            if (!(instruction instanceof MethodInsnNode saddleState) ||
-                saddleState.getOpcode() != Opcodes.INVOKEINTERFACE ||
-                !saddleState.owner.equals("net/minecraft/world/entity/Saddleable") ||
-                !saddleState.name.equals("m_6254_") ||
-                !saddleState.desc.equals("()Z")) {
-                continue;
-            }
-
-            AbstractInsnNode branchInstruction = nextCodeInstruction(saddleState);
-            if (!(branchInstruction instanceof JumpInsnNode alreadySaddled) ||
-                alreadySaddled.getOpcode() != Opcodes.IFNE) {
-                continue;
-            }
-
-            InsnList capabilityGate = new InsnList();
-            capabilityGate.add(new VarInsnNode(Opcodes.ALOAD, 0));
-            capabilityGate.add(new FieldInsnNode(
-                Opcodes.GETFIELD,
-                owner.name,
-                "mob",
-                "Lnet/minecraft/world/entity/PathfinderMob;"
-            ));
-            capabilityGate.add(new TypeInsnNode(
-                Opcodes.CHECKCAST,
-                "net/minecraft/world/entity/Saddleable"
-            ));
-            capabilityGate.add(new MethodInsnNode(
-                Opcodes.INVOKEINTERFACE,
-                "net/minecraft/world/entity/Saddleable",
-                "m_6741_",
-                "()Z",
-                true
-            ));
-            capabilityGate.add(new JumpInsnNode(Opcodes.IFEQ, alreadySaddled.label));
-            tickRidden.instructions.insert(alreadySaddled, capabilityGate);
-            patched++;
-        }
-
-        if (patched != 1) {
-            throw new IllegalStateException(
-                "Expected one MountComponent saddle-state branch, patched " + patched
-            );
-        }
-        tickRidden.maxStack = Math.max(tickRidden.maxStack, 1);
     }
 
     private static void patchLushsaurNoSaddle(ClassNode owner) {
