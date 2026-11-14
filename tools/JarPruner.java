@@ -92,6 +92,16 @@ public final class JarPruner {
         ROOT + "client/particle/SculksaurSonicBoomParticle$Provider", Set.of(
             "createParticle(Lnet/minecraft/core/particles/SimpleParticleType;Lnet/minecraft/client/multiplayer/ClientLevel;DDDDDD)Lnet/minecraft/client/particle/Particle;",
             "m_6966_(Lnet/minecraft/core/particles/ParticleOptions;Lnet/minecraft/client/multiplayer/ClientLevel;DDDDDD)Lnet/minecraft/client/particle/Particle;"
+        ),
+        ROOT + "client/particle/effect/SculksaurEffects", Set.of(
+            "archiesDinoMod$rememberSonicBoomOrigin(Lnet/minecraft/world/entity/Entity;DDD)V",
+            "archiesDinoMod$takeSonicBoomOrigin(Lnet/minecraft/world/entity/Entity;)[D",
+            "archiesDinoMod$spawnSculksaurSonicBoomFirstSphere(Lcom/astemir/astemirlib/re/client/model/core/animation/event/AnimationEvent$Context;)V",
+            "archiesDinoMod$spawnSculksaurSonicBoomSecondSphere(Lcom/astemir/astemirlib/re/client/model/core/animation/event/AnimationEvent$Context;)V",
+            "archiesDinoMod$spawnSculksaurSonicBoomSphereAt(Lnet/minecraft/world/level/Level;DDD)V",
+            "archiesDinoMod$spawnSculksaurSonicBoomParticle(Lnet/minecraft/world/level/Level;DDDI)V",
+            "archiesDinoMod$secondSonicBoomEvent()Lcom/astemir/astemirlib/re/client/model/core/animation/event/AnimationEvent;",
+            "archiesDinoMod$lambdaSecondSonicBoomEvent(Lcom/astemir/astemirlib/re/client/model/core/animation/event/AnimationEvent$Context;)V"
         )
     );
 
