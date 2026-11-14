@@ -1039,85 +1039,72 @@ public final class JarPruner {
             .findFirst()
             .orElseThrow(() -> new IllegalStateException("LushsaurEntity.mobInteract is missing"));
 
-        int superCalls = 0;
-        for (AbstractInsnNode instruction : interact.instructions.toArray()) {
-            if (instruction instanceof MethodInsnNode call &&
-                call.getOpcode() == Opcodes.INVOKESPECIAL &&
-                call.owner.equals(ROOT + "common/entity/base/AbstractComplexMount") &&
-                call.name.equals("m_6071_") &&
-                call.desc.equals(interactionDesc)) {
-                call.owner = owner.name;
-                call.name = "archiesDinoMod$interactWithoutSaddle";
-                superCalls++;
-            }
-        }
-        if (superCalls != 1) {
-            throw new IllegalStateException("Expected one original AbstractComplexMount.mobInteract call in Lushsaur, found " + superCalls);
-        }
-
-        MethodNode guardedInteract = new MethodNode(
-            Opcodes.ACC_PRIVATE | Opcodes.ACC_SYNTHETIC,
-            "archiesDinoMod$interactWithoutSaddle",
-            interactionDesc,
-            null,
-            null
-        );
+        clearMethod(interact);
+        InsnList interactionCode = interact.instructions;
         LabelNode delegate = new LabelNode();
-        guardedInteract.instructions.add(new VarInsnNode(Opcodes.ALOAD, 1));
-        guardedInteract.instructions.add(new VarInsnNode(Opcodes.ALOAD, 2));
-        guardedInteract.instructions.add(new MethodInsnNode(
+
+        interactionCode.add(new VarInsnNode(Opcodes.ALOAD, 1));
+        interactionCode.add(new VarInsnNode(Opcodes.ALOAD, 2));
+        interactionCode.add(new MethodInsnNode(
             Opcodes.INVOKEVIRTUAL,
             "net/minecraft/world/entity/player/Player",
             "m_21120_",
             "(Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/item/ItemStack;",
             false
         ));
-        guardedInteract.instructions.add(new FieldInsnNode(
+        interactionCode.add(new FieldInsnNode(
             Opcodes.GETSTATIC,
             "net/minecraft/world/item/Items",
             "f_42751_",
             "Lnet/minecraft/world/item/Item;"
         ));
-        guardedInteract.instructions.add(new MethodInsnNode(
+        interactionCode.add(new MethodInsnNode(
             Opcodes.INVOKEVIRTUAL,
             "net/minecraft/world/item/ItemStack",
             "m_150930_",
             "(Lnet/minecraft/world/item/Item;)Z",
             false
         ));
-        guardedInteract.instructions.add(new JumpInsnNode(Opcodes.IFEQ, delegate));
-        guardedInteract.instructions.add(new FieldInsnNode(
+        interactionCode.add(new JumpInsnNode(Opcodes.IFEQ, delegate));
+        interactionCode.add(new FieldInsnNode(
             Opcodes.GETSTATIC,
             "net/minecraft/world/InteractionResult",
             "FAIL",
             "Lnet/minecraft/world/InteractionResult;"
         ));
-        guardedInteract.instructions.add(new InsnNode(Opcodes.ARETURN));
-        guardedInteract.instructions.add(delegate);
-        guardedInteract.instructions.add(new FrameNode(Opcodes.F_SAME, 0, null, 0, null));
-        guardedInteract.instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        guardedInteract.instructions.add(new VarInsnNode(Opcodes.ALOAD, 1));
-        guardedInteract.instructions.add(new VarInsnNode(Opcodes.ALOAD, 2));
-        guardedInteract.instructions.add(new MethodInsnNode(
+        interactionCode.add(new InsnNode(Opcodes.ARETURN));
+        interactionCode.add(delegate);
+        interactionCode.add(new FrameNode(Opcodes.F_SAME, 0, null, 0, null));
+        interactionCode.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        interactionCode.add(new VarInsnNode(Opcodes.ALOAD, 1));
+        interactionCode.add(new VarInsnNode(Opcodes.ALOAD, 2));
+        interactionCode.add(new MethodInsnNode(
             Opcodes.INVOKESPECIAL,
             ROOT + "common/entity/base/AbstractComplexMount",
             "m_6071_",
             interactionDesc,
             false
         ));
-        guardedInteract.instructions.add(new InsnNode(Opcodes.ARETURN));
-        owner.methods.add(guardedInteract);
+        interactionCode.add(new InsnNode(Opcodes.ARETURN));
+        interact.maxStack = 3;
+        interact.maxLocals = 3;
 
+        owner.methods.removeIf(method ->
+            method.name.equals("m_6741_") && method.desc.equals("()Z"));
         MethodNode saddleable = new MethodNode(Opcodes.ACC_PUBLIC, "m_6741_", "()Z", null, null);
         saddleable.instructions.add(new InsnNode(Opcodes.ICONST_0));
         saddleable.instructions.add(new InsnNode(Opcodes.IRETURN));
         owner.methods.add(saddleable);
 
+        owner.methods.removeIf(method ->
+            method.name.equals("m_6254_") && method.desc.equals("()Z"));
         MethodNode saddled = new MethodNode(Opcodes.ACC_PUBLIC, "m_6254_", "()Z", null, null);
         saddled.instructions.add(new InsnNode(Opcodes.ICONST_0));
         saddled.instructions.add(new InsnNode(Opcodes.IRETURN));
         owner.methods.add(saddled);
 
+        owner.methods.removeIf(method ->
+            method.name.equals("setSaddled") && method.desc.equals("(Z)V"));
         MethodNode setSaddled = new MethodNode(Opcodes.ACC_PUBLIC, "setSaddled", "(Z)V", null, null);
         setSaddled.instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
         setSaddled.instructions.add(new InsnNode(Opcodes.ICONST_0));
@@ -1132,6 +1119,8 @@ public final class JarPruner {
         owner.methods.add(setSaddled);
 
         String slotAccessDesc = "(ILjava/util/function/Predicate;)Lnet/minecraft/world/entity/SlotAccess;";
+        owner.methods.removeIf(method ->
+            method.name.equals("createEquipmentSlotAccess") && method.desc.equals(slotAccessDesc));
         MethodNode equipmentSlotAccess = new MethodNode(
             Opcodes.ACC_PROTECTED,
             "createEquipmentSlotAccess",
@@ -1139,24 +1128,64 @@ public final class JarPruner {
             null,
             null
         );
-        equipmentSlotAccess.instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        equipmentSlotAccess.instructions.add(new VarInsnNode(Opcodes.ILOAD, 1));
-        equipmentSlotAccess.instructions.add(new InsnNode(Opcodes.ACONST_NULL));
-        equipmentSlotAccess.instructions.add(new MethodInsnNode(
-            Opcodes.INVOKESTATIC,
+        InsnList equipmentCode = equipmentSlotAccess.instructions;
+        LabelNode otherSlot = new LabelNode();
+
+        equipmentCode.add(new VarInsnNode(Opcodes.ILOAD, 1));
+        equipmentCode.add(new JumpInsnNode(Opcodes.IFNE, otherSlot));
+        equipmentCode.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        equipmentCode.add(new VarInsnNode(Opcodes.ILOAD, 1));
+        equipmentCode.add(new VarInsnNode(Opcodes.ALOAD, 2));
+        equipmentCode.add(new InvokeDynamicInsnNode(
+            "test",
+            "()Ljava/util/function/Predicate;",
+            new Handle(
+                Opcodes.H_INVOKESTATIC,
+                "java/lang/invoke/LambdaMetafactory",
+                "metafactory",
+                "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;",
+                false
+            ),
+            Type.getMethodType("(Ljava/lang/Object;)Z"),
+            new Handle(
+                Opcodes.H_INVOKEVIRTUAL,
+                "net/minecraft/world/item/ItemStack",
+                "m_41619_",
+                "()Z",
+                false
+            ),
+            Type.getMethodType("(Lnet/minecraft/world/item/ItemStack;)Z")
+        ));
+        equipmentCode.add(new MethodInsnNode(
+            Opcodes.INVOKEINTERFACE,
             "java/util/function/Predicate",
-            "isEqual",
-            "(Ljava/lang/Object;)Ljava/util/function/Predicate;",
+            "and",
+            "(Ljava/util/function/Predicate;)Ljava/util/function/Predicate;",
             true
         ));
-        equipmentSlotAccess.instructions.add(new MethodInsnNode(
+        equipmentCode.add(new MethodInsnNode(
             Opcodes.INVOKESPECIAL,
             ROOT + "common/entity/base/AbstractComplexMount",
             "createEquipmentSlotAccess",
             slotAccessDesc,
             false
         ));
-        equipmentSlotAccess.instructions.add(new InsnNode(Opcodes.ARETURN));
+        equipmentCode.add(new InsnNode(Opcodes.ARETURN));
+        equipmentCode.add(otherSlot);
+        equipmentCode.add(new FrameNode(Opcodes.F_SAME, 0, null, 0, null));
+        equipmentCode.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        equipmentCode.add(new VarInsnNode(Opcodes.ILOAD, 1));
+        equipmentCode.add(new VarInsnNode(Opcodes.ALOAD, 2));
+        equipmentCode.add(new MethodInsnNode(
+            Opcodes.INVOKESPECIAL,
+            ROOT + "common/entity/base/AbstractComplexMount",
+            "createEquipmentSlotAccess",
+            slotAccessDesc,
+            false
+        ));
+        equipmentCode.add(new InsnNode(Opcodes.ARETURN));
+        equipmentSlotAccess.maxStack = 4;
+        equipmentSlotAccess.maxLocals = 3;
         owner.methods.add(equipmentSlotAccess);
     }
 

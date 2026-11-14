@@ -351,39 +351,44 @@ jobs:
           fi
           echo "Verified 15-pixel passenger-hitbox correction and 3-pixel forward visual adjustment."
 
-          LUSH_SADDLE_INTERACT="$(awk '/archiesDinoMod\$interactWithoutSaddle\(/ { capture=1; print; next } capture && /^  (public|private|protected) / { exit } capture { print }' <<< "$LUSH_ENTITY_BYTECODE")"
+          LUSH_SADDLE_INTERACT="$(awk '/public net.minecraft.world.InteractionResult m_6071_\\(/ { capture=1; print; next } capture && /^  (public|private|protected) / { exit } capture { print }' <<< "$LUSH_ENTITY_BYTECODE")"
           for required_saddle_guard in 'Items.f_42751_' 'InteractionResult.FAIL' 'AbstractComplexMount.m_6071_'; do
             if ! grep -Fq "$required_saddle_guard" <<< "$LUSH_SADDLE_INTERACT"; then
               echo "Lushsaur saddle interaction guard is missing $required_saddle_guard."
-              printf '%s\n' "$LUSH_SADDLE_INTERACT"
+              printf '%s\\n' "$LUSH_SADDLE_INTERACT"
               exit 1
             fi
           done
-          LUSH_SADDLEABLE="$(awk '/ m_6741_\(/ { capture=1; print; next } capture && /^  (public|private|protected) / { exit } capture { print }' <<< "$LUSH_ENTITY_BYTECODE")"
+          LUSH_SADDLEABLE="$(awk '/ m_6741_\\(/ { capture=1; print; next } capture && /^  (public|private|protected) / { exit } capture { print }' <<< "$LUSH_ENTITY_BYTECODE")"
           if [[ "$LUSH_SADDLEABLE" != *"iconst_0"* || "$LUSH_SADDLEABLE" != *"ireturn"* ]]; then
             echo "Lushsaur must report that it cannot be saddled."
-            printf '%s\n' "$LUSH_SADDLEABLE"
+            printf '%s\\n' "$LUSH_SADDLEABLE"
             exit 1
           fi
-          LUSH_IS_SADDLED="$(awk '/ m_6254_\(/ { capture=1; print; next } capture && /^  (public|private|protected) / { exit } capture { print }' <<< "$LUSH_ENTITY_BYTECODE")"
+          LUSH_IS_SADDLED="$(awk '/ m_6254_\\(/ { capture=1; print; next } capture && /^  (public|private|protected) / { exit } capture { print }' <<< "$LUSH_ENTITY_BYTECODE")"
           if [[ "$LUSH_IS_SADDLED" != *"iconst_0"* || "$LUSH_IS_SADDLED" != *"ireturn"* ]]; then
             echo "Lushsaur must never report a saddled state."
-            printf '%s\n' "$LUSH_IS_SADDLED"
+            printf '%s\\n' "$LUSH_IS_SADDLED"
             exit 1
           fi
-          LUSH_SET_SADDLED="$(awk '/ setSaddled\(/ { capture=1; print; next } capture && /^  (public|private|protected) / { exit } capture { print }' <<< "$LUSH_ENTITY_BYTECODE")"
+          LUSH_SET_SADDLED="$(awk '/ setSaddled\\(/ { capture=1; print; next } capture && /^  (public|private|protected) / { exit } capture { print }' <<< "$LUSH_ENTITY_BYTECODE")"
           if [[ "$LUSH_SET_SADDLED" != *"iconst_0"* || "$LUSH_SET_SADDLED" != *"AbstractComplexMount.setSaddled"* ]]; then
             echo "Lushsaur setSaddled must force the superclass saddle slot empty."
-            printf '%s\n' "$LUSH_SET_SADDLED"
+            printf '%s\\n' "$LUSH_SET_SADDLED"
             exit 1
           fi
-          LUSH_EQUIPMENT_ACCESS="$(awk '/ createEquipmentSlotAccess\(/ { capture=1; print; next } capture && /^  (public|private|protected) / { exit } capture { print }' <<< "$LUSH_ENTITY_BYTECODE")"
-          if [[ "$LUSH_EQUIPMENT_ACCESS" != *"Predicate.isEqual"* || "$LUSH_EQUIPMENT_ACCESS" != *"aconst_null"* ]]; then
-            echo "Lushsaur internal equipment slot must reject inserted stacks."
-            printf '%s\n' "$LUSH_EQUIPMENT_ACCESS"
+          LUSH_EQUIPMENT_ACCESS="$(awk '/ createEquipmentSlotAccess\\(/ { capture=1; print; next } capture && /^  (public|private|protected) / { exit } capture { print }' <<< "$LUSH_ENTITY_BYTECODE")"
+          if [[ "$LUSH_EQUIPMENT_ACCESS" != *"Predicate.and"* || "$LUSH_EQUIPMENT_ACCESS" != *"InvokeDynamic"* || "$LUSH_EQUIPMENT_ACCESS" != *"ifne"* ]]; then
+            echo "Lushsaur must reject non-empty stacks only in its saddle slot while preserving other equipment slots."
+            printf '%s\\n' "$LUSH_EQUIPMENT_ACCESS"
             exit 1
           fi
-          echo "Verified Lushsaur rejects saddle interaction, Saddleable state, setter calls and internal equipment-slot insertion."
+          LUSH_ENTITY_VERBOSE="$(javap -classpath build/classes-pruned.jar -p -c -v com.eternal_creations.archies_dino_mod.common.entity.mob.lushsaur.LushsaurEntity)"
+          if ! printf '%s\\n' "$LUSH_ENTITY_VERBOSE" | grep -Fq 'ItemStack.m_41619_'; then
+            echo "Lushsaur saddle-slot filter is not based on ItemStack.isEmpty()."
+            exit 1
+          fi
+          echo "Verified Lushsaur blocks saddle interaction and saddle state, accepts empty-slot clearing, rejects non-empty stacks only in slot 0, and leaves other slots unchanged."
 
           LUSH_MENU="$(awk '/m_213583_\(/ { capture=1; print; next } capture && /^  (public|private|protected) / { exit } capture { print }' <<< "$LUSH_ENTITY_BYTECODE")"
           if [[ "$LUSH_MENU" != *"return"* ||
