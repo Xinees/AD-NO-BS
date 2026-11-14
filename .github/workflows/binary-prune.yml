@@ -1,4 +1,4 @@
-name: Direct Legacy JAR Prune - build 17
+name: Direct Legacy JAR Prune - build 18
 
 on:
   push:
@@ -306,6 +306,17 @@ jobs:
               exit 1
             fi
           done
+          VELOCITY_COMPONENT_COUNT="$(printf '%s\n' "$SCULK_PARTICLE" | grep -F -o 'double 0.38d' | wc -l)"
+          LAYER_DIVISOR_COUNT="$(printf '%s\n' "$SCULK_PARTICLE" | grep -F -o 'sipush        768' | wc -l)"
+          if [ "$VELOCITY_COMPONENT_COUNT" -ne 3 ] || [ "$LAYER_DIVISOR_COUNT" -ne 2 ]; then
+            echo "Sculksaur Sonic Boom must use exactly three 0.38 XYZ velocity components and two 768-point layer divisors."
+            printf '%s\n' "$SCULK_PARTICLE"
+            exit 1
+          fi
+          if printf '%s\n' "$SCULK_PARTICLE" | grep -Fq 'ParticleTypes.f_235902_'; then
+            echo "Sculksaur moving shell still references the non-moving SONIC_BOOM particle."
+            exit 1
+          fi
           if ! printf '%s\n' "$SCULK_SPHERE" | grep -Fq 'sipush        1536'; then
             echo "Sculksaur Sonic Boom must spawn 1536 particles total across its two layers."
             printf '%s\n' "$SCULK_SPHERE"

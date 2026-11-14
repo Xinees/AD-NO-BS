@@ -1,25 +1,32 @@
 # AD-NO-BS Legacy recovery status
 
+# AD-NO-BS Legacy recovery status
+
 ## Current branch status — 2026-11-14
 
-- Working branch: `binary-prune/legacy`
-- Latest completed build: Direct Legacy JAR Prune **build 111**.
-- GitHub Actions: [run #116 — success](https://github.com/Xinees/AD-NO-BS/actions/runs/43528408869); workflow/guard commit: `8a22d56e01f1bc9b5d08db522ec87fccfef97e50`.
-- Code changes: [`127bb60d`](https://github.com/Xinees/AD-NO-BS/commit/127bb60d49cae787e26b8e3feaa594ea4b86174d) and [`669bc901`](https://github.com/Xinees/AD-NO-BS/commit/669bc901d48893c3b7f81056b1f7a720ac72283a).
-- Artifact ID: `14085958100`; ZIP digest: `sha256:cc0bf23229b7cbc931f70035227a29b42e5933d039fd3f2f411376bb375e9f7b`.
-- Output JAR: `ec_ad-legacy-forge-1.20.1.jar`; size: `2,493,447` bytes; SHA-256: `5b01626519d9b02934f932c58d5ffe8fd9210851ba3630725f2347726a03c456`.
-- **Build110 runtime feedback:** the user confirmed Lushsaur behavior and the new turning behavior work, but reported that Sculksaur sometimes aimed its head unnaturally downward. The likely regression was the shared `SmoothLookControl` patch applying an instant 360-degree limit to vertical pitch as well as horizontal yaw.
-- **Build111 look correction:** horizontal yaw remains instant. Vertical target tracking now interpolates `smoothY` using the controller's existing `interpolationSpeed`, and the vertical rotation limit is restored to `maxSpeedLimit`. The existing `canRotate` condition, look timer, action locks, and passenger handling remain.
-- **Build111 Sonic Boom correction:** replaced the previous vanilla `SCULK_SOUL` particles with Minecraft 1.20.1's `SONIC_BOOM` type. The effect is two concentric spherical layers: 384 particles per layer (768 total), with the leading layer offset 0.30 blocks and the following layer 0.06 blocks from the origin. Radial particle speed is raised from 0.72 to 0.82. Camera shake remains; legacy distortion and ground-wave emitters remain disconnected.
-- Post-download comparison with Build110: all 473 JAR entries remain; no entries were added or removed; exactly two classes changed: `SculksaurEffects.class` and `SmoothLookControl.class`. The original input JAR hash was verified unchanged by CI; Astemir RE remains a separate dependency.
-- **Runtime status:** Build111 passed CI and downloaded-JAR bytecode/archive inspection. It has **not** yet been launched in Minecraft. Retest Sculksaur spawn/idle gaze, Sonic Boom appearance and the two-layer spacing; also confirm the already-working Lushsaur sprint and turning behavior remain intact.
+- Working branch: `binary-prune/legacy`.
+- Latest completed build: Direct Legacy JAR Prune **build 112** (GitHub Actions run #119).
+- Implementation and CI commit: [`38765501`](https://github.com/Xinees/AD-NO-BS/commit/387655018631865ded4b744d93205ae82d77f59c).
+- GitHub Actions: [run #119 — success](https://github.com/Xinees/AD-NO-BS/actions/runs/43532650945).
+- Artifact ID: `14088725208`; ZIP digest: `sha256:22b0e4a62498574e57d68827bd46afb7f6a591ee501fd32953eceb1bdbce7290`.
+- Output JAR: `ec_ad-legacy-forge-1.20.1.jar`; size: `2,493,438` bytes; SHA-256: `df6532bc1d96a7c9b6b984aa0eda29ca7b2194af46228eed9b04e6999e825577`.
+- **Build112 Sonic Boom visual fix:** Build111's `SONIC_BOOM` particle did not respond to the supplied XYZ velocity as a moving particle. Minecraft 1.20.1's SonicBoomParticle is a HugeExplosionParticle with one extra scalar constructor argument, not a normal three-axis moving particle. Build112 therefore uses vanilla `SCULK_SOUL`, whose provider accepts X/Y/Z velocity components.
+- The effect uses two hollow Fibonacci-distributed spherical shells, with 768 particles per shell (1,536 total). Initial radii are 0.55 and 0.05 blocks, leaving a 0.50-block gap. All three radial velocity components use 0.38 blocks/tick at spawn.
+- The original camera shake remains. The old Sonic Boom post-process distortion, colored light, jaw emitter fallback, and ground-wave emitters remain disconnected. The animation event callbacks/timestamps, attack AI, damage, range, knockback, cooldown, animation, and sound were not changed.
+- Post-download comparison with Build111: all 473 JAR entries remain; no entries were added or removed; exactly one class changed, `SculksaurEffects.class`. The untouched original input JAR hash is still verified by CI. Astemir RE remains a separate mandatory dependency and is not bundled.
+- CI checks the moving vanilla particle type, both 768-point layers, all three equal velocity components, 0.50-block spacing, event/camera-shake wiring, retained resources, and the existing controls/renderers. Downloaded JAR ZIP integrity and bytecode were independently inspected.
+- **Runtime status:** Build112 passed CI and downloaded-JAR structure/bytecode checks. It has **not** yet been launched in Minecraft. In-game acceptance is still needed for shell shape, visible movement, two-layer spacing, density at roughly five blocks, and the existing attack/other mob behavior.
+- Build111's vertical-look correction remains in the JAR unchanged: horizontal yaw is instant, while `smoothY` uses the existing interpolation speed and the original pitch limit.
 - **Font/display symptom:** the earlier report of square-like glyphs remains unclassified. Do not change the resource pack without a reproducing screenshot/log.
 - **Open audit — Sculksaur locomotion:** the original `SculksaurEntity.createLocomotion()` sets `EntityLocomotion.Builder.turnFactor(0.003f)`. Its behavior belongs to the separate Astemir RE dependency. This setting remains unchanged until the exact Astemir RE 1.2.98 dependency is inspected; the turn-factor audit remains open.
-- Next planned task after the smooth-turning audit: Lushsaur-only Happy-Ghast-like platform collision. The proposed `SPIN.get(this)` gate remains plan-only and has not been implemented.
+- Next planned task after the turning audit: Lushsaur-only Happy-Ghast-like platform collision. The proposed `SPIN.get(this)` gate remains plan-only and has not been implemented.
 
 ---
 
 ## Historical notes preserved from 2026-11-13
+
+The following sections are historical project notes. The current build and pending tests are recorded at the top of this file.
+
 
 The following sections are historical project notes. The current build and pending tests are recorded at the top of this file.
 
