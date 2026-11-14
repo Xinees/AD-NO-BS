@@ -1,4 +1,4 @@
-name: Direct Legacy JAR Prune - build 26
+name: Direct Legacy JAR Prune - build 27
 
 on:
   push:
@@ -290,7 +290,7 @@ jobs:
 
           SCULK_FACTORY_VERBOSE_FILE="$RUNNER_TEMP/sculksaur-factory-verbose.txt"
           javap -classpath build/classes-pruned.jar -p -c -v "$SCULK_EFFECTS" > "$SCULK_FACTORY_VERBOSE_FILE"
-          python3 "$SCULK_FACTORY_VERBOSE_FILE" <<'PY'
+          python3 - "$SCULK_FACTORY_VERBOSE_FILE" <<'PY'
           import pathlib
           import re
           import sys
