@@ -459,6 +459,10 @@ with zipfile.ZipFile(source, "r") as zin:
             name = f"{NEW_NAMESPACE}.mixins.json"
         elif source_name == f"{OLD_NAMESPACE}.forge.mixins.json":
             name = f"{NEW_NAMESPACE}.forge.mixins.json"
+        elif source_name == f"{OLD_NAMESPACE}.accesswidener":
+            name = f"{NEW_NAMESPACE}.accesswidener"
+        elif source_name == f"{OLD_NAMESPACE}.refmap.json":
+            name = f"{NEW_NAMESPACE}.refmap.json"
 
         if name.upper().endswith((".SF", ".RSA", ".DSA")) or name.upper() == "META-INF/INDEX.LIST":
             removed.append(name)
@@ -530,6 +534,9 @@ with zipfile.ZipFile(source, "r") as zin:
             name.startswith("assets/archie_dinosaurs/") or name.startswith("data/archie_dinosaurs/")
         ):
             data = dump_json(rewrite_entity_namespace(read_json(data, name)))
+
+        if name.endswith((".json", ".toml", ".accesswidener", ".mcmeta", ".cfg", ".properties", ".txt")):
+            data = data.replace(OLD_NAMESPACE.encode("ascii"), NEW_NAMESPACE.encode("ascii"))
 
         kept[name] = data
 
