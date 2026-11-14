@@ -414,9 +414,9 @@ jobs:
           SCULK_MOVING_PARTICLE='com.eternal_creations.archies_dino_mod.client.particle.SculksaurSonicBoomParticle'
           SCULK_MOVING_PARTICLE_DISASSEMBLY="$(javap -classpath build/classes-pruned.jar -p -c "$SCULK_MOVING_PARTICLE")"
           SCULK_MOVING_CONSTRUCTOR="$(printf '%s\n' "$SCULK_MOVING_PARTICLE_DISASSEMBLY" | sed -n '/SculksaurSonicBoomParticle(net.minecraft.client.multiplayer.ClientLevel/,/^  public void m_5989_/p')"
-          for required_lifetime_marker in 'bipush        40' 'Particle.m_107257_:(I)V'; do
+          for required_lifetime_marker in 'bipush        34' 'Particle.m_107257_:(I)V'; do
             if ! printf '%s\n' "$SCULK_MOVING_CONSTRUCTOR" | grep -F "$required_lifetime_marker"; then
-              echo "Sculksaur Sonic Boom particles must explicitly set a 40-tick lifetime: $required_lifetime_marker"
+              echo "Sculksaur Sonic Boom particles must explicitly set a 34-tick lifetime: $required_lifetime_marker"
               printf '%s\n' "$SCULK_MOVING_CONSTRUCTOR"
               exit 1
             fi
@@ -429,9 +429,9 @@ jobs:
               exit 1
             fi
           done
-          echo "Verified 16-frame Sonic Boom animation cycling independently of the 40-tick particle lifetime."
+          echo "Verified 16-frame Sonic Boom animation cycling independently of the 34-tick particle lifetime."
 
-          echo "Verified explicit 40-tick moving Sonic Boom particle lifetime (24.00-block maximum travel at 12.00 blocks/second)."
+          echo "Verified explicit 34-tick moving Sonic Boom particle lifetime (20.40-block maximum travel at 12.00 blocks/second)."
 
           SCULK_ORIGIN="$(javap -classpath build/classes-pruned.jar -p -c "$SCULK_EFFECTS")"
           for required_call in 'WeakHashMap.put' 'WeakHashMap.get' 'WeakHashMap.remove' \

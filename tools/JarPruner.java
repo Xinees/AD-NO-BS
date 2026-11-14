@@ -1703,7 +1703,7 @@ public final class JarPruner {
             "net/minecraft/client/particle/SonicBoomParticle", "<init>",
             "(L" + clientLevel + ";DDDDL" + spriteSet + ";)V", false));
         constructorCode.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        constructorCode.add(new IntInsnNode(Opcodes.BIPUSH, 40));
+        constructorCode.add(new IntInsnNode(Opcodes.BIPUSH, 34));
         constructorCode.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
             particle, "m_107257_", "(I)V", false));
         constructorCode.add(new VarInsnNode(Opcodes.ALOAD, 0));
