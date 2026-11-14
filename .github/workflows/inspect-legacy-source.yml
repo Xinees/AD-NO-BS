@@ -38,6 +38,29 @@ jobs:
           javap -classpath "$CLIENT_JAR" -p -c -s cgm
           sha1sum "$CLIENT_JAR"
 
+      - name: Trace Lushsaur interactions after vanilla item use
+        shell: bash
+        run: |
+          set -euo pipefail
+          JAR="ec_ad-forge-1.20.1-1.0.4.jar"
+          echo '===== ABSTRACT COMPLEX MOB ====='
+          javap -classpath "$JAR" -p -c com.eternal_creations.archies_dino_mod.common.entity.base.AbstractComplexMob
+          echo '===== ENTITY COMPONENT HOLDER ====='
+          javap -classpath "$JAR" -p -c com.eternal_creations.archies_dino_mod.common.entity.component.EntityComponentHolder
+          echo '===== PET COMPONENT ====='
+          javap -classpath "$JAR" -p -c com.eternal_creations.archies_dino_mod.common.entity.component.PetComponent
+          echo '===== ALL INTERACTION-RELATED COMPONENT CLASSES ====='
+          jar tf "$JAR" | grep 'common/entity/component/.*Component.class' | sort
+          echo '===== INTERACTION REFERENCES IN RETAINED CLASS CONSTANT POOLS ====='
+          for class in \
+            com.eternal_creations.archies_dino_mod.common.entity.component.EntityComponentHolder \
+            com.eternal_creations.archies_dino_mod.common.entity.component.PetComponent \
+            com.eternal_creations.archies_dino_mod.common.entity.base.AbstractComplexMob \
+            com.eternal_creations.archies_dino_mod.common.entity.base.AbstractComplexMount; do
+            javap -classpath "$JAR" -p -c "$class" | grep -E -B8 -A12 \
+              'mobInteract|interactFromPart|eatFromHand|equipSaddle|setSaddled|DINO_EQUIP|m_150930_|m_41622_|m_41619_' || true
+          done
+
       - name: Inspect original egg hatching and passenger rendering
         shell: bash
         run: |
