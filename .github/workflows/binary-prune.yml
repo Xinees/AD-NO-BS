@@ -261,8 +261,8 @@ jobs:
 
           LUSH_ENTITY_BYTECODE="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.common.entity.mob.lushsaur.LushsaurEntity)"
           LUSH_CREATE_MOUNT="$LUSH_ENTITY_BYTECODE"
-          if ! printf '%s\n' "$LUSH_CREATE_MOUNT" | grep -Fq 'float 0.1875f' ||
-             ! printf '%s\n' "$LUSH_CREATE_MOUNT" | grep -Fq 'passengerOffset'; then
+          if [[ "$LUSH_CREATE_MOUNT" != *"float 0.1875f"* ||
+                "$LUSH_CREATE_MOUNT" != *"passengerOffset"* ]]; then
             echo "Lushsaur passenger offset is not 13 pixels backward from the original position."
             printf '%s\n' "$LUSH_CREATE_MOUNT"
             exit 1
@@ -276,8 +276,10 @@ jobs:
             fi
           done
           LUSH_MENU="$(printf '%s\n' "$LUSH_ENTITY_BYTECODE" | awk '/m_213583_\(/ { capture=1; print; next } capture && /^  (public|private|protected) / { exit } capture { print }')"
-          if ! printf '%s\n' "$LUSH_MENU" | grep -Fq 'return' ||
-             printf '%s\n' "$LUSH_MENU" | grep -Eq 'invoke|aload|getfield'; then
+          if [[ "$LUSH_MENU" != *"return"* ||
+                "$LUSH_MENU" == *"invoke"* ||
+                "$LUSH_MENU" == *"aload"* ||
+                "$LUSH_MENU" == *"getfield"* ]]; then
             echo "Lushsaur custom inventory-screen opener is not disabled."
             printf '%s\n' "$LUSH_MENU"
             exit 1
@@ -307,14 +309,14 @@ jobs:
             printf '%s\n' "$LUSH_RUN_TRAIL"
             exit 1
           fi
-          if printf '%s\n' "$LUSH_EFFECTS_BYTECODE" | grep -F 'getstatic' | grep -Fq 'EMITTER_REST'; then
+          if grep -F 'getstatic' <<< "$LUSH_EFFECTS_BYTECODE" | grep -F 'EMITTER_REST' >/dev/null; then
             echo "Lushsaur sleep Z emitter is still referenced."
             exit 1
           fi
 
           CHORUS_EFFECTS='com.eternal_creations.archies_dino_mod.client.particle.effect.ChorusoatlEffects'
           CHORUS_EFFECTS_BYTECODE="$(javap -classpath build/classes-pruned.jar -p -c "$CHORUS_EFFECTS")"
-          if printf '%s\n' "$CHORUS_EFFECTS_BYTECODE" | grep -F 'getstatic' | grep -Fq 'EMITTER_STOMP'; then
+          if grep -F 'getstatic' <<< "$CHORUS_EFFECTS_BYTECODE" | grep -F 'EMITTER_STOMP' >/dev/null; then
             echo "Chorusoatl walking dust particle emitter is still used."
             printf '%s\n' "$CHORUS_EFFECTS_BYTECODE"
             exit 1
