@@ -825,12 +825,12 @@ jobs:
 
           with zipfile.ZipFile("build/classes-pruned.jar") as jar:
               expected = {
-                  "archie_dinosaurs.mixins.json": {
+                  "ec_ad.mixins.json": {
                       "DamageSourcesMixin",
                       "PlayerInterfaceMixin",
                       "ServerPlayerInterfaceMixin",
                   },
-                  "archie_dinosaurs.forge.mixins.json": {
+                  "ec_ad.forge.mixins.json": {
                       "PlayerAttackDamageBonusMixin",
                       "forge.ADWeaponItemMixin",
                   },
