@@ -79,6 +79,39 @@ def filter_mixin_config(data, template, name):
             value[section] = [item for item in value[section] if item in allowed]
     return dump_json(value)
 
+
+def rewrite_manifest(data):
+    text = data.decode("utf-8")
+    physical_lines = text.replace("\r\n", "\n").replace("\r", "\n").split("\n")
+    logical_lines = []
+    for line in physical_lines:
+        if line.startswith(" ") and logical_lines:
+            logical_lines[-1] += line[1:]
+        else:
+            logical_lines.append(line)
+
+    output_lines = []
+    for line in logical_lines:
+        if not line:
+            output_lines.append("")
+            continue
+        remaining = line.replace(OLD_NAMESPACE, NEW_NAMESPACE).encode("utf-8")
+        first_line = True
+        while remaining:
+            capacity = 72 if first_line else 71
+            end = min(capacity, len(remaining))
+            while end > 0 and end < len(remaining) and (remaining[end] & 0xC0) == 0x80:
+                end -= 1
+            if end == 0:
+                raise RuntimeError("Unable to wrap UTF-8 manifest attribute")
+            piece = remaining[:end].decode("utf-8")
+            output_lines.append(piece if first_line else " " + piece)
+            remaining = remaining[end:]
+            first_line = False
+
+    return ("\r\n".join(output_lines).rstrip("\r\n") + "\r\n").encode("utf-8")
+
+
 ENTITY_REGISTRY_NAMESPACE = "archie_dinosaurs"
 ENTITY_REGISTRY_NAMES = MOBS | {"chorusoatl_spit"}
 OLD_ENTITY_IDS = {f"{OLD_NAMESPACE}:{name}" for name in ENTITY_REGISTRY_NAMES}
@@ -470,7 +503,10 @@ with zipfile.ZipFile(source, "r") as zin:
 
         data = zin.read(source_name)
 
-        if name == "META-INF/mods.toml":
+        if name == "META-INF/MANIFEST.MF":
+            data = rewrite_manifest(data)
+
+        elif name == "META-INF/mods.toml":
             metadata = data.decode("utf-8")
             metadata, mod_id_count = re.subn(
                 r'(?m)^([ \t]*modId[ \t]*=[ \t]*)"ec_ad"',
