@@ -1,5 +1,16 @@
 # AD-NO-BS Legacy recovery status
 
+## Latest unified candidate — CI #195 — 2026-11-14
+
+- Implementation: [`a57cc2d`](https://github.com/Xinees/AD-NO-BS/commit/a57cc2dd202a7e72fd8d37cb934b9957a9b93be7) removes the three direct-turn controller patches and restores the original source-JAR behavior.
+- Workflow/verification: [`321187d`](https://github.com/Xinees/AD-NO-BS/commit/321187d2640f6242d1de4bb72d58162c5de51fd6) updates CI to require the original bounded yaw interpolation, body/head stabilization and XYZ look interpolation.
+- [GitHub Actions #195](https://github.com/Xinees/AD-NO-BS/actions/runs/43617699213) completed successfully. It passed source-JAR validation, pruning, original-vs-pruned controller audit, renderer/mixin/behavior checks, final JAR structure validation, and draft-release publication.
+- Output: 468 entries, 2,480,632 bytes. Download: [`ec_ad-legacy-forge-1.20.1.jar`](https://github.com/Xinees/AD-NO-BS/releases/download/untagged-570a2f8e246daef7f136/ec_ad-legacy-forge-1.20.1.jar). Draft release: [Legacy CI build #195](https://github.com/Xinees/AD-NO-BS/releases/tag/untagged-570a2f8e246daef7f136).
+- Candidate contents: vanilla passenger pose for Lushsaur/Chorusoatl; original Lushsaur passenger coordinates (no 13-pixel displacement); no Lushsaur mount GUI, E opens player's inventory; Lushsaur/Sculksaur lateral root roll removed while other root operations remain; Chorusoatl's original flight `flyingRoll` restored; movement-gated horizontal look steering for Lushsaur/Chorusoatl; original mob walking/body/head/look controllers restored.
+- **Runtime status:** structurally and bytecode validated, but still needs in-game acceptance. In particular, confirm the rider model aligns with its hitbox at the original mount anchors, Chorusoatl banks in flight, Lushsaur/Sculksaur remain upright laterally, and the three mobs' walk/head/body turning feels natural.
+
+---
+
 ## Latest runtime regression and corrected candidate — 2026-11-14
 
 - Build119 was launched by Astemir with Minecraft 1.20.1, Forge 47.4.28, Java 17.0.15 and Astemir RE 1.2.98. The log shows a JVM `VerifyError` in `MountComponent.tickRidden` at branch target 163 when Lushsaur/Chorusoatl mount entities were constructed.
@@ -16,9 +27,9 @@
 - Removed the mistaken 13-pixel seat displacement completely. The original Lushsaur server `passengerOffset(0, 0, 1)` and client mount-point offsets (saddled Z = 0, unsaddled Z = -0.6) must remain unchanged. The requested vanilla pig-like rider pose is achieved by disabling only the custom rider animation registration.
 - Restored Chorusoatl flight banking: the patch that replaced `flyingRoll.get(partialTick)` with zero was deleted. Successful CI [#189](https://github.com/Xinees/AD-NO-BS/actions/runs/43615959523) verifies the original `flyingRoll` field use and `ChasingFloat.get()` call remain.
 - Lushsaur and Sculksaur keep the no-`RollOnRotation` model change. That patch only edits the renderer's `onInitialize` root-operation array and preserves `SHAKING`, `SmoothBodyRotation`, and `GRUMM_ROTATION`; it does not rewrite AI or mob yaw/look controls.
-- The erratic body/head turning is more plausibly connected to separate Build99 direct-turning changes in `SmoothMoveControl`, `SmoothBodyControl`, and `SmoothLookControl`. CI [#193](https://github.com/Xinees/AD-NO-BS/actions/runs/43617497398) is configured to emit original and pruned method bytecode side by side for exact comparison.
+- The erratic body/head turning was traced to separate Build99 direct-turning changes in `SmoothMoveControl`, `SmoothBodyControl`, and `SmoothLookControl`, not to roll removal. Those three patches and their helper were deleted in commit [`a57cc2d`](https://github.com/Xinees/AD-NO-BS/commit/a57cc2dd202a7e72fd8d37cb934b9957a9b93be7); the source JAR's bounded shortest-angle yaw, body/head stabilization, and XYZ look interpolation are now retained.
 - CI [#191](https://github.com/Xinees/AD-NO-BS/actions/runs/43617393858) failed because of an incorrectly escaped AWK pattern in the new seat-position check, not because of mod bytecode. The check was corrected in workflow commit `9516d40`; CI #192 tests it. The later diagnostic workflow commit is `9256863`.
-- Smooth turning is a possible next design, not implemented yet. Prefer a bounded shortest-angle yaw step over restoring unmeasured sluggish interpolation.
+- No custom turn-rate patch is present. The original `smoothRotlerp` already caps each yaw step at 45 degrees per tick; assess this restored behavior in-game before adding another limit.
 
 ---
 
