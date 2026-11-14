@@ -2776,7 +2776,7 @@ public final class JarPruner {
             name.startsWith(ROOT + "client/model/attachable/LushsaurMaceAttachable") ||
             name.equals(ROOT + "client/animation/player/attachable/LushsaurMaceAnimations") ||
             name.startsWith(ROOT + "common/entity/base/") ||
-            name.startsWith(ROOT + "common/entity/component/")
+            name.startsWith(ROOT + "common/entity/component/") ||
             name.startsWith(ROOT + "common/entity/ai/") ||
             name.startsWith(ROOT + "common/entity/utils/") ||
             name.startsWith(ROOT + "common/entity/mob/lushsaur/") ||
