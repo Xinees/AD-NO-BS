@@ -1,13 +1,15 @@
 # AD-NO-BS Legacy recovery status
 
-## Latest integrated candidate — CI #221 — 2026-11-14
+## Latest integrated candidate — CI #232 — 2026-11-14
 
-- [GitHub Actions #221](https://github.com/Xinees/AD-NO-BS/actions/runs/43630833190) completed successfully. It passed original-JAR verification, direct bytecode pruning, controller and renderer audits, Lushsaur saddle checks, entity-namespace checks, final 468-entry JAR validation, and draft-release publication.
-- Implementation commit [`8f995d2`](https://github.com/Xinees/AD-NO-BS/commit/8f995d28bcf32a9a4521c89f1a3b799290532397) makes the Lushsaur equipment filter slot-specific. Saddle use is rejected in `mobInteract`; `isSaddleable()` and `isSaddled()` return false; `setSaddled(true)` is forced to false; only slot 0 rejects non-empty stacks, while clearing and all other slots retain the original path.
-- The same commit moves entity-type registry IDs to `archie_dinosaurs` for Lushsaur, Chorusoatl, Sculksaur, and Chorusoatl's spit projectile. It updates the Forge entity DeferredRegister, `ResourceSupplier.id()`, entity-type tags, advancement predicates, and entity translation keys. It deliberately leaves mod ID `ec_ad`, item/block/sound registries, and asset/data directory namespaces unchanged.
-- The Build207/Build212 source comparison shows no change to `patchLushsaurMountSpeed`; the same rider-sprint/feed-boost formula is present in both. Build212 adds passenger-offset and saddle-related changes, but neither edits the speed-property method. No unverified speed constant was changed. The reported runtime speed difference remains unproven by source diff and needs an in-game comparison.
-- Output: 468 entries, 2,482,346 bytes. Download: [`ec_ad-legacy-forge-1.20.1.jar`](https://github.com/Xinees/AD-NO-BS/releases/download/untagged-d16b6548cb9c8822a6d5/ec_ad-legacy-forge-1.20.1.jar). Draft release: [Legacy CI build #221](https://github.com/Xinees/AD-NO-BS/releases/tag/untagged-d16b6548cb9c8822a6d5).
-- **Runtime status:** structural, bytecode, namespace, and resource checks passed; no in-game launch was performed in this session. Test the rider alignment, saddle rejection, normal movement speed with/without the feed boost, and spawning through the new entity IDs before marking this runtime-accepted.
+- [GitHub Actions #232](https://github.com/Xinees/AD-NO-BS/actions/runs/43632610194) completed successfully. It passed immutable source-JAR verification, direct bytecode pruning, resource migration, controller/renderer audits, framework override checks, and the final 468-entry JAR audit.
+- Build source commit: [`26f223e`](https://github.com/Xinees/AD-NO-BS/commit/26f223e20ed1fa92c70c91704be9c4ff4ac27417). Output: 468 entries, 2,474,289 bytes.
+- **Full mod ID migration:** the packaged Forge mod ID is now `archie_dinosaurs`. The migration updates all retained Forge registry namespaces, the mod ID constant strings, `assets/archie_dinosaurs/` and `data/archie_dinosaurs/` paths, JSON references, model animation identifiers, mixin config filenames, access widener, refmap, and manifest.
+- Embedded Astemir models are migrated through their length-prefixed JSON section. The texture-file payloads are preserved, the rewritten JSON is parsed again, and the stored JSON length is recalculated.
+- The final JAR audit verified that `ec_ad` is absent from entry paths and scanned entry contents. The original source JAR was not modified; it remains the immutable input with SHA-256 `8df20e08d46f778a6e975b60b0cc7e19ff674264834812015537d7ef0fb121b1`. Its old filename and the build script's source namespace constant are retained only as migration inputs, not in the resulting mod. Internal Java package names were not renamed.
+- Download: [`archie_dinosaurs-legacy-forge-1.20.1.jar`](https://github.com/Xinees/AD-NO-BS/releases/download/untagged-383b938f8e1004aa720c/archie_dinosaurs-legacy-forge-1.20.1.jar). Draft release: [Legacy CI build #232](https://github.com/Xinees/AD-NO-BS/releases/tag/untagged-383b938f8e1004aa720c).
+- The previously implemented slot-specific Lushsaur saddle restriction remains unchanged. The earlier Build207/Build212 speed comparison is still unresolved at runtime; this migration did not invent a new speed value.
+- **Runtime status:** no Minecraft launch was performed in this session. CI confirms structure and namespace consistency, not actual in-game loading. Test startup, entity registration/spawning, rider alignment, saddle rejection, and Lushsaur movement speed before treating this candidate as runtime-accepted.
 
 ---
 
