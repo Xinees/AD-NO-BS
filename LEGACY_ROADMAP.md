@@ -2,6 +2,17 @@
 
 ## Runtime regression found after Build119 and root-cause correction — 2026-11-14
 
+### Follow-up after the first in-game screenshot — 2026-11-14
+
+- The 13-pixel rider displacement was a mistaken interpretation of the desired pig-like passenger pose. It has been removed entirely. Original server and client seat coordinates are now expected to remain untouched.
+- Chorusoatl's original lateral flight banking through `flyingRoll` has been restored. The latest successful roll-preservation test is [CI #189](https://github.com/Xinees/AD-NO-BS/actions/runs/43615959523).
+- Lushsaur and Sculksaur still have only the `RollOnRotation` root operation removed. Their other root operations, including `SmoothBodyRotation` and `GRUMM_ROTATION`, are retained; the GRUMM array index is adjusted after removing the roll entry.
+- The reported occasional 180-degree turns and erratic head tracking are not explained by the roll-removal patch itself. The separate Build99 changes make `SmoothMoveControl` return target yaw directly, rewrite `SmoothBodyControl.m_8121_()` to assign body yaw directly, and make `SmoothLookControl.m_8128_()` apply horizontal targets directly. These are the primary suspects and are being compared against the untouched source JAR before any new turning behavior is committed.
+- Astemir is considering a limited, rate-capped smooth turn to eliminate instant 180-degree snaps. No new turn-rate behavior has been added yet; avoid reintroducing the former sluggish interpolation without measuring its actual per-tick behavior.
+- Current candidate after removing the seat displacement: [CI #192](https://github.com/Xinees/AD-NO-BS/actions/runs/43617463431). The added controller audit is [CI #193](https://github.com/Xinees/AD-NO-BS/actions/runs/43617497398).
+
+---
+
 Astemir's first Minecraft runtime launch of Build119 reached the integrated world, then failed while constructing retained mount entities. The supplied launch log identifies `java.lang.VerifyError: Inconsistent stackmap frames at branch target 163` in `MountComponent.tickRidden`. The same class failure affected both Lushsaur and Chorusoatl creation. The chunk-read message was a consequence of this class-verification failure, not evidence of a corrupt world.
 
 **Root cause:** the earlier `patchRiderLookSteering` inserted an idle-input early return plus hand-authored `FrameNode` entries around the look/pitch logic. The pruner writes classes with `ClassWriter.COMPUTE_MAXS`, not `COMPUTE_FRAMES`, so existing StackMap frames were retained rather than recomputed for the new control-flow paths. The injected pitch/rotation path reached the old body-rotation branch with local slots 5 and 6 as `TOP`, while the retained frame at bytecode offset 163 declared both as `float`. The JVM correctly rejected the class.
@@ -39,7 +50,7 @@ Runner output: `ec_ad-legacy-forge-1.20.1.jar`, **468 entries**, **2,480,309 byt
 ### Rider pose and Lushsaur seat position
 
 - `ADPlayerAnimations.init()` no longer registers `OnLushsaurPlayerAnimations` or `OnChorusoatlPlayerAnimations`. The player therefore uses the normal vanilla passenger pose; this also removes the custom rider run/action layer while mounted. Dismounted player animations are unaffected.
-- Lushsaur's seat is shifted **13 model pixels (0.8125 block) backward**. The same relative correction is applied to the server passenger offset and both client mount-point anchors (saddled and unsaddled).
+- **No 13-pixel seat displacement is required.** The server `passengerOffset` and both client mount-point anchors (saddled/unsaddled) must remain identical to the original JAR. Only the rider animation registration is disabled so the player uses the vanilla passenger pose. The previous 13-pixel patch was removed after the runtime screenshot showed the rendered player model displaced from its entity hitbox.
 - Chorusoatl receives the vanilla-like seated pose but no 13-pixel offset.
 
 ### Lushsaur inventory and E key
@@ -52,7 +63,7 @@ Runner output: `ec_ad-legacy-forge-1.20.1.jar`, **468 entries**, **2,480,309 byt
 ### Lateral roll removal
 
 - LushsaurClient and SculksaurClient no longer register their `RollOnRotation` root operation. The remaining root operations are preserved and the array/Grumm rotation index is adjusted.
-- Chorusoatl's `flyingRoll` value is replaced with zero only at the relevant model animation read.
+- Chorusoatl's original `flyingRoll` animation path is preserved. The accidental zero-substitution was removed; CI #189 confirms the original `flyingRoll` field read and `ChasingFloat.get()` call remain.
 - Horizontal yaw, head tracking, vertical pitch, gait and run animations are preserved by the bytecode patch. In-game visual confirmation is still required.
 
 ### Movement-gated look steering
@@ -82,7 +93,7 @@ Runner output: `ec_ad-legacy-forge-1.20.1.jar`, **468 entries**, **2,480,309 byt
 ### Required in-game acceptance test
 
 1. Ride Lushsaur and Chorusoatl; verify the player simply sits like on a vanilla pig and no custom arm/action animations play.
-2. Ride Lushsaur both with and without a saddle; verify the seat is 13 pixels backward and centered over the hitbox. Verify no Lushsaur menu opens and E opens the player's inventory.
+2. Ride Lushsaur both with and without a saddle; verify the rendered player model coincides with the passenger hitbox at the original seat position. Verify no Lushsaur menu opens and E opens the player's inventory.
 3. Move both mounts while rotating the camera; verify body and head follow horizontal yaw only while movement input is held. Stop moving and rotate the camera; verify the mount keeps its heading. Test while blocked against a wall.
 4. Test running/turning on all three mobs; verify lateral roll is gone while ordinary gait, yaw, head movement and pitch remain.
 5. Verify no footstep dust on any retained mob, no Lushsaur sleep Z, and no Lushsaur green charge trail. Verify footstep sounds and Sculksaur step camera feedback remain.
