@@ -2926,8 +2926,8 @@ public final class JarPruner {
                 throw new IllegalStateException("EntityRendererProvider lambda has wrong SAM name: " + dynamic.name);
             }
         }
-        if (providerLambdas != 1) {
-            throw new IllegalStateException("Expected exactly one NoopRenderer provider lambda, found " + providerLambdas);
+        if (providerLambdas != 2) {
+            throw new IllegalStateException("Expected one NoopRenderer and one Pus Arrow renderer provider lambda, found " + providerLambdas);
         }
 
         int calls = 0;
