@@ -200,6 +200,7 @@ public final class JarPruner {
         patchLushsaurCanSprint(lushsaurEntity);
         patchLushsaurMountSpeed(lushsaurEntity);
         patchLushsaurRunAnimation(lushsaurClient);
+        patchLushsaurVisualPassengerOffset(lushsaurClient);
         patchSculksaurExplosionEffects(
             nodes.get(ROOT + "client/particle/effect/SculksaurEffects"));
         patchLushsaurRestParticles(
@@ -958,6 +959,43 @@ public final class JarPruner {
                 "frames " + originalFrameCount + " -> " + finalFrameCount +
                 ", branches " + originalBranchCount + " -> " + finalBranchCount);
         }
+    }
+
+    private static void patchLushsaurVisualPassengerOffset(ClassNode rendererOwner) {
+        if (rendererOwner == null) throw new IllegalStateException("Lushsaur renderer class is missing");
+
+        MethodNode clinit = rendererOwner.methods.stream()
+            .filter(method -> method.name.equals("<clinit>") && method.desc.equals("()V"))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("LushsaurClient static initializer is missing"));
+
+        List<MethodInsnNode> vec3Constructors = new ArrayList<>();
+        for (AbstractInsnNode instruction : clinit.instructions.toArray()) {
+            if (instruction instanceof MethodInsnNode call &&
+                call.getOpcode() == Opcodes.INVOKESPECIAL &&
+                call.owner.equals("net/minecraft/world/phys/Vec3") &&
+                call.name.equals("<init>") &&
+                call.desc.equals("(DDD)V")) {
+                vec3Constructors.add(call);
+            }
+        }
+        if (vec3Constructors.size() != 2) {
+            throw new IllegalStateException("Expected exactly two original Lushsaur passenger mount points");
+        }
+
+        AbstractInsnNode saddledZ = previousCodeInstruction(vec3Constructors.get(0));
+        AbstractInsnNode unsaddledZ = previousCodeInstruction(vec3Constructors.get(1));
+        if (saddledZ == null || saddledZ.getOpcode() != Opcodes.DCONST_0) {
+            throw new IllegalStateException("Unexpected original saddled Lushsaur mount-point Z offset");
+        }
+        if (!(unsaddledZ instanceof LdcInsnNode constant) ||
+            !(constant.cst instanceof Double value) ||
+            Math.abs(value - (-0.6000000238418579d)) > 0.000001d) {
+            throw new IllegalStateException("Unexpected original unsaddled Lushsaur mount-point Z offset");
+        }
+
+        clinit.instructions.set(saddledZ, new LdcInsnNode(0.9375d));
+        clinit.instructions.set(unsaddledZ, new LdcInsnNode(0.3374999761581421d));
     }
 
     private static void patchNoRollRootOperation(ClassNode owner) {
