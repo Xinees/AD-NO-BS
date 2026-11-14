@@ -202,6 +202,8 @@ public final class JarPruner {
         patchLushsaurRunAnimation(lushsaurClient);
         patchLushsaurVisualPassengerOffset(lushsaurClient);
         patchLushsaurPassengerHitboxOffset(lushsaurEntity);
+        patchAbstractComplexMountSaddleGate(nodes.get(ROOT + "common/entity/base/AbstractComplexMount"));
+        patchMountComponentSaddleGate(nodes.get(ROOT + "common/entity/component/MountComponent"));
         patchLushsaurNoSaddle(lushsaurEntity);
         patchEntityRegistryNamespace(nodes.get(ROOT + "platform/ForgeCommonHelper"));
         patchSculksaurExplosionEffects(
@@ -1257,65 +1259,119 @@ public final class JarPruner {
         registerEntityType.maxStack = Math.max(registerEntityType.maxStack, 4);
     }
 
-    private static void patchLushsaurNoSaddle(ClassNode owner) {
-        if (owner == null) throw new IllegalStateException("Lushsaur entity class is missing");
+    private static void patchAbstractComplexMountSaddleGate(ClassNode owner) {
+        if (owner == null) throw new IllegalStateException("AbstractComplexMount class is missing");
 
-        String interactionDesc =
+        String descriptor =
             "(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;";
         MethodNode interact = owner.methods.stream()
-            .filter(method -> method.name.equals("m_6071_") && method.desc.equals(interactionDesc))
+            .filter(method -> method.name.equals("m_6071_") && method.desc.equals(descriptor))
             .findFirst()
-            .orElseThrow(() -> new IllegalStateException("LushsaurEntity.mobInteract is missing"));
+            .orElseThrow(() -> new IllegalStateException("AbstractComplexMount.mobInteract is missing"));
 
-        clearMethod(interact);
-        InsnList interactionCode = interact.instructions;
-        LabelNode delegate = new LabelNode();
+        int patched = 0;
+        for (AbstractInsnNode instruction : interact.instructions.toArray()) {
+            if (!(instruction instanceof MethodInsnNode itemCheck) ||
+                itemCheck.getOpcode() != Opcodes.INVOKEVIRTUAL ||
+                !itemCheck.owner.equals("net/minecraft/world/item/ItemStack") ||
+                !itemCheck.name.equals("m_150930_") ||
+                !itemCheck.desc.equals("(Lnet/minecraft/world/item/Item;)Z")) {
+                continue;
+            }
 
-        interactionCode.add(new VarInsnNode(Opcodes.ALOAD, 1));
-        interactionCode.add(new VarInsnNode(Opcodes.ALOAD, 2));
-        interactionCode.add(new MethodInsnNode(
-            Opcodes.INVOKEVIRTUAL,
-            "net/minecraft/world/entity/player/Player",
-            "m_21120_",
-            "(Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/item/ItemStack;",
-            false
-        ));
-        interactionCode.add(new FieldInsnNode(
-            Opcodes.GETSTATIC,
-            "net/minecraft/world/item/Items",
-            "f_42751_",
-            "Lnet/minecraft/world/item/Item;"
-        ));
-        interactionCode.add(new MethodInsnNode(
-            Opcodes.INVOKEVIRTUAL,
-            "net/minecraft/world/item/ItemStack",
-            "m_150930_",
-            "(Lnet/minecraft/world/item/Item;)Z",
-            false
-        ));
-        interactionCode.add(new JumpInsnNode(Opcodes.IFEQ, delegate));
-        interactionCode.add(new FieldInsnNode(
-            Opcodes.GETSTATIC,
-            "net/minecraft/world/InteractionResult",
-            "FAIL",
-            "Lnet/minecraft/world/InteractionResult;"
-        ));
-        interactionCode.add(new InsnNode(Opcodes.ARETURN));
-        interactionCode.add(delegate);
-        interactionCode.add(new FrameNode(Opcodes.F_SAME, 0, null, 0, null));
-        interactionCode.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        interactionCode.add(new VarInsnNode(Opcodes.ALOAD, 1));
-        interactionCode.add(new VarInsnNode(Opcodes.ALOAD, 2));
-        interactionCode.add(new MethodInsnNode(
-            Opcodes.INVOKESPECIAL,
-            ROOT + "common/entity/base/AbstractComplexMount",
-            "m_6071_",
-            interactionDesc,
-            false
-        ));
-        interactionCode.add(new InsnNode(Opcodes.ARETURN));
-        interact.maxStack = 3;
-        interact.maxLocals = 3;
+            AbstractInsnNode itemField = previousCodeInstruction(itemCheck);
+            AbstractInsnNode branchInstruction = nextCodeInstruction(itemCheck);
+            if (!(itemField instanceof FieldInsnNode saddleItem) ||
+                saddleItem.getOpcode() != Opcodes.GETSTATIC ||
+                !saddleItem.owner.equals("net/minecraft/world/item/Items") ||
+                !saddleItem.name.equals("f_42751_") ||
+                !(branchInstruction instanceof JumpInsnNode itemNotSaddle) ||
+                itemNotSaddle.getOpcode() != Opcodes.IFEQ) {
+                continue;
+            }
+
+            InsnList capabilityGate = new InsnList();
+            capabilityGate.add(new VarInsnNode(Opcodes.ALOAD, 0));
+            capabilityGate.add(new MethodInsnNode(
+                Opcodes.INVOKEINTERFACE,
+                "net/minecraft/world/entity/Saddleable",
+                "m_6741_",
+                "()Z",
+                true
+            ));
+            capabilityGate.add(new JumpInsnNode(Opcodes.IFEQ, itemNotSaddle.label));
+            interact.instructions.insert(itemNotSaddle, capabilityGate);
+            patched++;
+        }
+
+        if (patched != 1) {
+            throw new IllegalStateException(
+                "Expected one AbstractComplexMount saddle item branch, patched " + patched
+            );
+        }
+        interact.maxStack = Math.max(interact.maxStack, 1);
+    }
+
+    private static void patchMountComponentSaddleGate(ClassNode owner) {
+        if (owner == null) throw new IllegalStateException("MountComponent class is missing");
+
+        String descriptor =
+            "(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/phys/Vec3;)V";
+        MethodNode tickRidden = owner.methods.stream()
+            .filter(method -> method.name.equals("tickRidden") && method.desc.equals(descriptor))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("MountComponent.tickRidden is missing"));
+
+        int patched = 0;
+        for (AbstractInsnNode instruction : tickRidden.instructions.toArray()) {
+            if (!(instruction instanceof MethodInsnNode saddleState) ||
+                saddleState.getOpcode() != Opcodes.INVOKEINTERFACE ||
+                !saddleState.owner.equals("net/minecraft/world/entity/Saddleable") ||
+                !saddleState.name.equals("m_6254_") ||
+                !saddleState.desc.equals("()Z")) {
+                continue;
+            }
+
+            AbstractInsnNode branchInstruction = nextCodeInstruction(saddleState);
+            if (!(branchInstruction instanceof JumpInsnNode alreadySaddled) ||
+                alreadySaddled.getOpcode() != Opcodes.IFNE) {
+                continue;
+            }
+
+            InsnList capabilityGate = new InsnList();
+            capabilityGate.add(new VarInsnNode(Opcodes.ALOAD, 0));
+            capabilityGate.add(new FieldInsnNode(
+                Opcodes.GETFIELD,
+                owner.name,
+                "mob",
+                "Lnet/minecraft/world/entity/PathfinderMob;"
+            ));
+            capabilityGate.add(new TypeInsnNode(
+                Opcodes.CHECKCAST,
+                "net/minecraft/world/entity/Saddleable"
+            ));
+            capabilityGate.add(new MethodInsnNode(
+                Opcodes.INVOKEINTERFACE,
+                "net/minecraft/world/entity/Saddleable",
+                "m_6741_",
+                "()Z",
+                true
+            ));
+            capabilityGate.add(new JumpInsnNode(Opcodes.IFEQ, alreadySaddled.label));
+            tickRidden.instructions.insert(alreadySaddled, capabilityGate);
+            patched++;
+        }
+
+        if (patched != 1) {
+            throw new IllegalStateException(
+                "Expected one MountComponent saddle-state branch, patched " + patched
+            );
+        }
+        tickRidden.maxStack = Math.max(tickRidden.maxStack, 1);
+    }
+
+    private static void patchLushsaurNoSaddle(ClassNode owner) {
+        if (owner == null) throw new IllegalStateException("Lushsaur entity class is missing");
 
         owner.methods.removeIf(method ->
             method.name.equals("m_6741_") && method.desc.equals("()Z"));

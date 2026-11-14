@@ -198,16 +198,17 @@ def rewrite_entity_namespace(value):
 
 def key_is_allowed(key):
     if key in {
-        "ec_ad",
-        "category.ec_ad.default",
-        "effect.ec_ad.dazed",
-        "item_group.ec_ad.items",
-        "message.ec_ad.pet_not_found",
-        "message.ec_ad.pet_teleport_success",
-        "message.ec_ad.pet_world_unavailable",
-        "message.ec_ad.status.buried",
-        "archie_dinosaurs.mount_primary_attack",
-        "archie_dinosaurs.mount_special_attack",
+        NEW_NAMESPACE,
+        f"category.{NEW_NAMESPACE}.default",
+        f"effect.{NEW_NAMESPACE}.dazed",
+        f"item_group.{NEW_NAMESPACE}_items",
+        f"item_group.{NEW_NAMESPACE}.items",
+        f"message.{NEW_NAMESPACE}.pet_not_found",
+        f"message.{NEW_NAMESPACE}.pet_teleport_success",
+        f"message.{NEW_NAMESPACE}.pet_world_unavailable",
+        f"message.{NEW_NAMESPACE}.status.buried",
+        f"{NEW_NAMESPACE}.mount_primary_attack",
+        f"{NEW_NAMESPACE}.mount_special_attack",
     }:
         return True
 
@@ -217,24 +218,27 @@ def key_is_allowed(key):
     for mob in MOBS:
         if any(key.startswith(f"advancement.{kind}_{mob}.") for kind in ("kill", "spot", "tame")):
             return True
-        if key == f"entity.archie_dinosaurs.{mob}":
+        if key == f"entity.{NEW_NAMESPACE}.{mob}":
             return True
-        if key.startswith(f"subtitles.ec_ad.mob.{mob}."):
+        if key.startswith(f"subtitles.{NEW_NAMESPACE}.mob.{mob}."):
             return True
 
-    if key == "entity.archie_dinosaurs.chorusoatl_spit":
+    if key == f"entity.{NEW_NAMESPACE}.chorusoatl_spit":
         return True
-    if key.startswith("subtitles.ec_ad.mob.dino."):
-        return True
-    if key in {"block.ec_ad.lushsaur_egg", "block.ec_ad.chorusoatl_egg"}:
+    if key.startswith(f"subtitles.{NEW_NAMESPACE}.mob.dino."):
         return True
     if key in {
-        "item.ec_ad.lush_core",
-        "item.ec_ad.chorus_fossil",
-        "item.ec_ad.sculk_toxin",
-        "item.ec_ad.lushsaur_spawn_egg",
-        "item.ec_ad.chorusoatl_spawn_egg",
-        "item.ec_ad.sculksaur_spawn_egg",
+        f"block.{NEW_NAMESPACE}.lushsaur_egg",
+        f"block.{NEW_NAMESPACE}.chorusoatl_egg",
+    }:
+        return True
+    if key in {
+        f"item.{NEW_NAMESPACE}.lush_core",
+        f"item.{NEW_NAMESPACE}.chorus_fossil",
+        f"item.{NEW_NAMESPACE}.sculk_toxin",
+        f"item.{NEW_NAMESPACE}.lushsaur_spawn_egg",
+        f"item.{NEW_NAMESPACE}.chorusoatl_spawn_egg",
+        f"item.{NEW_NAMESPACE}.sculksaur_spawn_egg",
     }:
         return True
     return False
@@ -679,6 +683,26 @@ with zipfile.ZipFile(target, "r") as check:
     metadata = check.read("META-INF/mods.toml").decode("utf-8")
     if 'modId = "archie_dinosaurs"' not in metadata or 'modId = "ec_ad"' in metadata:
         raise SystemExit("Forge mods.toml does not declare only the archie_dinosaurs mod ID")
+
+    english = read_json(check.read("assets/archie_dinosaurs/lang/en_us.json"),
+                        "assets/archie_dinosaurs/lang/en_us.json")
+    required_translations = {
+        "item_group.archie_dinosaurs_items",
+        "item.archie_dinosaurs.lushsaur_spawn_egg",
+        "item.archie_dinosaurs.chorusoatl_spawn_egg",
+        "item.archie_dinosaurs.sculksaur_spawn_egg",
+        "item.archie_dinosaurs.lush_core",
+        "item.archie_dinosaurs.chorus_fossil",
+        "item.archie_dinosaurs.sculk_toxin",
+        "block.archie_dinosaurs.lushsaur_egg",
+        "block.archie_dinosaurs.chorusoatl_egg",
+    }
+    missing_translations = sorted(
+        key for key in required_translations
+        if not isinstance(english.get(key), str) or not english[key].strip() or english[key] == key
+    )
+    if missing_translations:
+        raise SystemExit("Missing real English translations for retained entries: " + repr(missing_translations))
 
     allowed_item_models = {
         f"assets/archie_dinosaurs/models/item/{item}.json" for item in ITEMS

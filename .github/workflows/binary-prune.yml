@@ -351,14 +351,41 @@ jobs:
           fi
           echo "Verified 15-pixel passenger-hitbox correction and 3-pixel forward visual adjustment."
 
-          LUSH_SADDLE_INTERACT="$(awk '/public net.minecraft.world.InteractionResult m_6071_/ { capture=1; print; next } capture && /^  (public|private|protected) / { exit } capture { print }' <<< "$LUSH_ENTITY_BYTECODE")"
-          for required_saddle_guard in 'Items.f_42751_' 'InteractionResult.FAIL' 'AbstractComplexMount.m_6071_'; do
-            if ! grep -Fq "$required_saddle_guard" <<< "$LUSH_SADDLE_INTERACT"; then
-              echo "Lushsaur saddle interaction guard is missing $required_saddle_guard."
-              printf '%s\\n' "$LUSH_SADDLE_INTERACT"
-              exit 1
-            fi
-          done
+          LUSH_INTERACT="$(awk '/public net.minecraft.world.InteractionResult m_6071_/ { capture=1; print; next } capture && /^  (public|private|protected) / { exit } capture { print }' <<< "$LUSH_ENTITY_BYTECODE")"
+          if [[ "$LUSH_INTERACT" != *"isBuried"* ||
+                "$LUSH_INTERACT" != *"AbstractComplexMount.m_6071_"* ||
+                "$LUSH_INTERACT" == *"InteractionResult.FAIL"* ]]; then
+            echo "Lushsaur original mobInteract path must remain intact; the saddle gate belongs in the shared Saddleable capability check."
+            printf '%s\\n' "$LUSH_INTERACT"
+            exit 1
+          fi
+
+          ABSTRACT_MOUNT_BYTECODE="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.common.entity.base.AbstractComplexMount)"
+          ABSTRACT_SADDLE_INTERACT="$(awk '/public net.minecraft.world.InteractionResult m_6071_/ { capture=1; print; next } capture && /^  (public|private|protected) / { exit } capture { print }' <<< "$ABSTRACT_MOUNT_BYTECODE")"
+          SADDLE_ITEM_POS="$(grep -n -m1 'ItemStack.m_150930_' <<< "$ABSTRACT_SADDLE_INTERACT" | cut -d: -f1)"
+          SADDLEABLE_POS="$(grep -n -m1 'Saddleable.m_6741_' <<< "$ABSTRACT_SADDLE_INTERACT" | cut -d: -f1)"
+          SADDLE_SET_POS="$(grep -n -m1 'Mount.setSaddled\|AbstractComplexMount.setSaddled' <<< "$ABSTRACT_SADDLE_INTERACT" | cut -d: -f1)"
+          SADDLE_SOUND_POS="$(grep -n -m1 'm_6269_' <<< "$ABSTRACT_SADDLE_INTERACT" | cut -d: -f1)"
+          if [[ -z "$SADDLE_ITEM_POS" || -z "$SADDLEABLE_POS" || -z "$SADDLE_SET_POS" || -z "$SADDLE_SOUND_POS" ]] ||
+             (( SADDLE_ITEM_POS >= SADDLEABLE_POS || SADDLEABLE_POS >= SADDLE_SET_POS || SADDLE_SET_POS >= SADDLE_SOUND_POS )); then
+            echo "AbstractComplexMount must check Saddleable.isSaddleable before consuming the saddle, changing state, or playing the saddle sound."
+            printf '%s\\n' "$ABSTRACT_SADDLE_INTERACT"
+            exit 1
+          fi
+
+          MOUNT_COMPONENT_BYTECODE="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.common.entity.component.MountComponent)"
+          MOUNT_TICK_RIDDEN="$(awk '/public void tickRidden\(/ { capture=1; print; next } capture && /^  (public|private|protected) / { exit } capture { print }' <<< "$MOUNT_COMPONENT_BYTECODE")"
+          TICK_SADDLEABLE_POS="$(grep -n -m1 'Saddleable.m_6741_' <<< "$MOUNT_TICK_RIDDEN" | cut -d: -f1)"
+          TICK_CONSUME_POS="$(grep -n -m1 'ItemStack.m_41774_' <<< "$MOUNT_TICK_RIDDEN" | cut -d: -f1)"
+          TICK_SET_POS="$(grep -n -m1 'Mount.setSaddled' <<< "$MOUNT_TICK_RIDDEN" | cut -d: -f1)"
+          TICK_SOUND_POS="$(grep -n -m1 'm_6269_' <<< "$MOUNT_TICK_RIDDEN" | cut -d: -f1)"
+          if [[ -z "$TICK_SADDLEABLE_POS" || -z "$TICK_CONSUME_POS" || -z "$TICK_SET_POS" || -z "$TICK_SOUND_POS" ]] ||
+             (( TICK_SADDLEABLE_POS >= TICK_CONSUME_POS || TICK_SADDLEABLE_POS >= TICK_SET_POS || TICK_SADDLEABLE_POS >= TICK_SOUND_POS )); then
+            echo "MountComponent.tickRidden must gate saddle consumption, state changes, and sound by Saddleable.isSaddleable."
+            printf '%s\\n' "$MOUNT_TICK_RIDDEN"
+            exit 1
+          fi
+
           LUSH_SADDLEABLE="$(awk '/ m_6741_/ { capture=1; print; next } capture && /^  (public|private|protected) / { exit } capture { print }' <<< "$LUSH_ENTITY_BYTECODE")"
           if [[ "$LUSH_SADDLEABLE" != *"iconst_0"* || "$LUSH_SADDLEABLE" != *"ireturn"* ]]; then
             echo "Lushsaur must report that it cannot be saddled."
@@ -388,7 +415,7 @@ jobs:
             echo "Lushsaur saddle-slot filter is not based on ItemStack.isEmpty()."
             exit 1
           fi
-          echo "Verified Lushsaur blocks saddle interaction and saddle state, accepts empty-slot clearing, rejects non-empty stacks only in slot 0, and leaves other slots unchanged."
+          echo "Verified original Lushsaur interaction behavior is preserved and both shared saddle-consumption paths obey Saddleable.isSaddleable; Lushsaur remains permanently unsaddled and its saddle slot rejects non-empty stacks."
 
           LUSH_MENU="$(awk '/m_213583_\(/ { capture=1; print; next } capture && /^  (public|private|protected) / { exit } capture { print }' <<< "$LUSH_ENTITY_BYTECODE")"
           if [[ "$LUSH_MENU" != *"return"* ||
@@ -732,6 +759,7 @@ jobs:
                   "META-INF/jarjar/metadata.json",
                   "META-INF/jarjar/mixinextras-forge-0.4.1.jar",
                   "META-INF/mods.toml",
+                  "assets/archie_dinosaurs/lang/en_us.json",
                   "archie_dinosaurs.mixins.json",
                   "archie_dinosaurs.forge.mixins.json",
                   "pack.mcmeta",
@@ -759,6 +787,25 @@ jobs:
                   "assets/archie_dinosaurs/models/block/lushsaur_egg.json",
                   "assets/archie_dinosaurs/models/block/chorusoatl_egg.json",
               }
+              english = json.loads(z.read("assets/archie_dinosaurs/lang/en_us.json"))
+              required_translations = {
+                  "item_group.archie_dinosaurs_items",
+                  "item.archie_dinosaurs.lushsaur_spawn_egg",
+                  "item.archie_dinosaurs.chorusoatl_spawn_egg",
+                  "item.archie_dinosaurs.sculksaur_spawn_egg",
+                  "item.archie_dinosaurs.lush_core",
+                  "item.archie_dinosaurs.chorus_fossil",
+                  "item.archie_dinosaurs.sculk_toxin",
+                  "block.archie_dinosaurs.lushsaur_egg",
+                  "block.archie_dinosaurs.chorusoatl_egg",
+              }
+              missing_translations = sorted(
+                  key for key in required_translations
+                  if not isinstance(english.get(key), str) or not english[key].strip() or english[key] == key
+              )
+              if missing_translations:
+                  raise SystemExit("Missing real English translations: " + repr(missing_translations))
+
               hatchable_tag = json.loads(z.read("data/archie_dinosaurs/tags/blocks/chorusoatl_egg_hatchable.json"))
               expected_hatchable_blocks = {
                   "minecraft:end_stone",
