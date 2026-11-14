@@ -900,94 +900,126 @@ public final class JarPruner {
             .findFirst()
             .orElseThrow(() -> new IllegalStateException("MountComponent.tickRidden is missing"));
 
+        String playerInternal = "net/minecraft/world/entity/player/Player";
+        String lushsaurInternal = ROOT + "common/entity/mob/lushsaur/LushsaurEntity";
+        String chorusoatlInternal = ROOT + "common/entity/mob/chorusoatl/ChorusoatlEntity";
+        String mobDescriptor = "Lnet/minecraft/world/entity/PathfinderMob;";
+        String mathInternal = "java/lang/Math";
+
+        int originalFrameCount = 0;
+        int originalBranchCount = 0;
+        for (AbstractInsnNode instruction : tickRidden.instructions.toArray()) {
+            if (instruction instanceof FrameNode) originalFrameCount++;
+            if (instruction instanceof JumpInsnNode ||
+                instruction instanceof TableSwitchInsnNode ||
+                instruction instanceof LookupSwitchInsnNode) originalBranchCount++;
+        }
+
         MethodInsnNode playerPitch = null;
         for (AbstractInsnNode instruction : tickRidden.instructions.toArray()) {
             if (instruction instanceof MethodInsnNode call &&
                 call.getOpcode() == Opcodes.INVOKEVIRTUAL &&
-                call.owner.equals("net/minecraft/world/entity/player/Player") &&
-                call.name.equals("m_146909_") && call.desc.equals("()F")) {
+                call.owner.equals(playerInternal) &&
+                call.name.equals("m_146909_") &&
+                call.desc.equals("()F")) {
                 playerPitch = call;
                 break;
             }
         }
         if (playerPitch == null) throw new IllegalStateException("Rider pitch read is missing");
-        AbstractInsnNode pitchReceiver = previousCodeInstruction(playerPitch);
-        if (!(pitchReceiver instanceof VarInsnNode playerLoad) ||
-            playerLoad.getOpcode() != Opcodes.ALOAD || playerLoad.var != 1) {
-            throw new IllegalStateException("Unexpected rider pitch receiver");
+
+        AbstractInsnNode pitchScaleAnchor = nextCodeInstruction(
+            nextCodeInstruction(nextCodeInstruction(playerPitch)));
+        if (!(pitchScaleAnchor instanceof VarInsnNode pitchStore) ||
+            pitchStore.getOpcode() != Opcodes.FSTORE || pitchStore.var != 3) {
+            throw new IllegalStateException("Unexpected MountComponent.tickRidden rider-pitch sequence");
+        }
+        AbstractInsnNode pitchRemainder = previousCodeInstruction(pitchStore);
+        if (pitchRemainder == null || pitchRemainder.getOpcode() != Opcodes.FREM) {
+            throw new IllegalStateException("Expected the original 360-degree rider-pitch normalization");
         }
 
-        String playerInternal = "net/minecraft/world/entity/player/Player";
-        String lushsaurInternal = ROOT + "common/entity/mob/lushsaur/LushsaurEntity";
-        String chorusoatlInternal = ROOT + "common/entity/mob/chorusoatl/ChorusoatlEntity";
-        Object[] initialLocals = new Object[] {
-            owner.name, playerInternal, "net/minecraft/world/phys/Vec3"
-        };
-        LabelNode checkInput = new LabelNode();
-        LabelNode continueRotation = new LabelNode();
-        InsnList gate = new InsnList();
-        gate.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        gate.add(new FieldInsnNode(Opcodes.GETFIELD, owner.name, "mob",
-            "Lnet/minecraft/world/entity/PathfinderMob;"));
-        gate.add(new TypeInsnNode(Opcodes.INSTANCEOF, lushsaurInternal));
-        gate.add(new JumpInsnNode(Opcodes.IFNE, checkInput));
-        gate.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        gate.add(new FieldInsnNode(Opcodes.GETFIELD, owner.name, "mob",
-            "Lnet/minecraft/world/entity/PathfinderMob;"));
-        gate.add(new TypeInsnNode(Opcodes.INSTANCEOF, chorusoatlInternal));
-        gate.add(new JumpInsnNode(Opcodes.IFEQ, continueRotation));
-        gate.add(checkInput);
-        gate.add(new FrameNode(Opcodes.F_FULL, 3, initialLocals, 0, new Object[0]));
-        gate.add(new VarInsnNode(Opcodes.ALOAD, 1));
-        gate.add(new FieldInsnNode(Opcodes.GETFIELD, playerInternal, "f_20900_", "F"));
-        gate.add(new InsnNode(Opcodes.FCONST_0));
-        gate.add(new InsnNode(Opcodes.FCMPL));
-        gate.add(new JumpInsnNode(Opcodes.IFNE, continueRotation));
-        gate.add(new VarInsnNode(Opcodes.ALOAD, 1));
-        gate.add(new FieldInsnNode(Opcodes.GETFIELD, playerInternal, "f_20902_", "F"));
-        gate.add(new InsnNode(Opcodes.FCONST_0));
-        gate.add(new InsnNode(Opcodes.FCMPL));
-        gate.add(new JumpInsnNode(Opcodes.IFNE, continueRotation));
-        gate.add(new InsnNode(Opcodes.RETURN));
-        gate.add(continueRotation);
-        gate.add(new FrameNode(Opcodes.F_FULL, 3, initialLocals, 0, new Object[0]));
-        tickRidden.instructions.insertBefore(pitchReceiver, gate);
+        InsnList neutralizeTargetPitch = new InsnList();
+        neutralizeTargetPitch.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        neutralizeTargetPitch.add(new FieldInsnNode(Opcodes.GETFIELD, owner.name, "mob", mobDescriptor));
+        neutralizeTargetPitch.add(new TypeInsnNode(Opcodes.INSTANCEOF, lushsaurInternal));
+        neutralizeTargetPitch.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        neutralizeTargetPitch.add(new FieldInsnNode(Opcodes.GETFIELD, owner.name, "mob", mobDescriptor));
+        neutralizeTargetPitch.add(new TypeInsnNode(Opcodes.INSTANCEOF, chorusoatlInternal));
+        neutralizeTargetPitch.add(new InsnNode(Opcodes.IOR));
+        neutralizeTargetPitch.add(new InsnNode(Opcodes.ICONST_1));
+        neutralizeTargetPitch.add(new InsnNode(Opcodes.IXOR));
+        neutralizeTargetPitch.add(new InsnNode(Opcodes.I2F));
+        neutralizeTargetPitch.add(new InsnNode(Opcodes.FMUL));
+        tickRidden.instructions.insert(pitchRemainder, neutralizeTargetPitch);
 
-        VarInsnNode yawStore = null;
-        int stores = 0;
+        int headCalls = 0;
+        int bodyCalls = 0;
         for (AbstractInsnNode instruction : tickRidden.instructions.toArray()) {
-            if (instruction instanceof VarInsnNode variable &&
-                variable.getOpcode() == Opcodes.FSTORE && variable.var == 4) {
-                yawStore = variable;
-                stores++;
+            if (!(instruction instanceof MethodInsnNode call) ||
+                call.getOpcode() != Opcodes.INVOKEINTERFACE ||
+                !call.owner.equals(ROOT + "common/entity/base/Mount") ||
+                !call.desc.equals("()Z")) continue;
+
+            boolean head = call.name.equals("canMountRotateHead");
+            boolean body = call.name.equals("canMountRotateBody");
+            if (!head && !body) continue;
+
+            AbstractInsnNode following = nextCodeInstruction(call);
+            if (!(following instanceof JumpInsnNode branch) ||
+                branch.getOpcode() != Opcodes.IFEQ) {
+                throw new IllegalStateException("Unexpected control-flow after " + call.name);
             }
+
+            InsnList requireMovementForTargetMounts = new InsnList();
+            requireMovementForTargetMounts.add(new VarInsnNode(Opcodes.ALOAD, 0));
+            requireMovementForTargetMounts.add(new FieldInsnNode(Opcodes.GETFIELD, owner.name, "mob", mobDescriptor));
+            requireMovementForTargetMounts.add(new TypeInsnNode(Opcodes.INSTANCEOF, lushsaurInternal));
+            requireMovementForTargetMounts.add(new VarInsnNode(Opcodes.ALOAD, 0));
+            requireMovementForTargetMounts.add(new FieldInsnNode(Opcodes.GETFIELD, owner.name, "mob", mobDescriptor));
+            requireMovementForTargetMounts.add(new TypeInsnNode(Opcodes.INSTANCEOF, chorusoatlInternal));
+            requireMovementForTargetMounts.add(new InsnNode(Opcodes.IOR));
+            requireMovementForTargetMounts.add(new InsnNode(Opcodes.ICONST_1));
+            requireMovementForTargetMounts.add(new InsnNode(Opcodes.IXOR));
+
+            requireMovementForTargetMounts.add(new VarInsnNode(Opcodes.ALOAD, 1));
+            requireMovementForTargetMounts.add(new FieldInsnNode(Opcodes.GETFIELD, playerInternal, "f_20900_", "F"));
+            requireMovementForTargetMounts.add(new MethodInsnNode(
+                Opcodes.INVOKESTATIC, mathInternal, "abs", "(F)F", false));
+            requireMovementForTargetMounts.add(new VarInsnNode(Opcodes.ALOAD, 1));
+            requireMovementForTargetMounts.add(new FieldInsnNode(Opcodes.GETFIELD, playerInternal, "f_20902_", "F"));
+            requireMovementForTargetMounts.add(new MethodInsnNode(
+                Opcodes.INVOKESTATIC, mathInternal, "abs", "(F)F", false));
+            requireMovementForTargetMounts.add(new InsnNode(Opcodes.FADD));
+            requireMovementForTargetMounts.add(new MethodInsnNode(
+                Opcodes.INVOKESTATIC, mathInternal, "signum", "(F)F", false));
+            requireMovementForTargetMounts.add(new InsnNode(Opcodes.F2I));
+            requireMovementForTargetMounts.add(new InsnNode(Opcodes.IOR));
+            requireMovementForTargetMounts.add(new InsnNode(Opcodes.IAND));
+            tickRidden.instructions.insert(call, requireMovementForTargetMounts);
+
+            if (head) headCalls++;
+            if (body) bodyCalls++;
         }
-        if (stores != 1 || yawStore == null) {
-            throw new IllegalStateException("Unexpected MountComponent.tickRidden yaw local");
+        if (headCalls != 1 || bodyCalls != 1) {
+            throw new IllegalStateException(
+                "Expected one head and one body rider-look gate, found head=" + headCalls + ", body=" + bodyCalls);
         }
-        Object[] pitchedLocals = new Object[] {
-            owner.name, playerInternal, "net/minecraft/world/phys/Vec3", Opcodes.FLOAT, Opcodes.FLOAT
-        };
-        LabelNode setNeutralPitch = new LabelNode();
-        LabelNode keepPitch = new LabelNode();
-        InsnList pitchOverride = new InsnList();
-        pitchOverride.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        pitchOverride.add(new FieldInsnNode(Opcodes.GETFIELD, owner.name, "mob",
-            "Lnet/minecraft/world/entity/PathfinderMob;"));
-        pitchOverride.add(new TypeInsnNode(Opcodes.INSTANCEOF, lushsaurInternal));
-        pitchOverride.add(new JumpInsnNode(Opcodes.IFNE, setNeutralPitch));
-        pitchOverride.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        pitchOverride.add(new FieldInsnNode(Opcodes.GETFIELD, owner.name, "mob",
-            "Lnet/minecraft/world/entity/PathfinderMob;"));
-        pitchOverride.add(new TypeInsnNode(Opcodes.INSTANCEOF, chorusoatlInternal));
-        pitchOverride.add(new JumpInsnNode(Opcodes.IFEQ, keepPitch));
-        pitchOverride.add(setNeutralPitch);
-        pitchOverride.add(new FrameNode(Opcodes.F_FULL, 5, pitchedLocals, 0, new Object[0]));
-        pitchOverride.add(new InsnNode(Opcodes.FCONST_0));
-        pitchOverride.add(new VarInsnNode(Opcodes.FSTORE, 3));
-        pitchOverride.add(keepPitch);
-        pitchOverride.add(new FrameNode(Opcodes.F_FULL, 5, pitchedLocals, 0, new Object[0]));
-        tickRidden.instructions.insert(yawStore, pitchOverride);
+
+        int finalFrameCount = 0;
+        int finalBranchCount = 0;
+        for (AbstractInsnNode instruction : tickRidden.instructions.toArray()) {
+            if (instruction instanceof FrameNode) finalFrameCount++;
+            if (instruction instanceof JumpInsnNode ||
+                instruction instanceof TableSwitchInsnNode ||
+                instruction instanceof LookupSwitchInsnNode) finalBranchCount++;
+        }
+        if (finalFrameCount != originalFrameCount || finalBranchCount != originalBranchCount) {
+            throw new IllegalStateException(
+                "Rider-look patch must not add stack-map frames or control-flow branches; " +
+                "frames " + originalFrameCount + " -> " + finalFrameCount +
+                ", branches " + originalBranchCount + " -> " + finalBranchCount);
+        }
     }
 
     private static void patchNoRollRootOperation(ClassNode owner) {
