@@ -73,6 +73,552 @@ jobs:
             build/classes-pruned.jar \
             build/libs/ec_ad-legacy-forge-1.20.1.jar
 
+      - name: Inspect retained mount, rider animation, and inventory bytecode
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "=== Relevant retained class paths ==="
+          unzip -Z1 build/classes-pruned.jar | grep -Ei '(^|/)(.*(Lushsaur|Chorusoatl|AbstractComplexMount|DinoMenu|DinoScreen|ADPlayerAnimations|OnLushsaurPlayerAnimations|OnChorusoatlPlayerAnimations|Mount|Inventory|Rider|PlayerMixin|CommonClient|ADKeyMappings|ADClientForgeBus).*\.class)        shell: bash
+        run: |
+          set -euo pipefail
+          PROVIDER_DESC='()Lcom/astemir/astemirlib/re/client/model/render/renderer/AstemirEntityRenderer$Provider;'
+          for class_name in \
+            com.eternal_creations.archies_dino_mod.client.model.render.entity.mob.LushsaurClient \
+            com.eternal_creations.archies_dino_mod.client.model.render.entity.mob.ChorusoatlClient \
+            com.eternal_creations.archies_dino_mod.client.model.render.entity.mob.SculksaurClient
+          do
+            javap -classpath build/classes-pruned.jar -p -s "$class_name" | grep -F "descriptor: $PROVIDER_DESC"
+          done
+          RENDER_CALLS="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.client.CommonClient)"
+          COUNT="$(printf '%s\n' "$RENDER_CALLS" | grep -F -o "createRenderProvider:$PROVIDER_DESC" | wc -l)"
+          test "$COUNT" -eq 3
+          if printf '%s\n' "$RENDER_CALLS" | grep -F "createRenderProvider:()Lnet/minecraft/client/renderer/entity/EntityRendererProvider;"; then
+            echo "Found stale renderer descriptor in CommonClient."
+            exit 1
+          fi
+          if ! printf '%s\n' "$RENDER_CALLS" | grep -F "m_174009_:()Lnet/minecraft/client/renderer/entity/EntityRendererProvider;"; then
+            echo "Missing correctly named EntityRendererProvider lambda SAM."
+            exit 1
+          fi
+          if printf '%s\n' "$RENDER_CALLS" | grep -F "get:()Lnet/minecraft/client/renderer/entity/EntityRendererProvider;"; then
+            echo "Found invalid EntityRendererProvider lambda SAM name."
+            exit 1
+          fi
+          EGG_RENDERER_DESC='(Lcom/astemir/astemirlib/re/client/model/AstemirModel;)Lcom/astemir/astemirlib/re/client/model/render/renderer/AstemirBlockEntityRenderer;'
+          EGG_CLIENT='com.eternal_creations.archies_dino_mod.client.model.render.block.DinoEggClient'
+          javap -classpath build/classes-pruned.jar -p -s "$EGG_CLIENT" | grep -F "descriptor: $EGG_RENDERER_DESC"
+          BLOCK_RENDER_CALLS="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.client.CommonClient)"
+          BLOCK_COUNT="$(printf '%s\n' "$BLOCK_RENDER_CALLS" | grep -F -o "createRenderer:$EGG_RENDERER_DESC" | wc -l)"
+          test "$BLOCK_COUNT" -eq 2
+          if printf '%s\n' "$BLOCK_RENDER_CALLS" | grep -F "createRenderer:(Lcom/astemir/astemirlib/re/client/model/AstemirModel;)Lnet/minecraft/client/renderer/blockentity/BlockEntityRenderer;"; then
+            echo "Found stale egg renderer descriptor in CommonClient."
+            exit 1
+          fi
+          COMMON_CLIENT='com.eternal_creations.archies_dino_mod.client.CommonClient'
+          BLOCK_HELPER_DESC='(Lcom/eternal_creations/archies_dino_mod/util/ResourceSupplier;Lnet/minecraft/client/renderer/blockentity/BlockEntityRenderer;)V'
+          javap -classpath build/classes-pruned.jar -p -s "$COMMON_CLIENT" | grep -F "descriptor: $BLOCK_HELPER_DESC"
+          BLOCK_HELPER_CALLS="$(printf '%s\n' "$BLOCK_RENDER_CALLS" | grep -F -o "registerBlockEntityRenderer:$BLOCK_HELPER_DESC" | wc -l)"
+          test "$BLOCK_HELPER_CALLS" -eq 2
+          if printf '%s\n' "$BLOCK_RENDER_CALLS" | grep -F "registerBlockEntityRenderer:(Ljava/util/function/Supplier;Lnet/minecraft/client/renderer/blockentity/BlockEntityRenderer;)V"; then
+            echo "Found mismatched ResourceSupplier/Supplier block-entity renderer call."
+            exit 1
+          fi
+
+      - name: Verify framework overrides, mounted attacks, and Lushsaur sprint controls
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          verify_method() {
+            local class_name="$1"
+            local method_name="$2"
+            local descriptor="$3"
+            local output
+            output="$(javap -classpath build/classes-pruned.jar -p -s "$class_name")"
+            if ! printf '%s\n' "$output" | grep -F -A1 "$method_name" | grep -Fq "descriptor: $descriptor"; then
+              echo "Missing required callback $class_name.$method_name $descriptor"
+              exit 1
+            fi
+          }
+
+          verify_method 'com.eternal_creations.archies_dino_mod.client.model.system.ADModifiers$1' \
+            'modify(' '(ILcom/astemir/astemirlib/re/client/model/core/animation/AnimationState;FFLcom/astemir/astemirlib/re/client/model/core/animation/BoneState;)V'
+          verify_method 'com.eternal_creations.archies_dino_mod.common.menu.DinoMenu' \
+            'm_6875_(' '(Lnet/minecraft/world/entity/player/Player;)Z'
+          verify_method 'com.eternal_creations.archies_dino_mod.common.menu.DinoMenu' \
+            'm_7648_(' '(Lnet/minecraft/world/entity/player/Player;I)Lnet/minecraft/world/item/ItemStack;'
+          verify_method 'com.eternal_creations.archies_dino_mod.client.screen.DinoScreen' \
+            'm_7286_(' '(Lnet/minecraft/client/gui/GuiGraphics;FII)V'
+          verify_method 'com.eternal_creations.archies_dino_mod.networking.serverbound.MountControlMessage' \
+            'execute(' '(Lnet/minecraft/server/level/ServerPlayer;)V'
+          verify_method 'com.eternal_creations.archies_dino_mod.client.ADClientForgeBus' \
+            'onClientTick(' '(Lnet/minecraftforge/event/TickEvent$ClientTickEvent;)V'
+          verify_method 'com.eternal_creations.archies_dino_mod.client.ADClientForgeBus' \
+            'lambda$onClientTick$0(' '(Lnet/minecraft/client/Minecraft;Lnet/minecraft/client/KeyMapping;Ljava/util/function/BiConsumer;)V'
+          verify_method 'com.eternal_creations.archies_dino_mod.common.entity.mob.lushsaur.LushsaurEntity' \
+            'onRiderAttack(' '(Lnet/minecraft/world/entity/LivingEntity;Lcom/eternal_creations/archies_dino_mod/common/entity/base/Mount$AttackType;)V'
+          verify_method 'com.eternal_creations.archies_dino_mod.common.entity.mob.chorusoatl.ChorusoatlEntity' \
+            'onRiderAttack(' '(Lnet/minecraft/world/entity/LivingEntity;Lcom/eternal_creations/archies_dino_mod/common/entity/base/Mount$AttackType;)V'
+          verify_method 'com.eternal_creations.archies_dino_mod.common.entity.mob.lushsaur.LushsaurEntity' \
+            'm_6688_(' '()Lnet/minecraft/world/entity/LivingEntity;'
+          verify_method 'com.eternal_creations.archies_dino_mod.common.entity.mob.lushsaur.LushsaurEntity' \
+            'm_264410_(' '()Z'
+          verify_method 'com.eternal_creations.archies_dino_mod.mixin.client.LocalPlayerMixin' \
+            'archiesDinoMod$allowLushsaurSprint(' '(Lnet/minecraft/world/entity/Entity;Lorg/spongepowered/asm/mixin/injection/callback/CallbackInfoReturnable;)V'
+
+          LOCAL_PLAYER_SPRINT="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.mixin.client.LocalPlayerMixin)"
+          for required_call in 'LushsaurEntity.m_6688_' 'CallbackInfoReturnable.setReturnValue'; do
+            if ! printf '%s\n' "$LOCAL_PLAYER_SPRINT" | grep -Fq "$required_call"; then
+              echo "LocalPlayer sprint gate is missing Lushsaur controller authorization: $required_call"
+              printf '%s\n' "$LOCAL_PLAYER_SPRINT"
+              exit 1
+            fi
+          done
+
+          LOCAL_PLAYER_HANDLER="$(printf '%s\n' "$LOCAL_PLAYER_SPRINT" | awk '
+            /^[[:space:]]+public void archiesDinoMod\$allowLushsaurSprint\(/ { capture=1 }
+            capture && /^[[:space:]]+(private|public|protected) / && $0 !~ /archiesDinoMod\$allowLushsaurSprint\(/ { exit }
+            capture { print }
+          ')"
+          BOX_LINE="$(printf '%s\n' "$LOCAL_PLAYER_HANDLER" | grep -nF 'Boolean.TRUE' | cut -d: -f1 || true)"
+          SET_LINE="$(printf '%s\n' "$LOCAL_PLAYER_HANDLER" | grep -nF 'CallbackInfoReturnable.setReturnValue' | cut -d: -f1 || true)"
+          if [ -z "$BOX_LINE" ] || [ -z "$SET_LINE" ] || [ "$BOX_LINE" -ge "$SET_LINE" ] || \
+             printf '%s\n' "$LOCAL_PLAYER_HANDLER" | grep -Fq 'iconst_1'; then
+            echo "Lushsaur sprint callback must pass boxed Boolean.TRUE to CallbackInfoReturnable, never a primitive int."
+            printf '%s\n' "$LOCAL_PLAYER_HANDLER"
+            exit 1
+          fi
+          echo "Verified Lushsaur sprint callback boxes its boolean return value as Boolean.TRUE."
+
+          LUSH_SPRINT_CONTROL="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.common.entity.mob.lushsaur.LushsaurEntity)"
+          if ! printf '%s\n' "$LUSH_SPRINT_CONTROL" | grep -F -A5 'public boolean m_264410_();' | grep -Fq 'iconst_1'; then
+            echo "Lushsaur canSprint override must return true for vanilla mounted sprint input."
+            printf '%s\n' "$LUSH_SPRINT_CONTROL"
+            exit 1
+          fi
+
+          for entity_class in \
+            com.eternal_creations.archies_dino_mod.common.entity.mob.chorusoatl.ChorusoatlEntity \
+            com.eternal_creations.archies_dino_mod.common.entity.mob.sculksaur.SculksaurEntity; do
+            if javap -classpath build/classes-pruned.jar -p "$entity_class" | grep -Fq 'm_264410_('; then
+              echo "$entity_class unexpectedly received the Lushsaur-only sprint override."
+              exit 1
+            fi
+          done
+
+          LUSHSAUR_CLIENT='com.eternal_creations.archies_dino_mod.client.model.render.entity.mob.LushsaurClient'
+          verify_method "$LUSHSAUR_CLIENT" \
+            'archiesDinoMod$shouldUseRunAnimation(' \
+            '(Lcom/eternal_creations/archies_dino_mod/common/entity/mob/lushsaur/LushsaurEntity;)Z'
+          LUSH_GAIT="$(javap -classpath build/classes-pruned.jar -p -c "$LUSHSAUR_CLIENT")"
+          for required_call in 'LushsaurEntity.m_6688_' 'LivingEntity.m_20142_' \
+            'EntityLocomotion.whenRunning' 'Condition.check'; do
+            if ! printf '%s\n' "$LUSH_GAIT" | grep -Fq "$required_call"; then
+              echo "Lushsaur run animation gate is missing $required_call"
+              printf '%s\n' "$LUSH_GAIT"
+              exit 1
+            fi
+          done
+          echo "The bytecode pruner itself verified exactly two replaced Lushsaur run-animation conditions."
+
+          RIDER_ANIMATIONS='com.eternal_creations.archies_dino_mod.client.animation.player.riding.OnLushsaurPlayerAnimations'
+          verify_method "$RIDER_ANIMATIONS" \
+            'lambda$init$11(' \
+            '(Lcom/eternal_creations/archies_dino_mod/common/entity/mob/lushsaur/LushsaurEntity;)Z'
+          RIDER_RUN="$(javap -classpath build/classes-pruned.jar -p -c "$RIDER_ANIMATIONS" | sed -n '/lambda[$]init[$]11(/,/^  private static /p')"
+          for required_call in 'LushsaurEntity.m_6688_' 'LivingEntity.m_20142_'; do
+            if ! printf '%s\n' "$RIDER_RUN" | grep -Fq "$required_call"; then
+              echo "Lushsaur rider run animation is not synchronized to the controlling passenger: $required_call"
+              printf '%s\n' "$RIDER_RUN"
+              exit 1
+            fi
+          done
+          echo "Verified Lushsaur rider run animation reads controlling passenger sprint state."
+          if printf '%s\n' "$RIDER_RUN" | grep -Fq 'getRunLocomotion'; then
+            echo "Lushsaur rider run animation still uses the old velocity-based predicate."
+            printf '%s\n' "$RIDER_RUN"
+            exit 1
+          fi
+
+          SCULK_EFFECTS='com.eternal_creations.archies_dino_mod.client.particle.effect.SculksaurEffects'
+          SCULK_DISASSEMBLY="$(javap -classpath build/classes-pruned.jar -p -c "$SCULK_EFFECTS")"
+          SCULK_FINAL="$(printf '%s\n' "$SCULK_DISASSEMBLY" | awk '
+            /^[[:space:]]+private static void lambda\$explosionFinalEvent\$12\(/ { capture=1 }
+            capture && /^[[:space:]]+(private|public|protected) / && $0 !~ /lambda\$explosionFinalEvent\$12\(/ { exit }
+            capture { print }
+          ')"
+          if ! printf '%s\n' "$SCULK_FINAL" | grep -F 'ShakeUtil.shakeExplosion' >/dev/null; then
+            echo "Sculksaur explosion event must keep its original camera shake."
+            printf '%s\n' "$SCULK_FINAL"
+            exit 1
+          fi
+          for forbidden_call in 'spawnSculksaurSonicBoom' 'spawnParticle' 'Shockwave.of' 'ColoredLight.of'; do
+            if printf '%s\n' "$SCULK_FINAL" | grep -F "$forbidden_call" >/dev/null; then
+              echo "Sculksaur explosion event still contains removed particle/post-process behavior: $forbidden_call"
+              printf '%s\n' "$SCULK_FINAL"
+              exit 1
+            fi
+          done
+
+          SCULK_GROUND="$(printf '%s\n' "$SCULK_DISASSEMBLY" | awk '
+            /^[[:space:]]+private static void lambda\$explosionGroundEvent\$11\(/ { capture=1 }
+            capture && /^[[:space:]]+(private|public|protected) / && $0 !~ /lambda\$explosionGroundEvent\$11\(/ { exit }
+            capture { print }
+          ')"
+          if printf '%s\n' "$SCULK_GROUND" | grep -F 'spawnParticle' >/dev/null; then
+            echo "Sculksaur ground explosion callback still emits particles."
+            printf '%s\n' "$SCULK_GROUND"
+            exit 1
+          fi
+
+          for forbidden_effect_symbol in 'SculksaurSonicBoomParticle' 'spawnSculksaurSonicBoom' 'secondSonicBoomEvent'; do
+            if printf '%s\n' "$SCULK_DISASSEMBLY" | grep -F "$forbidden_effect_symbol" >/dev/null; then
+              echo "Removed custom Sculksaur explosion particle implementation remains: $forbidden_effect_symbol"
+              exit 1
+            fi
+          done
+          for required_track_marker in 'float 4.68f' 'float 5.12f' 'EXPLOSION_EFFECTS'; do
+            if ! printf '%s\n' "$SCULK_DISASSEMBLY" | grep -F "$required_track_marker" >/dev/null; then
+              echo "Original Sculksaur explosion/tendril event track lost $required_track_marker"
+              exit 1
+            fi
+          done
+          if printf '%s\n' "$SCULK_DISASSEMBLY" | grep -F 'float 4.88f' >/dev/null; then
+            echo "Delayed second explosion-particle event still exists."
+            exit 1
+          fi
+          echo "Verified all Sculksaur explosion particles and delayed particle wave are removed; original camera shake and event track remain."
+
+          LUSHSAUR_CLIENT='com.eternal_creations.archies_dino_mod.client.model.render.entity.mob.LushsaurClient'
+          SCULKSAUR_CLIENT='com.eternal_creations.archies_dino_mod.client.model.render.entity.mob.SculksaurClient'
+          LUSH_PHYSICS="$(javap -classpath build/classes-pruned.jar -p -c "$LUSHSAUR_CLIENT" | awk '
+            /^[[:space:]]+private void setupPhysics\(/ { capture=1 }
+            capture && /^[[:space:]]+(public|protected|private) / && $0 !~ /setupPhysics\(/ { exit }
+            capture { print }
+          ')"
+          SCULK_PHYSICS="$(javap -classpath build/classes-pruned.jar -p -c "$SCULKSAUR_CLIENT" | awk '
+            /^[[:space:]]+private void setupPhysics\(/ { capture=1 }
+            capture && /^[[:space:]]+(public|protected|private) / && $0 !~ /setupPhysics\(/ { exit }
+            capture { print }
+          ')"
+          for tail_bone in 'String tail1' 'String tail2' 'String mase' 'String tail'; do
+            if printf '%s\n' "$LUSH_PHYSICS" | grep -F "$tail_bone" >/dev/null; then
+              echo "Lushsaur tail physics bone remains enabled: $tail_bone"
+              printf '%s\n' "$LUSH_PHYSICS"
+              exit 1
+            fi
+          done
+          for preserved_lush_bone in 'String string' 'String beetroot'; do
+            if ! printf '%s\n' "$LUSH_PHYSICS" | grep -F "$preserved_lush_bone" >/dev/null; then
+              echo "Lushsaur non-tail item physics was unexpectedly removed: $preserved_lush_bone"
+              printf '%s\n' "$LUSH_PHYSICS"
+              exit 1
+            fi
+          done
+          for tail_bone in 'String tail1' 'String tail2'; do
+            if printf '%s\n' "$SCULK_PHYSICS" | grep -F "$tail_bone" >/dev/null; then
+              echo "Sculksaur tail physics bone remains enabled: $tail_bone"
+              printf '%s\n' "$SCULK_PHYSICS"
+              exit 1
+            fi
+          done
+          for preserved_leg in 'LegSolverModule.addLeg' 'String leg_left' 'String leg_right'; do
+            if ! printf '%s\n' "$SCULK_PHYSICS" | grep -F "$preserved_leg" >/dev/null; then
+              echo "Sculksaur leg IK was unexpectedly removed: $preserved_leg"
+              printf '%s\n' "$SCULK_PHYSICS"
+              exit 1
+            fi
+          done
+          echo "Verified Lushsaur and Sculksaur tail physics are disabled; Lushsaur item physics and Sculksaur leg IK remain."
+                    SMOOTH_MOVE_CONTROL='com.eternal_creations.archies_dino_mod.common.entity.ai.control.SmoothMoveControl'
+          SMOOTH_BODY_CONTROL='com.eternal_creations.archies_dino_mod.common.entity.ai.control.SmoothBodyControl'
+          SMOOTH_LOOK_CONTROL='com.eternal_creations.archies_dino_mod.common.entity.ai.control.SmoothLookControl'
+          verify_method "$SMOOTH_MOVE_CONTROL" 'archiesDinoMod$instantYaw(' '(FFF)F'
+          SMOOTH_MOVE="$(javap -classpath build/classes-pruned.jar -p -c "$SMOOTH_MOVE_CONTROL")"
+          SMOOTH_3D="$(printf '%s\n' "$SMOOTH_MOVE" | sed -n '/tick3DMovement(/,/^  protected void tickClimber(/p')"
+          SMOOTH_CLIMBER="$(printf '%s\n' "$SMOOTH_MOVE" | sed -n '/tickClimber(/,/^  protected void tickWalker(/p')"
+          SMOOTH_WALKER="$(printf '%s\n' "$SMOOTH_MOVE" | sed -n '/tickWalker(/,/^  private void tickStrafe(/p')"
+          if [ "$(printf '%s\n' "$SMOOTH_3D" | grep -F -o 'archiesDinoMod$instantYaw' | wc -l)" -ne 1 ] ||
+             [ "$(printf '%s\n' "$SMOOTH_3D" | grep -F -o 'smoothRotlerp' | wc -l)" -ne 1 ]; then
+            echo "SmoothMoveControl must instantly turn on yaw while keeping its original pitch interpolation."
+            printf '%s\n' "$SMOOTH_3D"
+            exit 1
+          fi
+          for segment in "$SMOOTH_CLIMBER" "$SMOOTH_WALKER"; do
+            if ! printf '%s\n' "$segment" | grep -Fq 'archiesDinoMod$instantYaw'; then
+              echo "SmoothMoveControl still interpolates a grounded/climbing yaw."
+              printf '%s\n' "$segment"
+              exit 1
+            fi
+          done
+
+          SMOOTH_BODY="$(javap -classpath build/classes-pruned.jar -p -c "$SMOOTH_BODY_CONTROL" | sed -n '/m_8121_(/,/^  private /p')"
+          for required_call in 'Condition.check' 'Mob.m_20160_' 'Mob.m_6688_' 'net/minecraft/world/entity/player/Player' 'Mob.m_146908_' 'Mob.f_20883_'; do
+            if ! printf '%s\n' "$SMOOTH_BODY" | grep -Fq "$required_call"; then
+              echo "SmoothBodyControl lost its immediate body snap or an existing rotation lock: $required_call"
+              printf '%s\n' "$SMOOTH_BODY"
+              exit 1
+            fi
+          done
+          if printf '%s\n' "$SMOOTH_BODY" | grep -Fq 'Mth.m_14189_'; then
+            echo "SmoothBodyControl still contains body-yaw interpolation."
+            printf '%s\n' "$SMOOTH_BODY"
+            exit 1
+          fi
+
+          SMOOTH_LOOK="$(javap -classpath build/classes-pruned.jar -p -c "$SMOOTH_LOOK_CONTROL")"
+          SMOOTH_LOOK_TICK="$(printf '%s\n' "$SMOOTH_LOOK" | sed -n '/m_8128_(/,/^  protected /p')"
+          for required_call in 'Condition.check' 'LookControl.m_8128_' 'Field smoothX' \
+            'Field smoothY' 'Field smoothZ' 'Field interpolationSpeed' 'Field maxSpeedLimit' \
+            'LookControl.f_24938_' 'LookControl.f_24939_' 'dmul' 'dadd'; do
+            if ! printf '%s\n' "$SMOOTH_LOOK_TICK" | grep -Fq "$required_call"; then
+              echo "SmoothLookControl is missing instant yaw with vertically eased pitch: $required_call"
+              printf '%s\n' "$SMOOTH_LOOK_TICK"
+              exit 1
+            fi
+          done
+          if [ "$(printf '%s\n' "$SMOOTH_LOOK_TICK" | grep -F -o 'float 360.0f' | wc -l)" -ne 1 ]; then
+            echo "SmoothLookControl must apply the instant 360-degree limit to horizontal yaw only."
+            printf '%s\n' "$SMOOTH_LOOK_TICK"
+            exit 1
+          fi
+          for getter in 'm_180897_' 'm_180896_'; do
+            SEGMENT="$(printf '%s\n' "$SMOOTH_LOOK" | sed -n "/$getter(/,/^  protected /p")"
+            if ! printf '%s\n' "$SEGMENT" | grep -Fq 'Condition.check'; then
+              echo "SmoothLookControl lost the canRotate guard in $getter."
+              printf '%s\n' "$SEGMENT"
+              exit 1
+            fi
+          done
+          echo "Verified instant horizontal yaw, eased vertical look pitch, and retained action/player rotation locks."
+
+          LUSH_MOUNT_SPEED="$(printf '%s\n' "$LUSH_SPRINT_CONTROL" | sed -n '/lambda[$]createMount[$]21(/,/lambda[$]createMount[$]20(/p')"
+          for required_call in 'm_6688_' 'm_20142_' 'getSpeedBoostTicks' 'java/lang/Integer.signum' 'java/lang/Math.max'; do
+            if ! printf '%s\n' "$LUSH_MOUNT_SPEED" | grep -Fq "$required_call"; then
+              echo "Lushsaur mount speed is missing expected walk/run or feed-boost logic: $required_call"
+              printf '%s\n' "$LUSH_MOUNT_SPEED"
+              exit 1
+            fi
+          done
+
+          LUSH_CONTROL="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.common.entity.mob.lushsaur.LushsaurEntity)"
+          for required_call in 'm_6254_' 'm_6688_' 'm_146895_' 'isAdult' 'isSitting' 'isOwnedBy'; do
+            case "$LUSH_CONTROL" in
+              *"$required_call"*) ;;
+              *)
+                echo "Lushsaur no-saddle controller is missing required guard/call: $required_call"
+                printf '%s\n' "$LUSH_CONTROL"
+                exit 1
+                ;;
+            esac
+          done
+          CHORUS_CONTROL="$(javap -classpath build/classes-pruned.jar -p com.eternal_creations.archies_dino_mod.common.entity.mob.chorusoatl.ChorusoatlEntity)"
+          if printf '%s\n' "$CHORUS_CONTROL" | grep -Fq 'm_6688_('; then
+            echo "Chorusoatl unexpectedly received the Lushsaur-only no-saddle override."
+            exit 1
+          fi
+
+          MOUNT_CONTROL="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.networking.serverbound.MountControlMessage)"
+          if ! printf '%s\n' "$MOUNT_CONTROL" | grep -Fq 'Mount.onRiderAttack'; then
+            echo "MountControlMessage no longer dispatches rider attacks."
+            exit 1
+          fi
+
+          ARROW_MIXIN="$(javap -classpath build/classes-pruned.jar -p -c -v com.eternal_creations.archies_dino_mod.mixin.AbstractArrowMixin)"
+          if printf '%s\n' "$ARROW_MIXIN" | grep -Fq 'archies_Dino_Mod$RIB_BOW_ARROW'; then
+            echo "Removed rib-bow data accessor is still referenced by AbstractArrowMixin."
+            exit 1
+          fi
+
+          TAB="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.common.tab.ADCreativeTabs)"
+          python3 - "$TAB" <<'PY'
+          import sys
+          tab = sys.argv[1]
+          expected = [
+              "LUSHSAUR_SPAWN_EGG",
+              "CHORUSOATL_SPAWN_EGG",
+              "SCULKSAUR_SPAWN_EGG",
+              "LUSHSAUR_EGG",
+              "CHORUSOATL_EGG",
+              "LUSH_CORE",
+              "SCULK_TOXIN",
+              "CHORUS_FOSSIL",
+          ]
+          positions = [tab.find("ADItems." + name) for name in expected]
+          if any(position < 0 for position in positions):
+              raise SystemExit("Creative tab is missing one or more retained items")
+          if positions != sorted(positions):
+              raise SystemExit("Creative tab item order is incorrect: " + repr(positions))
+          print("Verified creative tab order:", " -> ".join(expected))
+          PY
+
+      - name: Verify Legacy JAR structure and retained content
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import zipfile
+          import json
+          import hashlib
+
+          jar = Path("build/libs/ec_ad-legacy-forge-1.20.1.jar")
+          with zipfile.ZipFile(jar) as z:
+              bad = z.testzip()
+              if bad:
+                  raise SystemExit(f"Corrupt ZIP entry: {bad}")
+
+              names = set(z.namelist())
+              sonic_boom_classes = sorted(
+                  name for name in names
+                  if name.endswith(".class") and "SculksaurSonicBoomParticle" in name
+              )
+              if sonic_boom_classes:
+                  raise SystemExit("Removed Sculksaur explosion particle classes remain: " + ", ".join(sonic_boom_classes))
+              for config_name in ("ec_ad.mixins.json", "ec_ad.forge.mixins.json"):
+                  config = json.loads(z.read(config_name))
+                  package = config.get("package", "").replace(".", "/").strip("/")
+                  for section in ("mixins", "client", "server"):
+                      for mixin_name in config.get(section, []):
+                          class_path = f"{package}/{mixin_name.replace('.', '/')}.class"
+                          if class_path not in names:
+                              raise SystemExit(f"{config_name} references missing mixin class {class_path}")
+
+              required = {
+                  "META-INF/jarjar/metadata.json",
+                  "META-INF/jarjar/mixinextras-forge-0.4.1.jar",
+                  "META-INF/mods.toml",
+                  "ec_ad.mixins.json",
+                  "ec_ad.forge.mixins.json",
+                  "pack.mcmeta",
+                  "com/eternal_creations/archies_dino_mod/ArchiesDinosaurs.class",
+                  "com/eternal_creations/archies_dino_mod/common/entity/mob/lushsaur/LushsaurEntity.class",
+                  "com/eternal_creations/archies_dino_mod/common/entity/mob/chorusoatl/ChorusoatlEntity.class",
+                  "com/eternal_creations/archies_dino_mod/common/entity/mob/sculksaur/SculksaurEntity.class",
+                  "com/eternal_creations/archies_dino_mod/common/block/eggs/LushsaurEggBlock.class",
+                  "com/eternal_creations/archies_dino_mod/common/block/eggs/ChorusoatlEggBlock.class",
+                  "assets/ec_ad/models/entity/lushsaur.astemirmodel",
+                  "assets/ec_ad/models/entity/lushsaur_baby.astemirmodel",
+                  "assets/ec_ad/models/entity/chorusoatl.astemirmodel",
+                  "assets/ec_ad/models/entity/chorusoatl_baby.astemirmodel",
+                  "assets/ec_ad/models/entity/sculksaur.astemirmodel",
+                  "assets/ec_ad/models/block/lushsaur_egg.astemirmodel",
+                  "assets/ec_ad/models/block/chorusoatl_egg.astemirmodel",
+                  "assets/ec_ad/models/item/lush_core.json",
+                  "assets/ec_ad/models/item/chorus_fossil.json",
+                  "assets/ec_ad/models/item/sculk_toxin.json",
+                  "assets/ec_ad/models/item/lushsaur_spawn_egg.json",
+                  "assets/ec_ad/models/item/chorusoatl_spawn_egg.json",
+                  "assets/ec_ad/models/item/sculksaur_spawn_egg.json",
+                  "assets/ec_ad/models/block/lushsaur_egg.json",
+                  "assets/ec_ad/models/block/chorusoatl_egg.json",
+              }
+              metadata = json.loads(z.read("META-INF/jarjar/metadata.json"))
+              nested_astemir = [
+                  name for name in names
+                  if name.startswith("META-INF/jarjar/astemirlib_re-")
+              ]
+              if nested_astemir:
+                  raise SystemExit("Astemir RE must be installed separately, not bundled: " + ", ".join(nested_astemir))
+              for dependency in metadata.get("jars", []):
+                  if dependency.get("identifier", {}).get("artifact") == "astemirlib_re":
+                      raise SystemExit("Astemir RE must not be declared as a Jar-in-Jar dependency")
+                  dependency_path = dependency.get("path")
+                  if dependency_path not in names:
+                      raise SystemExit(f"Jar-in-Jar metadata references missing file: {dependency_path}")
+              mods_toml = z.read("META-INF/mods.toml").decode("utf-8")
+              astemir_dependency = 'modId = "astemirlib_re"'
+              if astemir_dependency not in mods_toml or 'mandatory = true' not in mods_toml:
+                  raise SystemExit("Parent mod must keep Astemir RE as an external required dependency")
+
+              missing = sorted(required - names)
+              if missing:
+                  raise SystemExit("Missing required Legacy entries:\n" + "\n".join(missing))
+
+              forbidden_parts = (
+                  "/common/entity/mob/archie/",
+                  "/common/entity/mob/coralosaur/",
+                  "/common/entity/mob/obsidiceratops/",
+                  "/common/entity/mob/sculkraptor/",
+                  "/common/entity/mob/therimoss/",
+                  "/common/items/weapon/",
+                  "/common/items/armor/",
+                  "/client/screen/guidebook/",
+                  "LushsaurMace",
+                  "PusTippedArrowEntity",
+              )
+              leftovers = sorted(
+                  name for name in names
+                  if name.endswith(".class") and any(part in name for part in forbidden_parts)
+              )
+              if leftovers:
+                  raise SystemExit("Unexpected classes left in JAR:\n" + "\n".join(leftovers))
+
+              banned_assets = (
+                  "lush_mace", "ooze_tipped_arrow", "chorus_scythe", "rib_bow",
+                  "sculk_bow", "scorching_horn", "therimoss_claws",
+                  "coralosaur", "obsidiceratops", "sculkraptor", "therimoss", "archie",
+              )
+              extra_assets = sorted(
+                  name for name in names
+                  if name.startswith("assets/ec_ad/") and any(token in name.lower() for token in banned_assets)
+              )
+              if extra_assets:
+                  raise SystemExit("Unexpected assets left in JAR:\n" + "\n".join(extra_assets))
+
+              print(f"Verified {len(names)} entries in {jar}")
+              print(f"Final size: {jar.stat().st_size} bytes")
+          PY
+
+      - name: Upload pruned Legacy JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: ec-ad-legacy-forge-1.20.1
+          path: |
+            build/libs/ec_ad-legacy-forge-1.20.1.jar
+            build/resource-prune-report.txt
+          if-no-files-found: error
+          retention-days: 30
+
+ | sort || true
+          echo "=== Rider animation and mount code ==="
+          for C in \
+            com.eternal_creations.archies_dino_mod.client.animation.player.ADPlayerAnimations \
+            com.eternal_creations.archies_dino_mod.client.animation.player.riding.OnLushsaurPlayerAnimations \
+            com.eternal_creations.archies_dino_mod.client.animation.player.riding.OnChorusoatlPlayerAnimations \
+            com.eternal_creations.archies_dino_mod.common.entity.mob.lushsaur.LushsaurEntity \
+            com.eternal_creations.archies_dino_mod.common.entity.mob.chorusoatl.ChorusoatlEntity \
+            com.eternal_creations.archies_dino_mod.common.entity.base.AbstractComplexMount \
+            com.eternal_creations.archies_dino_mod.common.menu.DinoMenu \
+            com.eternal_creations.archies_dino_mod.client.ADKeyMappings \
+            com.eternal_creations.archies_dino_mod.client.ADClientForgeBus \
+            com.eternal_creations.archies_dino_mod.client.model.render.entity.mob.LushsaurClient \
+            com.eternal_creations.archies_dino_mod.client.model.render.entity.mob.ChorusoatlClient
+          do
+            echo "===== SIGNATURES $C ====="
+            javap -classpath build/classes-pruned.jar -p -s "$C" 2>&1 || true
+          done
+          echo "=== Full rider animation disassembly ==="
+          for C in \
+            com.eternal_creations.archies_dino_mod.client.animation.player.riding.OnLushsaurPlayerAnimations \
+            com.eternal_creations.archies_dino_mod.client.animation.player.riding.OnChorusoatlPlayerAnimations \
+            com.eternal_creations.archies_dino_mod.client.animation.player.ADPlayerAnimations
+          do
+            echo "===== BYTECODE $C ====="
+            javap -classpath build/classes-pruned.jar -p -c "$C" 2>&1 || true
+          done
+          echo "=== Mount inventory and interaction bytecode ==="
+          for C in \
+            com.eternal_creations.archies_dino_mod.common.menu.DinoMenu \
+            com.eternal_creations.archies_dino_mod.common.entity.mob.lushsaur.LushsaurEntity \
+            com.eternal_creations.archies_dino_mod.common.entity.mob.chorusoatl.ChorusoatlEntity \
+            com.eternal_creations.archies_dino_mod.common.entity.base.AbstractComplexMount
+          do
+            echo "===== BYTECODE $C ====="
+            javap -classpath build/classes-pruned.jar -p -c "$C" 2>&1 || true
+          done
+          echo "=== Lush/Chorus model asset names and animation-related strings ==="
+          unzip -Z1 ec_ad-forge-1.20.1-1.0.4.jar | grep -Ei 'lushsaur|chorusoatl' | grep -Ei 'astemirmodel|animation|model' | sort | head -200
       - name: Verify retained renderer method descriptors
         shell: bash
         run: |
