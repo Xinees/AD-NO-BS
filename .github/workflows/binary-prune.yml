@@ -277,12 +277,13 @@ jobs:
             fi
           done
           CHORUS_ROLL="$(javap -classpath build/classes-pruned.jar -p -c "$CHORUS_ROLL_CLIENT")"
-          if grep -Fq 'flyingRoll' <<< "$CHORUS_ROLL"; then
-            echo "Chorusoatl flying lateral roll remains in the model animation."
+          if ! grep -Fq 'ChorusoatlEntity.flyingRoll' <<< "$CHORUS_ROLL" ||
+             ! grep -Fq 'ChasingFloat.get:(F)F' <<< "$CHORUS_ROLL"; then
+            echo "Original Chorusoatl flyingRoll animation read was not retained."
             printf '%s\n' "$CHORUS_ROLL"
             exit 1
           fi
-          echo "Verified lateral roll sources are removed without disabling locomotion animations."
+          echo "Verified Lushsaur/Sculksaur lateral root roll is removed while original Chorusoatl flying roll remains."
 
           LUSH_ENTITY_BYTECODE="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.common.entity.mob.lushsaur.LushsaurEntity)"
           LUSH_CREATE_MOUNT="$LUSH_ENTITY_BYTECODE"
