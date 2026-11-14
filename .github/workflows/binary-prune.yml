@@ -930,6 +930,8 @@ jobs:
                   "data/archie_dinosaurs/advancements/recipes/combat/lush_mace.json",
                   "data/archie_dinosaurs/advancements/recipes/combat/ooze_tipped_arrow.json",
                   "data/archie_dinosaurs/damage_type/pus_arrow.json",
+                  "data/minecraft/tags/game_events/vibrations.json",
+                  "data/minecraft/tags/game_events/warden_can_listen.json",
                   "assets/archie_dinosaurs/models/block/lushsaur_egg.json",
                   "assets/archie_dinosaurs/models/block/chorusoatl_egg.json",
               }
