@@ -1681,9 +1681,12 @@ public final class JarPruner {
                 candidate.desc.equals(registrationDescriptor))
             .findFirst()
             .orElseThrow(() -> new IllegalStateException("ADClientModBus.registerFactories is missing"));
-        if (method.instructions.toArray().length == 0 ||
-            method.instructions.getLast().getOpcode() != Opcodes.RETURN) {
-            throw new IllegalStateException("ADClientModBus.registerFactories has an unexpected body");
+        AbstractInsnNode terminalInstruction = method.instructions.getLast();
+        while (terminalInstruction != null && terminalInstruction.getOpcode() < 0) {
+            terminalInstruction = terminalInstruction.getPrevious();
+        }
+        if (terminalInstruction == null || terminalInstruction.getOpcode() != Opcodes.RETURN) {
+            throw new IllegalStateException("ADClientModBus.registerFactories has an unexpected terminal instruction");
         }
         for (AbstractInsnNode instruction : method.instructions.toArray()) {
             if (instruction instanceof MethodInsnNode call &&
@@ -1720,7 +1723,7 @@ public final class JarPruner {
             eventInternal, "registerSpriteSet",
             "(L" + particleTypeInternal + ";L" + particleEngineInternal +
                 "$SpriteParticleRegistration;)V", false));
-        method.instructions.insertBefore(method.instructions.getLast(), registration);
+        method.instructions.insertBefore(terminalInstruction, registration);
         method.maxStack = Math.max(method.maxStack, 3);
     }
 
