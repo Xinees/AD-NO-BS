@@ -1386,13 +1386,13 @@ public final class JarPruner {
         p.add(new VarInsnNode(Opcodes.DLOAD, 3));
         p.add(new VarInsnNode(Opcodes.DLOAD, 5));
         p.add(new VarInsnNode(Opcodes.DLOAD, 14));
-        p.add(new LdcInsnNode(0.5d));
+        p.add(new LdcInsnNode(0.6d));
         p.add(new InsnNode(Opcodes.DMUL));
         p.add(new VarInsnNode(Opcodes.DLOAD, 8));
-        p.add(new LdcInsnNode(0.5d));
+        p.add(new LdcInsnNode(0.6d));
         p.add(new InsnNode(Opcodes.DMUL));
         p.add(new VarInsnNode(Opcodes.DLOAD, 16));
-        p.add(new LdcInsnNode(0.5d));
+        p.add(new LdcInsnNode(0.6d));
         p.add(new InsnNode(Opcodes.DMUL));
         p.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
             ROOT + "client/particle/SculksaurSonicBoomParticle$Provider", "spawn",
@@ -1656,7 +1656,7 @@ public final class JarPruner {
         String eventTrackInternal =
             "com/astemir/astemirlib/re/client/model/core/animation/event/AnimationEventTrack";
         InsnList secondTrackEvent = new InsnList();
-        secondTrackEvent.add(new LdcInsnNode(4.93f));
+        secondTrackEvent.add(new LdcInsnNode(4.88f));
         secondTrackEvent.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
             owner.name, factoryName, factoryDescriptor, false));
         secondTrackEvent.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
@@ -1723,13 +1723,49 @@ public final class JarPruner {
 
         MethodNode tick = new MethodNode(Opcodes.ACC_PUBLIC, "m_5989_", "()V", null, null);
         InsnList tickCode = tick.instructions;
+        LabelNode animationCycle = new LabelNode();
         LabelNode tickReturn = new LabelNode();
+
+        tickCode.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        tickCode.add(new FieldInsnNode(Opcodes.GETFIELD, particle, "f_107224_", "I"));
+        tickCode.add(new VarInsnNode(Opcodes.ISTORE, 1));
+        tickCode.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        tickCode.add(new FieldInsnNode(Opcodes.GETFIELD, particle, "f_107225_", "I"));
+        tickCode.add(new VarInsnNode(Opcodes.ISTORE, 2));
+        tickCode.add(new VarInsnNode(Opcodes.ILOAD, 1));
+        tickCode.add(new VarInsnNode(Opcodes.ILOAD, 2));
+        tickCode.add(new JumpInsnNode(Opcodes.IF_ICMPLT, animationCycle));
+        tickCode.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        tickCode.add(new InsnNode(Opcodes.ICONST_1));
+        tickCode.add(new FieldInsnNode(Opcodes.PUTFIELD, particle, "f_107220_", "Z"));
+        tickCode.add(new InsnNode(Opcodes.RETURN));
+
+        tickCode.add(animationCycle);
+        tickCode.add(new FrameNode(Opcodes.F_APPEND, 2,
+            new Object[] { Opcodes.INTEGER, Opcodes.INTEGER }, 0, new Object[0]));
+        tickCode.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        tickCode.add(new VarInsnNode(Opcodes.ILOAD, 1));
+        tickCode.add(new IntInsnNode(Opcodes.BIPUSH, 16));
+        tickCode.add(new InsnNode(Opcodes.IREM));
+        tickCode.add(new FieldInsnNode(Opcodes.PUTFIELD, particle, "f_107224_", "I"));
+        tickCode.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        tickCode.add(new IntInsnNode(Opcodes.BIPUSH, 16));
+        tickCode.add(new FieldInsnNode(Opcodes.PUTFIELD, particle, "f_107225_", "I"));
         tickCode.add(new VarInsnNode(Opcodes.ALOAD, 0));
         tickCode.add(new MethodInsnNode(Opcodes.INVOKESPECIAL,
             "net/minecraft/client/particle/HugeExplosionParticle", "m_5989_", "()V", false));
         tickCode.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        tickCode.add(new VarInsnNode(Opcodes.ILOAD, 1));
+        tickCode.add(new InsnNode(Opcodes.ICONST_1));
+        tickCode.add(new InsnNode(Opcodes.IADD));
+        tickCode.add(new FieldInsnNode(Opcodes.PUTFIELD, particle, "f_107224_", "I"));
+        tickCode.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        tickCode.add(new VarInsnNode(Opcodes.ILOAD, 2));
+        tickCode.add(new FieldInsnNode(Opcodes.PUTFIELD, particle, "f_107225_", "I"));
+        tickCode.add(new VarInsnNode(Opcodes.ALOAD, 0));
         tickCode.add(new FieldInsnNode(Opcodes.GETFIELD, particle, "f_107220_", "Z"));
         tickCode.add(new JumpInsnNode(Opcodes.IFNE, tickReturn));
+
         tickCode.add(new VarInsnNode(Opcodes.ALOAD, 0));
         tickCode.add(new VarInsnNode(Opcodes.ALOAD, 0));
         tickCode.add(new FieldInsnNode(Opcodes.GETFIELD, particle, "f_107215_", "D"));
@@ -1742,8 +1778,8 @@ public final class JarPruner {
         tickCode.add(tickReturn);
         tickCode.add(new FrameNode(Opcodes.F_SAME, 0, null, 0, null));
         tickCode.add(new InsnNode(Opcodes.RETURN));
-        tick.maxStack = 7;
-        tick.maxLocals = 1;
+        tick.maxStack = 4;
+        tick.maxLocals = 3;
         movingParticle.methods.add(tick);
         nodes.put(particleName, movingParticle);
 
