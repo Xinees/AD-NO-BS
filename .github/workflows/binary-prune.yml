@@ -832,9 +832,11 @@ jobs:
                   "sculk_bow", "scorching_horn", "therimoss_claws",
                   "coralosaur", "obsidiceratops", "sculkraptor", "therimoss", "archie",
               )
+              asset_prefix = "assets/archie_dinosaurs/"
               extra_assets = sorted(
                   name for name in names
-                  if name.startswith("assets/archie_dinosaurs/") and any(token in name.lower() for token in banned_assets)
+                  if name.startswith(asset_prefix)
+                  and any(token in name[len(asset_prefix):].lower() for token in banned_assets)
               )
               if extra_assets:
                   raise SystemExit("Unexpected assets left in JAR:\n" + "\n".join(extra_assets))
