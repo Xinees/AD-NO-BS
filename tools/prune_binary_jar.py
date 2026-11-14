@@ -501,6 +501,11 @@ with zipfile.ZipFile(source, "r") as zin:
             removed.append(name)
             continue
 
+        if name.endswith(".json") and (
+            name.startswith("assets/ec_ad/") or name.startswith("data/ec_ad/")
+        ):
+            data = dump_json(rewrite_entity_namespace(read_json(data, name)))
+
         kept[name] = data
 
 with zipfile.ZipFile(target, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as zout:
