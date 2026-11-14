@@ -284,6 +284,21 @@ jobs:
           fi
           echo "Verified Lushsaur-only 13-pixel seat correction and vanilla E inventory behavior."
 
+          LOCAL_PLAYER_MIXIN='com.eternal_creations.archies_dino_mod.mixin.client.LocalPlayerMixin'
+          verify_method "$LOCAL_PLAYER_MIXIN" \
+            'archiesDinoMod$openLushsaurPlayerInventory(' \
+            '(Lorg/spongepowered/asm/mixin/injection/callback/CallbackInfo;)V'
+          LOCAL_INVENTORY="$(javap -classpath build/classes-pruned.jar -p -c "$LOCAL_PLAYER_MIXIN")"
+          for required_call in 'LocalPlayer.m_20202_' 'LushsaurEntity' \
+            'Minecraft.m_91087_' 'InventoryScreen."<init>"' 'Minecraft.m_91152_' 'CallbackInfo.cancel'; do
+            if ! printf '%s\n' "$LOCAL_INVENTORY" | grep -Fq "$required_call"; then
+              echo "Lushsaur E-key inventory redirect is missing $required_call"
+              printf '%s\n' "$LOCAL_INVENTORY"
+              exit 1
+            fi
+          done
+          echo "Verified E opens the local player's vanilla InventoryScreen only while riding Lushsaur."
+
           LUSH_EFFECTS='com.eternal_creations.archies_dino_mod.client.particle.effect.LushsaurEffects'
           LUSH_EFFECTS_BYTECODE="$(javap -classpath build/classes-pruned.jar -p -c "$LUSH_EFFECTS")"
           LUSH_RUN_TRAIL="$(printf '%s\n' "$LUSH_EFFECTS_BYTECODE" | awk '/lambda\$static\$3\(/ { capture=1; print; next } capture && /^  (private|public|protected) / { exit } capture { print }')"
