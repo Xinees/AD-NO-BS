@@ -13,7 +13,7 @@ public final class JarPruner {
 
     private static final Map<String, Set<String>> REGISTRY_FIELDS = Map.ofEntries(
         Map.entry(ROOT + "common/items/ADItems", Set.of(
-            "LUSH_CORE", "CHORUS_FOSSIL", "SCULK_TOXIN",
+            "LUSH_CORE", "CHORUS_FOSSIL", "SCULK_TOXIN", "LUSHSAUR_MACE", "OOZE_TIPPED_ARROW",
             "LUSHSAUR_EGG", "CHORUSOATL_EGG",
             "LUSHSAUR_SPAWN_EGG", "CHORUSOATL_SPAWN_EGG", "SCULKSAUR_SPAWN_EGG"
         )),
@@ -21,7 +21,7 @@ public final class JarPruner {
         Map.entry(ROOT + "common/block/entity/ADBlockEntityTypes", Set.of("LUSHSAUR_EGG", "CHORUSOATL_EGG")),
         Map.entry(ROOT + "common/menu/ADMenus", Set.of("DINO")),
         Map.entry(ROOT + "common/entity/ADEntityTypes", Set.of(
-            "SPAWN_INFO", "LUSHSAUR", "CHORUSOATL", "SCULKSAUR", "CHORUSOATL_SPIT"
+            "SPAWN_INFO", "LUSHSAUR", "CHORUSOATL", "SCULKSAUR", "CHORUSOATL_SPIT", "PUS_TIPPED_ARROW"
         )),
         Map.entry(ROOT + "common/entity/ADActionTypes", Set.of(
             "ATTACK_HEADBUTT", "ATTACK_BITE", "ATTACK_TAIL", "ATTACK_TAIL_STOMP",
@@ -34,7 +34,7 @@ public final class JarPruner {
         Map.entry(ROOT + "common/entity/ADActivities", Set.of("CHASE")),
         Map.entry(ROOT + "common/entity/ADMemoryModuleTypes", Set.of("IS_ENRAGED", "WALK_COMMAND")),
         Map.entry(ROOT + "common/effect/ADMobEffects", Set.of("DAZED")),
-        Map.entry(ROOT + "common/ADGameEvents", Set.of()),
+        Map.entry(ROOT + "common/ADGameEvents", Set.of("PUS_ARROW_AGGRO")),
         Map.entry(ROOT + "common/particle/ADParticles", Set.of(
             "DUST_PILLAR",
             "CHORUSOATL_SPIT_0", "CHORUSOATL_SPIT_1", "CHORUSOATL_SPIT_AOE", "CHORUSOATL_SPIT_PROJECTILE",
@@ -42,6 +42,7 @@ public final class JarPruner {
             "SCULKSAUR_EXPLOSION_5", "SCULKSAUR_EXPLOSION_6"
         )),
         Map.entry(ROOT + "common/sound/ADSoundEvents", Set.of(
+            "MACE_ATTACK", "MACE_SPIN",
             "DINO_EQUIP", "DINO_EGG_PICKUP", "DINO_EGG_BREAK", "DINO_EGG_CRACK", "DINO_EGG_HATCH", "DINO_EGG_LAY",
             "LUSHSAUR_IDLE", "LUSHSAUR_ATTACK_HEADBUTT", "LUSHSAUR_ATTACK_BITE",
             "LUSHSAUR_ATTACK_TAIL_STOMP", "LUSHSAUR_ATTACK_TAIL_SWING", "LUSHSAUR_EMERGE",
@@ -60,13 +61,13 @@ public final class JarPruner {
             "LUSHSAUR", "LUSHSAUR_BABY", "CHORUSOATL", "CHORUSOATL_BABY", "SCULKSAUR"
         )),
         Map.entry(ROOT + "client/model/registry/ADBlockEntityModels", Set.of("LUSHSAUR_EGG", "CHORUSOATL_EGG")),
-        Map.entry(ROOT + "client/model/registry/ADAttachableModels", Set.of())
+        Map.entry(ROOT + "client/model/registry/ADAttachableModels", Set.of("LUSHSAUR_MACE"))
     );
 
     private static final List<String> CREATIVE_ITEMS = List.of(
         "LUSHSAUR_SPAWN_EGG", "CHORUSOATL_SPAWN_EGG", "SCULKSAUR_SPAWN_EGG",
         "LUSHSAUR_EGG", "CHORUSOATL_EGG",
-        "LUSH_CORE", "SCULK_TOXIN", "CHORUS_FOSSIL"
+        "LUSH_CORE", "SCULK_TOXIN", "CHORUS_FOSSIL", "LUSHSAUR_MACE", "OOZE_TIPPED_ARROW"
     );
 
     private static final Map<String, Set<String>> FRAMEWORK_CALLBACK_METHODS = Map.of(
@@ -119,6 +120,11 @@ public final class JarPruner {
 
     private static final Set<String> MIXIN_ROOTS = Set.of(
         ROOT + "mixin/AbstractArrowMixin",
+        ROOT + "mixin/DamageSourcesMixin",
+        ROOT + "mixin/PlayerInterfaceMixin",
+        ROOT + "mixin/ServerPlayerInterfaceMixin",
+        ROOT + "mixin/PlayerAttackDamageBonusMixin",
+        ROOT + "mixin/forge/ADWeaponItemMixin",
         ROOT + "mixin/BreedGoalAccessor",
         ROOT + "mixin/CriteriaTriggersAccessor",
         ROOT + "mixin/EntityAccessor",
@@ -188,6 +194,7 @@ public final class JarPruner {
         patchTemptItems(nodes.get(ROOT + "common/entity/mob/chorusoatl/ai/ChorusoatlAI"), "CHORUS_FOSSIL");
         patchEntitySettings(nodes.get(ROOT + "server/ServerConfig$EntitySettings"));
         patchServerConfig(nodes.get(ROOT + "server/ServerConfig"));
+        patchLushMaceItemFactory(nodes.get(ROOT + "common/items/ADItems"));
         patchNetworkHelper(nodes.get(ROOT + "platform/ForgeNetworkHelper"));
         patchKeyMappings(nodes.get(ROOT + "client/ADKeyMappings"));
         patchAbstractArrowMixin(nodes.get(ROOT + "mixin/AbstractArrowMixin"));
@@ -492,10 +499,12 @@ public final class JarPruner {
                 InsnList code = method.instructions;
                 code.add(new MethodInsnNode(Opcodes.INVOKESTATIC, ROOT + "client/model/registry/ADEntityModels", "init", "()V", false));
                 code.add(new MethodInsnNode(Opcodes.INVOKESTATIC, ROOT + "client/model/registry/ADBlockEntityModels", "init", "()V", false));
+                code.add(new MethodInsnNode(Opcodes.INVOKESTATIC, ROOT + "client/model/registry/ADAttachableModels", "init", "()V", false));
                 code.add(new MethodInsnNode(Opcodes.INVOKESTATIC, ROOT + "client/animation/player/ADPlayerAnimations", "init", "()V", false));
                 code.add(new MethodInsnNode(Opcodes.INVOKESTATIC, ROOT + "client/particle/ADParticleEmitters", "init", "()V", false));
                 code.add(new MethodInsnNode(Opcodes.INVOKESTATIC, owner.name, "registerEntityRenderers", "()V", false));
                 code.add(new MethodInsnNode(Opcodes.INVOKESTATIC, owner.name, "registerBlockEntityRenderers", "()V", false));
+                code.add(new MethodInsnNode(Opcodes.INVOKESTATIC, owner.name, "registerLegacyAttachables", "()V", false));
                 code.add(new InsnNode(Opcodes.RETURN));
                 method.maxLocals = 0;
             }
@@ -521,6 +530,8 @@ public final class JarPruner {
                     Type.getMethodType("(Lnet/minecraft/client/renderer/entity/EntityRendererProvider$Context;)Lnet/minecraft/client/renderer/entity/NoopRenderer;")));
                 code.add(new MethodInsnNode(Opcodes.INVOKESTATIC, owner.name, "registerEntityRenderer",
                     "(Ljava/util/function/Supplier;Lnet/minecraft/client/renderer/entity/EntityRendererProvider;)V", false));
+
+                addPusArrowEntityRenderer(method, owner.name);
                 code.add(new InsnNode(Opcodes.RETURN));
                 method.maxLocals = 0;
             }
@@ -533,6 +544,45 @@ public final class JarPruner {
                 method.maxLocals = 0;
             }
         }
+
+        owner.methods.removeIf(method ->
+            method.name.equals("registerLegacyAttachables") && method.desc.equals("()V"));
+        MethodNode attachables = new MethodNode(
+            Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC,
+            "registerLegacyAttachables", "()V", null, null);
+        InsnList code = attachables.instructions;
+        code.add(new InsnNode(Opcodes.ICONST_1));
+        code.add(new TypeInsnNode(Opcodes.ANEWARRAY,
+            "com/astemir/astemirlib/re/client/model/core/attachable/Attachable$Builder"));
+        code.add(new InsnNode(Opcodes.DUP));
+        code.add(new InsnNode(Opcodes.ICONST_0));
+        code.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
+            ROOT + "client/model/attachable/LushsaurMaceAttachable", "create",
+            "()Lcom/astemir/astemirlib/re/client/model/core/attachable/Attachable$Builder;", false));
+        code.add(new InsnNode(Opcodes.AASTORE));
+        code.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
+            "com/astemir/astemirlib/re/client/model/core/attachable/Attachable", "register",
+            "([Lcom/astemir/astemirlib/re/client/model/core/attachable/Attachable$Builder;)V", false));
+        code.add(new InsnNode(Opcodes.RETURN));
+        attachables.maxStack = 4;
+        attachables.maxLocals = 0;
+        owner.methods.add(attachables);
+    }
+
+    private static void addPusArrowEntityRenderer(MethodNode method, String commonClientOwner) {
+        InsnList code = method.instructions;
+        code.add(new FieldInsnNode(Opcodes.GETSTATIC, ROOT + "common/entity/ADEntityTypes",
+            "PUS_TIPPED_ARROW", "L" + ROOT + "util/ResourceSupplier;"));
+        code.add(new InvokeDynamicInsnNode("m_174009_",
+            "()Lnet/minecraft/client/renderer/entity/EntityRendererProvider;",
+            new Handle(Opcodes.H_INVOKESTATIC, "java/lang/invoke/LambdaMetafactory", "metafactory",
+                "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;", false),
+            Type.getMethodType("(Lnet/minecraft/client/renderer/entity/EntityRendererProvider$Context;)Lnet/minecraft/client/renderer/entity/EntityRenderer;"),
+            new Handle(Opcodes.H_INVOKESTATIC, commonClientOwner, "lambda$registerEntityRenderers$0",
+                "(Lnet/minecraft/client/renderer/entity/EntityRendererProvider$Context;)Lnet/minecraft/client/renderer/entity/EntityRenderer;", false),
+            Type.getMethodType("(Lnet/minecraft/client/renderer/entity/EntityRendererProvider$Context;)Lnet/minecraft/client/renderer/entity/EntityRenderer;")));
+        code.add(new MethodInsnNode(Opcodes.INVOKESTATIC, commonClientOwner, "registerEntityRenderer",
+            "(Ljava/util/function/Supplier;Lnet/minecraft/client/renderer/entity/EntityRendererProvider;)V", false));
     }
 
     private static void addEntityRenderer(MethodNode method, String entityField, String rendererOwner, String rendererMethod) {
@@ -1580,6 +1630,52 @@ public final class JarPruner {
                 method.maxLocals = 0;
             }
         }
+    }
+
+    private static void patchLushMaceItemFactory(ClassNode owner) {
+        if (owner == null) throw new IllegalStateException("ADItems class is missing");
+
+        String maceOwner = ROOT + "common/items/weapon/LushsaurMaceItem";
+        String statsOwner = ROOT + "common/items/util/ADWeaponItem$WeaponStats";
+        String factoryDescriptor =
+            "(Lnet/minecraft/world/item/Item$Properties;)L" + maceOwner + ";";
+        MethodNode factory = owner.methods.stream()
+            .filter(method -> method.name.equals("lambda$static$0") &&
+                method.desc.equals(factoryDescriptor))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("Lushsaur mace item factory is missing"));
+
+        owner.methods.removeIf(method ->
+            method.name.equals("legacyLushMaceStats") &&
+            method.desc.equals("()L" + statsOwner + ";"));
+
+        MethodNode statsSupplier = new MethodNode(
+            Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC,
+            "legacyLushMaceStats", "()L" + statsOwner + ";", null, null);
+        statsSupplier.instructions.add(new FieldInsnNode(Opcodes.GETSTATIC,
+            maceOwner, "DEFAULT_STATS", "L" + statsOwner + ";"));
+        statsSupplier.instructions.add(new InsnNode(Opcodes.ARETURN));
+        statsSupplier.maxStack = 1;
+        statsSupplier.maxLocals = 0;
+        owner.methods.add(statsSupplier);
+
+        clearMethod(factory);
+        InsnList code = factory.instructions;
+        code.add(new TypeInsnNode(Opcodes.NEW, maceOwner));
+        code.add(new InsnNode(Opcodes.DUP));
+        code.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        code.add(new InvokeDynamicInsnNode("get", "()Ljava/util/function/Supplier;",
+            new Handle(Opcodes.H_INVOKESTATIC, "java/lang/invoke/LambdaMetafactory", "metafactory",
+                "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;", false),
+            Type.getMethodType("()Ljava/lang/Object;"),
+            new Handle(Opcodes.H_INVOKESTATIC, owner.name, "legacyLushMaceStats",
+                "()L" + statsOwner + ";", false),
+            Type.getMethodType("()L" + statsOwner + ";")));
+        code.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, maceOwner, "<init>",
+            "(Lnet/minecraft/world/item/Item$Properties;Ljava/util/function/Supplier;)V", false));
+        code.add(new InsnNode(Opcodes.ARETURN));
+        factory.maxStack = 4;
+        factory.maxLocals = 1;
     }
 
     private static void patchAbstractArrowMixin(ClassNode owner) {
@@ -2672,8 +2768,15 @@ public final class JarPruner {
     private static boolean shouldKeepAllMethods(String name, Set<String> roots) {
         if (roots.contains(name)) return true;
 
-        return name.startsWith(ROOT + "common/entity/base/") ||
-            name.startsWith(ROOT + "common/entity/component/") ||
+        return name.equals(ROOT + "common/items/weapon/LushsaurMaceItem") ||
+            name.startsWith(ROOT + "common/items/util/ADWeaponItem") ||
+            name.equals(ROOT + "common/items/PusArrowItem") ||
+            name.equals(ROOT + "common/entity/projectile/PusTippedArrowEntity") ||
+            name.equals(ROOT + "client/CommonClient$1") ||
+            name.startsWith(ROOT + "client/model/attachable/LushsaurMaceAttachable") ||
+            name.equals(ROOT + "client/animation/player/attachable/LushsaurMaceAnimations") ||
+            name.startsWith(ROOT + "common/entity/base/") ||
+            name.startsWith(ROOT + "common/entity/component/")
             name.startsWith(ROOT + "common/entity/ai/") ||
             name.startsWith(ROOT + "common/entity/utils/") ||
             name.startsWith(ROOT + "common/entity/mob/lushsaur/") ||
