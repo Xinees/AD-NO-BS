@@ -6,7 +6,9 @@
 
 This file is the explicit task list for the next Legacy work. The order below is intentional. Do not quietly reduce these requests to cosmetic tweaks, and do not mix unrelated behavior changes into one patch.
 
-## Build119 implementation status — rider controls, roll and particle cleanup
+## Current baseline and test status
+
+### Build119 implementation status — rider controls, roll and particle cleanup
 
 **Implementation commit:** `d9ae4f5bac2040ffe7788fd24174becf9f933f8a`  
 **Latest CI guard commit:** `c9f46bded6d8900ac96c96e8eb3f48aa771d4d82`  
@@ -71,8 +73,6 @@ Runner output: `ec_ad-legacy-forge-1.20.1.jar`, **468 entries**, **2,480,309 byt
 6. Confirm unrelated attacks, taming, inventory/equipment behavior on Chorusoatl, and Sculksaur non-footstep particle tracks.
 
 ---
-
-## Current baseline and test status
 
 ### Build 118 — previous implementation; superseded by Build119
 
