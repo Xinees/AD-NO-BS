@@ -238,48 +238,48 @@ jobs:
 
           SCULK_EFFECTS='com.eternal_creations.archies_dino_mod.client.particle.effect.SculksaurEffects'
           SCULK_DISASSEMBLY="$(javap -classpath build/classes-pruned.jar -p -c "$SCULK_EFFECTS")"
-          SCULK_FINAL="$(printf '%s\\n' "$SCULK_DISASSEMBLY" | awk '
-            /^[[:space:]]+private static void lambda\\$explosionFinalEvent\\$12\\(/ { capture=1 }
-            capture && /^[[:space:]]+(private|public|protected) / && $0 !~ /lambda\\$explosionFinalEvent\\$12\\(/ { exit }
+          SCULK_FINAL="$(printf '%s\n' "$SCULK_DISASSEMBLY" | awk '
+            /^[[:space:]]+private static void lambda\$explosionFinalEvent\$12\(/ { capture=1 }
+            capture && /^[[:space:]]+(private|public|protected) / && $0 !~ /lambda\$explosionFinalEvent\$12\(/ { exit }
             capture { print }
           ')"
-          if ! printf '%s\\n' "$SCULK_FINAL" | grep -Fq 'ShakeUtil.shakeExplosion'; then
+          if ! printf '%s\n' "$SCULK_FINAL" | grep -Fq 'ShakeUtil.shakeExplosion'; then
             echo "Sculksaur explosion event must keep its original camera shake."
-            printf '%s\\n' "$SCULK_FINAL"
+            printf '%s\n' "$SCULK_FINAL"
             exit 1
           fi
           for forbidden_call in 'spawnSculksaurSonicBoom' 'spawnParticle' 'Shockwave.of' 'ColoredLight.of'; do
-            if printf '%s\\n' "$SCULK_FINAL" | grep -Fq "$forbidden_call"; then
+            if printf '%s\n' "$SCULK_FINAL" | grep -Fq "$forbidden_call"; then
               echo "Sculksaur explosion event still contains removed particle/post-process behavior: $forbidden_call"
-              printf '%s\\n' "$SCULK_FINAL"
+              printf '%s\n' "$SCULK_FINAL"
               exit 1
             fi
           done
 
-          SCULK_GROUND="$(printf '%s\\n' "$SCULK_DISASSEMBLY" | awk '
-            /^[[:space:]]+private static void lambda\\$explosionGroundEvent\\$11\\(/ { capture=1 }
-            capture && /^[[:space:]]+(private|public|protected) / && $0 !~ /lambda\\$explosionGroundEvent\\$11\\(/ { exit }
+          SCULK_GROUND="$(printf '%s\n' "$SCULK_DISASSEMBLY" | awk '
+            /^[[:space:]]+private static void lambda\$explosionGroundEvent\$11\(/ { capture=1 }
+            capture && /^[[:space:]]+(private|public|protected) / && $0 !~ /lambda\$explosionGroundEvent\$11\(/ { exit }
             capture { print }
           ')"
-          if printf '%s\\n' "$SCULK_GROUND" | grep -Fq 'spawnParticle'; then
+          if printf '%s\n' "$SCULK_GROUND" | grep -Fq 'spawnParticle'; then
             echo "Sculksaur ground explosion callback still emits particles."
-            printf '%s\\n' "$SCULK_GROUND"
+            printf '%s\n' "$SCULK_GROUND"
             exit 1
           fi
 
           for forbidden_effect_symbol in 'SculksaurSonicBoomParticle' 'spawnSculksaurSonicBoom' 'secondSonicBoomEvent'; do
-            if printf '%s\\n' "$SCULK_DISASSEMBLY" | grep -Fq "$forbidden_effect_symbol"; then
+            if printf '%s\n' "$SCULK_DISASSEMBLY" | grep -Fq "$forbidden_effect_symbol"; then
               echo "Removed custom Sculksaur explosion particle implementation remains: $forbidden_effect_symbol"
               exit 1
             fi
           done
           for required_track_marker in 'float 4.68f' 'float 5.12f' 'EXPLOSION_EFFECTS'; do
-            if ! printf '%s\\n' "$SCULK_DISASSEMBLY" | grep -Fq "$required_track_marker"; then
+            if ! printf '%s\n' "$SCULK_DISASSEMBLY" | grep -Fq "$required_track_marker"; then
               echo "Original Sculksaur explosion/tendril event track lost $required_track_marker"
               exit 1
             fi
           done
-          if printf '%s\\n' "$SCULK_DISASSEMBLY" | grep -Fq 'float 4.88f'; then
+          if printf '%s\n' "$SCULK_DISASSEMBLY" | grep -Fq 'float 4.88f'; then
             echo "Delayed second explosion-particle event still exists."
             exit 1
           fi
@@ -288,40 +288,40 @@ jobs:
           LUSHSAUR_CLIENT='com.eternal_creations.archies_dino_mod.client.model.render.entity.mob.LushsaurClient'
           SCULKSAUR_CLIENT='com.eternal_creations.archies_dino_mod.client.model.render.entity.mob.SculksaurClient'
           LUSH_PHYSICS="$(javap -classpath build/classes-pruned.jar -p -c "$LUSHSAUR_CLIENT" | awk '
-            /^[[:space:]]+private void setupPhysics\\(/ { capture=1 }
-            capture && /^[[:space:]]+(public|protected|private) / && $0 !~ /setupPhysics\\(/ { exit }
+            /^[[:space:]]+private void setupPhysics\(/ { capture=1 }
+            capture && /^[[:space:]]+(public|protected|private) / && $0 !~ /setupPhysics\(/ { exit }
             capture { print }
           ')"
           SCULK_PHYSICS="$(javap -classpath build/classes-pruned.jar -p -c "$SCULKSAUR_CLIENT" | awk '
-            /^[[:space:]]+private void setupPhysics\\(/ { capture=1 }
-            capture && /^[[:space:]]+(public|protected|private) / && $0 !~ /setupPhysics\\(/ { exit }
+            /^[[:space:]]+private void setupPhysics\(/ { capture=1 }
+            capture && /^[[:space:]]+(public|protected|private) / && $0 !~ /setupPhysics\(/ { exit }
             capture { print }
           ')"
           for tail_bone in 'String tail1' 'String tail2' 'String mase' 'String tail'; do
-            if printf '%s\\n' "$LUSH_PHYSICS" | grep -Fq "$tail_bone"; then
+            if printf '%s\n' "$LUSH_PHYSICS" | grep -Fq "$tail_bone"; then
               echo "Lushsaur tail physics bone remains enabled: $tail_bone"
-              printf '%s\\n' "$LUSH_PHYSICS"
+              printf '%s\n' "$LUSH_PHYSICS"
               exit 1
             fi
           done
           for preserved_lush_bone in 'String string' 'String beetroot'; do
-            if ! printf '%s\\n' "$LUSH_PHYSICS" | grep -Fq "$preserved_lush_bone"; then
+            if ! printf '%s\n' "$LUSH_PHYSICS" | grep -Fq "$preserved_lush_bone"; then
               echo "Lushsaur non-tail item physics was unexpectedly removed: $preserved_lush_bone"
-              printf '%s\\n' "$LUSH_PHYSICS"
+              printf '%s\n' "$LUSH_PHYSICS"
               exit 1
             fi
           done
           for tail_bone in 'String tail1' 'String tail2'; do
-            if printf '%s\\n' "$SCULK_PHYSICS" | grep -Fq "$tail_bone"; then
+            if printf '%s\n' "$SCULK_PHYSICS" | grep -Fq "$tail_bone"; then
               echo "Sculksaur tail physics bone remains enabled: $tail_bone"
-              printf '%s\\n' "$SCULK_PHYSICS"
+              printf '%s\n' "$SCULK_PHYSICS"
               exit 1
             fi
           done
           for preserved_leg in 'LegSolverModule.addLeg' 'String leg_left' 'String leg_right'; do
-            if ! printf '%s\\n' "$SCULK_PHYSICS" | grep -Fq "$preserved_leg"; then
+            if ! printf '%s\n' "$SCULK_PHYSICS" | grep -Fq "$preserved_leg"; then
               echo "Sculksaur leg IK was unexpectedly removed: $preserved_leg"
-              printf '%s\\n' "$SCULK_PHYSICS"
+              printf '%s\n' "$SCULK_PHYSICS"
               exit 1
             fi
           done
