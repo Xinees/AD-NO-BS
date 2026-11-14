@@ -234,11 +234,11 @@ jobs:
 
           MOUNT_COMPONENT='com.eternal_creations.archies_dino_mod.common.entity.component.MountComponent'
           MOUNT_COMPONENT_BYTECODE="$(javap -classpath build/classes-pruned.jar -p -c "$MOUNT_COMPONENT")"
-          MOUNT_TICK="$(awk '/tickRidden\\(/ { capture=1; print; next } capture && /^  (public|private|protected) / { exit } capture { print }' <<< "$MOUNT_COMPONENT_BYTECODE")"
+          MOUNT_TICK="$(awk '/tickRidden\(/ { capture=1; print; next } capture && /^  (public|private|protected) / { exit } capture { print }' <<< "$MOUNT_COMPONENT_BYTECODE")"
           for required_control in 'Player.f_20900_' 'Player.f_20902_' 'LushsaurEntity' 'ChorusoatlEntity'; do
             if ! grep -Fq "$required_control" <<< "$MOUNT_TICK"; then
               echo "Movement-gated mount steering is missing $required_control"
-              printf '%s\\n' "$MOUNT_TICK"
+              printf '%s\n' "$MOUNT_TICK"
               exit 1
             fi
           done
@@ -247,20 +247,20 @@ jobs:
           ABS_COUNT="$(grep -F -c 'java.lang.Math.abs' <<< "$MOUNT_TICK" || true)"
           if [ "$SIGNUM_COUNT" -ne 2 ] || [ "$ABS_COUNT" -ne 4 ]; then
             echo "Expected two branchless horizontal-input gates (2 signum / 4 abs), found signum=$SIGNUM_COUNT abs=$ABS_COUNT"
-            printf '%s\\n' "$MOUNT_TICK"
+            printf '%s\n' "$MOUNT_TICK"
             exit 1
           fi
 
           if ! grep -Fq 'i2f' <<< "$MOUNT_TICK" || ! grep -Fq 'fmul' <<< "$MOUNT_TICK"; then
             echo "Missing branchless rider-pitch neutralization for Lushsaur/Chorusoatl."
-            printf '%s\\n' "$MOUNT_TICK"
+            printf '%s\n' "$MOUNT_TICK"
             exit 1
           fi
 
           BRANCH_COUNT="$(grep -E -c '^[[:space:]]+[0-9]+: (if[a-z]+|goto|tableswitch|lookupswitch)' <<< "$MOUNT_TICK" || true)"
           if [ "$BRANCH_COUNT" -ne 3 ]; then
             echo "MountComponent.tickRidden must retain only its three original branches; found $BRANCH_COUNT."
-            printf '%s\\n' "$MOUNT_TICK"
+            printf '%s\n' "$MOUNT_TICK"
             exit 1
           fi
           echo "Verified branchless horizontal-input steering and pitch neutralization; original tickRidden control flow and stack-map frames remain intact."
