@@ -1,16 +1,15 @@
 # AD-NO-BS Legacy recovery status
 
-## Latest integrated candidate — CI #237 — 2026-11-14
+## Latest integrated candidate — CI #252 — 2026-11-14
 
-- [GitHub Actions #237](https://github.com/Xinees/AD-NO-BS/actions/runs/43643195675) completed successfully. It passed source-JAR integrity, bytecode/resource pruning, retained controller and renderer audits, framework/mount override checks, the Lushsaur no-equipment audit, and the final 468-entry JAR audit.
-- Implementation commit: [`4e2a9b9`](https://github.com/Xinees/AD-NO-BS/commit/4e2a9b9308949ce5fe5be16122bca6f4e3768248). Output: 468 entries, 2,488,585 bytes.
-- Download: [`archie_dinosaurs-legacy-forge-1.20.1.jar`](https://github.com/Xinees/AD-NO-BS/releases/download/untagged-245a84653106512cd24b/archie_dinosaurs-legacy-forge-1.20.1.jar). Draft release: [Legacy CI build #237](https://github.com/Xinees/AD-NO-BS/releases/tag/untagged-245a84653106512cd24b).
-- **Lushsaur no-equipment implementation:** no custom equipment-slot override remains. `getSlot(int)` returns `SlotAccess.NULL` for every slot; `getItemBySlot` returns `ItemStack.EMPTY`; `setItemSlot` is a no-op; `equipItemIfPossible` returns the original stack; `canHoldItem` and `wantsToPickUp` return false; `pickUpItem` is disabled. `getInventorySize()` returns zero and `updateContainerEquipment()` no longer syncs a saddle slot. `isSaddleable()`/`isSaddled()` remain false and `setSaddled` is a no-op.
-- **Riding and control were kept separate:** the patch does not alter `createMount`, `MountComponent.tickRidden`, passenger/controller resolution, movement and sprint callbacks, attack dispatch, or the original Lushsaur `mobInteract` body. All existing CI checks for rider input, steering/pitch, sprint, mounted attacks, and retained controller bytecode passed on this build.
-- Localization remains validated in both `en_us` and `ru_ru`. The package retains full `archie_dinosaurs` mod ID/namespace migration.
-- Original source JAR was not modified; SHA-256 remains `8df20e08d46f778a6e975b60b0cc7e19ff674264834812015537d7ef0fb121b1`.
-- **Runtime status:** no Minecraft launch was done in this session. Test Shift-right-click and other equipment attempts (including vanilla equipment slots), no saddle item loss/sound, normal taming/feeding interactions, mounting/steering/attacks, and movement in-game. CI confirms bytecode shape, not runtime acceptance.
-
+- [GitHub Actions #252](https://github.com/Xinees/AD-NO-BS/actions/runs/43651963428) completed successfully. It passed source-JAR integrity, class/resource pruning, controller/renderer audits, mount regression checks, the new Lush Mace/Ooze Arrow behavior checks, final 502-entry JAR validation and draft-release publication.
+- Current implementation/validation commit: `346b60d10182184fcf23d2c6c4d2c06e5e1282da`. Output: **502 entries**, **2,547,437 bytes**.
+- Download: [`archie_dinosaurs-legacy-forge-1.20.1.jar`](https://github.com/Xinees/AD-NO-BS/releases/download/untagged-d029ad29810418ef8e73/archie_dinosaurs-legacy-forge-1.20.1.jar). Draft release: [Legacy CI build #252](https://github.com/Xinees/AD-NO-BS/releases/tag/untagged-d029ad29810418ef8e73).
+- **Lush Mace restored:** normal attack, fall-smash scaling, spin attack with 30-second cooldown, original default stats, player attack/sync hooks, attachable model and animation, sound events and tooltip/localization.
+- **Ooze Tipped Arrow restored:** original projectile/item, entity registry and renderer, custom damage type, 200-tick blindness/nausea/poison on hit, ×2 damage against ordinary targets and ×4 against sculk-tagged targets. The `pus_arrow_aggro` event is included in the vanilla vibration and Warden-listening tags.
+- Exact crafting: 4 Ooze Tipped Arrows from Sculk Toxin + wooden rod tag + feather tag; 1 Lush Mace from Lush Core + 2 Dripstone Blocks. Recipe advancements and creative-tab entries are included. The arrow's original visible name is Sculk Tipped Arrow / Стрела со скалком.
+- The provided 1.0.5 JAR was used for original item reference. CI still uses the pinned, untouched 1.0.4 input JAR; source SHA-256 remains `8df20e08d46f778a6e975b60b0cc7e19ff674264834812015537d7ef0fb121b1`. Astemir RE remains a separate mandatory dependency.
+- **Runtime status:** CI validates the compiled classes, mixin registrations, item/entity registries, recipes, resources and archive. It does not prove live Minecraft behavior. Test the two recipes, mace model/animation/normal and fall attacks/spin/cooldown/sounds, arrow hit effects/damage/sculk vibration response/pickup, then recheck the previously working three mobs, eggs, ride controls and Lushsaur no-saddle behavior.
 ---
 
 
@@ -80,7 +79,7 @@ Build 12 is structurally verified by CI. The user has confirmed build 11 launche
 
 Produce a Forge 1.20.1 Legacy build from the untouched original Archie's Dinosaurs JAR. Retain only:
 - Mobs: Lushsaur, Chorusoatl, Sculksaur
-- Items: Lush Core, Chorus Fossil, Sculk Toxin
+- Items: Lush Core, Chorus Fossil, Sculk Toxin, Lush Mace and Ooze Tipped Arrow
 - Required hatchable eggs, spawn eggs, models, textures, animations, sounds, AI, particles, client rendering, mount inventory and riding controls
 
 The three mobs and their ordinary behavior are reported working. Do not alter their behavior, animations, stats, attacks, or balance beyond fixing the broken mounted-attack dispatch and the explicitly requested Lushsaur no-saddle control exception.
