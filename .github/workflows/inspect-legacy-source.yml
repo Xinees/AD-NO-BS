@@ -67,3 +67,11 @@ jobs:
           javap -classpath "$JAR" -p -c com.eternal_creations.archies_dino_mod.client.model.render.entity.mob.LushsaurClient
           echo '===== CHORUSOATL CLIENT ====='
           javap -classpath "$JAR" -p -c com.eternal_creations.archies_dino_mod.client.model.render.entity.mob.ChorusoatlClient
+          echo '===== ENTITY REGISTRY DEFINITIONS ====='
+          javap -classpath "$JAR" -p -c com.eternal_creations.archies_dino_mod.common.entity.ADEntityTypes
+          echo '===== RESOURCE SUPPLIER ====='
+          javap -classpath "$JAR" -p -c com.eternal_creations.archies_dino_mod.util.ResourceSupplier
+          echo '===== ENTITY REGISTRY AND MOD ID REFERENCES ====='
+          jar tf "$JAR" | grep -E 'ADMod|ADEntityTypes|ResourceSupplier|Mod\.class$|mods\.toml | sort
+          echo '===== MOD METADATA ====='
+          unzip -p "$JAR" META-INF/mods.toml
