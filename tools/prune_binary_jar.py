@@ -29,6 +29,8 @@ ITEMS = {
     "lushsaur_spawn_egg",
     "chorusoatl_spawn_egg",
     "sculksaur_spawn_egg",
+    "lush_mace",
+    "ooze_tipped_arrow",
 }
 MOBS = {"lushsaur", "chorusoatl", "sculksaur"}
 EGGS = {"lushsaur_egg", "chorusoatl_egg"}
@@ -37,6 +39,7 @@ SOUND_PREFIXES = (
     "mob.lushsaur.",
     "mob.chorusoatl.",
     "mob.sculksaur.",
+    "item.lushsaur_mace.",
 )
 KEEP_MIXINS = {
     "mixins": [
@@ -44,6 +47,9 @@ KEEP_MIXINS = {
         "BreedGoalAccessor",
         "CriteriaTriggersAccessor",
         "EntityAccessor",
+        "DamageSourcesMixin",
+        "PlayerInterfaceMixin",
+        "ServerPlayerInterfaceMixin",
         "PlayerListMixin",
         "sculksaur.PrimaryLevelDataMixin",
         "sculksaur.SculkShriekerBlockEntityMixin",
@@ -59,7 +65,10 @@ KEEP_MIXINS = {
     ],
 }
 KEEP_FORGE_MIXINS = {
-    "mixins": [],
+    "mixins": [
+        "PlayerAttackDamageBonusMixin",
+        "forge.ADWeaponItemMixin",
+    ],
     "client": [],
 }
 
@@ -177,7 +186,7 @@ def rewrite_astemir_model(data, name):
 
 
 ENTITY_REGISTRY_NAMESPACE = "archie_dinosaurs"
-ENTITY_REGISTRY_NAMES = MOBS | {"chorusoatl_spit"}
+ENTITY_REGISTRY_NAMES = MOBS | {"chorusoatl_spit", "pus_tipped_arrow"}
 OLD_ENTITY_IDS = {f"{OLD_NAMESPACE}:{name}" for name in ENTITY_REGISTRY_NAMES}
 NEW_ENTITY_IDS = {f"{ENTITY_REGISTRY_NAMESPACE}:{name}" for name in ENTITY_REGISTRY_NAMES}
 
@@ -236,6 +245,12 @@ def key_is_allowed(key):
         f"item.{NEW_NAMESPACE}.lush_core",
         f"item.{NEW_NAMESPACE}.chorus_fossil",
         f"item.{NEW_NAMESPACE}.sculk_toxin",
+        f"item.{NEW_NAMESPACE}.lush_mace",
+        f"item.{NEW_NAMESPACE}.ooze_tipped_arrow",
+        f"item.{NEW_NAMESPACE}.desc.lush_mace",
+        f"entity.{NEW_NAMESPACE}.pus_tipped_arrow",
+        f"subtitles.{NEW_NAMESPACE}.item.lushsaur_mace.attack",
+        f"subtitles.{NEW_NAMESPACE}.item.lushsaur_mace.spin",
         f"item.{NEW_NAMESPACE}.lushsaur_spawn_egg",
         f"item.{NEW_NAMESPACE}.chorusoatl_spawn_egg",
         f"item.{NEW_NAMESPACE}.sculksaur_spawn_egg",
@@ -255,11 +270,15 @@ def keep_asset(path):
 
     if low.startswith("sounds/mob/"):
         return any(f"/{mob}/" in f"/{low}" for mob in MOBS) or low.startswith("sounds/mob/dino/")
+    if low.startswith("sounds/item/lushsaur_mace/"):
+        return low.endswith(".ogg")
     if low.startswith("sounds/"):
         return False
 
     if low.startswith("animations/player/riding/"):
         return low.endswith("/lushsaur.astemiranim") or low.endswith("/chorusoatl.astemiranim")
+    if low == "animations/player/attachable/lushsaur_mace.astemiranim":
+        return True
     if low.startswith("animations/"):
         return False
 
@@ -275,6 +294,9 @@ def keep_asset(path):
             "sculksaur.astemirmodel",
         }
 
+    if low == "models/attachable/lushsaur_mace.astemirmodel":
+        return True
+
     if low.startswith("models/block/"):
         return any(egg in low for egg in EGGS)
 
@@ -289,6 +311,12 @@ def keep_asset(path):
 
     if low.startswith("textures/block/"):
         return low.rsplit("/", 1)[-1] in {f"{egg}.png" for egg in EGGS}
+
+    if low == "textures/item/model/lushsaur_mace.png":
+        return True
+
+    if low == "textures/entity/projectiles/pus_tipped_arrow.png":
+        return True
 
     if low.startswith("textures/item/"):
         name = low.rsplit("/", 1)[-1]
@@ -328,6 +356,9 @@ def keep_data_path(path):
     rel = path[len(DATA):]
     low = rel.lower()
     base = low.rsplit("/", 1)[-1]
+
+    if low.startswith("advancements/recipes/"):
+        return base in {"lush_mace.json", "ooze_tipped_arrow.json"}
 
     if low.startswith("advancements/"):
         if base == "root.json":
@@ -382,7 +413,7 @@ def keep_data_path(path):
         return base in {"lushsaur.nbt", "lushsaur_kid.nbt"}
 
     if low.startswith("damage_type/"):
-        return False
+        return base == "pus_arrow.json"
 
     return False
 
@@ -488,7 +519,7 @@ def extend_chorusoatl_hatchable(data):
 
 def filter_tag_json(data, name):
     value = rewrite_entity_namespace(read_json(data, name))
-    allowed = ITEMS | EGGS | MOBS | {"chorusoatl_spit"}
+    allowed = ITEMS | EGGS | MOBS | {"chorusoatl_spit", "pus_tipped_arrow"}
     if isinstance(value, dict) and isinstance(value.get("values"), list):
         value["values"] = [
             item for item in value["values"]
@@ -534,6 +565,7 @@ def validate_advancement_graph(entries):
         "archie_dinosaurs:lushsaur_egg", "archie_dinosaurs:chorusoatl_egg",
         "archie_dinosaurs:lushsaur_spawn_egg", "archie_dinosaurs:chorusoatl_spawn_egg",
         "archie_dinosaurs:sculksaur_spawn_egg",
+        "archie_dinosaurs:lush_mace", "archie_dinosaurs:ooze_tipped_arrow",
     }
     for name, doc in docs.items():
         parent = doc.get("parent")
@@ -721,6 +753,12 @@ with zipfile.ZipFile(target, "r") as check:
         "item.archie_dinosaurs.lush_core",
         "item.archie_dinosaurs.chorus_fossil",
         "item.archie_dinosaurs.sculk_toxin",
+        "item.archie_dinosaurs.lush_mace",
+        "item.archie_dinosaurs.ooze_tipped_arrow",
+        "item.archie_dinosaurs.desc.lush_mace",
+        "entity.archie_dinosaurs.pus_tipped_arrow",
+        "subtitles.archie_dinosaurs.item.lushsaur_mace.attack",
+        "subtitles.archie_dinosaurs.item.lushsaur_mace.spin",
         "block.archie_dinosaurs.lushsaur_egg",
         "block.archie_dinosaurs.chorusoatl_egg",
     }
@@ -760,6 +798,40 @@ with zipfile.ZipFile(target, "r") as check:
     missing_hatchable_blocks = sorted(expected_hatchable_blocks - actual_hatchable_blocks)
     if missing_hatchable_blocks:
         raise SystemExit(f"Chorusoatl egg hatchable tag is missing blocks: {missing_hatchable_blocks}")
+
+    required_item_resources = {
+        "data/archie_dinosaurs/recipes/lush_mace.json",
+        "data/archie_dinosaurs/recipes/ooze_tipped_arrow.json",
+        "data/archie_dinosaurs/advancements/recipes/combat/lush_mace.json",
+        "data/archie_dinosaurs/advancements/recipes/combat/ooze_tipped_arrow.json",
+        "data/archie_dinosaurs/damage_type/pus_arrow.json",
+        "assets/archie_dinosaurs/textures/entity/projectiles/pus_tipped_arrow.png",
+        "assets/archie_dinosaurs/models/attachable/lushsaur_mace.astemirmodel",
+        "assets/archie_dinosaurs/animations/player/attachable/lushsaur_mace.astemiranim",
+        "assets/archie_dinosaurs/textures/item/model/lushsaur_mace.png",
+        "assets/archie_dinosaurs/sounds/item/lushsaur_mace/spin.ogg",
+    }
+    missing_item_resources = sorted(required_item_resources - names)
+    if missing_item_resources:
+        raise SystemExit(f"Missing retained Lush Mace/Ooze Arrow resources: {missing_item_resources}")
+
+    sound_definitions = read_json(check.read("assets/archie_dinosaurs/sounds.json"), "assets/archie_dinosaurs/sounds.json")
+    for sound_id in ("item.lushsaur_mace.attack", "item.lushsaur_mace.spin"):
+        if sound_id not in sound_definitions:
+            raise SystemExit(f"Missing retained Lush Mace sound definition: {sound_id}")
+
+    with check.open("data/archie_dinosaurs/recipes/lush_mace.json") as file:
+        mace_recipe = json.load(file)
+    with check.open("data/archie_dinosaurs/recipes/ooze_tipped_arrow.json") as file:
+        arrow_recipe = json.load(file)
+    if mace_recipe.get("result", {}).get("item") != "archie_dinosaurs:lush_mace":
+        raise SystemExit("Lush Mace recipe result is incorrect")
+    if mace_recipe.get("pattern") != ["W", "S", "S"] or mace_recipe.get("key", {}).get("W", {}).get("item") != "archie_dinosaurs:lush_core":
+        raise SystemExit("Lush Mace recipe no longer matches the original Lush Core + 2 Dripstone pattern")
+    if arrow_recipe.get("result", {}).get("item") != "archie_dinosaurs:ooze_tipped_arrow" or arrow_recipe.get("result", {}).get("count") != 4:
+        raise SystemExit("Ooze Tipped Arrow recipe result is incorrect")
+    if arrow_recipe.get("pattern") != ["W", "I", "S"] or arrow_recipe.get("key", {}).get("W", {}).get("item") != "archie_dinosaurs:sculk_toxin":
+        raise SystemExit("Ooze Tipped Arrow recipe no longer matches the original Toxin + Rod + Feather pattern")
 
     if "assets/archie_dinosaurs/textures/gui/back.png" not in names:
         raise SystemExit("Retained advancement background texture is missing")
