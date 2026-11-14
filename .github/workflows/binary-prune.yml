@@ -384,7 +384,7 @@ jobs:
             exit 1
           fi
           LUSH_ENTITY_VERBOSE="$(javap -classpath build/classes-pruned.jar -p -c -v com.eternal_creations.archies_dino_mod.common.entity.mob.lushsaur.LushsaurEntity)"
-          if ! printf '%s\\n' "$LUSH_ENTITY_VERBOSE" | grep -Fq 'ItemStack.m_41619_'; then
+          if [[ "$LUSH_ENTITY_VERBOSE" != *"ItemStack.m_41619_"* ]]; then
             echo "Lushsaur saddle-slot filter is not based on ItemStack.isEmpty()."
             exit 1
           fi
