@@ -77,6 +77,35 @@ jobs:
             build/classes-pruned.jar \
             build/libs/ec_ad-legacy-forge-1.20.1.jar
 
+      - name: Audit original and retained mob turn controllers
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          dump_method() {
+            local jar="$1"
+            local class="$2"
+            local method="$3"
+            echo "===== $jar :: $class :: $method ====="
+            javap -classpath "$jar" -p -c "$class" | awk -v method="$method" '
+              index($0, method) > 0 { capture=1 }
+              capture { print }
+              capture && NF == 0 { exit }
+            '
+          }
+
+          ORIGINAL_JAR="ec_ad-forge-1.20.1-1.0.4.jar"
+          PRUNED_JAR="build/classes-pruned.jar"
+
+          for JAR in "$ORIGINAL_JAR" "$PRUNED_JAR"; do
+            dump_method "$JAR" com.eternal_creations.archies_dino_mod.common.entity.ai.control.SmoothMoveControl 'tick3DMovement('
+            dump_method "$JAR" com.eternal_creations.archies_dino_mod.common.entity.ai.control.SmoothMoveControl 'tickClimber('
+            dump_method "$JAR" com.eternal_creations.archies_dino_mod.common.entity.ai.control.SmoothMoveControl 'tickWalker('
+            dump_method "$JAR" com.eternal_creations.archies_dino_mod.common.entity.ai.control.SmoothMoveControl 'smoothRotlerp('
+            dump_method "$JAR" com.eternal_creations.archies_dino_mod.common.entity.ai.control.SmoothBodyControl 'm_8121_('
+            dump_method "$JAR" com.eternal_creations.archies_dino_mod.common.entity.ai.control.SmoothLookControl 'm_8128_('
+          done
+
       - name: Verify retained renderer method descriptors
         shell: bash
         run: |
