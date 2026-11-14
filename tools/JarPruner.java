@@ -1299,13 +1299,13 @@ public final class JarPruner {
         p.add(new InsnNode(Opcodes.DADD));
 
         p.add(new VarInsnNode(Opcodes.DLOAD, 14));
-        p.add(new LdcInsnNode(0.38d));
+        p.add(new LdcInsnNode(0.32d));
         p.add(new InsnNode(Opcodes.DMUL));
         p.add(new VarInsnNode(Opcodes.DLOAD, 8));
-        p.add(new LdcInsnNode(0.38d));
+        p.add(new LdcInsnNode(0.32d));
         p.add(new InsnNode(Opcodes.DMUL));
         p.add(new VarInsnNode(Opcodes.DLOAD, 16));
-        p.add(new LdcInsnNode(0.38d));
+        p.add(new LdcInsnNode(0.32d));
         p.add(new InsnNode(Opcodes.DMUL));
 
         p.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,

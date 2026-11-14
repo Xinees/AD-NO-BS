@@ -299,17 +299,17 @@ jobs:
               exit 1
             fi
           done
-          for required_layer_marker in 'irem' 'idiv' 'sipush        768' 'double 0.38d' 'double 0.55d' 'double 0.5d'; do
+          for required_layer_marker in 'irem' 'idiv' 'sipush        768' 'double 0.32d' 'double 0.55d' 'double 0.5d'; do
             if ! printf '%s\n' "$SCULK_PARTICLE" | grep -Fq "$required_layer_marker"; then
               echo "Sculksaur Sonic Boom does not contain the expected two-layer shell marker: $required_layer_marker"
               printf '%s\n' "$SCULK_PARTICLE"
               exit 1
             fi
           done
-          VELOCITY_COMPONENT_COUNT="$(printf '%s\n' "$SCULK_PARTICLE" | grep -F -o 'double 0.38d' | wc -l)"
+          VELOCITY_COMPONENT_COUNT="$(printf '%s\n' "$SCULK_PARTICLE" | grep -F -o 'double 0.32d' | wc -l)"
           LAYER_DIVISOR_COUNT="$(printf '%s\n' "$SCULK_PARTICLE" | grep -F -o 'sipush        768' | wc -l)"
           if [ "$VELOCITY_COMPONENT_COUNT" -ne 3 ] || [ "$LAYER_DIVISOR_COUNT" -ne 2 ]; then
-            echo "Sculksaur Sonic Boom must use exactly three 0.38 XYZ velocity components and two 768-point layer divisors."
+            echo "Sculksaur Sonic Boom must use exactly three 0.32 XYZ velocity components and two 768-point layer divisors."
             printf '%s\n' "$SCULK_PARTICLE"
             exit 1
           fi
