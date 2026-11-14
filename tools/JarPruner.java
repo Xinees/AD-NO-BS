@@ -1432,7 +1432,7 @@ public final class JarPruner {
         ));
         s.add(new VarInsnNode(Opcodes.ASTORE, 7));
         s.add(new InsnNode(Opcodes.ICONST_0));
-        s.add(new IntInsnNode(Opcodes.BIPUSH, 128));
+        s.add(new IntInsnNode(Opcodes.SIPUSH, 128));
         s.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
             "java/util/stream/IntStream", "range",
             "(II)Ljava/util/stream/IntStream;", true));

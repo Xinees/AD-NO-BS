@@ -1,4 +1,4 @@
-name: Direct Legacy JAR Prune - build 22
+name: Direct Legacy JAR Prune - build 23
 
 on:
   push:
@@ -257,7 +257,7 @@ jobs:
             capture && /^[[:space:]]+(private|public|protected) / && $0 !~ /archiesDinoMod\$spawnSculksaurSonicBoomSphereAt\(/ { exit }
             capture { print }
           ')"
-          for required_sphere_call in 'IntStream.range' 'IntStream.forEach' 'bipush        128'; do
+          for required_sphere_call in 'IntStream.range' 'IntStream.forEach' 'sipush        128'; do
             if ! printf '%s\n' "$SCULK_SPHERE" | grep -F "$required_sphere_call"; then
               echo "SphereAt does not create exactly 128 points through the expected stream path: $required_sphere_call"
               printf '%s\n' "$SCULK_SPHERE"
@@ -341,7 +341,7 @@ jobs:
           done
 
           SCULK_SPHERE="$(printf '%s\n' "$SCULK_TRACK" | sed -n '/archiesDinoMod[$]spawnSculksaurSonicBoomSphereAt(/,/^  private /p')"
-          if ! printf '%s\n' "$SCULK_SPHERE" | grep -F 'bipush        128'; then
+          if ! printf '%s\n' "$SCULK_SPHERE" | grep -F 'sipush        128'; then
             echo "Each Sonic Boom sphere must contain exactly 128 particles."
             printf '%s\n' "$SCULK_SPHERE"
             exit 1
