@@ -339,16 +339,17 @@ jobs:
           fi
 
           LUSH_MOUNT_POINTS="$(javap -classpath build/classes-pruned.jar -p -c "$LUSH_ROLL_CLIENT" | sed -n '/static {};/,/^  private static boolean /p')"
-          if [[ "$LUSH_MOUNT_POINTS" != *"double 0.9375d"* ||
+          if [[ "$LUSH_MOUNT_POINTS" != *"dconst_0"* ||
+                "$LUSH_MOUNT_POINTS" != *"double -0.6000000238418579d"* ||
                 "$LUSH_MOUNT_POINTS" != *"double 0.3374999761581421d"* ||
-                "$LUSH_MOUNT_POINTS" == *"double -0.6000000238418579d"* ||
+                "$LUSH_MOUNT_POINTS" == *"double 0.9375d"* ||
                 "$LUSH_MOUNT_POINTS" == *"double -0.8125d"* ||
                 "$LUSH_MOUNT_POINTS" == *"double -1.4125d"* ]]; then
-            echo "Lushsaur visual passenger anchors must shift exactly 15 pixels backward for both saddled and unsaddled riders."
+            echo "Only the unsaddled Lushsaur visual passenger anchor may shift 15 pixels backward; the unused saddled anchor must remain original."
             printf '%s\\n' "$LUSH_MOUNT_POINTS"
             exit 1
           fi
-          echo "Verified the server passenger hitbox remains at the original center while only both client-rendered Lushsaur passenger anchors move 15 pixels backward."
+          echo "Verified the server passenger hitbox remains at the original center, the unused saddled anchor stays unchanged, and only the unsaddled rendered rider moves 15 pixels backward."
 
           LUSH_MENU="$(awk '/m_213583_\(/ { capture=1; print; next } capture && /^  (public|private|protected) / { exit } capture { print }' <<< "$LUSH_ENTITY_BYTECODE")"
           if [[ "$LUSH_MENU" != *"return"* ||
