@@ -201,6 +201,8 @@ public final class JarPruner {
         patchLushsaurMountSpeed(lushsaurEntity);
         patchLushsaurRunAnimation(lushsaurClient);
         patchLushsaurVisualPassengerOffset(lushsaurClient);
+        patchLushsaurPassengerHitboxOffset(lushsaurEntity);
+        patchLushsaurNoSaddle(lushsaurEntity);
         patchSculksaurExplosionEffects(
             nodes.get(ROOT + "client/particle/effect/SculksaurEffects"));
         patchLushsaurRestParticles(
@@ -994,7 +996,168 @@ public final class JarPruner {
             throw new IllegalStateException("Unexpected original unsaddled Lushsaur mount-point Z offset");
         }
 
-        clinit.instructions.set(unsaddledZ, new LdcInsnNode(0.3374999761581421d));
+        clinit.instructions.set(unsaddledZ, new LdcInsnNode(0.15d));
+    }
+
+    private static void patchLushsaurPassengerHitboxOffset(ClassNode owner) {
+        if (owner == null) throw new IllegalStateException("Lushsaur entity class is missing");
+        MethodNode createMount = owner.methods.stream()
+            .filter(method -> method.name.equals("createMount") &&
+                method.desc.startsWith("()L" + ROOT + "common/entity/component/MountComponent;"))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("LushsaurEntity.createMount is missing"));
+
+        MethodInsnNode passengerOffset = null;
+        for (AbstractInsnNode instruction : createMount.instructions.toArray()) {
+            if (instruction instanceof MethodInsnNode call &&
+                call.getOpcode() == Opcodes.INVOKEVIRTUAL &&
+                call.owner.equals(ROOT + "common/entity/component/MountComponent$Definition") &&
+                call.name.equals("passengerOffset") &&
+                call.desc.equals("(FFF)L" + ROOT + "common/entity/component/MountComponent$Definition;")) {
+                if (passengerOffset != null) {
+                    throw new IllegalStateException("Unexpected multiple Lushsaur passengerOffset calls");
+                }
+                passengerOffset = call;
+            }
+        }
+        if (passengerOffset == null) throw new IllegalStateException("Lushsaur passengerOffset call is missing");
+
+        AbstractInsnNode originalZ = previousCodeInstruction(passengerOffset);
+        if (originalZ == null || originalZ.getOpcode() != Opcodes.FCONST_1) {
+            throw new IllegalStateException("Unexpected original Lushsaur passenger Z offset");
+        }
+        createMount.instructions.set(originalZ, new LdcInsnNode(0.0625f));
+    }
+
+    private static void patchLushsaurNoSaddle(ClassNode owner) {
+        if (owner == null) throw new IllegalStateException("Lushsaur entity class is missing");
+
+        String interactionDesc =
+            "(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;";
+        MethodNode interact = owner.methods.stream()
+            .filter(method -> method.name.equals("m_6071_") && method.desc.equals(interactionDesc))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("LushsaurEntity.mobInteract is missing"));
+
+        int superCalls = 0;
+        for (AbstractInsnNode instruction : interact.instructions.toArray()) {
+            if (instruction instanceof MethodInsnNode call &&
+                call.getOpcode() == Opcodes.INVOKESPECIAL &&
+                call.owner.equals(ROOT + "common/entity/base/AbstractComplexMount") &&
+                call.name.equals("m_6071_") &&
+                call.desc.equals(interactionDesc)) {
+                call.owner = owner.name;
+                call.name = "archiesDinoMod$interactWithoutSaddle";
+                superCalls++;
+            }
+        }
+        if (superCalls != 1) {
+            throw new IllegalStateException("Expected one original AbstractComplexMount.mobInteract call in Lushsaur, found " + superCalls);
+        }
+
+        MethodNode guardedInteract = new MethodNode(
+            Opcodes.ACC_PRIVATE | Opcodes.ACC_SYNTHETIC,
+            "archiesDinoMod$interactWithoutSaddle",
+            interactionDesc,
+            null,
+            null
+        );
+        LabelNode delegate = new LabelNode();
+        guardedInteract.instructions.add(new VarInsnNode(Opcodes.ALOAD, 1));
+        guardedInteract.instructions.add(new VarInsnNode(Opcodes.ALOAD, 2));
+        guardedInteract.instructions.add(new MethodInsnNode(
+            Opcodes.INVOKEVIRTUAL,
+            "net/minecraft/world/entity/player/Player",
+            "m_21120_",
+            "(Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/item/ItemStack;",
+            false
+        ));
+        guardedInteract.instructions.add(new FieldInsnNode(
+            Opcodes.GETSTATIC,
+            "net/minecraft/world/item/Items",
+            "f_42751_",
+            "Lnet/minecraft/world/item/Item;"
+        ));
+        guardedInteract.instructions.add(new MethodInsnNode(
+            Opcodes.INVOKEVIRTUAL,
+            "net/minecraft/world/item/ItemStack",
+            "m_150930_",
+            "(Lnet/minecraft/world/item/Item;)Z",
+            false
+        ));
+        guardedInteract.instructions.add(new JumpInsnNode(Opcodes.IFEQ, delegate));
+        guardedInteract.instructions.add(new FieldInsnNode(
+            Opcodes.GETSTATIC,
+            "net/minecraft/world/InteractionResult",
+            "FAIL",
+            "Lnet/minecraft/world/InteractionResult;"
+        ));
+        guardedInteract.instructions.add(new InsnNode(Opcodes.ARETURN));
+        guardedInteract.instructions.add(delegate);
+        guardedInteract.instructions.add(new FrameNode(Opcodes.F_SAME, 0, null, 0, null));
+        guardedInteract.instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        guardedInteract.instructions.add(new VarInsnNode(Opcodes.ALOAD, 1));
+        guardedInteract.instructions.add(new VarInsnNode(Opcodes.ALOAD, 2));
+        guardedInteract.instructions.add(new MethodInsnNode(
+            Opcodes.INVOKESPECIAL,
+            ROOT + "common/entity/base/AbstractComplexMount",
+            "m_6071_",
+            interactionDesc,
+            false
+        ));
+        guardedInteract.instructions.add(new InsnNode(Opcodes.ARETURN));
+        owner.methods.add(guardedInteract);
+
+        MethodNode saddleable = new MethodNode(Opcodes.ACC_PUBLIC, "m_6741_", "()Z", null, null);
+        saddleable.instructions.add(new InsnNode(Opcodes.ICONST_0));
+        saddleable.instructions.add(new InsnNode(Opcodes.IRETURN));
+        owner.methods.add(saddleable);
+
+        MethodNode saddled = new MethodNode(Opcodes.ACC_PUBLIC, "m_6254_", "()Z", null, null);
+        saddled.instructions.add(new InsnNode(Opcodes.ICONST_0));
+        saddled.instructions.add(new InsnNode(Opcodes.IRETURN));
+        owner.methods.add(saddled);
+
+        MethodNode setSaddled = new MethodNode(Opcodes.ACC_PUBLIC, "setSaddled", "(Z)V", null, null);
+        setSaddled.instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        setSaddled.instructions.add(new InsnNode(Opcodes.ICONST_0));
+        setSaddled.instructions.add(new MethodInsnNode(
+            Opcodes.INVOKESPECIAL,
+            ROOT + "common/entity/base/AbstractComplexMount",
+            "setSaddled",
+            "(Z)V",
+            false
+        ));
+        setSaddled.instructions.add(new InsnNode(Opcodes.RETURN));
+        owner.methods.add(setSaddled);
+
+        String slotAccessDesc = "(ILjava/util/function/Predicate;)Lnet/minecraft/world/entity/SlotAccess;";
+        MethodNode equipmentSlotAccess = new MethodNode(
+            Opcodes.ACC_PROTECTED,
+            "createEquipmentSlotAccess",
+            slotAccessDesc,
+            null,
+            null
+        );
+        equipmentSlotAccess.instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        equipmentSlotAccess.instructions.add(new VarInsnNode(Opcodes.ILOAD, 1));
+        equipmentSlotAccess.instructions.add(new InsnNode(Opcodes.ACONST_NULL));
+        equipmentSlotAccess.instructions.add(new MethodInsnNode(
+            Opcodes.INVOKESTATIC,
+            "java/util/function/Predicate",
+            "isEqual",
+            "(Ljava/lang/Object;)Ljava/util/function/Predicate;",
+            true
+        ));
+        equipmentSlotAccess.instructions.add(new MethodInsnNode(
+            Opcodes.INVOKESPECIAL,
+            ROOT + "common/entity/base/AbstractComplexMount",
+            "createEquipmentSlotAccess",
+            slotAccessDesc,
+            false
+        ));
+        equipmentSlotAccess.instructions.add(new InsnNode(Opcodes.ARETURN));
+        owner.methods.add(equipmentSlotAccess);
     }
 
     private static void patchNoRollRootOperation(ClassNode owner) {
