@@ -93,10 +93,10 @@ The player mounted the Lushsaur and held W. The Lushsaur began with its walking 
 ### Required result
 
 - Two hollow expanding spheres, both spawning at the exact same attack origin.
-- The first sphere appears first. The second appears about half a second later; the spacing between wavefronts must be caused by the delay, not different initial radii.
+- The first sphere appears first. The second follows exactly 3 game ticks (0.15 seconds) later; the spacing between wavefronts must be caused by the delay, not different initial radii.
 - Each sphere expands evenly in every direction.
 - Use the actual vanilla `SONIC_BOOM` particle type, not `SCULK_SOUL`.
-- The count must be restrained and readable at roughly five blocks. Avoid filling the volume or creating a dense cloud.
+- The count must remain restrained while keeping the spherical outline readable at roughly thirteen blocks. Avoid filling the volume or creating a dense cloud.
 - Remove the other attack-specific particle bursts/emitters from this event. Keep the original camera shake on the first event.
 - Do not use Astemir's shader/post-process shockwave, colored-light effect, screen-space distortion, or a replacement custom 3D distortion.
 
@@ -118,7 +118,7 @@ Build115 retains the exact `SONIC_BOOM` type, vanilla sprite/animation, full-bri
 - **Callback isolation:** the second AnimationEvent factory is cloned from the original, but its ASM `invokedynamic` bootstrap-argument array is cloned before changing the callback handle. The original factory must still target `lambda$explosionFinalEvent$12`; the second factory targets only `archiesDinoMod$lambdaSecondSonicBoomEvent`. The pruner checks this to prevent the first event from accidentally being redirected to the second callback.
 - No attack AI, target selection, original event time, damage, range, knockback, cooldown, attack action, sound, or unrelated Sculksaur animation/particle track was changed. The second event is visual-only.
 - Build114-to-Build115 archive comparison: 475 entries in each archive; no additions/removals; only `SculksaurEffects.class` and `SculksaurSonicBoomParticle.class` changed. No resource, model, texture, sound, or JSON entry changed.
-- CI run #141 verifies exact `SONIC_BOOM` registration/provider behavior, 512 positive iterations per wave (`SIPUSH 512`), common saved origin, 3-tick timing, radial velocity, 40-tick particle lifetime, callback separation, camera shake, retained JAR structure, and existing controls/renderers. The downloaded JAR was also independently inspected with `javap` and compared entry-by-entry. Bytecode tests cannot prove the visual result in Minecraft.
+- CI run #141 verifies exact `SONIC_BOOM` registration/provider behavior, 512 positive iterations per wave (`SIPUSH 512`), common saved origin, 3-tick timing, radial velocity, 40-tick particle lifetime, callback separation, camera shake, retained JAR structure, and existing controls/renderers. The locally materialized Build115 JAR was independently inspected with `javap` and compared entry-by-entry. Bytecode tests cannot prove the visual result in Minecraft.
 
 ### Preserve the gameplay attack
 
