@@ -401,6 +401,37 @@ jobs:
           fi
           echo "Verified original server passenger offset, 15-pixel visual-only rider offset, and vanilla E inventory behavior."
 
+          FORGE_COMMON_HELPER='com.eternal_creations.archies_dino_mod.platform.ForgeCommonHelper'
+          FORGE_COMMON_BYTECODE="$(javap -classpath build/classes-pruned.jar -p -c "$FORGE_COMMON_HELPER")"
+          ENTITY_TYPES_INIT="$(printf '%s\\n' "$FORGE_COMMON_BYTECODE" | sed -n '/ForgeRegistries.ENTITY_TYPES/,/putstatic .*Field ENTITY_TYPES:/p')"
+          if [[ "$ENTITY_TYPES_INIT" != *"String archie_dinosaurs"* ||
+                "$ENTITY_TYPES_INIT" != *"DeferredRegister.create"* ||
+                "$ENTITY_TYPES_INIT" == *"String ec_ad"* ]]; then
+            echo "Forge entity DeferredRegister namespace must be archie_dinosaurs only."
+            printf '%s\\n' "$ENTITY_TYPES_INIT"
+            exit 1
+          fi
+          ENTITY_REGISTER="$(awk '/registerEntityType\(/ { capture=1; print; next } capture && /^  (public|private|protected) / { exit } capture { print }' <<< "$FORGE_COMMON_BYTECODE")"
+          for required_entity_registry_call in 'DeferredRegister.register' 'String archie_dinosaurs' 'ResourceLocation."<init>"'; do
+            if [[ "$ENTITY_REGISTER" != *"$required_entity_registry_call"* ]]; then
+              echo "Forge entity registration ID construction is missing $required_entity_registry_call."
+              printf '%s\\n' "$ENTITY_REGISTER"
+              exit 1
+            fi
+          done
+          if [[ "$ENTITY_REGISTER" == *"Constants.prefix"* ]]; then
+            echo "Entity ResourceSupplier IDs must not reuse the ec_ad prefix."
+            printf '%s\\n' "$ENTITY_REGISTER"
+            exit 1
+          fi
+          OTHER_REGISTRIES="$(printf '%s\\n' "$FORGE_COMMON_BYTECODE" | sed -n '/getstatic .*ForgeRegistries.ITEMS/,/putstatic .*Field ITEMS:/p')"
+          if [[ "$OTHER_REGISTRIES" != *"String ec_ad"* ]]; then
+            echo "Item registry namespace was unexpectedly changed from ec_ad."
+            printf '%s\\n' "$OTHER_REGISTRIES"
+            exit 1
+          fi
+          echo "Verified only entity-type registration moved to archie_dinosaurs; item and other registry namespaces remain ec_ad."
+
           LOCAL_PLAYER_MIXIN='com.eternal_creations.archies_dino_mod.mixin.client.LocalPlayerMixin'
           verify_method "$LOCAL_PLAYER_MIXIN" \
             'archiesDinoMod$openLushsaurPlayerInventory(' \
@@ -799,6 +830,52 @@ jobs:
               print(f"Verified {len(names)} entries in {jar}")
               print(f"Final size: {jar.stat().st_size} bytes")
           PY
+
+          
+                    python3 - <<'PY'
+                    import zipfile
+                    import json
+                    jar = "build/libs/ec_ad-legacy-forge-1.20.1.jar"
+                    expected = {
+                        "archie_dinosaurs:lushsaur",
+                        "archie_dinosaurs:chorusoatl",
+                        "archie_dinosaurs:sculksaur",
+                        "archie_dinosaurs:chorusoatl_spit",
+                    }
+                    found = set()
+                    old = {
+                        "ec_ad:lushsaur", "ec_ad:chorusoatl",
+                        "ec_ad:sculksaur", "ec_ad:chorusoatl_spit",
+                    }
+                    with zipfile.ZipFile(jar) as archive:
+                        for name in archive.namelist():
+                            if not name.endswith(".json"):
+                                continue
+                            try:
+                                value = json.loads(archive.read(name))
+                            except (UnicodeDecodeError, json.JSONDecodeError):
+                                continue
+                            def visit(node):
+                                if isinstance(node, dict):
+                                    for key, child in node.items():
+                                        if isinstance(key, str) and key.startswith("entity.ec_ad."):
+                                            raise SystemExit(f"Old entity translation key remains: {name}: {key}")
+                                        visit(child)
+                                elif isinstance(node, list):
+                                    for child in node:
+                                        visit(child)
+                                elif isinstance(node, str):
+                                    if node in old:
+                                        raise SystemExit(f"Old entity ID remains: {name}: {node}")
+                                    if node in expected:
+                                        found.add(node)
+                            if name.startswith("assets/ec_ad/lang/") or name.startswith("data/ec_ad/"):
+                                visit(value)
+                    missing = sorted(expected - found)
+                    if missing:
+                        raise SystemExit("Missing new entity registry references: " + repr(missing))
+                    print("Verified migrated entity IDs:", ", ".join(sorted(found)))
+                    PY
 
       - name: Publish validated Legacy JAR as a private draft release
         shell: bash

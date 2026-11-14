@@ -203,6 +203,7 @@ public final class JarPruner {
         patchLushsaurVisualPassengerOffset(lushsaurClient);
         patchLushsaurPassengerHitboxOffset(lushsaurEntity);
         patchLushsaurNoSaddle(lushsaurEntity);
+        patchEntityRegistryNamespace(nodes.get(ROOT + "platform/ForgeCommonHelper"));
         patchSculksaurExplosionEffects(
             nodes.get(ROOT + "client/particle/effect/SculksaurEffects"));
         patchLushsaurRestParticles(
@@ -1027,6 +1028,96 @@ public final class JarPruner {
             throw new IllegalStateException("Unexpected original Lushsaur passenger Z offset");
         }
         createMount.instructions.set(originalZ, new LdcInsnNode(0.0625f));
+    }
+
+    private static void patchEntityRegistryNamespace(ClassNode owner) {
+        if (owner == null) throw new IllegalStateException("ForgeCommonHelper class is missing");
+
+        MethodNode initializer = owner.methods.stream()
+            .filter(method -> method.name.equals("<clinit>") && method.desc.equals("()V"))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("ForgeCommonHelper static initializer is missing"));
+
+        int deferredRegisterChanges = 0;
+        for (AbstractInsnNode instruction : initializer.instructions.toArray()) {
+            if (!(instruction instanceof FieldInsnNode field) ||
+                field.getOpcode() != Opcodes.PUTSTATIC ||
+                !field.owner.equals(owner.name) ||
+                !field.name.equals("ENTITY_TYPES") ||
+                !field.desc.equals("Lnet/minecraftforge/registries/DeferredRegister;")) {
+                continue;
+            }
+
+            AbstractInsnNode createInstruction = previousCodeInstruction(field);
+            AbstractInsnNode namespaceInstruction = previousCodeInstruction(createInstruction);
+            AbstractInsnNode registryInstruction = previousCodeInstruction(namespaceInstruction);
+            if (!(createInstruction instanceof MethodInsnNode create) ||
+                create.getOpcode() != Opcodes.INVOKESTATIC ||
+                !create.owner.equals("net/minecraftforge/registries/DeferredRegister") ||
+                !create.name.equals("create") ||
+                !create.desc.equals("(Lnet/minecraftforge/registries/IForgeRegistry;Ljava/lang/String;)Lnet/minecraftforge/registries/DeferredRegister;") ||
+                !(namespaceInstruction instanceof LdcInsnNode namespace) ||
+                !"ec_ad".equals(namespace.cst) ||
+                !(registryInstruction instanceof FieldInsnNode registry) ||
+                registry.getOpcode() != Opcodes.GETSTATIC ||
+                !registry.owner.equals("net/minecraftforge/registries/ForgeRegistries") ||
+                !registry.name.equals("ENTITY_TYPES")) {
+                throw new IllegalStateException("Unexpected Forge entity DeferredRegister initialization");
+            }
+
+            initializer.instructions.set(namespaceInstruction, new LdcInsnNode("archie_dinosaurs"));
+            deferredRegisterChanges++;
+        }
+        if (deferredRegisterChanges != 1) {
+            throw new IllegalStateException("Expected exactly one Forge entity DeferredRegister namespace change, found " + deferredRegisterChanges);
+        }
+
+        String registerDescriptor =
+            "(Ljava/lang/String;Lnet/minecraft/world/entity/EntityType$Builder;)L" +
+            ROOT + "util/ResourceSupplier;";
+        MethodNode registerEntityType = owner.methods.stream()
+            .filter(method -> method.name.equals("registerEntityType") && method.desc.equals(registerDescriptor))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("ForgeCommonHelper.registerEntityType is missing"));
+
+        List<MethodInsnNode> oldPrefixes = new ArrayList<>();
+        for (AbstractInsnNode instruction : registerEntityType.instructions.toArray()) {
+            if (instruction instanceof MethodInsnNode call &&
+                call.getOpcode() == Opcodes.INVOKESTATIC &&
+                call.owner.equals(ROOT + "Constants") &&
+                call.name.equals("prefix") &&
+                call.desc.equals("(Ljava/lang/String;)Lnet/minecraft/resources/ResourceLocation;")) {
+                oldPrefixes.add(call);
+            }
+        }
+        if (oldPrefixes.size() != 1) {
+            throw new IllegalStateException("Expected exactly one Constants.prefix call in registerEntityType, found " + oldPrefixes.size());
+        }
+
+        MethodInsnNode oldPrefix = oldPrefixes.get(0);
+        AbstractInsnNode oldNameLoad = previousCodeInstruction(oldPrefix);
+        if (!(oldNameLoad instanceof VarInsnNode nameLoad) ||
+            nameLoad.getOpcode() != Opcodes.ALOAD ||
+            nameLoad.var != 1) {
+            throw new IllegalStateException("Unexpected entity ResourceLocation name argument");
+        }
+
+        InsnList replacement = new InsnList();
+        replacement.add(new TypeInsnNode(Opcodes.NEW, "net/minecraft/resources/ResourceLocation"));
+        replacement.add(new InsnNode(Opcodes.DUP));
+        replacement.add(new LdcInsnNode("archie_dinosaurs"));
+        replacement.add(new VarInsnNode(Opcodes.ALOAD, 1));
+        replacement.add(new MethodInsnNode(
+            Opcodes.INVOKESPECIAL,
+            "net/minecraft/resources/ResourceLocation",
+            "<init>",
+            "(Ljava/lang/String;Ljava/lang/String;)V",
+            false
+        ));
+        registerEntityType.instructions.insertBefore(oldNameLoad, replacement);
+        registerEntityType.instructions.remove(oldNameLoad);
+        registerEntityType.instructions.remove(oldPrefix);
+        registerEntityType.maxStack = Math.max(registerEntityType.maxStack, 4);
     }
 
     private static void patchLushsaurNoSaddle(ClassNode owner) {

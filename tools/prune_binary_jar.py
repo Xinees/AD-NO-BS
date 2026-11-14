@@ -74,6 +74,32 @@ def filter_mixin_config(data, template, name):
             value[section] = [item for item in value[section] if item in allowed]
     return dump_json(value)
 
+ENTITY_REGISTRY_NAMESPACE = "archie_dinosaurs"
+ENTITY_REGISTRY_NAMES = MOBS | {"chorusoatl_spit"}
+OLD_ENTITY_IDS = {f"ec_ad:{name}" for name in ENTITY_REGISTRY_NAMES}
+NEW_ENTITY_IDS = {f"{ENTITY_REGISTRY_NAMESPACE}:{name}" for name in ENTITY_REGISTRY_NAMES}
+
+
+def rewrite_entity_namespace(value):
+    if isinstance(value, dict):
+        rewritten = {}
+        for key, child in value.items():
+            new_key = key
+            if isinstance(key, str):
+                for entity_name in ENTITY_REGISTRY_NAMES:
+                    old_key = f"entity.ec_ad.{entity_name}"
+                    if key == old_key:
+                        new_key = f"entity.{ENTITY_REGISTRY_NAMESPACE}.{entity_name}"
+                        break
+            rewritten[new_key] = rewrite_entity_namespace(child)
+        return rewritten
+    if isinstance(value, list):
+        return [rewrite_entity_namespace(child) for child in value]
+    if isinstance(value, str) and value in OLD_ENTITY_IDS:
+        return f"{ENTITY_REGISTRY_NAMESPACE}:{value.split(':', 1)[1]}"
+    return value
+
+
 def key_is_allowed(key):
     if key in {
         "ec_ad",
@@ -95,12 +121,12 @@ def key_is_allowed(key):
     for mob in MOBS:
         if any(key.startswith(f"advancement.{kind}_{mob}.") for kind in ("kill", "spot", "tame")):
             return True
-        if key == f"entity.ec_ad.{mob}":
+        if key == f"entity.archie_dinosaurs.{mob}":
             return True
         if key.startswith(f"subtitles.ec_ad.mob.{mob}."):
             return True
 
-    if key == "entity.ec_ad.chorusoatl_spit":
+    if key == "entity.archie_dinosaurs.chorusoatl_spit":
         return True
     if key.startswith("subtitles.ec_ad.mob.dino."):
         return True
@@ -284,6 +310,35 @@ def filter_loot_table(data, name):
     return dump_json(value)
 
 
+def validate_entity_namespace(entries):
+    found_new_ids = set()
+
+    def visit(value, name):
+        if isinstance(value, dict):
+            for key, child in value.items():
+                if isinstance(key, str) and key.startswith("entity.ec_ad."):
+                    raise RuntimeError(f"Old entity translation key remains in {name}: {key}")
+                visit(child, name)
+        elif isinstance(value, list):
+            for child in value:
+                visit(child, name)
+        elif isinstance(value, str):
+            if value in OLD_ENTITY_IDS:
+                raise RuntimeError(f"Old entity registry ID remains in {name}: {value}")
+            if value in NEW_ENTITY_IDS:
+                found_new_ids.add(value)
+
+    for name, data in entries.items():
+        if not name.endswith(".json"):
+            continue
+        if name.startswith("assets/ec_ad/lang/") or name.startswith("data/ec_ad/"):
+            visit(read_json(data, name), name)
+
+    missing = sorted(NEW_ENTITY_IDS - found_new_ids)
+    if missing:
+        raise RuntimeError("New entity registry IDs are missing from retained JSON resources: " + ", ".join(missing))
+
+
 def validate_loot_tables(entries):
     for name, data in entries.items():
         if not (name.startswith("data/ec_ad/loot_tables/") and name.endswith(".json")):
@@ -324,16 +379,11 @@ def extend_chorusoatl_hatchable(data):
 
 
 def filter_tag_json(data, name):
-    value = read_json(data, name)
+    value = rewrite_entity_namespace(read_json(data, name))
     if isinstance(value, dict) and isinstance(value.get("values"), list):
-        allowed_ids = {
-            "ec_ad:lushsaur", "ec_ad:chorusoatl", "ec_ad:sculksaur",
-            "ec_ad:chorusoatl_spit",
-        }
         value["values"] = [
             item for item in value["values"]
             if not (isinstance(item, str) and item.startswith("ec_ad:"))
-            or item in allowed_ids
         ]
     return dump_json(value)
 
@@ -347,7 +397,7 @@ def filter_root_advancement(data):
                     {
                         "condition": "minecraft:entity_properties",
                         "entity": "this",
-                        "predicate": {"type": f"ec_ad:{mob}"},
+                        "predicate": {"type": f"archie_dinosaurs:{mob}"},
                     }
                 ]
             },
@@ -404,7 +454,7 @@ with zipfile.ZipFile(source, "r") as zin:
                 continue
 
             if name.startswith(MOD + "lang/"):
-                lang = read_json(data, name)
+                lang = rewrite_entity_namespace(read_json(data, name))
                 lang = {k: v for k, v in lang.items() if key_is_allowed(k)}
                 if name.endswith("/en_us.json"):
                     lang["advancement.root.desc"] = "Meet the dinosaurs"
@@ -496,6 +546,7 @@ with zipfile.ZipFile(target, "r") as check:
         raise SystemExit("Retained root advancement is missing")
 
 validate_advancement_graph(kept)
+validate_entity_namespace(kept)
 validate_loot_tables(kept)
 
 report = Path("build/resource-prune-report.txt")
