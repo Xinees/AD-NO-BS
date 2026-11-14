@@ -1,5 +1,16 @@
 # AD-NO-BS Legacy — roadmap and behavior requirements
 
+## Latest integrated candidate — Build #221 — 2026-11-14
+
+- [GitHub Actions #221](https://github.com/Xinees/AD-NO-BS/actions/runs/43630833190) passed all steps, including source-JAR integrity, bytecode pruning, controller/renderer audits, Lushsaur saddle checks, entity-namespace checks, and the final packaged-JAR audit. It published [draft release #221](https://github.com/Xinees/AD-NO-BS/releases/tag/untagged-d16b6548cb9c8822a6d5).
+- Output: `ec_ad-legacy-forge-1.20.1.jar`, 468 entries, 2,482,346 bytes. [Download Build #221](https://github.com/Xinees/AD-NO-BS/releases/download/untagged-d16b6548cb9c8822a6d5/ec_ad-legacy-forge-1.20.1.jar).
+- Lushsaur saddle handling is now slot-specific: saddle interaction returns `InteractionResult.FAIL`; `isSaddleable()` and `isSaddled()` return false; `setSaddled(true)` is forced back to false; and only equipment slot 0 rejects non-empty stacks. Empty-slot clearing still works, all other slots retain the superclass predicate, and no shared `AbstractComplexMount` saddle behavior was changed. The saddle item is rejected before the superclass interaction path can consume it.
+- Entity-type registration moved to `archie_dinosaurs` for `archie_dinosaurs:lushsaur`, `archie_dinosaurs:chorusoatl`, `archie_dinosaurs:sculksaur`, and `archie_dinosaurs:chorusoatl_spit`. The Forge entity DeferredRegister and each entity `ResourceSupplier.id()` now use the new namespace. Entity-type tag values, advancement predicates, and entity translation keys were migrated too. The mod ID, item/block/sound registries, and resource/data directory namespaces remain `ec_ad`.
+- **Build207 vs Build212 speed finding:** the Lushsaur max-speed patch is unchanged between those source revisions. Build212's added changes are the passenger offset and no-saddle patch; neither modifies the speed-property method. The current source still uses the same rider-sprint/feed-boost formula already present in Build207. I did not invent a new speed constant or change that formula because the source diff does not prove a new speed cause. The reported in-game speed difference still needs a controlled runtime comparison.
+- **Runtime status:** CI and bytecode/resource checks passed; the JAR has not been launched in Minecraft in this session. Passenger position, saddle rejection in-game, movement speed, and entity spawning under the new IDs still need an in-game test.
+
+---
+
 ## Runtime regression found after Build119 and root-cause correction — 2026-11-14
 
 ### Follow-up after the first in-game screenshot — 2026-11-14
@@ -12,7 +23,7 @@
 - The `RollOnRotation` removal remains a renderer-only change for Lushsaur and Sculksaur; Chorusoatl's original `flyingRoll` flight banking remains intact. No new custom turn-rate value was added. The existing original turn is already bounded; decide whether it needs further tuning only after observing the restored behavior in-game.
 - Unified controller/roll baseline: [CI #196](https://github.com/Xinees/AD-NO-BS/actions/runs/43618034281) passed all checks, verified 468 JAR entries, and preserved non-roll root operations.
 - Earlier visual/egg baseline: [CI #207](https://github.com/Xinees/AD-NO-BS/actions/runs/43620810294), superseded by #212.
-- **Current integrated candidate:** [CI #212](https://github.com/Xinees/AD-NO-BS/actions/runs/43626888055) passed every step. Implementation commit [`1073c87`](https://github.com/Xinees/AD-NO-BS/commit/1073c87069440ff9a80c47d44a37ad369187b902) centers the Lushsaur passenger hitbox, moves the rendered model 3 px forward, and blocks Lushsaur saddle support; workflow guard commit [`3b5b93a`](https://github.com/Xinees/AD-NO-BS/commit/3b5b93af3abc27f86434399469198a0784dd7bcf) verifies those requirements. Existing resource/egg commit `d234cb8` supplies the six Chorusoatl egg substrates. Output: 468 entries, 2,480,913 bytes, SHA-256 `2a0cb70ebde25b38c62694ad30f4d6ccbf42a25d0b600da035f0281a9478f02c`, in [draft release #212](https://github.com/Xinees/AD-NO-BS/releases/tag/untagged-656f417caba722492ba3).
+- **Previous passenger/egg baseline (superseded by Build #221):** [CI #212](https://github.com/Xinees/AD-NO-BS/actions/runs/43626888055) passed every step. Implementation commit [`1073c87`](https://github.com/Xinees/AD-NO-BS/commit/1073c87069440ff9a80c47d44a37ad369187b902) centers the Lushsaur passenger hitbox, moves the rendered model 3 px forward, and blocks Lushsaur saddle support; workflow guard commit [`3b5b93a`](https://github.com/Xinees/AD-NO-BS/commit/3b5b93af3abc27f86434399469198a0784dd7bcf) verifies those requirements. Existing resource/egg commit `d234cb8` supplies the six Chorusoatl egg substrates. Output: 468 entries, 2,480,913 bytes, SHA-256 `2a0cb70ebde25b38c62694ad30f4d6ccbf42a25d0b600da035f0281a9478f02c`, in [draft release #212](https://github.com/Xinees/AD-NO-BS/releases/tag/untagged-656f417caba722492ba3).
 
 ---
 
@@ -70,7 +81,7 @@ Runner output: `ec_ad-legacy-forge-1.20.1.jar`, **468 entries**, **2,480,309 byt
 
 - Lushsaur now rejects saddle interaction before the shared superclass interaction can tame/equip/play the saddle path.
 - `Saddleable.isSaddleable()` (`m_6741_`) returns false for Lushsaur; `isSaddled()` (`m_6254_`) always returns false.
-- Lushsaur's `setSaddled(boolean)` override forces the superclass saddle slot empty. Its internal equipment-slot access uses a predicate that rejects inserted stacks. These restrictions are Lushsaur-only; the shared `AbstractComplexMount` implementation and other mounts remain unchanged.
+- Lushsaur's `setSaddled(boolean)` override forces the superclass saddle slot empty. Build #221 replaces the original broad equipment filter with a slot-specific predicate: slot 0 accepts only an empty stack, empty-slot clearing remains valid, and other slots retain their original predicate. These restrictions are Lushsaur-only; the shared `AbstractComplexMount` implementation and other mounts remain unchanged.
 - The player entity/hitbox is moved 15 pixels toward the center through the Lushsaur `MountComponent` passenger offset: `(0, 0, 0.0625)`.
 - The unsaddled rendered player model is moved 3 pixels forward relative to the previous screenshot: its client `MountPoint` Z is `+0.15`. The unused saddled mount point is unchanged.
 - Chorusoatl egg hatchability includes End Stone, End Stone Bricks, Purpur Block, Purpur Pillar, Obsidian and Bedrock. Existing dark-place and nearby-chorus conditions outside the preferred End dimension remain unchanged.

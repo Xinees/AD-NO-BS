@@ -1,15 +1,13 @@
 # AD-NO-BS Legacy recovery status
 
-## Latest integrated passenger, saddle and egg candidate — CI #212 — 2026-11-14
+## Latest integrated candidate — CI #221 — 2026-11-14
 
-- [GitHub Actions #212](https://github.com/Xinees/AD-NO-BS/actions/runs/43626888055) completed successfully. It passed source-JAR verification, pruning, controller and renderer audits, all riding/saddle/egg guards, 468-entry JAR validation, and draft-release publication.
-- Implementation commit [`1073c87`](https://github.com/Xinees/AD-NO-BS/commit/1073c87069440ff9a80c47d44a37ad369187b902) changes only Lushsaur-related class behavior: passenger hitbox offset, unsaddled visual mount point, and saddle rejection. The mount passenger offset is now `(0, 0, 0.0625)` instead of `(0, 0, 1)`, shifting the player entity/hitbox 15 pixels toward the body center. The unsaddled visual `MountPoint` is now Z = `+0.15`, moving the rendered player model 3 pixels forward relative to the previous screenshot. The unused saddled visual point remains original.
-- Lushsaur saddle support is blocked at four levels: saddle item interaction returns `InteractionResult.FAIL`; `isSaddleable()` returns false; `isSaddled()` always returns false and `setSaddled(true)` is forced back to false; the internal equipment-slot writer rejects inserted stacks. No shared `AbstractComplexMount` behavior was changed.
-- Resource commit [`d234cb8`](https://github.com/Xinees/AD-NO-BS/commit/d234cb8c732f2a414a7fecc2635de9b07073d4db) extends `data/ec_ad/tags/blocks/chorusoatl_egg_hatchable.json` to include End Stone, End Stone Bricks, Purpur Block, Purpur Pillar, Obsidian and Bedrock.
-- Original egg conditions remain: `minecraft:the_end` is in `chorusoatl_egg_preferred`, where `canHatch()` bypasses substrate/light/chorus checks. Outside the End, the egg still requires zero block/sky light, one of the six hatchable blocks directly below, and at least five `chorus_plant`/`chorus_flower` blocks within radius 3.
-- Workflow guard commit [`3b5b93a`](https://github.com/Xinees/AD-NO-BS/commit/3b5b93af3abc27f86434399469198a0784dd7bcf) checks the exact passenger/model offsets, all four Lushsaur saddle rejection paths, all six egg substrates, and the preferred End dimension.
-- Output: 468 entries, 2,480,913 bytes; SHA-256 `2a0cb70ebde25b38c62694ad30f4d6ccbf42a25d0b600da035f0281a9478f02c`. Download: [`ec_ad-legacy-forge-1.20.1.jar`](https://github.com/Xinees/AD-NO-BS/releases/download/untagged-656f417caba722492ba3/ec_ad-legacy-forge-1.20.1.jar). Draft release: [Legacy CI build #212](https://github.com/Xinees/AD-NO-BS/releases/tag/untagged-656f417caba722492ba3).
-- **Runtime status:** CI and bytecode checks passed. Minecraft testing remains required for actual hitbox/model alignment, saddle rejection without item consumption, unsaddled riding, and hatching on each supported substrate. Do not mark the candidate runtime-accepted until tested.
+- [GitHub Actions #221](https://github.com/Xinees/AD-NO-BS/actions/runs/43630833190) completed successfully. It passed original-JAR verification, direct bytecode pruning, controller and renderer audits, Lushsaur saddle checks, entity-namespace checks, final 468-entry JAR validation, and draft-release publication.
+- Implementation commit [`8f995d2`](https://github.com/Xinees/AD-NO-BS/commit/8f995d28bcf32a9a4521c89f1a3b799290532397) makes the Lushsaur equipment filter slot-specific. Saddle use is rejected in `mobInteract`; `isSaddleable()` and `isSaddled()` return false; `setSaddled(true)` is forced to false; only slot 0 rejects non-empty stacks, while clearing and all other slots retain the original path.
+- The same commit moves entity-type registry IDs to `archie_dinosaurs` for Lushsaur, Chorusoatl, Sculksaur, and Chorusoatl's spit projectile. It updates the Forge entity DeferredRegister, `ResourceSupplier.id()`, entity-type tags, advancement predicates, and entity translation keys. It deliberately leaves mod ID `ec_ad`, item/block/sound registries, and asset/data directory namespaces unchanged.
+- The Build207/Build212 source comparison shows no change to `patchLushsaurMountSpeed`; the same rider-sprint/feed-boost formula is present in both. Build212 adds passenger-offset and saddle-related changes, but neither edits the speed-property method. No unverified speed constant was changed. The reported runtime speed difference remains unproven by source diff and needs an in-game comparison.
+- Output: 468 entries, 2,482,346 bytes. Download: [`ec_ad-legacy-forge-1.20.1.jar`](https://github.com/Xinees/AD-NO-BS/releases/download/untagged-d16b6548cb9c8822a6d5/ec_ad-legacy-forge-1.20.1.jar). Draft release: [Legacy CI build #221](https://github.com/Xinees/AD-NO-BS/releases/tag/untagged-d16b6548cb9c8822a6d5).
+- **Runtime status:** structural, bytecode, namespace, and resource checks passed; no in-game launch was performed in this session. Test the rider alignment, saddle rejection, normal movement speed with/without the feed boost, and spawning through the new entity IDs before marking this runtime-accepted.
 
 ---
 
@@ -170,22 +168,14 @@ The five root TXT files uploaded on `main` were reviewed: `bow.txt`, `lush.txt`,
 4. The test note in `random.txt` also reports that mounted LMB/RMB attacks did nothing. The build 11 artifact lacked `MountControlMessage.execute(ServerPlayer)`, so the network message decoded but its server-side attack handler was absent.
 5. `random_num2.txt` is an additional gameplay test session; no additional distinct exception was found in the inspected log.
 
-## Pending Lushsaur behavior task — no saddle required
+## Lushsaur unsaddled riding and saddle rejection — implemented, runtime test pending
 
-Lushsaur (Пышнозавр) must be controllable without a saddle once tamed:
-- Tame it.
-- Mount it as its owner.
-- Allow normal player movement control without putting a saddle into its inventory.
-- Do not require the ugly saddle model/attachment for Lushsaur control.
-- Preserve saddle requirements and behavior for Chorusoatl and Sculksaur unless separately proven otherwise.
-
-Technical cause identified in the original behavior:
-- `MountComponent.of(...)` for Lushsaur already permits an adult owner to mount while not sitting; it does not require a saddle in its mount predicate.
-- `AbstractComplexMount.m_6688_()` currently returns the controlling passenger only when `m_6254_()` reports a saddle.
-- `MountComponent.travel(...)` uses `mob.m_6688_()` to obtain player input, so an unsaddled Lushsaur carries its owner but does not treat them as its controller.
-- The planned narrow change is a Lushsaur-only override of `m_6688_()`: keep the superclass path when saddled, but return the first passenger when that passenger is the tamed Lushsaur's owner. Do not change the shared `AbstractComplexMount` saddle rules.
-
-This behavior change is recorded for the next task; it is not part of build 12.
+- The Lushsaur-only `m_6688_()` override allows the tamed owner to control an adult Lushsaur while it is unsaddled; non-owners, babies, sitting Lushsaurs, and other mounts do not receive this exception.
+- Build #221 rejects saddle interaction before the shared superclass path; the interaction returns `FAIL`, so the saddle is not consumed.
+- `isSaddleable()` and `isSaddled()` return false. `setSaddled(true)` delegates to the superclass with false.
+- The equipment-slot override filters only Lushsaur slot 0 (the saddle slot), allowing only an empty stack. This preserves slot clearing and leaves any other equipment slot's original predicate untouched.
+- The implementation is Lushsaur-specific. The shared `AbstractComplexMount` logic and saddle requirements for Chorusoatl remain unchanged.
+- **Runtime acceptance is pending:** in Minecraft, try normal right-click saddle use and inventory/slot insertion paths, confirm the saddle is not consumed or retained, then verify unsaddled owner control still works and other mounts retain their saddle behavior.
 
 ## Someday / uncertain idea — separate Ancient Chorusoatl (not near-term)
 
@@ -213,14 +203,14 @@ Open design questions for that future task:
 
 Do not implement this during the current crash/creative-tab repair cycle. Revisit only after the stable Legacy build is verified in-game and the user explicitly returns to this idea.
 
-## Required in-game retest of build 12
+## Required in-game retest of Build #221
 
 1. Launch Forge 1.20.1 with Astemir RE installed separately.
-2. Fire a normal vanilla bow with no mod entities nearby.
-3. Spawn and ride Lushsaur and Chorusoatl; verify passenger rendering no longer crashes.
-4. Open and close each mount inventory repeatedly; verify no server/client crash.
-5. Test LMB and RMB mounted attacks for all three retained mobs and confirm each server-side action executes.
-6. Confirm the creative tab order and all eight entries.
-7. After those tests pass, implement the Lushsaur no-saddle control exception and test it independently.
+2. Confirm the entity IDs resolve: `archie_dinosaurs:lushsaur`, `archie_dinosaurs:chorusoatl`, `archie_dinosaurs:sculksaur`, and `archie_dinosaurs:chorusoatl_spit`.
+3. Try saddle interaction and any normal inventory/slot insertion path on Lushsaur. Confirm the saddle is not consumed, inserted, or reported as equipped.
+4. Ride an adult tamed Lushsaur without a saddle. Compare walking and sprinting speed against Build207 and test both with and without the feed-boost timer active. The source diff alone did not identify the reported speed difference.
+5. Confirm Chorusoatl retains its existing saddle behavior and that item/block IDs remain under `ec_ad`.
+6. Verify rider hitbox/model alignment and the six Chorusoatl egg substrates, including preferred-dimension behavior in the End.
+7. Retest mounted LMB/RMB attacks and unrelated retained behavior.
 
-A successful structural CI build is not proof that the game runtime crash paths have been cleared.
+A successful structural CI build is not proof of in-game behavior; do not mark these checks runtime-accepted until tested.
