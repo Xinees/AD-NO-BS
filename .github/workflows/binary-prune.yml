@@ -327,7 +327,7 @@ jobs:
           SONIC_REGISTRATION="$(javap -classpath build/classes-pruned.jar -p -c -v com.eternal_creations.archies_dino_mod.client.ADClientModBus)"
           SONIC_FACTORIES="$(printf '%s\n' "$SONIC_REGISTRATION" | sed -n '/registerFactories(/,/^  public /p')"
           for required_call in 'ParticleTypes.f_235902_' 'RegisterParticleProvidersEvent.registerSpriteSet' 'SculksaurSonicBoomParticle$Provider'; do
-            if ! printf '%s\n' "$SONIC_REGISTRATION" | grep -Fq "$required_call"; then
+            if ! printf '%s\n' "$SONIC_REGISTRATION" | grep -F "$required_call"; then
               echo "Missing exact Sonic Boom sprite-set provider registration: $required_call"
               printf '%s\n' "$SONIC_FACTORIES"
               exit 1
@@ -337,13 +337,13 @@ jobs:
           SONIC_PROVIDER='com.eternal_creations.archies_dino_mod.client.particle.SculksaurSonicBoomParticle$Provider'
           SONIC_PROVIDER_BYTECODE="$(javap -classpath build/classes-pruned.jar -p -c "$SONIC_PROVIDER")"
           for required_call in 'ThreadLocal.set' 'ThreadLocal.remove' 'Level.m_7106_' 'SonicBoomParticle$Provider.<init>' 'ParticleProvider.m_6966_'; do
-            if ! printf '%s\n' "$SONIC_PROVIDER_BYTECODE" | grep -Fq "$required_call"; then
+            if ! printf '%s\n' "$SONIC_PROVIDER_BYTECODE" | grep -F "$required_call"; then
               echo "Sonic Boom provider is missing marker/fallback behavior: $required_call"
               printf '%s\n' "$SONIC_PROVIDER_BYTECODE"
               exit 1
             fi
           done
-          if ! printf '%s\n' "$SONIC_PROVIDER_BYTECODE" | grep -Fq 'SculksaurSonicBoomParticle."<init>"'; then
+          if ! printf '%s\n' "$SONIC_PROVIDER_BYTECODE" | grep -F 'SculksaurSonicBoomParticle."<init>"'; then
             echo "Marked Sculksaur particles are not created by the Sonic Boom provider."
             printf '%s\n' "$SONIC_PROVIDER_BYTECODE"
             exit 1
@@ -352,13 +352,13 @@ jobs:
           MOVING_PARTICLE='com.eternal_creations.archies_dino_mod.client.particle.SculksaurSonicBoomParticle'
           MOVING_PARTICLE_BYTECODE="$(javap -classpath build/classes-pruned.jar -p -c "$MOVING_PARTICLE")"
           for required_call in 'SonicBoomParticle."<init>"' 'Particle.m_172260_' 'Particle.m_6257_' 'HugeExplosionParticle.m_5989_'; do
-            if ! printf '%s\n' "$MOVING_PARTICLE_BYTECODE" | grep -Fq "$required_call"; then
+            if ! printf '%s\n' "$MOVING_PARTICLE_BYTECODE" | grep -F "$required_call"; then
               echo "Moving Sonic Boom particle lost its vanilla base behavior or movement: $required_call"
               printf '%s\n' "$MOVING_PARTICLE_BYTECODE"
               exit 1
             fi
           done
-          if ! printf '%s\n' "$MOVING_PARTICLE_BYTECODE" | grep -Fq 'Particle.f_107219_'; then
+          if ! printf '%s\n' "$MOVING_PARTICLE_BYTECODE" | grep -F 'Particle.f_107219_'; then
             echo "Moving Sonic Boom particle must disable block collision so its radial speed remains constant."
             printf '%s\n' "$MOVING_PARTICLE_BYTECODE"
             exit 1
