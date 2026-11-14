@@ -6,66 +6,75 @@
 
 This file is the explicit task list for the next Legacy work. The order below is intentional. Do not quietly reduce these requests to cosmetic tweaks, and do not mix unrelated behavior changes into one patch.
 
-## Next riding and visual cleanup pass — requested 2026-11-14 (not implemented)
+## Build119 implementation status — rider controls, roll and particle cleanup
 
-The user has clarified the desired behavior. Keep these as separate, narrowly scoped changes and do not bundle them with particle cleanup.
+**Implementation commit:** `d9ae4f5bac2040ffe7788fd24174becf9f933f8a`  
+**Latest CI guard commit:** `c9f46bded6d8900ac96c96e8eb3f48aa771d4d82`  
+**CI run #176:** [43608521634](https://github.com/Xinees/AD-NO-BS/actions/runs/43608521634)
 
-### Rider presentation — Lushsaur and Chorusoatl
+The pruner compiled and rebuilt from the untouched original JAR. Renderer descriptor checks, the new riding/particle bytecode guards, and final retained-JAR structure validation all passed. The only failed step was uploading the JAR artifact because the repository's GitHub Actions artifact-storage quota is full.
 
-- While the player rides either Lushsaur or Chorusoatl, disable the special custom player action animations triggered by LMB/RMB and other mount-specific rider animation layers that make the player swing/act.
-- The player should retain the ordinary vanilla passenger/sitting pose, visually comparable to riding a vanilla pig.
-- The player should retain the ordinary vanilla passenger/sitting pose, visually comparable to riding a vanilla pig. No special LMB/RMB arm/action animation or mount-specific rider flourish.
-- **Lushsaur-only rider seat offset:** move the rider's seat position exactly 13 model pixels backward relative to the Lushsaur's forward direction, so the player visually sits centered over the Lushsaur hitbox. This is a separate mount-position adjustment, not part of the sitting animation. Do not apply this offset to Chorusoatl.
-- Preserve ordinary player animations when dismounted and avoid changing rider behavior for unrelated entities.
+Runner output: `ec_ad-legacy-forge-1.20.1.jar`, **468 entries**, **2,480,309 bytes**. The runner produced and validated the JAR, but the artifact could not be downloaded because the upload step was rejected by GitHub. No SHA-256 is recorded for this runner copy.
 
-### Lushsaur inventory removal and E-key behavior
+**Runtime status:** Build119 has not yet been launched in Minecraft. Treat all behavior below as structurally/bytecode-verified, not runtime-confirmed.
 
-- Remove the Lushsaur-specific mount inventory/menu (the GUI currently titled `Lushsaur`, shown in the supplied screenshot) and its mount storage interface for Lushsaur only.
-- When the player is riding Lushsaur and presses E, open the player's ordinary inventory instead of opening a Lushsaur mount/container screen.
-- Do not apply this removal to Chorusoatl or Sculksaur; preserve their existing inventory behavior unless separately requested.
-- Audit all related paths: interaction/open-menu dispatch, key handling, container/menu registration where applicable, Lushsaur inventory storage/slots, saddle or equipment dependencies, and client screen registration. Do not merely hide the GUI while leaving inaccessible inventory state or broken menu packets.
-- Check whether any existing Lushsaur mechanics depend on its inventory slots before removing them; report any dependency that would be broken instead of silently deleting it. The desired user-facing result remains: no Lushsaur mount inventory, E opens player inventory.
+### Rider pose and Lushsaur seat position
 
-### Remove lateral banking/roll when mobs turn
+- `ADPlayerAnimations.init()` no longer registers `OnLushsaurPlayerAnimations` or `OnChorusoatlPlayerAnimations`. The player therefore uses the normal vanilla passenger pose; this also removes the custom rider run/action layer while mounted. Dismounted player animations are unaffected.
+- Lushsaur's seat is shifted **13 model pixels (0.8125 block) backward**. The same relative correction is applied to the server passenger offset and both client mount-point anchors (saddled and unsaddled).
+- Chorusoatl receives the vanilla-like seated pose but no 13-pixel offset.
 
-- Remove the unwanted sideways body roll/bank of the mob model. The supplied Lushsaur screenshots show the entire body visibly tilted around its longitudinal/forward axis; the marked red line illustrates the unwanted slant.
-- This is especially visible during running/locomotion, and may also appear while turning. Do not reduce this request to faster yaw interpolation or merely a turning-angle tweak.
-- Initial scope: all three retained mobs (Lushsaur, Chorusoatl, Sculksaur), unless the user later narrows it.
-- Preserve normal horizontal yaw turns, the ordinary gait/run cycle, head tracking, and unrelated vertical pitch/bobbing. Isolate and remove only the lateral roll component.
-- The exact implementation source is still unverified: it could be a root/body bone animation or an entity/model transform. Inspect the original renderer/model animation and Astemir RE behavior before patching.
+### Lushsaur inventory and E key
 
-### Movement-gated rider-look steering — Lushsaur and Chorusoatl
+- Lushsaur's custom mount-menu opener `m_213583_(Player)` is now a no-op, so it cannot open the Lushsaur container screen.
+- The client-side `LocalPlayer.sendOpenInventory()` hook detects Lushsaur as the current vehicle and opens the player's normal `InventoryScreen`; it cancels the custom riding-inventory request.
+- Chorusoatl and Sculksaur inventory behavior is unchanged.
+- The superclass's internal saddle/equipment slot remains as an internal compatibility detail; it is no longer exposed through a Lushsaur mount GUI. This avoids deleting shared equipment/control paths unrelated to the requested screen removal.
 
-- The controlling player's **horizontal yaw only** determines the mount's heading while movement input is active.
-- When stationary, rotating the camera must not rotate the mount's head/body. Keep the mount's last facing direction.
-- When the rider supplies movement input (forward/back/strafe), the whole mob should turn to the player's current horizontal look direction and be steerable that way.
-- The turning condition is input-based, not displacement-based: if the rider continues holding movement into a wall/obstacle, the mount should still turn toward the look direction.
-- Releasing movement input stops look-following; do not continue rotating merely because the rider moves the camera.
-- Ignore vertical camera pitch. Do not pitch the mount up/down to follow the player's vertical look.
-- Apply this behavior to both Lushsaur and Chorusoatl, not Sculksaur.
+### Lateral roll removal
 
-### Initial code audit — observations, not conclusions
+- LushsaurClient and SculksaurClient no longer register their `RollOnRotation` root operation. The remaining root operations are preserved and the array/Grumm rotation index is adjusted.
+- Chorusoatl's `flyingRoll` value is replaced with zero only at the relevant model animation read.
+- Horizontal yaw, head tracking, vertical pitch, gait and run animations are preserved by the bytecode patch. In-game visual confirmation is still required.
 
-- `JarPruner.patchPlayerAnimations()` clears `ADPlayerAnimations.init()` and registers `OnLushsaurPlayerAnimations.init(1)` and `OnChorusoatlPlayerAnimations.init(1)`. These are the obvious registration points for the special rider layers; inspect their actual contents before deciding whether to no-op the registrations or remove only selected tracks.
-- `patchLushsaurRiderRunAnimation()` changes the Lushsaur rider-run predicate to read the controlling passenger's sprint state. Removing the whole Lushsaur rider layer would also remove that custom run animation, which appears consistent with the requested vanilla-like seated pose but must be checked against the full rider layer before patching.
-- Existing `SmoothMoveControl`, `SmoothBodyControl`, and `SmoothLookControl` patches address yaw/look control. The current `SmoothBodyControl` has a player-controlling-passenger early return; this is not proof of the side-roll source.
-- The documented `EntityLocomotion.Builder.turnFactor(0.003f)` occurs only in Sculksaur's `createLocomotion()` and belongs to external Astemir RE. It must not be assumed to cause Lushsaur's or Chorusoatl's banking.
-- The exact source of the lateral bank and the precise meaning of the external `turnFactor` are still unverified. Inspect the original entity/model animation bytecode and exact Astemir RE 1.2.98 dependency read-only before choosing a patch point.
-- Keep each behavior isolated and add specific bytecode guards plus in-game regression tests. Do not modify the immutable original mod JAR or external Astemir RE JAR.
+### Movement-gated look steering
 
-### Particle cleanup backlog carried forward
+- In `MountComponent.tickRidden`, Lushsaur and Chorusoatl stop applying rider yaw to head/body while both movement inputs (`xxa` and `zza`) are zero.
+- When forward/back/strafe input is active, the original head/body yaw-follow logic remains active; rider pitch is neutralized for these two mounts.
+- The condition is based on input, not actual displacement, so a mount pressed against a wall still follows the horizontal look direction.
+- Sculksaur is not changed by this steering gate.
 
-- Build118 currently has no Sculksaur explosive-attack particles. Do not invent a replacement. Restore the original effect only after Astemir supplies the original particle formula/implementation.
-- Remove footstep dust particles from all retained mobs.
-- Remove the sleep `Z` particles above Lushsaur.
-- Remove the green particles emitted by Lushsaur; identify their exact particle source/type before changing it.
+### Particle cleanup
+
+- Lushsaur's sleep `REST_EFFECTS` no longer spawns `EMITTER_REST` at the `head` locator; its original rest sound remains.
+- Lushsaur's `RUN_EFFECTS` charge-trail callback (`lambda$static$3`) is disabled. This is the source that emitted the ground3 and moss charge-trail particles.
+- Lushsaur's original `stepEvent()` contained sound and camera shake but no particle call; it did not need a footstep-particle patch.
+- Chorusoatl's two `EMITTER_STOMP` particle events were removed from `WALK_EFFECTS`; light/heavy footstep sounds remain.
+- Sculksaur's footstep callback now retains `SCULKSAUR_STEP` sound and `ShakeUtil.shakeStep`, but emits no block/ordinary particles.
+- **Sculksaur explosive-attack particles remain completely absent.** Do not recreate them until Astemir supplies the original particle formula/implementation.
+
+### Preserved Build118 behavior and limits
+
 - Tail physics remains disabled as in Build118.
+- Sculksaur's attack, camera shake and non-footstep event tracks remain as in Build118; no substitute explosion-particle system was added.
+- Lushsaur's separate item-chain physics and Sculksaur leg IK remain.
+- The original input JAR and external Astemir RE 1.2.98 JAR were not modified.
+- A temporary read-only inspection workflow was used for bytecode analysis and has been deleted. The main `binary-prune.yml` workflow remains the production build.
 
-No code or JAR changes have been made for this pass yet.
+### Required in-game acceptance test
+
+1. Ride Lushsaur and Chorusoatl; verify the player simply sits like on a vanilla pig and no custom arm/action animations play.
+2. Ride Lushsaur both with and without a saddle; verify the seat is 13 pixels backward and centered over the hitbox. Verify no Lushsaur menu opens and E opens the player's inventory.
+3. Move both mounts while rotating the camera; verify body and head follow horizontal yaw only while movement input is held. Stop moving and rotate the camera; verify the mount keeps its heading. Test while blocked against a wall.
+4. Test running/turning on all three mobs; verify lateral roll is gone while ordinary gait, yaw, head movement and pitch remain.
+5. Verify no footstep dust on any retained mob, no Lushsaur sleep Z, and no Lushsaur green charge trail. Verify footstep sounds and Sculksaur step camera feedback remain.
+6. Confirm unrelated attacks, taming, inventory/equipment behavior on Chorusoatl, and Sculksaur non-footstep particle tracks.
+
+---
 
 ## Current baseline and test status
 
-### Build 118 — current implementation; CI validation passed, artifact upload quota-blocked
+### Build 118 — previous implementation; superseded by Build119
 
 - Implementation commit: [`1f39f51`](https://github.com/Xinees/AD-NO-BS/commit/1f39f518cdc12d2e9016be4f1dee19a423b3de7c). CI guard commit: [`57641de`](https://github.com/Xinees/AD-NO-BS/commit/57641de2df0b562dbc1023c7ec8b2ca41d2a256d).
 - GitHub Actions [run #152](https://github.com/Xinees/AD-NO-BS/actions/runs/43594713011) passed compilation, pruning, retained renderer descriptors, bytecode guards, and final 473-entry JAR validation. Artifact upload alone failed because GitHub Actions storage quota was full. Runner output: 473 entries, 2,492,713 bytes.
