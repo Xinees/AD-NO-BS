@@ -303,6 +303,26 @@ def validate_loot_tables(entries):
         visit(value)
 
 
+def extend_chorusoatl_hatchable(data):
+    value = read_json(data, "data/ec_ad/tags/blocks/chorusoatl_egg_hatchable.json")
+    values = value.get("values")
+    if not isinstance(values, list):
+        raise RuntimeError("Chorusoatl hatchable block tag must contain a values array")
+
+    required = (
+        "minecraft:end_stone",
+        "minecraft:end_stone_bricks",
+        "minecraft:purpur_block",
+        "minecraft:purpur_pillar",
+        "minecraft:obsidian",
+        "minecraft:bedrock",
+    )
+    for block_id in required:
+        if block_id not in values:
+            values.append(block_id)
+    return dump_json(value)
+
+
 def filter_tag_json(data, name):
     value = read_json(data, name)
     if isinstance(value, dict) and isinstance(value.get("values"), list):
@@ -404,6 +424,8 @@ with zipfile.ZipFile(source, "r") as zin:
                 data = filter_root_advancement(data)
             elif name.startswith("data/ec_ad/loot_tables/") and name.endswith(".json"):
                 data = filter_loot_table(data, name)
+            elif name == "data/ec_ad/tags/blocks/chorusoatl_egg_hatchable.json":
+                data = extend_chorusoatl_hatchable(data)
             elif "/tags/" in name and name.endswith(".json"):
                 data = filter_tag_json(data, name)
 
@@ -452,6 +474,22 @@ with zipfile.ZipFile(target, "r") as check:
     missing_items = sorted(allowed_item_models - names)
     if missing_items:
         raise SystemExit(f"Required item models missing: {missing_items}")
+    hatchable_tag_path = "data/ec_ad/tags/blocks/chorusoatl_egg_hatchable.json"
+    with check.open(hatchable_tag_path) as file:
+        hatchable_tag = json.load(file)
+    expected_hatchable_blocks = {
+        "minecraft:end_stone",
+        "minecraft:end_stone_bricks",
+        "minecraft:purpur_block",
+        "minecraft:purpur_pillar",
+        "minecraft:obsidian",
+        "minecraft:bedrock",
+    }
+    actual_hatchable_blocks = set(hatchable_tag.get("values", []))
+    missing_hatchable_blocks = sorted(expected_hatchable_blocks - actual_hatchable_blocks)
+    if missing_hatchable_blocks:
+        raise SystemExit(f"Chorusoatl egg hatchable tag is missing blocks: {missing_hatchable_blocks}")
+
     if "assets/ec_ad/textures/gui/back.png" not in names:
         raise SystemExit("Retained advancement background texture is missing")
     if "data/ec_ad/advancements/root.json" not in names:
