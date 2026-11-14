@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import json
 import re
+import struct
 import sys
 import zipfile
 from pathlib import Path
@@ -110,6 +111,69 @@ def rewrite_manifest(data):
             first_line = False
 
     return ("\r\n".join(output_lines).rstrip("\r\n") + "\r\n").encode("utf-8")
+
+
+def rewrite_astemir_model(data, name):
+    magic = b"ASTEMIR-MODEL-1"
+    if not data.startswith(magic):
+        raise RuntimeError(f"Unrecognized Astemir model header in {name}")
+
+    offset = len(magic)
+    if offset + 4 > len(data):
+        raise RuntimeError(f"Truncated Astemir model version in {name}")
+    version = struct.unpack_from("<I", data, offset)[0]
+    offset += 4
+    if version != 2:
+        raise RuntimeError(f"Unsupported Astemir model version {version} in {name}")
+
+    while offset + 4 <= len(data):
+        length = struct.unpack_from("<I", data, offset)[0]
+        content_offset = offset + 4
+        if content_offset >= len(data):
+            raise RuntimeError(f"Missing Astemir model record in {name}")
+
+        if data[content_offset:content_offset + 1] in (b"{", b"["):
+            json_end = content_offset + length
+            if json_end != len(data):
+                raise RuntimeError(
+                    f"Astemir model JSON length mismatch in {name}: "
+                    f"declared={length}, remaining={len(data) - content_offset}"
+                )
+            model_json = data[content_offset:json_end]
+            try:
+                json.loads(model_json.decode("utf-8"))
+            except Exception as exc:
+                raise RuntimeError(f"Invalid embedded Astemir model JSON in {name}: {exc}") from exc
+
+            rewritten_json = model_json.replace(
+                OLD_NAMESPACE.encode("ascii"),
+                NEW_NAMESPACE.encode("ascii"),
+            )
+            try:
+                json.loads(rewritten_json.decode("utf-8"))
+            except Exception as exc:
+                raise RuntimeError(f"Namespace rewrite damaged embedded model JSON in {name}: {exc}") from exc
+
+            return data[:offset] + struct.pack("<I", len(rewritten_json)) + rewritten_json
+
+        filename_length = length
+        if filename_length == 0 or filename_length > 1024:
+            raise RuntimeError(f"Invalid embedded asset-name length in {name}: {filename_length}")
+        filename_end = content_offset + filename_length
+        if filename_end + 4 > len(data):
+            raise RuntimeError(f"Truncated embedded asset name in {name}")
+        try:
+            filename = data[content_offset:filename_end].decode("utf-8")
+        except UnicodeDecodeError as exc:
+            raise RuntimeError(f"Invalid embedded asset filename in {name}") from exc
+
+        payload_length = struct.unpack_from("<I", data, filename_end)[0]
+        payload_end = filename_end + 4 + payload_length
+        if payload_end > len(data):
+            raise RuntimeError(f"Truncated embedded asset {filename} in {name}")
+        offset = payload_end
+
+    raise RuntimeError(f"Embedded model JSON section is missing from {name}")
 
 
 ENTITY_REGISTRY_NAMESPACE = "archie_dinosaurs"
@@ -534,6 +598,8 @@ with zipfile.ZipFile(source, "r") as zin:
                 sounds = read_json(data, name)
                 sounds = {k: v for k, v in sounds.items() if k.startswith(SOUND_PREFIXES)}
                 data = dump_json(sounds)
+            elif name.endswith(".astemirmodel"):
+                data = rewrite_astemir_model(data, name)
 
         elif name.startswith("data/archie_dinosaurs/"):
             if not keep_data_path(name):
@@ -603,41 +669,7 @@ with zipfile.ZipFile(target, "r") as check:
         if name.endswith(".jar"):
             continue
         payload = check.read(name)
-        marker = OLD_NAMESPACE.encode("ascii")
-        offset = payload.find(marker)
-        if offset >= 0:
-            start = max(0, offset - 48)
-            end = min(len(payload), offset + len(marker) + 48)
-            context = payload[start:end]
-            print(f"Namespace diagnostic for {name}: size={len(payload)}, offset={offset}")
-            print(f"Prefix hex: {payload[:64].hex()}")
-            print(f"Context hex: {context.hex()}")
-            print(f"Context repr: {context!r}")
-            if name.endswith(".astemirmodel"):
-                for token in (b"ec_ad", b"animations", b'{"', b"PNG", b"\x89PNG", b"IEND"):
-                    positions = []
-                    cursor = 0
-                    while True:
-                        cursor = payload.find(token, cursor)
-                        if cursor < 0:
-                            break
-                        positions.append(cursor)
-                        cursor += len(token)
-                    print(f"Token {token!r}: {positions[:40]}")
-                for label, position in (
-                    ("first json object", payload.find(b'{"')),
-                    ("animation block", payload.find(b'"animations"')),
-                    ("namespace", offset),
-                    ("first PNG", payload.find(b"\x89PNG")),
-                ):
-                    if position >= 0:
-                        print(f"{label} @{position}: {payload[max(0, position - 96):position + 160]!r}")
-                png = payload.find(b"\x89PNG")
-                if png >= 0:
-                    iend = payload.find(b"IEND", png)
-                    print(f"first PNG IEND marker @{iend}, end+CRC @{iend + 8 if iend >= 0 else -1}")
-                    if iend >= 0:
-                        print(f"bytes after first PNG: {payload[iend + 8:iend + 96].hex()}")
+        if OLD_NAMESPACE.encode("ascii") in payload:
             raise SystemExit(f"Old mod namespace remains in JAR entry content: {name}")
 
     metadata = check.read("META-INF/mods.toml").decode("utf-8")
