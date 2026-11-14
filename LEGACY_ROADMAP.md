@@ -4,7 +4,7 @@
 
 ### Follow-up after the first in-game screenshot — 2026-11-14
 
-- **Passenger hitbox stays at the original central/server position.** Only the rendered player model is moved 15 pixels backward relative to that hitbox. The server `passengerOffset(0, 0, 1)` is unchanged; both `LushsaurClient` visual `MountPoint` Z anchors are offset by +0.9375 blocks (saddled: 0.9375; unsaddled: 0.3374999761581421). This is a client-render-only correction and must not be implemented by moving the passenger entity.
+- **Passenger hitbox stays at the original central/server position.** Only the rendered player model is moved 15 pixels backward relative to that hitbox. The server `passengerOffset(0, 0, 1)` is unchanged. The Lushsaur can only be ridden unsaddled, so only its unsaddled visual `MountPoint` is shifted: Z = `+0.3374999761581421` (original `-0.6000000238418579` plus 0.9375 blocks / 15 pixels). The saddled visual point remains original and unused. This is client-render-only; never move the passenger entity to achieve visual alignment.
 - Chorusoatl's original lateral flight banking through `flyingRoll` has been restored. The latest successful roll-preservation test is [CI #189](https://github.com/Xinees/AD-NO-BS/actions/runs/43615959523).
 - Lushsaur and Sculksaur still have only the `RollOnRotation` root operation removed. Their other root operations, including `SmoothBodyRotation` and `GRUMM_ROTATION`, are retained; the GRUMM array index is adjusted after removing the roll entry.
 - The occasional 180-degree turns and erratic head tracking were traced to separate Build99 patches, not to removal of `RollOnRotation`. Those patches had bypassed `SmoothMoveControl.smoothRotlerp`, replaced `SmoothBodyControl.m_8121_()` with direct body-yaw assignment, and made the horizontal coordinates in `SmoothLookControl.m_8128_()` update immediately.
@@ -52,7 +52,7 @@ Runner output: `ec_ad-legacy-forge-1.20.1.jar`, **468 entries**, **2,480,309 byt
 ### Rider pose and Lushsaur seat position
 
 - `ADPlayerAnimations.init()` no longer registers `OnLushsaurPlayerAnimations` or `OnChorusoatlPlayerAnimations`. The player therefore uses the normal vanilla passenger pose; this also removes the custom rider run/action layer while mounted. Dismounted player animations are unaffected.
-- Keep the player entity and hitbox centered at the original server passenger point (`passengerOffset(0, 0, 1)`). Move only the rendered player model 15 pixels backward within that hitbox by adding +0.9375 local Z to both client-only `MountPoint` offsets: saddled Z = +0.9375; unsaddled Z = +0.3374999761581421. Never change server `passengerOffset` to achieve this visual alignment.
+- Keep the player entity and hitbox centered at the original server passenger point (`passengerOffset(0, 0, 1)`). Move only the rendered player model 15 pixels backward within that hitbox by adding +0.9375 local Z to the **unsaddled client-only `MountPoint`**: unsaddled Z = `+0.3374999761581421`. The unused saddled point remains original and must not receive this offset. Never change server `passengerOffset` to achieve this visual alignment.
 - Chorusoatl receives the vanilla-like seated pose but no 13-pixel offset.
 
 ### Chorusoatl egg hatching
@@ -62,6 +62,26 @@ Runner output: `ec_ad-legacy-forge-1.20.1.jar`, **468 entries**, **2,480,309 byt
 - The original hatchable-block tag contained only `minecraft:end_stone`. The retained resource tag is extended to include `minecraft:end_stone_bricks`, `minecraft:purpur_block`, `minecraft:purpur_pillar`, `minecraft:obsidian`, and `minecraft:bedrock` as well. `minecraft:end_stone` remains.
 - The nearby chorus requirement is unchanged: at least five `minecraft:chorus_plant` or `minecraft:chorus_flower` blocks in that radius. The preferred End dimension still bypasses these substrate/light/chorus requirements as in the original source.
 - CI #207 validates all six substrate entries and preserves `minecraft:the_end` in the preferred-dimension tag.
+
+## Next build — Lushsaur must not accept a saddle
+
+**Status: queued for the next build; not part of Build #207.**
+
+- Remove the ability to equip or apply a saddle to the Lushsaur. It is an unsaddled-only rideable mob.
+- Keep the existing owner/passenger riding and movement-control behavior working without a saddle. Do not disable riding while removing saddle support.
+- The restriction must be Lushsaur-specific. Do not change the shared saddle/equipment behavior of Chorusoatl or any other retained mount.
+- Trace and block the actual saddle-equip path (interaction/item use and any entity equipment-slot path that can set the saddle), rather than merely hiding a saddle GUI. The Lushsaur mount menu is already disabled; that alone does not prove the saddle cannot be equipped.
+- Do not rewrite shared `AbstractComplexMount` saddle logic for all mounts. Prefer a narrow Lushsaur override/guard at the point where the saddle is accepted, after inspecting the original bytecode and all relevant call paths.
+- Keep only the unsaddled passenger render offset at +15 pixels. The original server passenger offset and unused saddled visual anchor remain unchanged.
+
+### Acceptance tests
+
+1. Attempt to apply a saddle to an adult owned Lushsaur using every normal saddle interaction path; the saddle must not equip, appear, or change its state.
+2. Mount and control the same Lushsaur without a saddle; movement, sprint, rider position, and the 15-pixel visual-only offset must continue working.
+3. Confirm saddle behavior on Chorusoatl and other unaffected mounts is unchanged.
+4. Confirm no shared saddle/equipment code was globally disabled and no saddle item is consumed or lost on a rejected interaction.
+
+---
 
 ### Lushsaur inventory and E key
 
@@ -103,7 +123,7 @@ Runner output: `ec_ad-legacy-forge-1.20.1.jar`, **468 entries**, **2,480,309 byt
 ### Required in-game acceptance test
 
 1. Ride Lushsaur and Chorusoatl; verify the player simply sits like on a vanilla pig and no custom arm/action animations play.
-2. Ride Lushsaur both with and without a saddle; verify the player hitbox/entity stays at the original central point while the rendered player model sits 15 pixels backward inside it. Check both saddle states. Verify no Lushsaur menu opens and E opens the player's inventory.
+2. Ride Lushsaur unsaddled only; verify the player hitbox/entity stays at the original central point while the rendered player model sits 15 pixels backward inside it. Verify that the next-build saddle restriction prevents equipping a saddle. Verify no Lushsaur menu opens and E opens the player's inventory.
 3. Move both mounts while rotating the camera; verify body and head follow horizontal yaw only while movement input is held. Stop moving and rotate the camera; verify the mount keeps its heading. Test while blocked against a wall.
 4. Test running/turning on all three mobs; verify lateral roll is gone while ordinary gait, yaw, head movement and pitch remain.
 5. Verify no footstep dust on any retained mob, no Lushsaur sleep Z, and no Lushsaur green charge trail. Verify footstep sounds and Sculksaur step camera feedback remain.
