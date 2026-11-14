@@ -304,6 +304,20 @@ jobs:
               printf '%s\n' "$DISASSEMBLY"
               exit 1
             fi
+            for preserved_operation in 'CommonRootOperations.SHAKING' 'SmoothBodyRotation.of' 'CommonRootOperations.GRUMM_ROTATION'; do
+              if ! grep -Fq "$preserved_operation" <<< "$DISASSEMBLY"; then
+                echo "Roll removal damaged another root operation in $C: $preserved_operation"
+                printf '%s\n' "$DISASSEMBLY"
+                exit 1
+              fi
+            done
+            ROOT_INIT="$(printf '%s\n' "$DISASSEMBLY" | sed -n '/onInitialize(/,/^  public /p')"
+            if [ "$(printf '%s\n' "$ROOT_INIT" | grep -F -o 'ModelSystem.addRootOperation' | wc -l)" -ne 1 ] ||
+               [ "$(printf '%s\n' "$ROOT_INIT" | grep -F -o 'iconst_3' | wc -l)" -lt 1 ]; then
+              echo "Expected one three-entry root operation array in $C after removing only RollOnRotation."
+              printf '%s\n' "$ROOT_INIT"
+              exit 1
+            fi
           done
           CHORUS_ROLL="$(javap -classpath build/classes-pruned.jar -p -c "$CHORUS_ROLL_CLIENT")"
           if ! grep -Fq 'ChorusoatlEntity.flyingRoll' <<< "$CHORUS_ROLL" ||
@@ -312,7 +326,7 @@ jobs:
             printf '%s\n' "$CHORUS_ROLL"
             exit 1
           fi
-          echo "Verified Lushsaur/Sculksaur lateral root roll is removed while original Chorusoatl flying roll remains."
+          echo "Verified only Lushsaur/Sculksaur RollOnRotation is removed; SHAKING, SmoothBodyRotation and GRUMM_ROTATION remain, and Chorusoatl flight banking is preserved."
 
           LUSH_ENTITY_BYTECODE="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.common.entity.mob.lushsaur.LushsaurEntity)"
           LUSH_MOUNT_METHOD="$(awk '/ createMount\(/ { capture=1; print; next } capture && /^  (public|private|protected) / { exit } capture { print }' <<< "$LUSH_ENTITY_BYTECODE")"
