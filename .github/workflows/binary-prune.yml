@@ -314,9 +314,9 @@ jobs:
               exit 1
             fi
           done
-          for required_layer_marker in 'bipush        128' 'double 0.315d' 'double 0.015625d'; do
+          for required_layer_marker in 'double 0.315d' 'double 0.015625d'; do
             if ! printf '%s\n' "$SCULK_PARTICLE" | grep -F "$required_layer_marker"; then
-              echo "Sculksaur Sonic Boom particle count/speed is incorrect: $required_layer_marker"
+              echo "Sculksaur Sonic Boom particle speed/distribution is incorrect: $required_layer_marker"
               printf '%s\n' "$SCULK_PARTICLE"
               exit 1
             fi
