@@ -74,5 +74,30 @@ jobs:
             echo "===== BYTECODE: $C ====="
             javap -classpath "$JAR" -p -c "$C" 2>&1 || true
           done
+          for C in \
+            com.eternal_creations.archies_dino_mod.common.entity.component.MountComponent \
+            'com.eternal_creations.archies_dino_mod.common.entity.component.MountComponent$Definition' \
+            com.eternal_creations.archies_dino_mod.common.entity.base.Mount \
+            com.eternal_creations.archies_dino_mod.client.model.render.entity.MountedListener \
+            com.eternal_creations.archies_dino_mod.client.model.render.entity.layer.PassengerLayer \
+            com.eternal_creations.archies_dino_mod.client.model.render.entity.mob.LushsaurClient \
+            com.eternal_creations.archies_dino_mod.client.model.render.entity.mob.ChorusoatlClient
+          do
+            echo "===== BYTECODE: $C ====="
+            javap -classpath "$JAR" -p -c "$C" 2>&1 || true
+          done
+          echo "=== Entity animation asset paths ==="
+          unzip -Z1 ec_ad-forge-1.20.1-1.0.4.jar | grep 'assets/ec_ad/animations/' | sort || true
+          for F in \
+            assets/ec_ad/animations/player/riding/lushsaur.astemiranim \
+            assets/ec_ad/animations/player/riding/chorusoatl.astemiranim \
+            assets/ec_ad/models/entity/lushsaur.astemirmodel \
+            assets/ec_ad/models/entity/chorusoatl.astemirmodel \
+            assets/ec_ad/models/entity/sculksaur.astemirmodel
+          do
+            echo "===== ASSET: $F ====="
+            unzip -p ec_ad-forge-1.20.1-1.0.4.jar "$F" 2>/dev/null | head -c 40000 || true
+            echo
+          done
           echo "=== Original model/animation asset names ==="
           unzip -Z1 ec_ad-forge-1.20.1-1.0.4.jar | grep -Ei 'lushsaur|chorusoatl' | grep -Ei 'astemirmodel|animation|model' | sort | head -200
