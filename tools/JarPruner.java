@@ -213,7 +213,6 @@ public final class JarPruner {
             nodes.get(ROOT + "client/particle/effect/SculksaurEffects"));
         patchNoRollRootOperation(lushsaurClient);
         patchNoRollRootOperation(sculksaurClient);
-        patchChorusoatlFlyingRoll(chorusoatlClient);
         patchRiderLookSteering(nodes.get(ROOT + "common/entity/component/MountComponent"));
         patchTailPhysics(
             lushsaurClient,
@@ -1090,45 +1089,6 @@ public final class JarPruner {
             throw new IllegalStateException(owner.name + " GRUMM root operation index is unexpected");
         }
         initialize.instructions.set(grummIndex, new InsnNode(Opcodes.ICONST_2));
-    }
-
-    private static void patchChorusoatlFlyingRoll(ClassNode owner) {
-        if (owner == null) throw new IllegalStateException("Chorusoatl renderer is missing");
-        MethodNode animation = owner.methods.stream()
-            .filter(method -> method.name.equals("lambda$setupAnimations$0"))
-            .findFirst()
-            .orElseThrow(() -> new IllegalStateException("Chorusoatl flying bone animation is missing"));
-        String entityInternal = ROOT + "common/entity/mob/chorusoatl/ChorusoatlEntity";
-        String chasingFloat = "com/astemir/astemirlib/re/core/math/tween/ChasingFloat";
-        int replacements = 0;
-        for (AbstractInsnNode instruction : animation.instructions.toArray()) {
-            if (!(instruction instanceof FieldInsnNode field) ||
-                field.getOpcode() != Opcodes.GETFIELD ||
-                !field.owner.equals(entityInternal) || !field.name.equals("flyingRoll") ||
-                !field.desc.equals("L" + chasingFloat + ";")) continue;
-            AbstractInsnNode floatLoad = nextCodeInstruction(field);
-            AbstractInsnNode getValue = nextCodeInstruction(floatLoad);
-            AbstractInsnNode instanceLoad = previousCodeInstruction(field);
-            if (!(instanceLoad instanceof VarInsnNode load) ||
-                load.getOpcode() != Opcodes.ALOAD || load.var != 0 ||
-                !(floatLoad instanceof VarInsnNode partial) ||
-                partial.getOpcode() != Opcodes.FLOAD || partial.var != 4 ||
-                !(getValue instanceof MethodInsnNode call) ||
-                call.getOpcode() != Opcodes.INVOKEVIRTUAL ||
-                !call.owner.equals(chasingFloat) || !call.name.equals("get") ||
-                !call.desc.equals("(F)F")) {
-                throw new IllegalStateException("Unexpected Chorusoatl flyingRoll read");
-            }
-            animation.instructions.remove(instanceLoad);
-            animation.instructions.remove(field);
-            animation.instructions.remove(floatLoad);
-            animation.instructions.insertBefore(getValue, new InsnNode(Opcodes.FCONST_0));
-            animation.instructions.remove(getValue);
-            replacements++;
-        }
-        if (replacements != 1) {
-            throw new IllegalStateException("Expected one Chorusoatl flyingRoll animation use, replaced " + replacements);
-        }
     }
 
     private static void patchCreativeTab(ClassNode owner, ClassNode items) {
