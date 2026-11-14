@@ -8,18 +8,24 @@ This file is the explicit task list for the next Legacy work. The order below is
 
 ## Current baseline and test status
 
-### Build 112 — latest CI-verified JAR; runtime test pending
+### Build 113 — latest CI-verified JAR; runtime test pending
 
-- Latest CI: [run #122 — success](https://github.com/Xinees/AD-NO-BS/actions/runs/43533375677).
-- Implementation and strengthened CI commit: [`71ab3d2d`](https://github.com/Xinees/AD-NO-BS/commit/71ab3d2d483615054f3a4fc0d664286fb4c89172).
-- Artifact ID: `14089055419`; ZIP digest: `sha256:46ece3e402ebad1a3c25bc0341e5539366d37ade33f046c5b305a93373e0ef57`.
-- Output JAR: `ec_ad-legacy-forge-1.20.1.jar`; size: `2,493,438` bytes; SHA-256: `112f021a32fd6933b23e42271b0c63b7c6efd43aa77dd3479d09d64c3c7c3735`.
-- Build112 fixes the Build111 particle-motion failure. In Minecraft 1.20.1, `SONIC_BOOM` is a `SonicBoomParticle` derived from `HugeExplosionParticle`; its constructor takes one additional scalar, not a full XYZ velocity vector. Passing radial XYZ values to it cannot produce a moving spherical shell. Build112 uses vanilla `SCULK_SOUL`, whose particle provider accepts all three velocity components.
-- The effect is two hollow Fibonacci-distributed spherical shells with 768 particles each (1,536 total). The initial radii are 0.55 and 0.05 blocks, so the layers start 0.50 blocks apart. Each particle receives the same normalized radial direction scaled by 0.32 blocks/tick at spawn (about 14% faster than ordinary sprinting).
-- Camera shake is preserved. The old post-process distortion, colored light, jaw emitter fallback, and ground-wave emitters remain disconnected. No animation-event timing, attack AI, damage, range, knockback, cooldown, attack animation, or sound logic was changed.
-- Build111-to-Build112 archive comparison: all 473 entries remain; no entries were added or removed; exactly one class changed, `SculksaurEffects.class`.
-- CI verifies the `SCULK_SOUL` particle type, 768 points per shell, 1,536 total points, both layer divisors, all three 0.32 velocity components, the 0.50-block radial spacing, preserved camera shake, no legacy emitters/distortion, and retained JAR structure. The downloaded JAR was independently checked for ZIP integrity and bytecode.
-- **Runtime status:** CI and post-download structural/bytecode inspection passed. Build112 has **not** been launched in Minecraft. In-game checks are still required for the actual shell appearance, outward movement, spacing and density at roughly five blocks, plus attack and unrelated-mob regression checks.
+- Latest CI: [run #127 — success](https://github.com/Xinees/AD-NO-BS/actions/runs/43535858739).
+- Final code/CI commit: [`481251ab`](https://github.com/Xinees/AD-NO-BS/commit/481251ab558bc9f8a8f88ac1a1c127ae6661bc75).
+- Artifact ID: `14089138883`; ZIP digest: `sha256:7b695c626191a600f8ce09ec79ab1c4b02ce9033e6f1424ce8f6c3ca68aa7e80`.
+- Output JAR: `ec_ad-legacy-forge-1.20.1.jar`; size: `2,495,453` bytes; SHA-256: `e8be7d42b2be79aeefe5bcd03face06d8f9a5da43fa15052d9ea890f06375228`.
+- Build113 restores the **actual vanilla `SONIC_BOOM`** particle type for the moving shell. It does not substitute `SCULK_SOUL`. A small subclass of vanilla `SonicBoomParticle` keeps its original sprite set, render type, full-bright rendering, size, and 16-tick age animation, adding movement only to particles created by the Sculksaur effect.
+- The Forge sprite-set provider delegates unmarked `SONIC_BOOM` creation to vanilla `SonicBoomParticle.Provider`. A thread-local marker is set only around the Sculksaur helper's synchronous `Level.addParticle` call and is removed on both success and exception paths. Ordinary, unmarked vanilla Sonic Boom particles therefore keep the vanilla static behavior.
+- Two hollow Fibonacci-distributed shells: 768 particles per layer (1,536 total), initial radii 0.55 and 0.05 blocks, 0.50-block gap, radial speed 0.32 blocks/tick (6.4 blocks/second, about 14% above the 5.612 blocks/second sprint reference). At the vanilla 16-tick lifetime, a particle travels about 5.12 blocks; estimated ending radii are 5.67 and 5.17 blocks.
+- Camera shake remains. The old post-process distortion, colored light, jaw-emitter fallback, and ground-wave emitters remain disconnected. No animation-event timing, attack AI, damage, range, knockback, cooldown, attack animation, or sound logic changed. Other Sculksaur particle tracks are untouched.
+- Build112-to-Build113 JAR comparison: 473 entries before and 475 after; two generated client particle classes added; only `SculksaurEffects.class` and `ADClientModBus.class` changed; no entries removed and no model, texture, sound, JSON, or mob gameplay class changed.
+- CI verifies the exact `SONIC_BOOM` type, sprite-set registration, vanilla provider fallback, moving subclass/base tick behavior, both 768-particle layers, all 1,536 particles, radial velocity and spacing, camera shake, ZIP integrity, retained JAR content, and existing controls/renderers. The downloaded JAR's bytecode and entry comparison were independently inspected.
+- **Runtime status:** CI and downloaded-JAR checks passed, but Build113 has **not** been launched in Minecraft by this audit. In-game confirmation is still required for the actual shell appearance/movement/density at roughly five blocks and for attack/unrelated-mob regressions.
+
+### Build 112 — rejected particle substitution
+
+- Build112 passed its earlier CI, but it used vanilla `SCULK_SOUL` instead of the explicitly requested `SONIC_BOOM`. Its CI checked for the wrong particle type, so that success did not satisfy the task. Build112/123 are not accepted as the Sonic Boom visual fix.
+- Build113 supersedes it with the actual `SONIC_BOOM` particle and a narrowly scoped moving subclass/provider.
 
 ### Build 111 — previous baseline
 
@@ -29,10 +35,9 @@ This file is the explicit task list for the next Legacy work. The order below is
 - JAR size: `2,493,447` bytes; SHA-256: `5b01626519d9b02934f932c58d5ffe8fd9210851ba3630725f2347726a03c456`.
 - Build110 runtime feedback: Lushsaur and turning are confirmed working; Sculksaur sometimes pitched its head unnaturally toward the ground.
 - Build111 fixes the over-snapped vertical look: horizontal yaw stays instant, while `smoothY` is interpolated with the existing `interpolationSpeed` and the original `maxSpeedLimit` is restored for pitch.
-- Build111 replaces `SCULK_SOUL` with vanilla `SONIC_BOOM` particles. It creates two concentric expanding spherical layers, 384 particles each (768 total), at radial offsets 0.30 and 0.06 blocks. Particle speed increases from 0.72 to 0.82. Camera shake is preserved; old post-process distortion and ground-wave emitters remain disconnected.
+- Build111's Sonic Boom shell used the correct `SONIC_BOOM` type, but its particles were static because vanilla SonicBoomParticle ignores XYZ velocity. Build113 corrects that limitation without changing the particle type.
 - Build110-to-Build111 comparison: 473 entries in both JARs, no added/removed entries, and only `SculksaurEffects.class` plus `SmoothLookControl.class` changed.
-- CI verifies the pitch interpolation, horizontal yaw limit, two particle layers, `SONIC_BOOM` particle type, and JAR structure. Original input JAR and Astemir RE remain untouched/separate.
-- **Runtime status:** Build111 has passed CI and post-download archive/bytecode inspection only. It still needs an in-game check for Sculksaur's spawn/idle gaze and the shape/speed/spacing of Sonic Boom; re-confirm Lushsaur sprint and the other turning behavior afterward.
+- **Runtime status:** Build111 passed CI and post-download archive/bytecode inspection only. It still needed an in-game check for Sculksaur's spawn/idle gaze and the shape/speed/spacing of Sonic Boom.
 
 ### Smooth turning — main controls changed, task still open
 
@@ -61,47 +66,36 @@ The player mounted the Lushsaur and held W. The Lushsaur began with its walking 
 
 ## Priority 1 — replace the Sculksaur Sonic Boom visual effect
 
-**Build112 implements the moving vanilla-particle shell; in-game acceptance tests remain.** The old 3D/post-processing distortion is removed. Build111's native `SONIC_BOOM` points did not move radially because that particle does not use all three supplied velocity components.
+**Build113 contains the requested `SONIC_BOOM` shell and passes CI; in-game acceptance is still pending.** Build112 was a rejected substitution: it used `SCULK_SOUL` despite the explicit request for `SONIC_BOOM`. Do not treat Build112 or its CI result as satisfying this task.
 
 ### Required result
 
-- The wave is a **hollow, expanding sphere made only from vanilla Minecraft particles**.
+- The wave is a **hollow, expanding sphere made from the actual vanilla `SONIC_BOOM` particle type**.
 - The sphere is an outline/shell, not a filled ball, disc, flat ring, beam, or opaque cloud.
-- Its radius expands visibly and evenly from the attack's origin.
-- The effect remains readable at normal gameplay distances and does not bury the Sculksaur or nearby terrain in clutter.
-- During this wave, remove the other attack-specific particle bursts/emitters. The wave should be the one clear visual effect for that event.
+- Two shells start 0.50 blocks apart; the trailing layer follows the leading layer.
+- The radius expands evenly in all directions from the attack origin.
+- The wave should remain readable at roughly five blocks without burying the Sculksaur or terrain in visual clutter.
+- Remove the other attack-specific particle bursts/emitters from this event. The spherical wave should be the clear visual for this event.
 - Do not use Astemir's shader/post-process shockwave, colored-light effect, screen-space distortion, or a replacement custom 3D distortion.
 
-### What the original bytecode shows
+### What the vanilla particle requires
 
-The sonic-attack animation event track is `SculksaurEffects.EXPLOSION_EFFECTS`. In the original JAR, its ground event is scheduled at about `4.64` and its final explosion event at about `4.68`; a later tendril/vibration event is scheduled at about `5.12`.
+In Minecraft 1.20.1, `SONIC_BOOM` is rendered by `SonicBoomParticle`, which extends `HugeExplosionParticle`. Its provider treats the first extra scalar as the vanilla particle size and does not apply the supplied XYZ velocity components. Simply passing radial XYZ values to `Level.addParticle` cannot make the exact vanilla Sonic Boom particle travel.
 
-The original `explosionFinalEvent()` checks `PostProcessEngine.INSTANCE.isEnabledInConfig()`. When enabled, it spawns Astemir `ColoredLight` and `Shockwave`; when disabled, it instead spawns an entry from `EMITTER_EXPLOSION` at the jaw. The ground/final events also reference the old explosion emitter set and a ground emitter.
+The correct solution must retain the `SONIC_BOOM` type and vanilla sprite/animation behavior while adding movement only to the particles emitted by this Sculksaur event. Replacing the type with `SCULK_SOUL` is not an acceptable workaround.
 
-That is the exact visual path to replace. Audit all call sites before deleting resources: the explosion-specific emitters should no longer be spawned by this wave, but unrelated Sculksaur particle tracks must remain intact.
+### Build113 implementation
 
-### Build 112 implementation
-
-- The final animation event still calls one isolated sphere helper; the ground-event callback remains a no-op. Camera shake through `ShakeUtil.shakeExplosion(entity, 1.0f, 20.0f)` is preserved.
-- The helper uses vanilla `ParticleTypes.SCULK_SOUL`. Its 1.20.1 provider constructs a particle with separate X, Y, and Z velocity components, allowing each particle to travel along the normalized direction from the sphere center.
-- A Fibonacci-sphere distribution creates 768 unique directions per layer. The two layers reuse the same directions, so each trailing particle follows the corresponding leading particle with an initial radial separation of exactly 0.50 blocks.
-- The leading shell starts at radius 0.55 blocks; the trailing shell starts at radius 0.05 blocks. Both receive the same radial velocity magnitude of 0.32 blocks/tick at spawn.
-- Total spawn count is 1,536 particles. At a five-block radius this is substantially denser than the prior 384-particle layers while remaining a hollow shell rather than a filled volume.
-- The `SONIC_BOOM` type is not used for this moving shell: its 1.20.1 particle implementation is `SonicBoomParticle` derived from `HugeExplosionParticle`, and its constructor accepts one additional scalar instead of a 3D velocity vector. A custom particle registration/mixin would be required to make that exact particle travel radially; this build deliberately avoids adding that extra client infrastructure.
-- No attack AI, target selection, event-track timing, damage, range, knockback, cooldown, attack animation, or sound code was changed. Other Sculksaur particle tracks are not touched.
-- CI run #119 verifies the particle type, helper descriptors, two 768-point layers, 1,536 total spawns, identical XYZ velocity components, layer spacing, preserved camera shake, and absence of the removed distortion and ground emitters. This is bytecode verification only; it cannot confirm the visual result in-game.
-
-### Build 94 implementation (historical; superseded by Build112)
-
-- `lambda$explosionFinalEvent$12` now calls a dedicated vanilla-particle sphere helper. The helper creates 1,536 points with a Fibonacci-sphere distribution, starts them 0.15 blocks from the center, and sends them outward along their radial direction at 0.72 blocks/tick. The particle is vanilla `ParticleTypes.SCULK_SOUL`.
-- The origin is the Sculksaur's horizontal center and half its bounding-box height above its feet. This produces a 3D shell rather than the previous mixture of discs, rings, and ground effects.
-- `lambda$explosionGroundEvent$11` is now a no-op, so the four old ground-wave emitters are no longer spawned. The final jaw-emitter fallback is also gone.
-- `PostProcessEngine`, `Shockwave`, and `ColoredLight` are no longer called from the Sonic Boom event, so the visual no longer depends on the post-processing setting.
-- `ShakeUtil.shakeExplosion(entity, 1.0f, 20.0f)` remains. It is the original camera shake, not the removed screen-space distortion.
-- The existing event-track callbacks/timestamps and every other `SculksaurEffects` track were left unchanged. The attack AI and combat implementation were not edited.
-- CI run #94 verifies the two patched event methods, helper descriptors, vanilla particle type and spawn call, preserved camera shake, and absence of old wave calls. This proves bytecode structure only; it does not prove how dense or smooth the sphere looks in the game.
-- Old explosion particle asset files remain in the pruned JAR but are no longer spawned by either Sonic Boom event method. They were not deleted because this pass only disconnects the attack-specific visual call path.
-
+- The Sculksaur sphere helper calls `ParticleTypes.SONIC_BOOM` (`f_235902_`) for all 1,536 particles.
+- A small `SculksaurSonicBoomParticle` subclass extends vanilla `SonicBoomParticle`. It invokes the vanilla constructor with the same sprite set and size behavior; its tick invokes `HugeExplosionParticle.tick()` to preserve the original frame animation and 16-tick lifetime, then applies its radial movement.
+- The generated provider is registered through Forge's `RegisterParticleProvidersEvent.registerSpriteSet`, reusing the vanilla Sonic Boom sprite set. Unmarked calls delegate to the vanilla `SonicBoomParticle.Provider`; only the Sculksaur helper marks its synchronous creation call for movement. The ThreadLocal marker is removed on success and exception paths.
+- A Fibonacci-sphere distribution creates 768 unique directions per layer. Both layers reuse the same directions so each trailing particle follows its corresponding leading particle with an initial radial separation of exactly 0.50 blocks.
+- The leading shell starts at radius 0.55 blocks; the trailing shell starts at radius 0.05 blocks. Both receive the same radial velocity magnitude of 0.32 blocks/tick (6.4 blocks/second; about 14% above the 5.612 blocks/second sprint reference).
+- Vanilla Sonic Boom's 16-tick lifetime means about 5.12 blocks of travel. Approximate final radii are 5.67 and 5.17 blocks. The 768-point distribution gives an estimated particle spacing of roughly 0.7 blocks near that radius; the 1.5-block vanilla quad size causes overlap. Actual visual readability still requires an in-game check.
+- The final animation event still triggers the sphere helper and the original camera shake `ShakeUtil.shakeExplosion(entity, 1.0f, 20.0f)`. The ground-event callback remains a no-op.
+- No attack AI, target selection, event-track timing, damage, range, knockback, cooldown, attack animation, sound, or unrelated Sculksaur particle track was changed.
+- Build112-to-Build113 archive comparison: two new generated client classes added, exactly two classes changed (`SculksaurEffects.class`, `ADClientModBus.class`), no entries removed, and no resources/models/textures/sounds/JSON changed.
+- CI run #127 verifies exact `SONIC_BOOM` registration, vanilla-provider fallback for unmarked calls, custom particle inheritance and tick path, both 768-point layers, 1,536 total particles, equal radial speed components, initial radii/spacing, preserved camera shake, and retained JAR structure. The downloaded JAR was separately inspected with `javap` and compared entry-by-entry. These checks establish structure and bytecode, not in-game appearance.
 
 ### Preserve the gameplay attack
 
