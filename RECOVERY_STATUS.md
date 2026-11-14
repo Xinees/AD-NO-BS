@@ -1,26 +1,21 @@
 # AD-NO-BS Legacy recovery status
 
-## Current branch status — 2026-11-14
+## Current branch status — 2026-11-14 (Build119)
 
-- Working branch: `binary-prune/legacy`; current implementation commit: [`1f39f51`](https://github.com/Xinees/AD-NO-BS/commit/1f39f518cdc12d2e9016be4f1dee19a423b3de7c). The CI guard update is [`57641de`](https://github.com/Xinees/AD-NO-BS/commit/57641de2df0b562dbc1023c7ec8b2ca41d2a256d).
-- Latest output: **Build118**. It removes Sculksaur explosion particles and disables only the Lushsaur/Sculksaur tail physics chains.
-- GitHub Actions [run #152](https://github.com/Xinees/AD-NO-BS/actions/runs/43594713011) compiled the pruner, rebuilt from the immutable original JAR, and passed resource pruning, renderer descriptors, behavior/bytecode guards, and final 473-entry JAR validation. The only failed step was artifact upload because GitHub Actions storage quota is full. Runner output: 473 entries, 2,492,713 bytes.
-- Local Build118 JAR: `ec_ad-legacy-forge-1.20.1-build118.jar`; size `2,492,895` bytes; SHA-256 `d0208dbdd64f2e3ac7b79f980c1ba40796471893d42cfe6603d3db0f73895f96`. This file was produced from the previously verified Build117 JAR by applying the final bytecode changes and repacking; it is not claimed byte-identical to the runner's ZIP output.
-- Local archive validation: ZIP integrity passed; 473 entries; only four retained class files differ from Build117 (`ADClientModBus.class`, `LushsaurClient.class`, `SculksaurClient.class`, `SculksaurEffects.class`); the two custom Sonic Boom particle classes are removed; all other resources remain byte-identical to Build117.
-- **Sculksaur explosion visuals:** the first explosion callback now only applies the original camera shake; the ground callback is empty; the delayed second-wave event and generated `SculksaurSonicBoomParticle`/`Provider` classes are removed. The global SONIC_BOOM provider is restored to vanilla. The original `EXPLOSION_EFFECTS` camera-shake/tendril event track remains at 4.68s and 5.12s. Other Sculksaur particle effects are unchanged.
-- **Tail physics:** Lushsaur's adult tail chain (`tail1`, `tail2`, `mase`) and baby tail chain (`tail`, `tail2`) no longer add physics bones. Its separate `string`/`beetroot` physics chain remains. Sculksaur's `tail1`/`tail2` chain no longer adds physics bones; its `LegSolverModule` leg IK remains. Chorusoatl's renderer had no `PhysicsModule` tail setup to disable.
-- The visual/physics changes do not alter attack damage, range, knockback, targeting, AI, cooldown, sound, or unrelated mob behavior.
-- **Runtime status:** Build118 has not been launched in Minecraft. In-game checks remain necessary for tail pose/animation appearance and to confirm no unrelated visual regression.
-- Build117 is now the previous build and its Sonic Boom particle implementation is superseded by Build118.
-- Build111's vertical-look correction remains unchanged: horizontal yaw is instant, while `smoothY` uses the existing interpolation speed and original pitch limit.
-- **Font/display symptom:** the earlier report of square-like glyphs remains unclassified. Do not change the resource pack without a reproducing screenshot/log.
-- **Open audit — Sculksaur locomotion:** the original `SculksaurEntity.createLocomotion()` sets `EntityLocomotion.Builder.turnFactor(0.003f)`. Its behavior belongs to the separate Astemir RE dependency. This setting remains unchanged until the exact Astemir RE 1.2.98 dependency is inspected; the turn-factor audit remains open.
-- Next planned task after the turning audit: Lushsaur-only Happy-Ghast-like platform collision. The proposed `SPIN.get(this)` gate remains plan-only and has not been implemented.
-- Next riding pass recorded in `LEGACY_ROADMAP.md`: vanilla pig-like seated player pose on Lushsaur/Chorusoatl; Lushsaur-only rider seat offset of 13 model pixels backward to center the rider over its hitbox; remove lateral bank on retained mobs; movement-input-gated horizontal-look steering on both mounts.
-- Lushsaur-only UI change requested: remove its mount inventory/menu and make E open the player's ordinary inventory while riding. Preserve Chorusoatl/Sculksaur inventory behavior. Audit for dependencies on Lushsaur slots before removing them.
-- Particle cleanup backlog: Sculksaur explosive-attack particles are completely absent pending Astemir's original formula; remove footstep dust, Lushsaur sleep-Z particles, and Lushsaur green particles after locating their exact emitters.
-- Initial roll diagnosis clarified by the user's screenshots: the requested defect is whole-model lateral roll around the mob's forward/longitudinal axis, especially obvious during running, not slow yaw. Remove only this roll while preserving yaw turns and gait. Its code/animation source remains unverified.
-- Initial audit only: `ADPlayerAnimations.init()` registers both mount rider-animation classes; `SmoothBodyControl` handles yaw/body-heading logic, not a proven side-roll source. New tasks are not implemented.
+- Working branch: `binary-prune/legacy`.
+- Current implementation commit: [`d9ae4f5`](https://github.com/Xinees/AD-NO-BS/commit/d9ae4f5bac2040ffe7788fd24174becf9f933f8a).
+- Latest CI guard commit: [`c9f46bd`](https://github.com/Xinees/AD-NO-BS/commit/c9f46bded6d8900ac96c96e8eb3f48aa771d4d82).
+- **Build119** compiled successfully from the immutable original mod JAR. Renderer descriptors, functional bytecode guards for riding/particles, and final retained-JAR checks all passed in [GitHub Actions run #176](https://github.com/Xinees/AD-NO-BS/actions/runs/43608521634).
+- Runner output: `ec_ad-legacy-forge-1.20.1.jar`, 468 entries, 2,480,309 bytes. Artifact upload alone failed because GitHub Actions artifact storage quota was full; the runner-produced JAR was validated but is not downloadable as a workflow artifact. No SHA-256 was recorded for this runner copy.
+- **Runtime status:** Build119 has not yet been launched in Minecraft. Bytecode/structure verification is not proof of visual/gameplay behavior. Astemir must test the acceptance checklist in `LEGACY_ROADMAP.md`.
+- The current riding pass is implemented in `tools/JarPruner.java`: vanilla passenger pose for Lushsaur/Chorusoatl; 13-pixel backward seat correction for Lushsaur only; no Lushsaur mount menu and E opens player inventory; lateral roll removed from the three model paths; movement-input-gated horizontal-yaw steering for Lushsaur/Chorusoatl.
+- Lushsaur's internal saddle/equipment slot remains inside the shared mount implementation, but its custom GUI is inaccessible. This preserves equipment/control compatibility without exposing a separate Lushsaur inventory screen.
+- Particle cleanup is implemented: Lushsaur sleep Z and green charge-trail particles removed; Chorusoatl walking dust events removed while retaining step sounds; Sculksaur footstep particles removed while retaining sound/camera feedback. Lushsaur's step event had no particle emitter in the source.
+- **Sculksaur explosion particles are still entirely absent.** Wait for Astemir's original formula before restoring them; do not invent a replacement.
+- Tail physics remains disabled as in Build118. Lushsaur item-chain physics and Sculksaur leg IK are preserved.
+- The original mod JAR and external Astemir RE 1.2.98 dependency remain untouched.
+- Temporary read-only inspection workflow `.github/workflows/inspect-legacy.yml` has been deleted; the production `binary-prune.yml` workflow remains.
+- Build118 is now the previous baseline. Its original implementation/CI details remain documented below for handoff.
 
 ---
 
