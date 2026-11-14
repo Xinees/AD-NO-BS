@@ -243,8 +243,8 @@ jobs:
             fi
           done
 
-          SIGNUM_COUNT="$(grep -F -c 'java.lang.Math.signum' <<< "$MOUNT_TICK" || true)"
-          ABS_COUNT="$(grep -F -c 'java.lang.Math.abs' <<< "$MOUNT_TICK" || true)"
+          SIGNUM_COUNT="$(grep -F -c 'java/lang/Math.signum' <<< "$MOUNT_TICK" || true)"
+          ABS_COUNT="$(grep -F -c 'java/lang/Math.abs' <<< "$MOUNT_TICK" || true)"
           if [ "$SIGNUM_COUNT" -ne 2 ] || [ "$ABS_COUNT" -ne 4 ]; then
             echo "Expected two branchless horizontal-input gates (2 signum / 4 abs), found signum=$SIGNUM_COUNT abs=$ABS_COUNT"
             printf '%s\n' "$MOUNT_TICK"
