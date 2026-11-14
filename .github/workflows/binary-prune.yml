@@ -217,25 +217,110 @@ jobs:
           done
           echo "The bytecode pruner itself verified exactly two replaced Lushsaur run-animation conditions."
 
-          RIDER_ANIMATIONS='com.eternal_creations.archies_dino_mod.client.animation.player.riding.OnLushsaurPlayerAnimations'
-          verify_method "$RIDER_ANIMATIONS" \
-            'lambda$init$11(' \
-            '(Lcom/eternal_creations/archies_dino_mod/common/entity/mob/lushsaur/LushsaurEntity;)Z'
-          RIDER_RUN="$(javap -classpath build/classes-pruned.jar -p -c "$RIDER_ANIMATIONS" | sed -n '/lambda[$]init[$]11(/,/^  private static /p')"
-          for required_call in 'LushsaurEntity.m_6688_' 'LivingEntity.m_20142_'; do
-            if ! printf '%s\n' "$RIDER_RUN" | grep -Fq "$required_call"; then
-              echo "Lushsaur rider run animation is not synchronized to the controlling passenger: $required_call"
-              printf '%s\n' "$RIDER_RUN"
+          AD_PLAYER_ANIMATIONS='com.eternal_creations.archies_dino_mod.client.animation.player.ADPlayerAnimations'
+          AD_PLAYER_BYTECODE="$(javap -classpath build/classes-pruned.jar -p -c "$AD_PLAYER_ANIMATIONS")"
+          for forbidden_layer in 'OnLushsaurPlayerAnimations.init' 'OnChorusoatlPlayerAnimations.init'; do
+            if printf '%s\n' "$AD_PLAYER_BYTECODE" | grep -Fq "$forbidden_layer"; then
+              echo "Special mount-specific player animation is still registered: $forbidden_layer"
+              printf '%s\n' "$AD_PLAYER_BYTECODE"
               exit 1
             fi
           done
-          echo "Verified Lushsaur rider run animation reads controlling passenger sprint state."
-          if printf '%s\n' "$RIDER_RUN" | grep -Fq 'getRunLocomotion'; then
-            echo "Lushsaur rider run animation still uses the old velocity-based predicate."
-            printf '%s\n' "$RIDER_RUN"
+          echo "Verified vanilla passenger pose: custom Lushsaur/Chorusoatl rider animation layers are not registered."
+
+          MOUNT_COMPONENT='com.eternal_creations.archies_dino_mod.common.entity.component.MountComponent'
+          MOUNT_COMPONENT_BYTECODE="$(javap -classpath build/classes-pruned.jar -p -c "$MOUNT_COMPONENT")"
+          MOUNT_TICK="$(printf '%s\n' "$MOUNT_COMPONENT_BYTECODE" | sed -n '/tickRidden(/,/^  public /p')"
+          for required_control in 'Player.f_20900_' 'Player.f_20902_' 'LushsaurEntity' 'ChorusoatlEntity'; do
+            if ! printf '%s\n' "$MOUNT_TICK" | grep -Fq "$required_control"; then
+              echo "Movement-gated mount steering is missing $required_control"
+              printf '%s\n' "$MOUNT_TICK"
+              exit 1
+            fi
+          done
+          echo "Verified Lushsaur/Chorusoatl steering is gated by actual rider movement input."
+
+          LUSH_ROLL_CLIENT='com.eternal_creations.archies_dino_mod.client.model.render.entity.mob.LushsaurClient'
+          SCULK_ROLL_CLIENT='com.eternal_creations.archies_dino_mod.client.model.render.entity.mob.SculksaurClient'
+          CHORUS_ROLL_CLIENT='com.eternal_creations.archies_dino_mod.client.model.render.entity.mob.ChorusoatlClient'
+          for C in "$LUSH_ROLL_CLIENT" "$SCULK_ROLL_CLIENT"; do
+            DISASSEMBLY="$(javap -classpath build/classes-pruned.jar -p -c "$C")"
+            if printf '%s\n' "$DISASSEMBLY" | grep -Fq 'RollOnRotation'; then
+              echo "Unwanted lateral root roll remains in $C"
+              printf '%s\n' "$DISASSEMBLY"
+              exit 1
+            fi
+          done
+          CHORUS_ROLL="$(javap -classpath build/classes-pruned.jar -p -c "$CHORUS_ROLL_CLIENT" | sed -n '/lambda[$]setupAnimations[$]0(/,/^  private static /p')"
+          if printf '%s\n' "$CHORUS_ROLL" | grep -Fq 'flyingRoll'; then
+            echo "Chorusoatl flying lateral roll remains in the model animation."
+            printf '%s\n' "$CHORUS_ROLL"
+            exit 1
+          fi
+          echo "Verified lateral roll sources are removed without disabling locomotion animations."
+
+          LUSH_ENTITY_BYTECODE="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.common.entity.mob.lushsaur.LushsaurEntity)"
+          LUSH_CREATE_MOUNT="$(printf '%s\n' "$LUSH_ENTITY_BYTECODE" | sed -n '/createMount(/,/^  protected /p')"
+          if ! printf '%s\n' "$LUSH_CREATE_MOUNT" | grep -Fq 'float 0.1875f' ||
+             ! printf '%s\n' "$LUSH_CREATE_MOUNT" | grep -Fq 'passengerOffset'; then
+            echo "Lushsaur passenger offset is not 13 pixels backward from the original position."
+            printf '%s\n' "$LUSH_CREATE_MOUNT"
+            exit 1
+          fi
+          LUSH_MOUNT_POINTS="$(javap -classpath build/classes-pruned.jar -p -c "$LUSH_ROLL_CLIENT" | sed -n '/static {};/,/^  private static boolean /p')"
+          for required_offset in 'double -0.8125d' 'double -1.4125d'; do
+            if ! printf '%s\n' "$LUSH_MOUNT_POINTS" | grep -Fq "$required_offset"; then
+              echo "Lushsaur visual/camera passenger anchor is missing $required_offset"
+              printf '%s\n' "$LUSH_MOUNT_POINTS"
+              exit 1
+            fi
+          done
+          LUSH_MENU="$(printf '%s\n' "$LUSH_ENTITY_BYTECODE" | sed -n '/m_213583_(/,/^  public /p')"
+          if ! printf '%s\n' "$LUSH_MENU" | grep -Fq 'return' ||
+             printf '%s\n' "$LUSH_MENU" | grep -Eq 'invoke|aload|getfield'; then
+            echo "Lushsaur custom inventory-screen opener is not disabled."
+            printf '%s\n' "$LUSH_MENU"
+            exit 1
+          fi
+          echo "Verified Lushsaur-only 13-pixel seat correction and vanilla E inventory behavior."
+
+          LUSH_EFFECTS='com.eternal_creations.archies_dino_mod.client.particle.effect.LushsaurEffects'
+          LUSH_EFFECTS_BYTECODE="$(javap -classpath build/classes-pruned.jar -p -c "$LUSH_EFFECTS")"
+          LUSH_RUN_TRAIL="$(printf '%s\n' "$LUSH_EFFECTS_BYTECODE" | sed -n '/lambda[$]static[$]3(/,/^  private static /p')"
+          if printf '%s\n' "$LUSH_RUN_TRAIL" | grep -Eq 'spawnParticle|spawnBlockParticle'; then
+            echo "Lushsaur run dust/green particle callback is still active."
+            printf '%s\n' "$LUSH_RUN_TRAIL"
+            exit 1
+          fi
+          if printf '%s\n' "$LUSH_EFFECTS_BYTECODE" | grep -Fq 'getstatic' | grep -Fq 'EMITTER_REST'; then
+            echo "Lushsaur sleep Z emitter is still referenced."
             exit 1
           fi
 
+          CHORUS_EFFECTS='com.eternal_creations.archies_dino_mod.client.particle.effect.ChorusoatlEffects'
+          CHORUS_EFFECTS_BYTECODE="$(javap -classpath build/classes-pruned.jar -p -c "$CHORUS_EFFECTS")"
+          if printf '%s\n' "$CHORUS_EFFECTS_BYTECODE" | grep -F 'getstatic' | grep -Fq 'EMITTER_STOMP'; then
+            echo "Chorusoatl walking dust particle emitter is still used."
+            printf '%s\n' "$CHORUS_EFFECTS_BYTECODE"
+            exit 1
+          fi
+
+          SCULK_STEP="$(printf '%s\n' "$SCULK_DISASSEMBLY" | sed -n '/lambda[$]stepEvent[$]10(/,/^  private static /p')"
+          for forbidden_step_particle in 'spawnBlockParticle' 'spawnParticle'; do
+            if printf '%s\n' "$SCULK_STEP" | grep -Fq "$forbidden_step_particle"; then
+              echo "Sculksaur footstep particle still exists: $forbidden_step_particle"
+              printf '%s\n' "$SCULK_STEP"
+              exit 1
+            fi
+          done
+          if ! printf '%s\n' "$SCULK_STEP" | grep -Fq 'SCULKSAUR_STEP' ||
+             ! printf '%s\n' "$SCULK_STEP" | grep -Fq 'ShakeUtil.shakeStep'; then
+            echo "Sculksaur footstep cleanup unexpectedly removed the original step sound or camera shake."
+            printf '%s\n' "$SCULK_STEP"
+            exit 1
+          fi
+          echo "Verified footstep dust removal while retaining the original step sounds/camera feedback."
+          
           SCULK_EFFECTS='com.eternal_creations.archies_dino_mod.client.particle.effect.SculksaurEffects'
           SCULK_DISASSEMBLY="$(javap -classpath build/classes-pruned.jar -p -c "$SCULK_EFFECTS")"
           SCULK_FINAL="$(printf '%s\n' "$SCULK_DISASSEMBLY" | awk '
