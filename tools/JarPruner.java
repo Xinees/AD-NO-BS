@@ -1003,7 +1003,7 @@ public final class JarPruner {
             if (instruction instanceof MethodInsnNode call &&
                 call.getOpcode() == Opcodes.INVOKESTATIC &&
                 call.owner.equals(operationOwner) && call.name.equals("of") &&
-                call.desc.equals("(FFF)Lcom/astemir/astemirlib/re/client/model/core/RootOperation;")) {
+                call.desc.equals("(FFF)L" + operationOwner + ";")) {
                 rollFactory = call;
                 rollCalls++;
             }
