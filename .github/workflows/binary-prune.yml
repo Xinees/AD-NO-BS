@@ -701,7 +701,7 @@ jobs:
             --draft \
             --title "Legacy CI build #${GITHUB_RUN_NUMBER}" \
             --target "$GITHUB_SHA" \
-            --notes "Automated draft build from branch `binary-prune/legacy`.\n\nSource commit: `$GITHUB_SHA`.\n\nThis is a structurally validated CI build, not a final public release. Minecraft runtime acceptance testing is still required."
+            --notes "Automated draft build from branch binary-prune/legacy. Source commit: $GITHUB_SHA. Structurally validated CI build; not a final public release. Minecraft runtime acceptance testing is still required."
 
           while IFS= read -r old_tag; do
             [ -n "$old_tag" ] || continue
