@@ -1343,7 +1343,7 @@ public final class JarPruner {
         p.add(new InsnNode(Opcodes.I2D));
         p.add(new LdcInsnNode(0.5d));
         p.add(new InsnNode(Opcodes.DADD));
-        p.add(new LdcInsnNode(2.0d / 128.0d));
+        p.add(new LdcInsnNode(2.0d / 512.0d));
         p.add(new InsnNode(Opcodes.DMUL));
         p.add(new InsnNode(Opcodes.DCONST_1));
         p.add(new InsnNode(Opcodes.DSUB));
@@ -1386,13 +1386,13 @@ public final class JarPruner {
         p.add(new VarInsnNode(Opcodes.DLOAD, 3));
         p.add(new VarInsnNode(Opcodes.DLOAD, 5));
         p.add(new VarInsnNode(Opcodes.DLOAD, 14));
-        p.add(new LdcInsnNode(0.315d));
+        p.add(new LdcInsnNode(0.33d));
         p.add(new InsnNode(Opcodes.DMUL));
         p.add(new VarInsnNode(Opcodes.DLOAD, 8));
-        p.add(new LdcInsnNode(0.315d));
+        p.add(new LdcInsnNode(0.33d));
         p.add(new InsnNode(Opcodes.DMUL));
         p.add(new VarInsnNode(Opcodes.DLOAD, 16));
-        p.add(new LdcInsnNode(0.315d));
+        p.add(new LdcInsnNode(0.33d));
         p.add(new InsnNode(Opcodes.DMUL));
         p.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
             ROOT + "client/particle/SculksaurSonicBoomParticle$Provider", "spawn",
@@ -1434,7 +1434,7 @@ public final class JarPruner {
         ));
         s.add(new VarInsnNode(Opcodes.ASTORE, 7));
         s.add(new InsnNode(Opcodes.ICONST_0));
-        s.add(new IntInsnNode(Opcodes.SIPUSH, 128));
+        s.add(new IntInsnNode(Opcodes.SIPUSH, 512));
         s.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
             "java/util/stream/IntStream", "range",
             "(II)Ljava/util/stream/IntStream;", true));
@@ -1656,7 +1656,7 @@ public final class JarPruner {
         String eventTrackInternal =
             "com/astemir/astemirlib/re/client/model/core/animation/event/AnimationEventTrack";
         InsnList secondTrackEvent = new InsnList();
-        secondTrackEvent.add(new LdcInsnNode(5.18f));
+        secondTrackEvent.add(new LdcInsnNode(4.83f));
         secondTrackEvent.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
             owner.name, factoryName, factoryDescriptor, false));
         secondTrackEvent.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
@@ -1702,6 +1702,10 @@ public final class JarPruner {
         constructorCode.add(new MethodInsnNode(Opcodes.INVOKESPECIAL,
             "net/minecraft/client/particle/SonicBoomParticle", "<init>",
             "(L" + clientLevel + ";DDDDL" + spriteSet + ";)V", false));
+        constructorCode.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        constructorCode.add(new IntInsnNode(Opcodes.BIPUSH, 40));
+        constructorCode.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
+            particle, "m_107257_", "(I)V", false));
         constructorCode.add(new VarInsnNode(Opcodes.ALOAD, 0));
         constructorCode.add(new VarInsnNode(Opcodes.DLOAD, 8));
         constructorCode.add(new VarInsnNode(Opcodes.DLOAD, 10));
