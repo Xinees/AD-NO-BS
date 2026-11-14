@@ -190,18 +190,35 @@ public final class JarPruner {
         patchNetworkHelper(nodes.get(ROOT + "platform/ForgeNetworkHelper"));
         patchKeyMappings(nodes.get(ROOT + "client/ADKeyMappings"));
         patchAbstractArrowMixin(nodes.get(ROOT + "mixin/AbstractArrowMixin"));
-        patchLushsaurControllingPassenger(nodes.get(ROOT + "common/entity/mob/lushsaur/LushsaurEntity"));
-        patchLushsaurCanSprint(nodes.get(ROOT + "common/entity/mob/lushsaur/LushsaurEntity"));
-        patchLushsaurMountSpeed(nodes.get(ROOT + "common/entity/mob/lushsaur/LushsaurEntity"));
-        patchLushsaurRunAnimation(nodes.get(ROOT + "client/model/render/entity/mob/LushsaurClient"));
-        patchLushsaurRiderRunAnimation(nodes.get(ROOT + "client/animation/player/riding/OnLushsaurPlayerAnimations"));
+        ClassNode lushsaurEntity = nodes.get(ROOT + "common/entity/mob/lushsaur/LushsaurEntity");
+        ClassNode lushsaurClient = nodes.get(ROOT + "client/model/render/entity/mob/LushsaurClient");
+        ClassNode chorusoatlClient = nodes.get(ROOT + "client/model/render/entity/mob/ChorusoatlClient");
+        ClassNode sculksaurClient = nodes.get(ROOT + "client/model/render/entity/mob/SculksaurClient");
+        patchLushsaurControllingPassenger(lushsaurEntity);
+        patchLushsaurNoInventory(lushsaurEntity);
+        patchLushsaurSeatPosition(lushsaurEntity, lushsaurClient);
+        patchLushsaurCanSprint(lushsaurEntity);
+        patchLushsaurMountSpeed(lushsaurEntity);
+        patchLushsaurRunAnimation(lushsaurClient);
         patchSculksaurExplosionEffects(
             nodes.get(ROOT + "client/particle/effect/SculksaurEffects"));
+        patchLushsaurRestParticles(
+            nodes.get(ROOT + "client/particle/effect/LushsaurEffects"));
+        patchLushsaurRunParticles(
+            nodes.get(ROOT + "client/particle/effect/LushsaurEffects"));
+        patchChorusoatlFootstepParticles(
+            nodes.get(ROOT + "client/particle/effect/ChorusoatlEffects"));
+        patchSculksaurFootstepParticles(
+            nodes.get(ROOT + "client/particle/effect/SculksaurEffects"));
+        patchNoRollRootOperation(lushsaurClient);
+        patchNoRollRootOperation(sculksaurClient);
+        patchChorusoatlFlyingRoll(chorusoatlClient);
+        patchRiderLookSteering(nodes.get(ROOT + "common/entity/component/MountComponent"));
         patchTailPhysics(
-            nodes.get(ROOT + "client/model/render/entity/mob/LushsaurClient"),
+            lushsaurClient,
             Set.of("tail1", "tail2", "mase", "tail"), 5);
         patchTailPhysics(
-            nodes.get(ROOT + "client/model/render/entity/mob/SculksaurClient"),
+            sculksaurClient,
             Set.of("tail1", "tail2"), 2);
         patchSmoothMoveControl(nodes.get(ROOT + "common/entity/ai/control/SmoothMoveControl"));
         patchSmoothBodyControl(nodes.get(ROOT + "common/entity/ai/control/SmoothBodyControl"));
@@ -782,21 +799,301 @@ public final class JarPruner {
     }
 
     private static void patchPlayerAnimations(ClassNode owner) {
-        if (owner == null) return;
-        for (MethodNode method : owner.methods) {
-            if (!method.name.equals("init") || !method.desc.equals("()V")) continue;
-            clearMethod(method);
-            InsnList code = method.instructions;
-            code.add(new InsnNode(Opcodes.ICONST_1));
-            code.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
-                ROOT + "client/animation/player/riding/OnLushsaurPlayerAnimations",
-                "init", "(I)V", false));
-            code.add(new InsnNode(Opcodes.ICONST_1));
-            code.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
-                ROOT + "client/animation/player/riding/OnChorusoatlPlayerAnimations",
-                "init", "(I)V", false));
-            code.add(new InsnNode(Opcodes.RETURN));
-            method.maxLocals = 0;
+        if (owner == null) throw new IllegalStateException("ADPlayerAnimations class is missing");
+        MethodNode init = owner.methods.stream()
+            .filter(method -> method.name.equals("init") && method.desc.equals("()V"))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("ADPlayerAnimations.init() is missing"));
+        clearMethod(init);
+        init.instructions.add(new InsnNode(Opcodes.RETURN));
+        init.maxStack = 0;
+        init.maxLocals = 0;
+    }
+
+    private static AbstractInsnNode previousCodeInstruction(AbstractInsnNode instruction) {
+        AbstractInsnNode previous = instruction == null ? null : instruction.getPrevious();
+        while (previous != null && previous.getOpcode() < 0) previous = previous.getPrevious();
+        return previous;
+    }
+
+    private static AbstractInsnNode nextCodeInstruction(AbstractInsnNode instruction) {
+        AbstractInsnNode next = instruction == null ? null : instruction.getNext();
+        while (next != null && next.getOpcode() < 0) next = next.getNext();
+        return next;
+    }
+
+    private static void patchLushsaurNoInventory(ClassNode owner) {
+        if (owner == null) throw new IllegalStateException("LushsaurEntity class is missing");
+        String descriptor = "(Lnet/minecraft/world/entity/player/Player;)V";
+        owner.methods.removeIf(method -> method.name.equals("m_213583_") && method.desc.equals(descriptor));
+        MethodNode method = new MethodNode(Opcodes.ACC_PUBLIC, "m_213583_", descriptor, null, null);
+        method.instructions.add(new InsnNode(Opcodes.RETURN));
+        method.maxStack = 0;
+        method.maxLocals = 2;
+        owner.methods.add(method);
+    }
+
+    private static void patchLushsaurSeatPosition(ClassNode entityOwner, ClassNode rendererOwner) {
+        if (entityOwner == null || rendererOwner == null) {
+            throw new IllegalStateException("Lushsaur seat classes are missing");
+        }
+        MethodNode createMount = entityOwner.methods.stream()
+            .filter(method -> method.name.equals("createMount") &&
+                method.desc.endsWith("L" + ROOT + "common/entity/component/MountComponent;"))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("Lushsaur createMount() is missing"));
+        List<MethodInsnNode> passengerOffsetCalls = new ArrayList<>();
+        for (AbstractInsnNode instruction : createMount.instructions.toArray()) {
+            if (instruction instanceof MethodInsnNode call &&
+                call.owner.equals(ROOT + "common/entity/component/MountComponent$Definition") &&
+                call.name.equals("passengerOffset") &&
+                call.desc.equals("(FFF)L" + ROOT + "common/entity/component/MountComponent$Definition;")) {
+                passengerOffsetCalls.add(call);
+            }
+        }
+        if (passengerOffsetCalls.size() != 1) {
+            throw new IllegalStateException("Lushsaur must define exactly one passengerOffset");
+        }
+        AbstractInsnNode forwardOffset = previousCodeInstruction(passengerOffsetCalls.get(0));
+        if (forwardOffset == null || forwardOffset.getOpcode() != Opcodes.FCONST_1) {
+            throw new IllegalStateException("Unexpected original Lushsaur passenger Z offset");
+        }
+        createMount.instructions.set(forwardOffset, new LdcInsnNode(0.1875f));
+
+        MethodNode clinit = rendererOwner.methods.stream()
+            .filter(method -> method.name.equals("<clinit>") && method.desc.equals("()V"))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("LushsaurClient static initializer is missing"));
+        List<MethodInsnNode> vec3Constructors = new ArrayList<>();
+        for (AbstractInsnNode instruction : clinit.instructions.toArray()) {
+            if (instruction instanceof MethodInsnNode call &&
+                call.getOpcode() == Opcodes.INVOKESPECIAL &&
+                call.owner.equals("net/minecraft/world/phys/Vec3") &&
+                call.name.equals("<init>") && call.desc.equals("(DDD)V")) {
+                vec3Constructors.add(call);
+            }
+        }
+        if (vec3Constructors.size() != 2) {
+            throw new IllegalStateException("Expected exactly two Lushsaur passenger mount-point offsets");
+        }
+        AbstractInsnNode saddledZ = previousCodeInstruction(vec3Constructors.get(0));
+        AbstractInsnNode unsaddledZ = previousCodeInstruction(vec3Constructors.get(1));
+        if (saddledZ == null || saddledZ.getOpcode() != Opcodes.DCONST_0) {
+            throw new IllegalStateException("Unexpected original saddled Lushsaur mount-point Z offset");
+        }
+        if (!(unsaddledZ instanceof LdcInsnNode constant) ||
+            !(constant.cst instanceof Double value) ||
+            Math.abs(value - (-0.6000000238418579d)) > 0.000001d) {
+            throw new IllegalStateException("Unexpected original unsaddled Lushsaur mount-point Z offset");
+        }
+        clinit.instructions.set(saddledZ, new LdcInsnNode(-0.8125d));
+        clinit.instructions.set(unsaddledZ, new LdcInsnNode(-1.4125d));
+    }
+
+    private static void patchRiderLookSteering(ClassNode owner) {
+        if (owner == null) throw new IllegalStateException("MountComponent class is missing");
+        MethodNode tickRidden = owner.methods.stream()
+            .filter(method -> method.name.equals("tickRidden") &&
+                method.desc.equals("(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/phys/Vec3;)V"))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("MountComponent.tickRidden is missing"));
+
+        MethodInsnNode playerPitch = null;
+        for (AbstractInsnNode instruction : tickRidden.instructions.toArray()) {
+            if (instruction instanceof MethodInsnNode call &&
+                call.getOpcode() == Opcodes.INVOKEVIRTUAL &&
+                call.owner.equals("net/minecraft/world/entity/player/Player") &&
+                call.name.equals("m_146909_") && call.desc.equals("()F")) {
+                playerPitch = call;
+                break;
+            }
+        }
+        if (playerPitch == null) throw new IllegalStateException("Rider pitch read is missing");
+        AbstractInsnNode pitchReceiver = previousCodeInstruction(playerPitch);
+        if (!(pitchReceiver instanceof VarInsnNode playerLoad) ||
+            playerLoad.getOpcode() != Opcodes.ALOAD || playerLoad.var != 1) {
+            throw new IllegalStateException("Unexpected rider pitch receiver");
+        }
+
+        String playerInternal = "net/minecraft/world/entity/player/Player";
+        String lushsaurInternal = ROOT + "common/entity/mob/lushsaur/LushsaurEntity";
+        String chorusoatlInternal = ROOT + "common/entity/mob/chorusoatl/ChorusoatlEntity";
+        Object[] initialLocals = new Object[] {
+            owner.name, playerInternal, "net/minecraft/world/phys/Vec3"
+        };
+        LabelNode checkInput = new LabelNode();
+        LabelNode continueRotation = new LabelNode();
+        InsnList gate = new InsnList();
+        gate.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        gate.add(new FieldInsnNode(Opcodes.GETFIELD, owner.name, "mob",
+            "Lnet/minecraft/world/entity/PathfinderMob;"));
+        gate.add(new TypeInsnNode(Opcodes.INSTANCEOF, lushsaurInternal));
+        gate.add(new JumpInsnNode(Opcodes.IFNE, checkInput));
+        gate.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        gate.add(new FieldInsnNode(Opcodes.GETFIELD, owner.name, "mob",
+            "Lnet/minecraft/world/entity/PathfinderMob;"));
+        gate.add(new TypeInsnNode(Opcodes.INSTANCEOF, chorusoatlInternal));
+        gate.add(new JumpInsnNode(Opcodes.IFEQ, continueRotation));
+        gate.add(checkInput);
+        gate.add(new FrameNode(Opcodes.F_FULL, 3, initialLocals, 0, new Object[0]));
+        gate.add(new VarInsnNode(Opcodes.ALOAD, 1));
+        gate.add(new FieldInsnNode(Opcodes.GETFIELD, playerInternal, "f_20900_", "F"));
+        gate.add(new InsnNode(Opcodes.FCONST_0));
+        gate.add(new InsnNode(Opcodes.FCMPL));
+        gate.add(new JumpInsnNode(Opcodes.IFNE, continueRotation));
+        gate.add(new VarInsnNode(Opcodes.ALOAD, 1));
+        gate.add(new FieldInsnNode(Opcodes.GETFIELD, playerInternal, "f_20902_", "F"));
+        gate.add(new InsnNode(Opcodes.FCONST_0));
+        gate.add(new InsnNode(Opcodes.FCMPL));
+        gate.add(new JumpInsnNode(Opcodes.IFNE, continueRotation));
+        gate.add(new InsnNode(Opcodes.RETURN));
+        gate.add(continueRotation);
+        gate.add(new FrameNode(Opcodes.F_FULL, 3, initialLocals, 0, new Object[0]));
+        tickRidden.instructions.insertBefore(pitchReceiver, gate);
+
+        VarInsnNode yawStore = null;
+        int stores = 0;
+        for (AbstractInsnNode instruction : tickRidden.instructions.toArray()) {
+            if (instruction instanceof VarInsnNode variable &&
+                variable.getOpcode() == Opcodes.FSTORE && variable.var == 4) {
+                yawStore = variable;
+                stores++;
+            }
+        }
+        if (stores != 1 || yawStore == null) {
+            throw new IllegalStateException("Unexpected MountComponent.tickRidden yaw local");
+        }
+        Object[] pitchedLocals = new Object[] {
+            owner.name, playerInternal, "net/minecraft/world/phys/Vec3", Opcodes.FLOAT, Opcodes.FLOAT
+        };
+        LabelNode setNeutralPitch = new LabelNode();
+        LabelNode keepPitch = new LabelNode();
+        InsnList pitchOverride = new InsnList();
+        pitchOverride.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        pitchOverride.add(new FieldInsnNode(Opcodes.GETFIELD, owner.name, "mob",
+            "Lnet/minecraft/world/entity/PathfinderMob;"));
+        pitchOverride.add(new TypeInsnNode(Opcodes.INSTANCEOF, lushsaurInternal));
+        pitchOverride.add(new JumpInsnNode(Opcodes.IFNE, setNeutralPitch));
+        pitchOverride.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        pitchOverride.add(new FieldInsnNode(Opcodes.GETFIELD, owner.name, "mob",
+            "Lnet/minecraft/world/entity/PathfinderMob;"));
+        pitchOverride.add(new TypeInsnNode(Opcodes.INSTANCEOF, chorusoatlInternal));
+        pitchOverride.add(new JumpInsnNode(Opcodes.IFEQ, keepPitch));
+        pitchOverride.add(setNeutralPitch);
+        pitchOverride.add(new FrameNode(Opcodes.F_FULL, 5, pitchedLocals, 0, new Object[0]));
+        pitchOverride.add(new InsnNode(Opcodes.FCONST_0));
+        pitchOverride.add(new VarInsnNode(Opcodes.FSTORE, 3));
+        pitchOverride.add(keepPitch);
+        pitchOverride.add(new FrameNode(Opcodes.F_FULL, 5, pitchedLocals, 0, new Object[0]));
+        tickRidden.instructions.insert(yawStore, pitchOverride);
+    }
+
+    private static void patchNoRollRootOperation(ClassNode owner) {
+        if (owner == null) throw new IllegalStateException("Mob renderer is missing");
+        MethodNode initialize = owner.methods.stream()
+            .filter(method -> method.name.equals("onInitialize") &&
+                method.desc.startsWith("(Lcom/astemir/astemirlib/re/client/model/core/system/ModelSystem;"))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException(owner.name + ".onInitialize is missing"));
+        String commonRoot = "com/astemir/astemirlib/re/client/model/CommonRootOperations";
+        String operationOwner = commonRoot + "$RollOnRotation";
+        MethodInsnNode rollFactory = null;
+        int rollCalls = 0;
+        for (AbstractInsnNode instruction : initialize.instructions.toArray()) {
+            if (instruction instanceof MethodInsnNode call &&
+                call.getOpcode() == Opcodes.INVOKESTATIC &&
+                call.owner.equals(operationOwner) && call.name.equals("of") &&
+                call.desc.equals("(FFF)Lcom/astemir/astemirlib/re/client/model/core/RootOperation;")) {
+                rollFactory = call;
+                rollCalls++;
+            }
+        }
+        if (rollCalls != 1 || rollFactory == null) {
+            throw new IllegalStateException(owner.name + " must contain exactly one RollOnRotation root operation");
+        }
+        AbstractInsnNode arrayStore = nextCodeInstruction(rollFactory);
+        if (arrayStore == null || arrayStore.getOpcode() != Opcodes.AASTORE) {
+            throw new IllegalStateException(owner.name + " RollOnRotation array store is unexpected");
+        }
+        AbstractInsnNode arrayDuplicate = previousCodeInstruction(rollFactory);
+        while (arrayDuplicate != null && arrayDuplicate.getOpcode() != Opcodes.DUP) {
+            arrayDuplicate = previousCodeInstruction(arrayDuplicate);
+        }
+        if (arrayDuplicate == null) throw new IllegalStateException("RollOnRotation array DUP is missing");
+
+        TypeInsnNode rootArray = null;
+        int rootArrays = 0;
+        for (AbstractInsnNode instruction : initialize.instructions.toArray()) {
+            if (instruction instanceof TypeInsnNode type &&
+                type.getOpcode() == Opcodes.ANEWARRAY &&
+                type.desc.equals("com/astemir/astemirlib/re/client/model/core/RootOperation")) {
+                rootArray = type;
+                rootArrays++;
+            }
+        }
+        if (rootArrays != 1 || rootArray == null) {
+            throw new IllegalStateException(owner.name + " root operation array is unexpected");
+        }
+        AbstractInsnNode arraySize = previousCodeInstruction(rootArray);
+        if (arraySize == null || arraySize.getOpcode() != Opcodes.ICONST_4) {
+            throw new IllegalStateException(owner.name + " expected four original root operations");
+        }
+        initialize.instructions.set(arraySize, new InsnNode(Opcodes.ICONST_3));
+        removeInclusive(initialize.instructions, arrayDuplicate, arrayStore);
+
+        FieldInsnNode grumm = null;
+        for (AbstractInsnNode instruction : initialize.instructions.toArray()) {
+            if (instruction instanceof FieldInsnNode field &&
+                field.getOpcode() == Opcodes.GETSTATIC &&
+                field.owner.equals(commonRoot) && field.name.equals("GRUMM_ROTATION")) {
+                grumm = field;
+                break;
+            }
+        }
+        if (grumm == null) throw new IllegalStateException(owner.name + " GRUMM root operation was lost");
+        AbstractInsnNode grummIndex = previousCodeInstruction(grumm);
+        if (grummIndex == null || grummIndex.getOpcode() != Opcodes.ICONST_3) {
+            throw new IllegalStateException(owner.name + " GRUMM root operation index is unexpected");
+        }
+        initialize.instructions.set(grummIndex, new InsnNode(Opcodes.ICONST_2));
+    }
+
+    private static void patchChorusoatlFlyingRoll(ClassNode owner) {
+        if (owner == null) throw new IllegalStateException("Chorusoatl renderer is missing");
+        MethodNode animation = owner.methods.stream()
+            .filter(method -> method.name.equals("lambda$setupAnimations$0"))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("Chorusoatl flying bone animation is missing"));
+        String entityInternal = ROOT + "common/entity/mob/chorusoatl/ChorusoatlEntity";
+        String chasingFloat = "com/astemir/astemirlib/re/core/math/tween/ChasingFloat";
+        int replacements = 0;
+        for (AbstractInsnNode instruction : animation.instructions.toArray()) {
+            if (!(instruction instanceof FieldInsnNode field) ||
+                field.getOpcode() != Opcodes.GETFIELD ||
+                !field.owner.equals(entityInternal) || !field.name.equals("flyingRoll") ||
+                !field.desc.equals("L" + chasingFloat + ";")) continue;
+            AbstractInsnNode floatLoad = nextCodeInstruction(field);
+            AbstractInsnNode getValue = nextCodeInstruction(floatLoad);
+            AbstractInsnNode instanceLoad = previousCodeInstruction(field);
+            if (!(instanceLoad instanceof VarInsnNode load) ||
+                load.getOpcode() != Opcodes.ALOAD || load.var != 0 ||
+                !(floatLoad instanceof VarInsnNode partial) ||
+                partial.getOpcode() != Opcodes.FLOAD || partial.var != 4 ||
+                !(getValue instanceof MethodInsnNode call) ||
+                call.getOpcode() != Opcodes.INVOKEVIRTUAL ||
+                !call.owner.equals(chasingFloat) || !call.name.equals("get") ||
+                !call.desc.equals("(F)F")) {
+                throw new IllegalStateException("Unexpected Chorusoatl flyingRoll read");
+            }
+            animation.instructions.remove(instanceLoad);
+            animation.instructions.remove(field);
+            animation.instructions.remove(floatLoad);
+            animation.instructions.insertBefore(getValue, new InsnNode(Opcodes.FCONST_0));
+            animation.instructions.remove(getValue);
+            replacements++;
+        }
+        if (replacements != 1) {
+            throw new IllegalStateException("Expected one Chorusoatl flyingRoll animation use, replaced " + replacements);
         }
     }
 
@@ -1200,6 +1497,187 @@ public final class JarPruner {
         groundEvent.instructions.add(new InsnNode(Opcodes.RETURN));
         groundEvent.maxStack = 0;
         groundEvent.maxLocals = 1;
+    }
+
+    private static void patchLushsaurRestParticles(ClassNode owner) {
+        if (owner == null) throw new IllegalStateException("LushsaurEffects class is missing");
+        MethodNode clinit = owner.methods.stream()
+            .filter(method -> method.name.equals("<clinit>") && method.desc.equals("()V"))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("LushsaurEffects static initializer is missing"));
+        FieldInsnNode restEmitter = null;
+        int references = 0;
+        for (AbstractInsnNode instruction : clinit.instructions.toArray()) {
+            if (instruction instanceof FieldInsnNode field &&
+                field.getOpcode() == Opcodes.GETSTATIC &&
+                field.owner.equals(owner.name) && field.name.equals("EMITTER_REST")) {
+                restEmitter = field;
+                references++;
+            }
+        }
+        if (references != 1 || restEmitter == null) {
+            throw new IllegalStateException("Expected one Lushsaur sleep particle emitter");
+        }
+        AbstractInsnNode start = previousCodeInstruction(restEmitter);
+        AbstractInsnNode locator = nextCodeInstruction(restEmitter);
+        AbstractInsnNode spawn = nextCodeInstruction(locator);
+        AbstractInsnNode addEvent = nextCodeInstruction(spawn);
+        if (start == null || start.getOpcode() != Opcodes.FCONST_0 ||
+            !(locator instanceof LdcInsnNode key) || !"head".equals(key.cst) ||
+            !(spawn instanceof MethodInsnNode spawnCall) ||
+            !spawnCall.owner.equals("com/astemir/astemirlib/re/client/model/core/animation/event/AnimationEvent") ||
+            !spawnCall.name.equals("spawnParticle") ||
+            !(addEvent instanceof MethodInsnNode add) ||
+            !add.name.equals("addEvent")) {
+            throw new IllegalStateException("Unexpected Lushsaur REST_EFFECTS particle event");
+        }
+        removeInclusive(clinit.instructions, start, addEvent);
+    }
+
+    private static void patchLushsaurRunParticles(ClassNode owner) {
+        if (owner == null) throw new IllegalStateException("LushsaurEffects class is missing");
+        String contextDescriptor =
+            "(Lcom/astemir/astemirlib/re/client/model/core/animation/event/AnimationEvent$Context;)V";
+        MethodNode runTrail = owner.methods.stream()
+            .filter(method -> method.name.equals("lambda$static$3") && method.desc.equals(contextDescriptor))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("Lushsaur run particle callback is missing"));
+        clearMethod(runTrail);
+        runTrail.instructions.add(new InsnNode(Opcodes.RETURN));
+        runTrail.maxStack = 0;
+        runTrail.maxLocals = 1;
+    }
+
+    private static void patchChorusoatlFootstepParticles(ClassNode owner) {
+        if (owner == null) throw new IllegalStateException("ChorusoatlEffects class is missing");
+        MethodNode clinit = owner.methods.stream()
+            .filter(method -> method.name.equals("<clinit>") && method.desc.equals("()V"))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("ChorusoatlEffects static initializer is missing"));
+        FieldInsnNode walkTrack = null;
+        for (AbstractInsnNode instruction : clinit.instructions.toArray()) {
+            if (instruction instanceof FieldInsnNode field &&
+                field.getOpcode() == Opcodes.PUTSTATIC &&
+                field.owner.equals(owner.name) && field.name.equals("WALK_EFFECTS")) {
+                walkTrack = field;
+                break;
+            }
+        }
+        if (walkTrack == null) throw new IllegalStateException("Chorusoatl WALK_EFFECTS track is missing");
+        AbstractInsnNode walkStart = null;
+        for (AbstractInsnNode cursor = previousCodeInstruction(walkTrack);
+             cursor != null; cursor = previousCodeInstruction(cursor)) {
+            if (cursor instanceof MethodInsnNode call &&
+                call.getOpcode() == Opcodes.INVOKESTATIC &&
+                call.owner.equals("com/astemir/astemirlib/re/client/model/core/animation/event/AnimationEventTrack") &&
+                call.name.equals("of")) {
+                walkStart = cursor;
+                break;
+            }
+        }
+        if (walkStart == null) throw new IllegalStateException("Chorusoatl WALK_EFFECTS start is missing");
+
+        List<FieldInsnNode> stompEmitters = new ArrayList<>();
+        for (AbstractInsnNode cursor = walkStart; cursor != walkTrack; cursor = cursor.getNext()) {
+            if (cursor instanceof FieldInsnNode field &&
+                field.getOpcode() == Opcodes.GETSTATIC &&
+                field.owner.equals(owner.name) && field.name.equals("EMITTER_STOMP")) {
+                stompEmitters.add(field);
+            }
+        }
+        if (stompEmitters.size() != 2) {
+            throw new IllegalStateException("Expected two Chorusoatl walking stomp particle events");
+        }
+
+        FieldInsnNode firstEmitter = stompEmitters.get(0);
+        AbstractInsnNode firstLocator = nextCodeInstruction(firstEmitter);
+        AbstractInsnNode firstSpawn = nextCodeInstruction(firstLocator);
+        if (!(firstLocator instanceof LdcInsnNode firstName) || !"claw2".equals(firstName.cst) ||
+            !(firstSpawn instanceof MethodInsnNode firstSpawnCall) ||
+            !firstSpawnCall.name.equals("spawnParticle")) {
+            throw new IllegalStateException("Unexpected first Chorusoatl footstep particle event");
+        }
+        clinit.instructions.remove(firstEmitter);
+        clinit.instructions.remove(firstLocator);
+        clinit.instructions.remove(firstSpawn);
+
+        MethodInsnNode combine = null;
+        for (AbstractInsnNode cursor = walkStart; cursor != walkTrack; cursor = cursor.getNext()) {
+            if (cursor instanceof MethodInsnNode call &&
+                call.getOpcode() == Opcodes.INVOKEINTERFACE &&
+                call.owner.equals("com/astemir/astemirlib/re/client/model/core/animation/event/AnimationEvent") &&
+                call.name.equals("and")) {
+                combine = call;
+                break;
+            }
+        }
+        if (combine == null) throw new IllegalStateException("Chorusoatl footstep particle/sound combiner is missing");
+        clinit.instructions.remove(combine);
+
+        FieldInsnNode secondEmitter = stompEmitters.get(1);
+        AbstractInsnNode secondLocator = nextCodeInstruction(secondEmitter);
+        AbstractInsnNode secondSpawn = nextCodeInstruction(secondLocator);
+        AbstractInsnNode secondTime = previousCodeInstruction(secondEmitter);
+        AbstractInsnNode secondAdd = nextCodeInstruction(secondSpawn);
+        if (!(secondTime instanceof LdcInsnNode time) ||
+            !(time.cst instanceof Float value) || Math.abs(value - 1.04f) > 0.00001f ||
+            !(secondLocator instanceof LdcInsnNode secondName) || !"claw1".equals(secondName.cst) ||
+            !(secondSpawn instanceof MethodInsnNode secondSpawnCall) ||
+            !secondSpawnCall.name.equals("spawnParticle") ||
+            !(secondAdd instanceof MethodInsnNode add) || !add.name.equals("addEvent")) {
+            throw new IllegalStateException("Unexpected second Chorusoatl footstep particle event");
+        }
+        removeInclusive(clinit.instructions, secondTime, secondAdd);
+    }
+
+    private static void patchSculksaurFootstepParticles(ClassNode owner) {
+        if (owner == null) throw new IllegalStateException("SculksaurEffects class is missing");
+        String contextInternal =
+            "com/astemir/astemirlib/re/client/model/core/animation/event/AnimationEvent$Context";
+        String descriptor =
+            "(Lcom/astemir/astemirlib/re/client/particle/ParticleEmitterConfig;Ljava/lang/String;" +
+            "Lcom/astemir/astemirlib/re/client/particle/ParticleEmitterConfig;Ljava/lang/String;" +
+            "L" + contextInternal + ";)V";
+        MethodNode step = owner.methods.stream()
+            .filter(method -> method.name.equals("lambda$stepEvent$10") && method.desc.equals(descriptor))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("Sculksaur footstep callback is missing"));
+        clearMethod(step);
+        InsnList code = step.instructions;
+        String entityInternal = ROOT + "common/entity/mob/sculksaur/SculksaurEntity";
+        code.add(new VarInsnNode(Opcodes.ALOAD, 4));
+        code.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, contextInternal,
+            "getInstance", "()Ljava/lang/Object;", false));
+        code.add(new TypeInsnNode(Opcodes.CHECKCAST, entityInternal));
+        code.add(new VarInsnNode(Opcodes.ASTORE, 5));
+        code.add(new VarInsnNode(Opcodes.ALOAD, 5));
+        code.add(new LdcInsnNode(20.0f));
+        code.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
+            ROOT + "client/util/ShakeUtil", "shakeStep", "(Lnet/minecraft/world/entity/Entity;F)V", false));
+        code.add(new VarInsnNode(Opcodes.ALOAD, 4));
+        code.add(new FieldInsnNode(Opcodes.GETSTATIC,
+            ROOT + "common/sound/ADSoundEvents", "SCULKSAUR_STEP",
+            "L" + ROOT + "util/ResourceSupplier;"));
+        code.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
+            ROOT + "util/ResourceSupplier", "get", "()Ljava/lang/Object;", false));
+        code.add(new TypeInsnNode(Opcodes.CHECKCAST, "net/minecraft/sounds/SoundEvent"));
+        code.add(new FieldInsnNode(Opcodes.GETSTATIC,
+            "net/minecraft/sounds/SoundSource", "NEUTRAL", "Lnet/minecraft/sounds/SoundSource;"));
+        code.add(new InsnNode(Opcodes.FCONST_1));
+        code.add(new LdcInsnNode(0.8f));
+        code.add(new VarInsnNode(Opcodes.ALOAD, 5));
+        code.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
+            entityInternal, "m_217043_", "()Lnet/minecraft/util/RandomSource;", false));
+        code.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE,
+            "net/minecraft/util/RandomSource", "m_188501_", "()F", true));
+        code.add(new LdcInsnNode(0.4f));
+        code.add(new InsnNode(Opcodes.FMUL));
+        code.add(new InsnNode(Opcodes.FADD));
+        code.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, contextInternal,
+            "playSound", "(Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FF)V", false));
+        code.add(new InsnNode(Opcodes.RETURN));
+        step.maxStack = 5;
+        step.maxLocals = 6;
     }
 
     private static void patchTailPhysics(ClassNode owner, Set<String> tailBones, int expectedRemoved) {
