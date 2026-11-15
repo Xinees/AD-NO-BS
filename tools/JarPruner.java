@@ -188,7 +188,6 @@ public final class JarPruner {
         patchClientModBusRegistrations(nodes.get(ROOT + "client/ADClientModBus"));
         patchSpawnPlacements(nodes.get(ROOT + "ArchiesDinosaurs$ModBusEvents"));
         patchPlayerAnimations(nodes.get(ROOT + "client/animation/player/ADPlayerAnimations"));
-        patchLushMaceAnimationClip(nodes.get(ROOT + "client/animation/player/attachable/LushsaurMaceAnimations"));
         patchCreativeTab(nodes.get(ROOT + "common/tab/ADCreativeTabs"), nodes.get(ROOT + "common/items/ADItems"));
         patchParticleEmitters(nodes.get(ROOT + "client/particle/ADParticleEmitters"));
         patchTemptItems(nodes.get(ROOT + "common/entity/mob/lushsaur/ai/LushsaurAI"), "LUSH_CORE");
@@ -197,7 +196,6 @@ public final class JarPruner {
         patchServerConfig(nodes.get(ROOT + "server/ServerConfig"));
         patchLushMaceItemFactory(nodes.get(ROOT + "common/items/ADItems"));
         patchLushMaceTooltip(nodes.get(ROOT + "common/items/weapon/LushsaurMaceItem"));
-        patchLushMaceVanillaSwing(nodes.get(ROOT + "common/items/weapon/LushsaurMaceItem"));
         patchNetworkHelper(nodes.get(ROOT + "platform/ForgeNetworkHelper"));
         patchKeyMappings(nodes.get(ROOT + "client/ADKeyMappings"));
         patchAbstractArrowMixin(nodes.get(ROOT + "mixin/AbstractArrowMixin"));
@@ -997,84 +995,9 @@ public final class JarPruner {
             .findFirst()
             .orElseThrow(() -> new IllegalStateException("ADPlayerAnimations.init() is missing"));
         clearMethod(init);
-        init.instructions.add(new InsnNode(Opcodes.ICONST_1));
-        init.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
-            ROOT + "client/animation/player/riding/OnLushsaurPlayerAnimations", "init", "(I)V", false));
-        init.instructions.add(new InsnNode(Opcodes.ICONST_1));
-        init.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
-            ROOT + "client/animation/player/riding/OnChorusoatlPlayerAnimations", "init", "(I)V", false));
-        init.instructions.add(new InsnNode(Opcodes.ICONST_2));
-        init.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
-            ROOT + "client/animation/player/attachable/LushsaurMaceAnimations", "init", "(I)V", false));
         init.instructions.add(new InsnNode(Opcodes.RETURN));
-        init.maxStack = 1;
+        init.maxStack = 0;
         init.maxLocals = 0;
-    }
-
-    private static void patchLushMaceAnimationClip(ClassNode owner) {
-        if (owner == null) throw new IllegalStateException("LushsaurMaceAnimations class is missing");
-        int spinClipReferences = 0;
-        int attackClipReferences = 0;
-        for (MethodNode method : owner.methods) {
-            for (AbstractInsnNode instruction : method.instructions.toArray()) {
-                if (!(instruction instanceof LdcInsnNode constant) ||
-                    !(constant.cst instanceof String value)) continue;
-                if (value.equals("lushsaur_mace.spin")) {
-                    constant.cst = "lushsaur_mace.attack";
-                    spinClipReferences++;
-                } else if (value.equals("lushsaur_mace.attack")) {
-                    attackClipReferences++;
-                }
-            }
-        }
-        if (spinClipReferences != 1 || attackClipReferences < 1) {
-            throw new IllegalStateException(
-                "Expected one Lush Mace spin clip and at least one attack clip; found spin=" +
-                spinClipReferences + ", attack=" + attackClipReferences);
-        }
-    }
-
-    private static void patchLushMaceVanillaSwing(ClassNode owner) {
-        if (owner == null) throw new IllegalStateException("LushsaurMaceItem class is missing");
-        String descriptor =
-            "(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/player/Player;" +
-            "Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResultHolder;";
-        MethodNode use = owner.methods.stream()
-            .filter(method -> method.name.equals("m_7203_") && method.desc.equals(descriptor))
-            .findFirst()
-            .orElseThrow(() -> new IllegalStateException("LushsaurMaceItem.use is missing"));
-
-        List<MethodInsnNode> startUsingCalls = new ArrayList<>();
-        int existingSwingCalls = 0;
-        for (AbstractInsnNode instruction : use.instructions.toArray()) {
-            if (!(instruction instanceof MethodInsnNode call)) continue;
-            if (call.name.equals("m_6672_") &&
-                call.desc.equals("(Lnet/minecraft/world/InteractionHand;)V")) {
-                startUsingCalls.add(call);
-            }
-            if (call.name.equals("m_6674_") &&
-                call.desc.equals("(Lnet/minecraft/world/InteractionHand;)V")) {
-                existingSwingCalls++;
-            }
-        }
-        if (startUsingCalls.size() != 1 || existingSwingCalls != 0) {
-            throw new IllegalStateException(
-                "Expected one original startUsingItem call and no prior vanilla swing; found use=" +
-                startUsingCalls.size() + ", swing=" + existingSwingCalls);
-        }
-
-        InsnList vanillaSwing = new InsnList();
-        vanillaSwing.add(new VarInsnNode(Opcodes.ALOAD, 2));
-        vanillaSwing.add(new VarInsnNode(Opcodes.ALOAD, 3));
-        vanillaSwing.add(new MethodInsnNode(
-            Opcodes.INVOKEVIRTUAL,
-            "net/minecraft/world/entity/LivingEntity",
-            "m_6674_",
-            "(Lnet/minecraft/world/InteractionHand;)V",
-            false
-        ));
-        use.instructions.insert(startUsingCalls.get(0), vanillaSwing);
-        use.maxStack = Math.max(use.maxStack, 2);
     }
 
     private static AbstractInsnNode previousCodeInstruction(AbstractInsnNode instruction) {
@@ -2886,7 +2809,6 @@ public final class JarPruner {
             name.startsWith(ROOT + "client/model/render/entity/mob/SculksaurClient") ||
             name.startsWith(ROOT + "client/animation/player/riding/OnLushsaurPlayerAnimations") ||
             name.startsWith(ROOT + "client/animation/player/riding/OnChorusoatlPlayerAnimations") ||
-            name.startsWith(ROOT + "client/animation/player/attachable/LushsaurMaceAnimations") ||
             name.equals(ROOT + "util/ADConfig") ||
             name.equals(ROOT + "util/ResourceSupplier") ||
             name.equals(ROOT + "util/ClientUtil") ||
