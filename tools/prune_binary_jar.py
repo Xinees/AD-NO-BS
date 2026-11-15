@@ -516,7 +516,7 @@ def extend_chorusoatl_hatchable(data):
 
 def filter_tag_json(data, name):
     value = rewrite_entity_namespace(read_json(data, name))
-    allowed = ITEMS | EGGS | MOBS | {"chorusoatl_spit", "pus_tipped_arrow", "pus_arrow_aggro"}
+    allowed = ITEMS | EGGS | MOBS | {"chorusoatl_spit", "pus_tipped_arrow", "pus_arrow", "pus_arrow_aggro"}
     if isinstance(value, dict) and isinstance(value.get("values"), list):
         value["values"] = [
             item for item in value["values"]
@@ -683,6 +683,8 @@ with zipfile.ZipFile(source, "r") as zin:
         elif name in {
             "data/minecraft/tags/game_events/vibrations.json",
             "data/minecraft/tags/game_events/warden_can_listen.json",
+            "data/minecraft/tags/entity_types/arrows.json",
+            "data/minecraft/tags/damage_type/is_projectile.json",
         }:
             data = filter_tag_json(data, name)
 
@@ -713,6 +715,11 @@ with zipfile.ZipFile(source, "r") as zin:
             data = data.replace(OLD_NAMESPACE.encode("ascii"), NEW_NAMESPACE.encode("ascii"))
 
         kept[name] = data
+
+kept["data/minecraft/tags/items/arrows.json"] = dump_json({
+    "replace": False,
+    "values": ["archie_dinosaurs:ooze_tipped_arrow"],
+})
 
 with zipfile.ZipFile(target, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as zout:
     for name, data in sorted(kept.items()):
@@ -811,6 +818,9 @@ with zipfile.ZipFile(target, "r") as check:
         "data/archie_dinosaurs/damage_type/pus_arrow.json",
         "data/minecraft/tags/game_events/vibrations.json",
         "data/minecraft/tags/game_events/warden_can_listen.json",
+        "data/minecraft/tags/items/arrows.json",
+        "data/minecraft/tags/entity_types/arrows.json",
+        "data/minecraft/tags/damage_type/is_projectile.json",
         "assets/archie_dinosaurs/textures/entity/projectiles/pus_tipped_arrow.png",
         "assets/archie_dinosaurs/models/attachable/lushsaur_mace.astemirmodel",
         "assets/archie_dinosaurs/textures/item/model/lushsaur_mace.png",
@@ -834,6 +844,16 @@ with zipfile.ZipFile(target, "r") as check:
         stale = sorted(value for value in values if isinstance(value, str) and value.startswith("archie_dinosaurs:") and value.split(":", 1)[1] not in {"pus_arrow_aggro"})
         if stale:
             raise SystemExit(f"Removed mod game events remain in {tag_path}: {stale}")
+
+    expected_mc_tags = {
+        "data/minecraft/tags/items/arrows.json": "archie_dinosaurs:ooze_tipped_arrow",
+        "data/minecraft/tags/entity_types/arrows.json": "archie_dinosaurs:pus_tipped_arrow",
+        "data/minecraft/tags/damage_type/is_projectile.json": "archie_dinosaurs:pus_arrow",
+    }
+    for tag_path, expected_entry in expected_mc_tags.items():
+        tag = read_json(check.read(tag_path), tag_path)
+        if expected_entry not in set(tag.get("values", [])):
+            raise SystemExit(f"Required entry {expected_entry} missing from {tag_path}")
 
     sound_definitions = read_json(check.read("assets/archie_dinosaurs/sounds.json"), "assets/archie_dinosaurs/sounds.json")
     for sound_id in ("item.lushsaur_mace.attack", "item.lushsaur_mace.spin"):

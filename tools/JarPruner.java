@@ -196,6 +196,10 @@ public final class JarPruner {
         patchServerConfig(nodes.get(ROOT + "server/ServerConfig"));
         patchLushMaceItemFactory(nodes.get(ROOT + "common/items/ADItems"));
         patchLushMaceTooltip(nodes.get(ROOT + "common/items/weapon/LushsaurMaceItem"));
+        patchLushMaceAttachable(nodes.get(ROOT + "client/model/attachable/LushsaurMaceAttachable$1"));
+        patchLushMaceSwings(nodes.get(ROOT + "common/items/weapon/LushsaurMaceItem"));
+        patchPusTippedArrowEntity(nodes.get(ROOT + "common/entity/projectile/PusTippedArrowEntity"));
+        patchPopZitMessage(nodes.get(ROOT + "networking/serverbound/PopZitMessage"));
         patchNetworkHelper(nodes.get(ROOT + "platform/ForgeNetworkHelper"));
         patchKeyMappings(nodes.get(ROOT + "client/ADKeyMappings"));
         patchAbstractArrowMixin(nodes.get(ROOT + "mixin/AbstractArrowMixin"));
@@ -1695,6 +1699,819 @@ public final class JarPruner {
         owner.methods.add(tooltip);
     }
 
+    private static void patchLushMaceAttachable(ClassNode owner) {
+        if (owner == null) throw new IllegalStateException("LushsaurMaceAttachable$1 class is missing");
+
+        boolean replaced = false;
+        for (MethodNode method : owner.methods) {
+            if (!method.name.equals("onInitialize")) continue;
+            for (AbstractInsnNode insn : method.instructions.toArray()) {
+                if (insn instanceof LdcInsnNode ldc && "spin_first_person".equals(ldc.cst)) {
+                    ldc.cst = "attack_first_person";
+                    replaced = true;
+                }
+            }
+        }
+        if (!replaced) {
+            throw new IllegalStateException("Expected spin_first_person clip in LushsaurMaceAttachable$1.onInitialize");
+        }
+    }
+
+    private static void patchLushMaceSwings(ClassNode owner) {
+        if (owner == null) throw new IllegalStateException("LushsaurMaceItem class is missing");
+
+        String playerInternal = "net/minecraft/world/entity/player/Player";
+        String livingInternal = "net/minecraft/world/entity/LivingEntity";
+        String handInternal = "net/minecraft/world/InteractionHand";
+        String handDesc = "L" + handInternal + ";";
+
+        // 1) LMB attack action ticker: trigger vanilla 3rd-person arm swing on tick 0/1 (1st person hides it via setAttackAnim).
+        MethodNode attackTick = owner.methods.stream()
+            .filter(m -> m.name.equals("lambda$static$0") && m.desc.equals("(L" + playerInternal + ";I)V"))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("LushsaurMaceItem.lambda$static$0 not found"));
+
+        InsnList swingPrefix = new InsnList();
+        LabelNode afterSwing = new LabelNode();
+        swingPrefix.add(new VarInsnNode(Opcodes.ILOAD, 1));
+        swingPrefix.add(new InsnNode(Opcodes.ICONST_1));
+        swingPrefix.add(new JumpInsnNode(Opcodes.IF_ICMPGT, afterSwing));
+        swingPrefix.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        swingPrefix.add(new FieldInsnNode(Opcodes.GETFIELD, livingInternal, "f_20911_", "Z"));
+        swingPrefix.add(new JumpInsnNode(Opcodes.IFNE, afterSwing));
+        swingPrefix.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        swingPrefix.add(new FieldInsnNode(Opcodes.GETSTATIC, handInternal, "MAIN_HAND", handDesc));
+        swingPrefix.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, playerInternal, "m_6674_", "(" + handDesc + ")V", false));
+        swingPrefix.add(afterSwing);
+        swingPrefix.add(new FrameNode(Opcodes.F_FULL, 2,
+            new Object[] { playerInternal, Opcodes.INTEGER }, 0, new Object[0]));
+        attackTick.instructions.insertBefore(attackTick.instructions.getFirst(), swingPrefix);
+
+        // 2) RMB use(): trigger vanilla 3rd-person arm swing alongside startUsingItem / ATTACK_SPIN.
+        MethodNode useMethod = owner.methods.stream()
+            .filter(m -> m.name.equals("m_7203_"))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("LushsaurMaceItem.m_7203_ not found"));
+
+        AbstractInsnNode startUsingCall = null;
+        for (AbstractInsnNode insn : useMethod.instructions.toArray()) {
+            if (insn instanceof MethodInsnNode call &&
+                call.owner.equals(playerInternal) &&
+                call.name.equals("m_6672_")) {
+                startUsingCall = call;
+                break;
+            }
+        }
+        if (startUsingCall == null) {
+            throw new IllegalStateException("Expected Player.m_6672_ call in LushsaurMaceItem.m_7203_");
+        }
+        InsnList rmbSwing = new InsnList();
+        rmbSwing.add(new VarInsnNode(Opcodes.ALOAD, 2));
+        rmbSwing.add(new VarInsnNode(Opcodes.ALOAD, 3));
+        rmbSwing.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, playerInternal, "m_6674_", "(" + handDesc + ")V", false));
+        useMethod.instructions.insert(startUsingCall, rmbSwing);
+
+        // 3) Match ATTACK_SPIN ActionState duration (1.0f) with "attack_first_person" clip length.
+        MethodNode spinFactory = owner.methods.stream()
+            .filter(m -> m.name.equals("lambda$static$5"))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("LushsaurMaceItem.lambda$static$5 not found"));
+        boolean matchedDuration = false;
+        for (AbstractInsnNode insn : spinFactory.instructions.toArray()) {
+            if (insn instanceof LdcInsnNode ldc && ldc.cst instanceof Float f && Math.abs(f - 2.2f) < 0.01f) {
+                ldc.cst = Float.valueOf(1.0f);
+                matchedDuration = true;
+            }
+        }
+        if (!matchedDuration) {
+            throw new IllegalStateException("Expected 2.2f duration in LushsaurMaceItem.lambda$static$5");
+        }
+    }
+
+    private static void patchPusTippedArrowEntity(ClassNode owner) {
+        if (owner == null) throw new IllegalStateException("PusTippedArrowEntity class is missing");
+
+        String arrowSuper = "net/minecraft/world/entity/projectile/AbstractArrow";
+        String entityInternal = "net/minecraft/world/entity/Entity";
+        String mobInternal = "net/minecraft/world/entity/Mob";
+        String levelInternal = "net/minecraft/world/level/Level";
+        String vec3Internal = "net/minecraft/world/phys/Vec3";
+        String aabbInternal = "net/minecraft/world/phys/AABB";
+        String randomInternal = "net/minecraft/util/RandomSource";
+        String selectorInternal = "net/minecraft/world/entity/EntitySelector";
+        String sculkChargeOpts = "net/minecraft/core/particles/SculkChargeParticleOptions";
+        String particleOpts = "net/minecraft/core/particles/ParticleOptions";
+        String mthInternal = "net/minecraft/util/Mth";
+        String listInternal = "java/util/List";
+
+        owner.methods.removeIf(m ->
+            (m.name.equals("m_8119_") && m.desc.equals("()V")) ||
+            m.name.equals("spawnSculkChargeParticles") ||
+            m.name.equals("findNearestHomingMob") ||
+            m.name.equals("steerTowardNearestMob")
+        );
+
+        // 1) public void m_8119_() { super.m_8119_(); if (inGround) return; if (level.isClientSide) spawnSculkChargeParticles(); steerTowardNearestMob(); }
+        MethodNode tick = new MethodNode(Opcodes.ACC_PUBLIC, "m_8119_", "()V", null, null);
+        InsnList tc = tick.instructions;
+        LabelNode notInGround = new LabelNode();
+        LabelNode afterParticles = new LabelNode();
+        tc.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        tc.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, arrowSuper, "m_8119_", "()V", false));
+        tc.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        tc.add(new FieldInsnNode(Opcodes.GETFIELD, arrowSuper, "f_36703_", "Z"));
+        tc.add(new JumpInsnNode(Opcodes.IFEQ, notInGround));
+        tc.add(new InsnNode(Opcodes.RETURN));
+        tc.add(notInGround);
+        tc.add(new FrameNode(Opcodes.F_FULL, 1, new Object[] { owner.name }, 0, new Object[0]));
+        tc.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        tc.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, owner.name, "m_9236_", "()L" + levelInternal + ";", false));
+        tc.add(new VarInsnNode(Opcodes.ASTORE, 1));
+        tc.add(new VarInsnNode(Opcodes.ALOAD, 1));
+        tc.add(new FieldInsnNode(Opcodes.GETFIELD, levelInternal, "f_46443_", "Z"));
+        tc.add(new JumpInsnNode(Opcodes.IFEQ, afterParticles));
+        tc.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        tc.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, owner.name, "spawnSculkChargeParticles", "()V", false));
+        tc.add(afterParticles);
+        tc.add(new FrameNode(Opcodes.F_FULL, 2, new Object[] { owner.name, levelInternal }, 0, new Object[0]));
+        tc.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        tc.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, owner.name, "steerTowardNearestMob", "()V", false));
+        tc.add(new InsnNode(Opcodes.RETURN));
+        tick.maxStack = 2;
+        tick.maxLocals = 2;
+        owner.methods.add(tick);
+
+        // 2) private void spawnSculkChargeParticles()
+        MethodNode particles = new MethodNode(Opcodes.ACC_PRIVATE, "spawnSculkChargeParticles", "()V", null, null);
+        InsnList pc = particles.instructions;
+        LabelNode startLoop = new LabelNode();
+        LabelNode loopCond = new LabelNode();
+        LabelNode loopDone = new LabelNode();
+        pc.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        pc.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, owner.name, "m_9236_", "()L" + levelInternal + ";", false));
+        pc.add(new VarInsnNode(Opcodes.ASTORE, 1));
+        pc.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        pc.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, owner.name, "m_20184_", "()L" + vec3Internal + ";", false));
+        pc.add(new VarInsnNode(Opcodes.ASTORE, 2));
+        // speedSqr >= 0.0025
+        pc.add(new VarInsnNode(Opcodes.ALOAD, 2));
+        pc.add(new FieldInsnNode(Opcodes.GETFIELD, vec3Internal, "f_82479_", "D"));
+        pc.add(new InsnNode(Opcodes.DUP2));
+        pc.add(new InsnNode(Opcodes.DMUL));
+        pc.add(new VarInsnNode(Opcodes.ALOAD, 2));
+        pc.add(new FieldInsnNode(Opcodes.GETFIELD, vec3Internal, "f_82480_", "D"));
+        pc.add(new InsnNode(Opcodes.DUP2));
+        pc.add(new InsnNode(Opcodes.DMUL));
+        pc.add(new InsnNode(Opcodes.DADD));
+        pc.add(new VarInsnNode(Opcodes.ALOAD, 2));
+        pc.add(new FieldInsnNode(Opcodes.GETFIELD, vec3Internal, "f_82481_", "D"));
+        pc.add(new InsnNode(Opcodes.DUP2));
+        pc.add(new InsnNode(Opcodes.DMUL));
+        pc.add(new InsnNode(Opcodes.DADD));
+        pc.add(new LdcInsnNode(Double.valueOf(0.0025d)));
+        pc.add(new InsnNode(Opcodes.DCMPL));
+        pc.add(new JumpInsnNode(Opcodes.IFGE, startLoop));
+        pc.add(new InsnNode(Opcodes.RETURN));
+        pc.add(startLoop);
+        pc.add(new FrameNode(Opcodes.F_FULL, 3,
+            new Object[] { owner.name, levelInternal, vec3Internal }, 0, new Object[0]));
+        pc.add(new InsnNode(Opcodes.ICONST_0));
+        pc.add(new VarInsnNode(Opcodes.ISTORE, 3));
+        pc.add(loopCond);
+        pc.add(new FrameNode(Opcodes.F_FULL, 4,
+            new Object[] { owner.name, levelInternal, vec3Internal, Opcodes.INTEGER }, 0, new Object[0]));
+        pc.add(new VarInsnNode(Opcodes.ILOAD, 3));
+        pc.add(new InsnNode(Opcodes.ICONST_2));
+        pc.add(new JumpInsnNode(Opcodes.IF_ICMPGE, loopDone));
+        // double t = i * 0.5;
+        pc.add(new VarInsnNode(Opcodes.ILOAD, 3));
+        pc.add(new InsnNode(Opcodes.I2D));
+        pc.add(new LdcInsnNode(Double.valueOf(0.5d)));
+        pc.add(new InsnNode(Opcodes.DMUL));
+        pc.add(new VarInsnNode(Opcodes.DSTORE, 4));
+        // level.m_7106_(new SculkChargeParticleOptions(roll), px, py, pz, vx, vy, vz)
+        pc.add(new VarInsnNode(Opcodes.ALOAD, 1));
+        pc.add(new TypeInsnNode(Opcodes.NEW, sculkChargeOpts));
+        pc.add(new InsnNode(Opcodes.DUP));
+        pc.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        pc.add(new FieldInsnNode(Opcodes.GETFIELD, entityInternal, "f_19796_", "L" + randomInternal + ";"));
+        pc.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, randomInternal, "m_188501_", "()F", true));
+        pc.add(new LdcInsnNode(Float.valueOf(0.5f)));
+        pc.add(new InsnNode(Opcodes.FSUB));
+        pc.add(new LdcInsnNode(Float.valueOf(0.4f)));
+        pc.add(new InsnNode(Opcodes.FMUL));
+        pc.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, sculkChargeOpts, "<init>", "(F)V", false));
+        // px
+        pc.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        pc.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, owner.name, "m_20185_", "()D", false));
+        pc.add(new VarInsnNode(Opcodes.ALOAD, 2));
+        pc.add(new FieldInsnNode(Opcodes.GETFIELD, vec3Internal, "f_82479_", "D"));
+        pc.add(new VarInsnNode(Opcodes.DLOAD, 4));
+        pc.add(new InsnNode(Opcodes.DMUL));
+        pc.add(new InsnNode(Opcodes.DSUB));
+        pc.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        pc.add(new FieldInsnNode(Opcodes.GETFIELD, entityInternal, "f_19796_", "L" + randomInternal + ";"));
+        pc.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, randomInternal, "m_188501_", "()F", true));
+        pc.add(new LdcInsnNode(Float.valueOf(0.5f)));
+        pc.add(new InsnNode(Opcodes.FSUB));
+        pc.add(new InsnNode(Opcodes.F2D));
+        pc.add(new LdcInsnNode(Double.valueOf(0.08d)));
+        pc.add(new InsnNode(Opcodes.DMUL));
+        pc.add(new InsnNode(Opcodes.DADD));
+        // py
+        pc.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        pc.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, owner.name, "m_20186_", "()D", false));
+        pc.add(new VarInsnNode(Opcodes.ALOAD, 2));
+        pc.add(new FieldInsnNode(Opcodes.GETFIELD, vec3Internal, "f_82480_", "D"));
+        pc.add(new VarInsnNode(Opcodes.DLOAD, 4));
+        pc.add(new InsnNode(Opcodes.DMUL));
+        pc.add(new InsnNode(Opcodes.DSUB));
+        pc.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        pc.add(new FieldInsnNode(Opcodes.GETFIELD, entityInternal, "f_19796_", "L" + randomInternal + ";"));
+        pc.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, randomInternal, "m_188501_", "()F", true));
+        pc.add(new LdcInsnNode(Float.valueOf(0.5f)));
+        pc.add(new InsnNode(Opcodes.FSUB));
+        pc.add(new InsnNode(Opcodes.F2D));
+        pc.add(new LdcInsnNode(Double.valueOf(0.08d)));
+        pc.add(new InsnNode(Opcodes.DMUL));
+        pc.add(new InsnNode(Opcodes.DADD));
+        // pz
+        pc.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        pc.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, owner.name, "m_20189_", "()D", false));
+        pc.add(new VarInsnNode(Opcodes.ALOAD, 2));
+        pc.add(new FieldInsnNode(Opcodes.GETFIELD, vec3Internal, "f_82481_", "D"));
+        pc.add(new VarInsnNode(Opcodes.DLOAD, 4));
+        pc.add(new InsnNode(Opcodes.DMUL));
+        pc.add(new InsnNode(Opcodes.DSUB));
+        pc.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        pc.add(new FieldInsnNode(Opcodes.GETFIELD, entityInternal, "f_19796_", "L" + randomInternal + ";"));
+        pc.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, randomInternal, "m_188501_", "()F", true));
+        pc.add(new LdcInsnNode(Float.valueOf(0.5f)));
+        pc.add(new InsnNode(Opcodes.FSUB));
+        pc.add(new InsnNode(Opcodes.F2D));
+        pc.add(new LdcInsnNode(Double.valueOf(0.08d)));
+        pc.add(new InsnNode(Opcodes.DMUL));
+        pc.add(new InsnNode(Opcodes.DADD));
+        // vx, vy, vz
+        pc.add(new VarInsnNode(Opcodes.ALOAD, 2));
+        pc.add(new FieldInsnNode(Opcodes.GETFIELD, vec3Internal, "f_82479_", "D"));
+        pc.add(new InsnNode(Opcodes.DNEG));
+        pc.add(new LdcInsnNode(Double.valueOf(0.08d)));
+        pc.add(new InsnNode(Opcodes.DMUL));
+        pc.add(new VarInsnNode(Opcodes.ALOAD, 2));
+        pc.add(new FieldInsnNode(Opcodes.GETFIELD, vec3Internal, "f_82480_", "D"));
+        pc.add(new InsnNode(Opcodes.DNEG));
+        pc.add(new LdcInsnNode(Double.valueOf(0.08d)));
+        pc.add(new InsnNode(Opcodes.DMUL));
+        pc.add(new VarInsnNode(Opcodes.ALOAD, 2));
+        pc.add(new FieldInsnNode(Opcodes.GETFIELD, vec3Internal, "f_82481_", "D"));
+        pc.add(new InsnNode(Opcodes.DNEG));
+        pc.add(new LdcInsnNode(Double.valueOf(0.08d)));
+        pc.add(new InsnNode(Opcodes.DMUL));
+        pc.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, levelInternal, "m_7106_",
+            "(L" + particleOpts + ";DDDDDD)V", false));
+        pc.add(new IincInsnNode(3, 1));
+        pc.add(new JumpInsnNode(Opcodes.GOTO, loopCond));
+        pc.add(loopDone);
+        pc.add(new FrameNode(Opcodes.F_FULL, 3,
+            new Object[] { owner.name, levelInternal, vec3Internal }, 0, new Object[0]));
+        pc.add(new InsnNode(Opcodes.RETURN));
+        particles.maxStack = 20;
+        particles.maxLocals = 6;
+        owner.methods.add(particles);
+
+        // 3) private Mob findNearestHomingMob(double dirX, double dirY, double dirZ)
+        MethodNode findMob = new MethodNode(Opcodes.ACC_PRIVATE, "findNearestHomingMob",
+            "(DDD)L" + mobInternal + ";", null, null);
+        InsnList fc = findMob.instructions;
+        LabelNode noVehicle = new LabelNode();
+        LabelNode gotVehicle = new LabelNode();
+        LabelNode mobLoop = new LabelNode();
+        LabelNode mobNext = new LabelNode();
+        LabelNode mobDone = new LabelNode();
+
+        fc.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        fc.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, owner.name, "m_19749_", "()L" + entityInternal + ";", false));
+        fc.add(new VarInsnNode(Opcodes.ASTORE, 7)); // owner
+        fc.add(new VarInsnNode(Opcodes.ALOAD, 7));
+        fc.add(new JumpInsnNode(Opcodes.IFNULL, noVehicle));
+        fc.add(new VarInsnNode(Opcodes.ALOAD, 7));
+        fc.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, entityInternal, "m_20202_", "()L" + entityInternal + ";", false));
+        fc.add(new JumpInsnNode(Opcodes.GOTO, gotVehicle));
+        fc.add(noVehicle);
+        fc.add(new FrameNode(Opcodes.F_FULL, 5,
+            new Object[] { owner.name, Opcodes.DOUBLE, Opcodes.DOUBLE, Opcodes.DOUBLE, entityInternal },
+            0, new Object[0]));
+        fc.add(new InsnNode(Opcodes.ACONST_NULL));
+        fc.add(gotVehicle);
+        fc.add(new FrameNode(Opcodes.F_FULL, 5,
+            new Object[] { owner.name, Opcodes.DOUBLE, Opcodes.DOUBLE, Opcodes.DOUBLE, entityInternal },
+            1, new Object[] { entityInternal }));
+        fc.add(new VarInsnNode(Opcodes.ASTORE, 8)); // ownerVehicle
+
+        // candidates = level.getEntitiesOfClass(Mob.class, getBoundingBox().inflate(18.0), EntitySelector.LIVING_ENTITY_STILL_ALIVE)
+        fc.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        fc.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, owner.name, "m_9236_", "()L" + levelInternal + ";", false));
+        fc.add(new LdcInsnNode(Type.getObjectType(mobInternal)));
+        fc.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        fc.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, owner.name, "m_20191_", "()L" + aabbInternal + ";", false));
+        fc.add(new LdcInsnNode(Double.valueOf(18.0d)));
+        fc.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, aabbInternal, "m_82400_", "(D)L" + aabbInternal + ";", false));
+        fc.add(new FieldInsnNode(Opcodes.GETSTATIC, selectorInternal, "f_20403_", "Ljava/util/function/Predicate;"));
+        fc.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, levelInternal, "m_6443_",
+            "(Ljava/lang/Class;L" + aabbInternal + ";Ljava/util/function/Predicate;)L" + listInternal + ";", false));
+        fc.add(new VarInsnNode(Opcodes.ASTORE, 9)); // candidates
+        fc.add(new InsnNode(Opcodes.ACONST_NULL));
+        fc.add(new VarInsnNode(Opcodes.ASTORE, 10)); // bestTarget
+        fc.add(new LdcInsnNode(Double.valueOf(Double.MAX_VALUE)));
+        fc.add(new VarInsnNode(Opcodes.DSTORE, 11)); // bestDistSqr
+        fc.add(new InsnNode(Opcodes.ICONST_0));
+        fc.add(new VarInsnNode(Opcodes.ISTORE, 13)); // i
+
+        Object[] loopFrame = new Object[] {
+            owner.name, Opcodes.DOUBLE, Opcodes.DOUBLE, Opcodes.DOUBLE,
+            entityInternal, entityInternal, listInternal, mobInternal, Opcodes.DOUBLE, Opcodes.INTEGER
+        };
+        fc.add(mobLoop);
+        fc.add(new FrameNode(Opcodes.F_FULL, loopFrame.length, loopFrame, 0, new Object[0]));
+        fc.add(new VarInsnNode(Opcodes.ILOAD, 13));
+        fc.add(new VarInsnNode(Opcodes.ALOAD, 9));
+        fc.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, listInternal, "size", "()I", true));
+        fc.add(new JumpInsnNode(Opcodes.IF_ICMPGE, mobDone));
+
+        // mob = (Mob) candidates.get(i)
+        fc.add(new VarInsnNode(Opcodes.ALOAD, 9));
+        fc.add(new VarInsnNode(Opcodes.ILOAD, 13));
+        fc.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, listInternal, "get", "(I)Ljava/lang/Object;", true));
+        fc.add(new TypeInsnNode(Opcodes.CHECKCAST, mobInternal));
+        fc.add(new VarInsnNode(Opcodes.ASTORE, 14)); // mob
+
+        // skip if mob == owner || mob == ownerVehicle
+        fc.add(new VarInsnNode(Opcodes.ALOAD, 14));
+        fc.add(new VarInsnNode(Opcodes.ALOAD, 7));
+        fc.add(new JumpInsnNode(Opcodes.IF_ACMPEQ, mobNext));
+        fc.add(new VarInsnNode(Opcodes.ALOAD, 14));
+        fc.add(new VarInsnNode(Opcodes.ALOAD, 8));
+        fc.add(new JumpInsnNode(Opcodes.IF_ACMPEQ, mobNext));
+        // skip if owner != null && mob.isAlliedTo(owner)
+        LabelNode notAllied = new LabelNode();
+        fc.add(new VarInsnNode(Opcodes.ALOAD, 7));
+        fc.add(new JumpInsnNode(Opcodes.IFNULL, notAllied));
+        fc.add(new VarInsnNode(Opcodes.ALOAD, 14));
+        fc.add(new VarInsnNode(Opcodes.ALOAD, 7));
+        fc.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, mobInternal, "m_7307_", "(L" + entityInternal + ";)Z", false));
+        fc.add(new JumpInsnNode(Opcodes.IFNE, mobNext));
+        fc.add(notAllied);
+        fc.add(new FrameNode(Opcodes.F_FULL, 11, new Object[] {
+            owner.name, Opcodes.DOUBLE, Opcodes.DOUBLE, Opcodes.DOUBLE,
+            entityInternal, entityInternal, listInternal, mobInternal, Opcodes.DOUBLE, Opcodes.INTEGER, mobInternal
+        }, 0, new Object[0]));
+        // skip if !mob.isAlive() || mob.isSpectator()
+        fc.add(new VarInsnNode(Opcodes.ALOAD, 14));
+        fc.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, mobInternal, "m_6084_", "()Z", false));
+        fc.add(new JumpInsnNode(Opcodes.IFEQ, mobNext));
+        fc.add(new VarInsnNode(Opcodes.ALOAD, 14));
+        fc.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, mobInternal, "m_5833_", "()Z", false));
+        fc.add(new JumpInsnNode(Opcodes.IFNE, mobNext));
+
+        // tx, ty, tz
+        fc.add(new VarInsnNode(Opcodes.ALOAD, 14));
+        fc.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, mobInternal, "m_20185_", "()D", false));
+        fc.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        fc.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, owner.name, "m_20185_", "()D", false));
+        fc.add(new InsnNode(Opcodes.DSUB));
+        fc.add(new VarInsnNode(Opcodes.DSTORE, 15));
+
+        fc.add(new VarInsnNode(Opcodes.ALOAD, 14));
+        fc.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, mobInternal, "m_20186_", "()D", false));
+        fc.add(new VarInsnNode(Opcodes.ALOAD, 14));
+        fc.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, mobInternal, "m_20206_", "()F", false));
+        fc.add(new InsnNode(Opcodes.F2D));
+        fc.add(new LdcInsnNode(Double.valueOf(0.5d)));
+        fc.add(new InsnNode(Opcodes.DMUL));
+        fc.add(new InsnNode(Opcodes.DADD));
+        fc.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        fc.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, owner.name, "m_20186_", "()D", false));
+        fc.add(new InsnNode(Opcodes.DSUB));
+        fc.add(new VarInsnNode(Opcodes.DSTORE, 17));
+
+        fc.add(new VarInsnNode(Opcodes.ALOAD, 14));
+        fc.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, mobInternal, "m_20189_", "()D", false));
+        fc.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        fc.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, owner.name, "m_20189_", "()D", false));
+        fc.add(new InsnNode(Opcodes.DSUB));
+        fc.add(new VarInsnNode(Opcodes.DSTORE, 19));
+
+        // distSqr = tx*tx + ty*ty + tz*tz
+        fc.add(new VarInsnNode(Opcodes.DLOAD, 15));
+        fc.add(new VarInsnNode(Opcodes.DLOAD, 15));
+        fc.add(new InsnNode(Opcodes.DMUL));
+        fc.add(new VarInsnNode(Opcodes.DLOAD, 17));
+        fc.add(new VarInsnNode(Opcodes.DLOAD, 17));
+        fc.add(new InsnNode(Opcodes.DMUL));
+        fc.add(new InsnNode(Opcodes.DADD));
+        fc.add(new VarInsnNode(Opcodes.DLOAD, 19));
+        fc.add(new VarInsnNode(Opcodes.DLOAD, 19));
+        fc.add(new InsnNode(Opcodes.DMUL));
+        fc.add(new InsnNode(Opcodes.DADD));
+        fc.add(new VarInsnNode(Opcodes.DSTORE, 21));
+
+        // if (distSqr < 0.0001 || distSqr >= bestDistSqr) continue;
+        fc.add(new VarInsnNode(Opcodes.DLOAD, 21));
+        fc.add(new LdcInsnNode(Double.valueOf(0.0001d)));
+        fc.add(new InsnNode(Opcodes.DCMPG));
+        fc.add(new JumpInsnNode(Opcodes.IFLT, mobNext));
+        fc.add(new VarInsnNode(Opcodes.DLOAD, 21));
+        fc.add(new VarInsnNode(Opcodes.DLOAD, 11));
+        fc.add(new InsnNode(Opcodes.DCMPL));
+        fc.add(new JumpInsnNode(Opcodes.IFGE, mobNext));
+
+        // dot = (tx*dirX + ty*dirY + tz*dirZ) / Math.sqrt(distSqr); if (dot <= -0.25) continue;
+        fc.add(new VarInsnNode(Opcodes.DLOAD, 15));
+        fc.add(new VarInsnNode(Opcodes.DLOAD, 1));
+        fc.add(new InsnNode(Opcodes.DMUL));
+        fc.add(new VarInsnNode(Opcodes.DLOAD, 17));
+        fc.add(new VarInsnNode(Opcodes.DLOAD, 3));
+        fc.add(new InsnNode(Opcodes.DMUL));
+        fc.add(new InsnNode(Opcodes.DADD));
+        fc.add(new VarInsnNode(Opcodes.DLOAD, 19));
+        fc.add(new VarInsnNode(Opcodes.DLOAD, 5));
+        fc.add(new InsnNode(Opcodes.DMUL));
+        fc.add(new InsnNode(Opcodes.DADD));
+        fc.add(new VarInsnNode(Opcodes.DLOAD, 21));
+        fc.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "java/lang/Math", "sqrt", "(D)D", false));
+        fc.add(new InsnNode(Opcodes.DDIV));
+        fc.add(new LdcInsnNode(Double.valueOf(-0.25d)));
+        fc.add(new InsnNode(Opcodes.DCMPL));
+        fc.add(new JumpInsnNode(Opcodes.IFLE, mobNext));
+
+        fc.add(new VarInsnNode(Opcodes.DLOAD, 21));
+        fc.add(new VarInsnNode(Opcodes.DSTORE, 11));
+        fc.add(new VarInsnNode(Opcodes.ALOAD, 14));
+        fc.add(new VarInsnNode(Opcodes.ASTORE, 10));
+
+        fc.add(mobNext);
+        fc.add(new FrameNode(Opcodes.F_FULL, loopFrame.length, loopFrame, 0, new Object[0]));
+        fc.add(new IincInsnNode(13, 1));
+        fc.add(new JumpInsnNode(Opcodes.GOTO, mobLoop));
+
+        fc.add(mobDone);
+        fc.add(new FrameNode(Opcodes.F_FULL, 9, new Object[] {
+            owner.name, Opcodes.DOUBLE, Opcodes.DOUBLE, Opcodes.DOUBLE,
+            entityInternal, entityInternal, listInternal, mobInternal, Opcodes.DOUBLE
+        }, 0, new Object[0]));
+        fc.add(new VarInsnNode(Opcodes.ALOAD, 10));
+        fc.add(new InsnNode(Opcodes.ARETURN));
+        findMob.maxStack = 10;
+        findMob.maxLocals = 23;
+        owner.methods.add(findMob);
+
+        // 4) private void steerTowardNearestMob()
+        MethodNode steer = new MethodNode(Opcodes.ACC_PRIVATE, "steerTowardNearestMob", "()V", null, null);
+        InsnList sc = steer.instructions;
+        LabelNode tickOk = new LabelNode();
+        LabelNode speedOk = new LabelNode();
+        LabelNode targetOk = new LabelNode();
+        LabelNode distOk = new LabelNode();
+        LabelNode normOk = new LabelNode();
+
+        // if (this.tickCount < 2) return;
+        sc.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        sc.add(new FieldInsnNode(Opcodes.GETFIELD, entityInternal, "f_19797_", "I"));
+        sc.add(new InsnNode(Opcodes.ICONST_2));
+        sc.add(new JumpInsnNode(Opcodes.IF_ICMPGE, tickOk));
+        sc.add(new InsnNode(Opcodes.RETURN));
+        sc.add(tickOk);
+        sc.add(new FrameNode(Opcodes.F_FULL, 1, new Object[] { owner.name }, 0, new Object[0]));
+
+        // motion = getDeltaMovement(); speedSqr >= 0.01
+        sc.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        sc.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, owner.name, "m_20184_", "()L" + vec3Internal + ";", false));
+        sc.add(new VarInsnNode(Opcodes.ASTORE, 1));
+        sc.add(new VarInsnNode(Opcodes.ALOAD, 1));
+        sc.add(new FieldInsnNode(Opcodes.GETFIELD, vec3Internal, "f_82479_", "D"));
+        sc.add(new InsnNode(Opcodes.DUP2));
+        sc.add(new InsnNode(Opcodes.DMUL));
+        sc.add(new VarInsnNode(Opcodes.ALOAD, 1));
+        sc.add(new FieldInsnNode(Opcodes.GETFIELD, vec3Internal, "f_82480_", "D"));
+        sc.add(new InsnNode(Opcodes.DUP2));
+        sc.add(new InsnNode(Opcodes.DMUL));
+        sc.add(new InsnNode(Opcodes.DADD));
+        sc.add(new VarInsnNode(Opcodes.ALOAD, 1));
+        sc.add(new FieldInsnNode(Opcodes.GETFIELD, vec3Internal, "f_82481_", "D"));
+        sc.add(new InsnNode(Opcodes.DUP2));
+        sc.add(new InsnNode(Opcodes.DMUL));
+        sc.add(new InsnNode(Opcodes.DADD));
+        sc.add(new VarInsnNode(Opcodes.DSTORE, 2)); // speedSqr
+        sc.add(new VarInsnNode(Opcodes.DLOAD, 2));
+        sc.add(new LdcInsnNode(Double.valueOf(0.01d)));
+        sc.add(new InsnNode(Opcodes.DCMPL));
+        sc.add(new JumpInsnNode(Opcodes.IFGE, speedOk));
+        sc.add(new InsnNode(Opcodes.RETURN));
+        sc.add(speedOk);
+        sc.add(new FrameNode(Opcodes.F_FULL, 3,
+            new Object[] { owner.name, vec3Internal, Opcodes.DOUBLE }, 0, new Object[0]));
+
+        // speed = Math.sqrt(speedSqr) -> local 4..5
+        sc.add(new VarInsnNode(Opcodes.DLOAD, 2));
+        sc.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "java/lang/Math", "sqrt", "(D)D", false));
+        sc.add(new VarInsnNode(Opcodes.DSTORE, 4));
+        // dirX, dirY, dirZ -> locals 6, 8, 10
+        sc.add(new VarInsnNode(Opcodes.ALOAD, 1));
+        sc.add(new FieldInsnNode(Opcodes.GETFIELD, vec3Internal, "f_82479_", "D"));
+        sc.add(new VarInsnNode(Opcodes.DLOAD, 4));
+        sc.add(new InsnNode(Opcodes.DDIV));
+        sc.add(new VarInsnNode(Opcodes.DSTORE, 6));
+        sc.add(new VarInsnNode(Opcodes.ALOAD, 1));
+        sc.add(new FieldInsnNode(Opcodes.GETFIELD, vec3Internal, "f_82480_", "D"));
+        sc.add(new VarInsnNode(Opcodes.DLOAD, 4));
+        sc.add(new InsnNode(Opcodes.DDIV));
+        sc.add(new VarInsnNode(Opcodes.DSTORE, 8));
+        sc.add(new VarInsnNode(Opcodes.ALOAD, 1));
+        sc.add(new FieldInsnNode(Opcodes.GETFIELD, vec3Internal, "f_82481_", "D"));
+        sc.add(new VarInsnNode(Opcodes.DLOAD, 4));
+        sc.add(new InsnNode(Opcodes.DDIV));
+        sc.add(new VarInsnNode(Opcodes.DSTORE, 10));
+
+        // target = findNearestHomingMob(dirX, dirY, dirZ) -> local 12
+        sc.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        sc.add(new VarInsnNode(Opcodes.DLOAD, 6));
+        sc.add(new VarInsnNode(Opcodes.DLOAD, 8));
+        sc.add(new VarInsnNode(Opcodes.DLOAD, 10));
+        sc.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, owner.name, "findNearestHomingMob", "(DDD)L" + mobInternal + ";", false));
+        sc.add(new VarInsnNode(Opcodes.ASTORE, 12));
+        sc.add(new VarInsnNode(Opcodes.ALOAD, 12));
+        sc.add(new JumpInsnNode(Opcodes.IFNONNULL, targetOk));
+        sc.add(new InsnNode(Opcodes.RETURN));
+        sc.add(targetOk);
+        sc.add(new FrameNode(Opcodes.F_FULL, 8, new Object[] {
+            owner.name, vec3Internal, Opcodes.DOUBLE, Opcodes.DOUBLE,
+            Opcodes.DOUBLE, Opcodes.DOUBLE, Opcodes.DOUBLE, mobInternal
+        }, 0, new Object[0]));
+
+        // tx -> 13, ty -> 15, tz -> 17
+        sc.add(new VarInsnNode(Opcodes.ALOAD, 12));
+        sc.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, mobInternal, "m_20185_", "()D", false));
+        sc.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        sc.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, owner.name, "m_20185_", "()D", false));
+        sc.add(new InsnNode(Opcodes.DSUB));
+        sc.add(new VarInsnNode(Opcodes.DSTORE, 13));
+
+        sc.add(new VarInsnNode(Opcodes.ALOAD, 12));
+        sc.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, mobInternal, "m_20186_", "()D", false));
+        sc.add(new VarInsnNode(Opcodes.ALOAD, 12));
+        sc.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, mobInternal, "m_20206_", "()F", false));
+        sc.add(new InsnNode(Opcodes.F2D));
+        sc.add(new LdcInsnNode(Double.valueOf(0.5d)));
+        sc.add(new InsnNode(Opcodes.DMUL));
+        sc.add(new InsnNode(Opcodes.DADD));
+        sc.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        sc.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, owner.name, "m_20186_", "()D", false));
+        sc.add(new InsnNode(Opcodes.DSUB));
+        sc.add(new VarInsnNode(Opcodes.DSTORE, 15));
+
+        sc.add(new VarInsnNode(Opcodes.ALOAD, 12));
+        sc.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, mobInternal, "m_20189_", "()D", false));
+        sc.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        sc.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, owner.name, "m_20189_", "()D", false));
+        sc.add(new InsnNode(Opcodes.DSUB));
+        sc.add(new VarInsnNode(Opcodes.DSTORE, 17));
+
+        // dist = Math.sqrt(tx*tx + ty*ty + tz*tz) -> 19
+        sc.add(new VarInsnNode(Opcodes.DLOAD, 13));
+        sc.add(new VarInsnNode(Opcodes.DLOAD, 13));
+        sc.add(new InsnNode(Opcodes.DMUL));
+        sc.add(new VarInsnNode(Opcodes.DLOAD, 15));
+        sc.add(new VarInsnNode(Opcodes.DLOAD, 15));
+        sc.add(new InsnNode(Opcodes.DMUL));
+        sc.add(new InsnNode(Opcodes.DADD));
+        sc.add(new VarInsnNode(Opcodes.DLOAD, 17));
+        sc.add(new VarInsnNode(Opcodes.DLOAD, 17));
+        sc.add(new InsnNode(Opcodes.DMUL));
+        sc.add(new InsnNode(Opcodes.DADD));
+        sc.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "java/lang/Math", "sqrt", "(D)D", false));
+        sc.add(new VarInsnNode(Opcodes.DSTORE, 19));
+        sc.add(new VarInsnNode(Opcodes.DLOAD, 19));
+        sc.add(new LdcInsnNode(Double.valueOf(0.0001d)));
+        sc.add(new InsnNode(Opcodes.DCMPG));
+        sc.add(new JumpInsnNode(Opcodes.IFGE, distOk));
+        sc.add(new InsnNode(Opcodes.RETURN));
+        sc.add(distOk);
+        sc.add(new FrameNode(Opcodes.F_FULL, 12, new Object[] {
+            owner.name, vec3Internal, Opcodes.DOUBLE, Opcodes.DOUBLE,
+            Opcodes.DOUBLE, Opcodes.DOUBLE, Opcodes.DOUBLE, mobInternal,
+            Opcodes.DOUBLE, Opcodes.DOUBLE, Opcodes.DOUBLE, Opcodes.DOUBLE
+        }, 0, new Object[0]));
+
+        // nx = dirX*0.68 + (tx/dist)*0.32 -> 21, ny -> 23, nz -> 25
+        sc.add(new VarInsnNode(Opcodes.DLOAD, 6));
+        sc.add(new LdcInsnNode(Double.valueOf(0.68d)));
+        sc.add(new InsnNode(Opcodes.DMUL));
+        sc.add(new VarInsnNode(Opcodes.DLOAD, 13));
+        sc.add(new VarInsnNode(Opcodes.DLOAD, 19));
+        sc.add(new InsnNode(Opcodes.DDIV));
+        sc.add(new LdcInsnNode(Double.valueOf(0.32d)));
+        sc.add(new InsnNode(Opcodes.DMUL));
+        sc.add(new InsnNode(Opcodes.DADD));
+        sc.add(new VarInsnNode(Opcodes.DSTORE, 21));
+
+        sc.add(new VarInsnNode(Opcodes.DLOAD, 8));
+        sc.add(new LdcInsnNode(Double.valueOf(0.68d)));
+        sc.add(new InsnNode(Opcodes.DMUL));
+        sc.add(new VarInsnNode(Opcodes.DLOAD, 15));
+        sc.add(new VarInsnNode(Opcodes.DLOAD, 19));
+        sc.add(new InsnNode(Opcodes.DDIV));
+        sc.add(new LdcInsnNode(Double.valueOf(0.32d)));
+        sc.add(new InsnNode(Opcodes.DMUL));
+        sc.add(new InsnNode(Opcodes.DADD));
+        sc.add(new VarInsnNode(Opcodes.DSTORE, 23));
+
+        sc.add(new VarInsnNode(Opcodes.DLOAD, 10));
+        sc.add(new LdcInsnNode(Double.valueOf(0.68d)));
+        sc.add(new InsnNode(Opcodes.DMUL));
+        sc.add(new VarInsnNode(Opcodes.DLOAD, 17));
+        sc.add(new VarInsnNode(Opcodes.DLOAD, 19));
+        sc.add(new InsnNode(Opcodes.DDIV));
+        sc.add(new LdcInsnNode(Double.valueOf(0.32d)));
+        sc.add(new InsnNode(Opcodes.DMUL));
+        sc.add(new InsnNode(Opcodes.DADD));
+        sc.add(new VarInsnNode(Opcodes.DSTORE, 25));
+
+        // norm = Math.sqrt(nx*nx + ny*ny + nz*nz) -> 27
+        sc.add(new VarInsnNode(Opcodes.DLOAD, 21));
+        sc.add(new VarInsnNode(Opcodes.DLOAD, 21));
+        sc.add(new InsnNode(Opcodes.DMUL));
+        sc.add(new VarInsnNode(Opcodes.DLOAD, 23));
+        sc.add(new VarInsnNode(Opcodes.DLOAD, 23));
+        sc.add(new InsnNode(Opcodes.DMUL));
+        sc.add(new InsnNode(Opcodes.DADD));
+        sc.add(new VarInsnNode(Opcodes.DLOAD, 25));
+        sc.add(new VarInsnNode(Opcodes.DLOAD, 25));
+        sc.add(new InsnNode(Opcodes.DMUL));
+        sc.add(new InsnNode(Opcodes.DADD));
+        sc.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "java/lang/Math", "sqrt", "(D)D", false));
+        sc.add(new VarInsnNode(Opcodes.DSTORE, 27));
+        sc.add(new VarInsnNode(Opcodes.DLOAD, 27));
+        sc.add(new LdcInsnNode(Double.valueOf(0.0001d)));
+        sc.add(new InsnNode(Opcodes.DCMPG));
+        sc.add(new JumpInsnNode(Opcodes.IFGE, normOk));
+        sc.add(new InsnNode(Opcodes.RETURN));
+        sc.add(normOk);
+        sc.add(new FrameNode(Opcodes.F_FULL, 16, new Object[] {
+            owner.name, vec3Internal, Opcodes.DOUBLE, Opcodes.DOUBLE,
+            Opcodes.DOUBLE, Opcodes.DOUBLE, Opcodes.DOUBLE, mobInternal,
+            Opcodes.DOUBLE, Opcodes.DOUBLE, Opcodes.DOUBLE, Opcodes.DOUBLE,
+            Opcodes.DOUBLE, Opcodes.DOUBLE, Opcodes.DOUBLE, Opcodes.DOUBLE
+        }, 0, new Object[0]));
+
+        // vx -> 29, vy -> 31, vz -> 33
+        sc.add(new VarInsnNode(Opcodes.DLOAD, 21));
+        sc.add(new VarInsnNode(Opcodes.DLOAD, 27));
+        sc.add(new InsnNode(Opcodes.DDIV));
+        sc.add(new VarInsnNode(Opcodes.DLOAD, 4));
+        sc.add(new InsnNode(Opcodes.DMUL));
+        sc.add(new VarInsnNode(Opcodes.DSTORE, 29));
+
+        sc.add(new VarInsnNode(Opcodes.DLOAD, 23));
+        sc.add(new VarInsnNode(Opcodes.DLOAD, 27));
+        sc.add(new InsnNode(Opcodes.DDIV));
+        sc.add(new VarInsnNode(Opcodes.DLOAD, 4));
+        sc.add(new InsnNode(Opcodes.DMUL));
+        sc.add(new VarInsnNode(Opcodes.DSTORE, 31));
+
+        sc.add(new VarInsnNode(Opcodes.DLOAD, 25));
+        sc.add(new VarInsnNode(Opcodes.DLOAD, 27));
+        sc.add(new InsnNode(Opcodes.DDIV));
+        sc.add(new VarInsnNode(Opcodes.DLOAD, 4));
+        sc.add(new InsnNode(Opcodes.DMUL));
+        sc.add(new VarInsnNode(Opcodes.DSTORE, 33));
+
+        // setDeltaMovement(new Vec3(vx, vy, vz))
+        sc.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        sc.add(new TypeInsnNode(Opcodes.NEW, vec3Internal));
+        sc.add(new InsnNode(Opcodes.DUP));
+        sc.add(new VarInsnNode(Opcodes.DLOAD, 29));
+        sc.add(new VarInsnNode(Opcodes.DLOAD, 31));
+        sc.add(new VarInsnNode(Opcodes.DLOAD, 33));
+        sc.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, vec3Internal, "<init>", "(DDD)V", false));
+        sc.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, owner.name, "m_20256_", "(L" + vec3Internal + ";)V", false));
+
+        // yaw = (float)(Mth.atan2(vx, vz) * (180.0 / Math.PI)) -> 35
+        sc.add(new VarInsnNode(Opcodes.DLOAD, 29));
+        sc.add(new VarInsnNode(Opcodes.DLOAD, 33));
+        sc.add(new MethodInsnNode(Opcodes.INVOKESTATIC, mthInternal, "m_14136_", "(DD)D", false));
+        sc.add(new LdcInsnNode(Double.valueOf(180.0d / Math.PI)));
+        sc.add(new InsnNode(Opcodes.DMUL));
+        sc.add(new InsnNode(Opcodes.D2F));
+        sc.add(new VarInsnNode(Opcodes.FSTORE, 35));
+
+        // pitch = (float)(Mth.atan2(vy, Math.sqrt(vx*vx + vz*vz)) * (180.0 / Math.PI)) -> 36
+        sc.add(new VarInsnNode(Opcodes.DLOAD, 31));
+        sc.add(new VarInsnNode(Opcodes.DLOAD, 29));
+        sc.add(new VarInsnNode(Opcodes.DLOAD, 29));
+        sc.add(new InsnNode(Opcodes.DMUL));
+        sc.add(new VarInsnNode(Opcodes.DLOAD, 33));
+        sc.add(new VarInsnNode(Opcodes.DLOAD, 33));
+        sc.add(new InsnNode(Opcodes.DMUL));
+        sc.add(new InsnNode(Opcodes.DADD));
+        sc.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "java/lang/Math", "sqrt", "(D)D", false));
+        sc.add(new MethodInsnNode(Opcodes.INVOKESTATIC, mthInternal, "m_14136_", "(DD)D", false));
+        sc.add(new LdcInsnNode(Double.valueOf(180.0d / Math.PI)));
+        sc.add(new InsnNode(Opcodes.DMUL));
+        sc.add(new InsnNode(Opcodes.D2F));
+        sc.add(new VarInsnNode(Opcodes.FSTORE, 36));
+
+        sc.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        sc.add(new VarInsnNode(Opcodes.FLOAD, 35));
+        sc.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, owner.name, "m_146922_", "(F)V", false));
+        sc.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        sc.add(new VarInsnNode(Opcodes.FLOAD, 36));
+        sc.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, owner.name, "m_146926_", "(F)V", false));
+        sc.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        sc.add(new VarInsnNode(Opcodes.FLOAD, 35));
+        sc.add(new FieldInsnNode(Opcodes.PUTFIELD, entityInternal, "f_19859_", "F"));
+        sc.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        sc.add(new VarInsnNode(Opcodes.FLOAD, 36));
+        sc.add(new FieldInsnNode(Opcodes.PUTFIELD, entityInternal, "f_19860_", "F"));
+        sc.add(new InsnNode(Opcodes.RETURN));
+        steer.maxStack = 10;
+        steer.maxLocals = 37;
+        owner.methods.add(steer);
+    }
+
+    private static void patchPopZitMessage(ClassNode owner) {
+        if (owner == null) throw new IllegalStateException("PopZitMessage class is missing");
+
+        String sculksaurInternal = ROOT + "common/entity/mob/sculksaur/SculksaurEntity";
+        String playerInternal = "net/minecraft/world/entity/player/Player";
+        String serverPlayerInternal = "net/minecraft/server/level/ServerPlayer";
+        String entityInternal = "net/minecraft/world/entity/Entity";
+        String damageSourcesInternal = "net/minecraft/world/damagesource/DamageSources";
+        String damageSourceInternal = "net/minecraft/world/damagesource/DamageSource";
+        String helperDesc = "(L" + sculksaurInternal + ";L" + serverPlayerInternal + ";I)V";
+
+        owner.methods.removeIf(m ->
+            m.name.equals("damageSculksaurOnWartPop") && m.desc.equals(helperDesc));
+
+        // private static void damageSculksaurOnWartPop(SculksaurEntity sculksaur, ServerPlayer player, int remainingWarts)
+        MethodNode helper = new MethodNode(
+            Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC,
+            "damageSculksaurOnWartPop", helperDesc, null, null);
+        InsnList hc = helper.instructions;
+        hc.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        hc.add(new InsnNode(Opcodes.ICONST_0));
+        hc.add(new FieldInsnNode(Opcodes.PUTFIELD, entityInternal, "f_19802_", "I"));
+        hc.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        hc.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        hc.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, sculksaurInternal, "m_269291_",
+            "()L" + damageSourcesInternal + ";", false));
+        hc.add(new VarInsnNode(Opcodes.ALOAD, 1));
+        hc.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, damageSourcesInternal, "m_269075_",
+            "(L" + playerInternal + ";)L" + damageSourceInternal + ";", false));
+        hc.add(new LdcInsnNode(Float.valueOf(1000.0f)));
+        hc.add(new InsnNode(Opcodes.ICONST_1));
+        hc.add(new IntInsnNode(Opcodes.BIPUSH, 20));
+        hc.add(new InsnNode(Opcodes.ICONST_3));
+        hc.add(new VarInsnNode(Opcodes.ILOAD, 2));
+        hc.add(new InsnNode(Opcodes.IMUL));
+        hc.add(new InsnNode(Opcodes.ISUB));
+        hc.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "java/lang/Math", "max", "(II)I", false));
+        hc.add(new InsnNode(Opcodes.I2F));
+        hc.add(new InsnNode(Opcodes.FDIV));
+        hc.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, sculksaurInternal, "m_6469_",
+            "(L" + damageSourceInternal + ";F)Z", false));
+        hc.add(new InsnNode(Opcodes.POP));
+        hc.add(new InsnNode(Opcodes.RETURN));
+        helper.maxStack = 6;
+        helper.maxLocals = 3;
+        owner.methods.add(helper);
+
+        MethodNode execute = owner.methods.stream()
+            .filter(m -> m.name.equals("execute") && m.desc.equals("(L" + serverPlayerInternal + ";)V"))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("PopZitMessage.execute not found"));
+
+        VarInsnNode remainingWartsLoad = null;
+        for (AbstractInsnNode insn : execute.instructions.toArray()) {
+            if (insn instanceof VarInsnNode var && var.getOpcode() == Opcodes.ILOAD && var.var == 7) {
+                if (remainingWartsLoad != null) {
+                    throw new IllegalStateException("Expected unique ILOAD 7 in PopZitMessage.execute");
+                }
+                remainingWartsLoad = var;
+            }
+        }
+        if (remainingWartsLoad == null) {
+            throw new IllegalStateException("Remaining wart count load (ILOAD 7) not found in PopZitMessage.execute");
+        }
+
+        InsnList callDamage = new InsnList();
+        callDamage.add(new VarInsnNode(Opcodes.ALOAD, 3));
+        callDamage.add(new VarInsnNode(Opcodes.ALOAD, 1));
+        callDamage.add(new VarInsnNode(Opcodes.ILOAD, 7));
+        callDamage.add(new MethodInsnNode(Opcodes.INVOKESTATIC, owner.name, "damageSculksaurOnWartPop", helperDesc, false));
+        execute.instructions.insertBefore(remainingWartsLoad, callDamage);
+    }
+
     private static void patchAbstractArrowMixin(ClassNode owner) {
         if (owner == null) return;
 
@@ -1728,7 +2545,11 @@ public final class JarPruner {
                 ROOT + "util/ClientUtil", "handleArrowTick",
                 "(Lnet/minecraft/world/entity/projectile/AbstractArrow;)V", false));
             code.add(done);
+            code.add(new FrameNode(Opcodes.F_FULL, 2,
+                new Object[] { owner.name, "org/spongepowered/asm/mixin/injection/callback/CallbackInfo" },
+                0, new Object[0]));
             code.add(new InsnNode(Opcodes.RETURN));
+            method.maxStack = 2;
             method.maxLocals = 2;
         }
     }
@@ -2784,6 +3605,7 @@ public final class JarPruner {
 
     private static boolean shouldKeepAllMethods(String name, Set<String> roots) {
         if (roots.contains(name)) return true;
+        if (NETWORK_MESSAGES.contains(name)) return true;
 
         return name.equals(ROOT + "common/items/weapon/LushsaurMaceItem") ||
             name.startsWith(ROOT + "common/items/util/ADWeaponItem") ||

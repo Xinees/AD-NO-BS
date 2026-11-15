@@ -180,6 +180,46 @@ jobs:
             'm_7286_(' '(Lnet/minecraft/client/gui/GuiGraphics;FII)V'
           verify_method 'com.eternal_creations.archies_dino_mod.networking.serverbound.MountControlMessage' \
             'execute(' '(Lnet/minecraft/server/level/ServerPlayer;)V'
+          verify_method 'com.eternal_creations.archies_dino_mod.networking.serverbound.PopZitMessage' \
+            'execute(' '(Lnet/minecraft/server/level/ServerPlayer;)V'
+          verify_method 'com.eternal_creations.archies_dino_mod.networking.serverbound.PopZitMessage' \
+            'damageSculksaurOnWartPop(' '(Lcom/eternal_creations/archies_dino_mod/common/entity/mob/sculksaur/SculksaurEntity;Lnet/minecraft/server/level/ServerPlayer;I)V'
+          verify_method 'com.eternal_creations.archies_dino_mod.networking.clientbound.AskShooterIfHitBoneMessage' \
+            'execute(' '()V'
+          verify_method 'com.eternal_creations.archies_dino_mod.networking.clientbound.SyncSettingsMessage' \
+            'execute(' '()V'
+          verify_method 'com.eternal_creations.archies_dino_mod.common.entity.projectile.PusTippedArrowEntity' \
+            'm_8119_(' '()V'
+
+          PUS_ARROW_BYTECODE="$(javap -classpath build/classes-pruned.jar -p -v com.eternal_creations.archies_dino_mod.common.entity.projectile.PusTippedArrowEntity)"
+          for required_arrow_ref in 'SculkChargeParticleOptions' 'm_7106_' 'EntitySelector.f_20403_' 'StackMapTable'; do
+            if ! printf '%s\n' "$PUS_ARROW_BYTECODE" | grep -Fq "$required_arrow_ref"; then
+              echo "PusTippedArrowEntity is missing expected homing/particle bytecode ($required_arrow_ref)."
+              exit 1
+            fi
+          done
+
+          ARROW_MIXIN_BYTECODE="$(javap -classpath build/classes-pruned.jar -p -v com.eternal_creations.archies_dino_mod.mixin.AbstractArrowMixin)"
+          if ! printf '%s\n' "$ARROW_MIXIN_BYTECODE" | grep -Fq 'StackMapTable'; then
+            echo "AbstractArrowMixin.onTick is missing Java 17 StackMapTable."
+            exit 1
+          fi
+
+          MACE_ITEM_BYTECODE="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.common.items.weapon.LushsaurMaceItem)"
+          if ! printf '%s\n' "$MACE_ITEM_BYTECODE" | grep -Fq 'm_6674_'; then
+            echo "LushsaurMaceItem is missing vanilla Player.m_6674_ swing calls."
+            exit 1
+          fi
+
+          MACE_ATTACH_BYTECODE="$(javap -classpath build/classes-pruned.jar -p -c 'com.eternal_creations.archies_dino_mod.client.model.attachable.LushsaurMaceAttachable$1')"
+          if printf '%s\n' "$MACE_ATTACH_BYTECODE" | grep -Fq 'spin_first_person'; then
+            echo "LushsaurMaceAttachable\$1 still references spin_first_person."
+            exit 1
+          fi
+          if ! printf '%s\n' "$MACE_ATTACH_BYTECODE" | grep -Fq 'attack_first_person'; then
+            echo "LushsaurMaceAttachable\$1 is missing attack_first_person."
+            exit 1
+          fi
           verify_method 'com.eternal_creations.archies_dino_mod.client.ADClientForgeBus' \
             'onClientTick(' '(Lnet/minecraftforge/event/TickEvent$ClientTickEvent;)V'
           verify_method 'com.eternal_creations.archies_dino_mod.client.ADClientForgeBus' \
@@ -944,6 +984,9 @@ jobs:
                   "data/archie_dinosaurs/damage_type/pus_arrow.json",
                   "data/minecraft/tags/game_events/vibrations.json",
                   "data/minecraft/tags/game_events/warden_can_listen.json",
+                  "data/minecraft/tags/items/arrows.json",
+                  "data/minecraft/tags/entity_types/arrows.json",
+                  "data/minecraft/tags/damage_type/is_projectile.json",
                   "assets/archie_dinosaurs/models/block/lushsaur_egg.json",
                   "assets/archie_dinosaurs/models/block/chorusoatl_egg.json",
               }
