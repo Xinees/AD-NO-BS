@@ -776,6 +776,11 @@ jobs:
               exit 1
             fi
           done
+          PLAYER_ANIMATIONS="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.client.animation.player.ADPlayerAnimations)"
+          if grep -Fq 'LushsaurMaceAnimations' <<< "$PLAYER_ANIMATIONS"; then
+            echo "Lush Mace player attack animation is still registered."
+            exit 1
+          fi
           MACE_METHODS="$(javap -classpath build/classes-pruned.jar -p -s com.eternal_creations.archies_dino_mod.common.items.weapon.LushsaurMaceItem)"
           if ! grep -F -A1 'm_7373_' <<< "$MACE_METHODS" | grep -Fq 'descriptor: (Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/level/Level;Ljava/util/List;Lnet/minecraft/world/item/TooltipFlag;)V'; then
             echo "Lush Mace tooltip suppression override is missing."
@@ -902,7 +907,6 @@ jobs:
                   "com/eternal_creations/archies_dino_mod/common/items/weapon/LushsaurMaceItem.class",
                   "com/eternal_creations/archies_dino_mod/common/items/util/ADWeaponItem.class",
                   "com/eternal_creations/archies_dino_mod/client/model/attachable/LushsaurMaceAttachable.class",
-                  "com/eternal_creations/archies_dino_mod/client/animation/player/attachable/LushsaurMaceAnimations.class",
                   "com/eternal_creations/archies_dino_mod/mixin/DamageSourcesMixin.class",
                   "com/eternal_creations/archies_dino_mod/mixin/PlayerInterfaceMixin.class",
                   "com/eternal_creations/archies_dino_mod/mixin/ServerPlayerInterfaceMixin.class",
@@ -931,7 +935,6 @@ jobs:
                   "assets/archie_dinosaurs/textures/item/ooze_tipped_arrow.png",
                   "assets/archie_dinosaurs/textures/entity/projectiles/pus_tipped_arrow.png",
                   "assets/archie_dinosaurs/models/attachable/lushsaur_mace.astemirmodel",
-                  "assets/archie_dinosaurs/animations/player/attachable/lushsaur_mace.astemiranim",
                   "assets/archie_dinosaurs/textures/item/model/lushsaur_mace.png",
                   "assets/archie_dinosaurs/sounds/item/lushsaur_mace/spin.ogg",
                   "data/archie_dinosaurs/recipes/lush_mace.json",
@@ -1021,6 +1024,10 @@ jobs:
                   if b"ec_ad" in z.read(entry_name):
                       raise SystemExit(f"Old mod identifier remains in JAR contents: {entry_name}")
 
+              mace_animation_class = "com/eternal_creations/archies_dino_mod/client/animation/player/attachable/LushsaurMaceAnimations.class"
+              mace_animation_asset = "assets/archie_dinosaurs/animations/player/attachable/lushsaur_mace.astemiranim"
+              if mace_animation_class in names or mace_animation_asset in names:
+                  raise SystemExit("Lush Mace attack animation class/resource must be absent")
               missing = sorted(required - names)
               if missing:
                   raise SystemExit("Missing required Legacy entries:\n" + "\n".join(missing))
