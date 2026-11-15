@@ -1721,39 +1721,71 @@ public final class JarPruner {
         if (owner == null) throw new IllegalStateException("LushsaurMaceItem class is missing");
 
         String playerInternal = "net/minecraft/world/entity/player/Player";
-        String livingInternal = "net/minecraft/world/entity/LivingEntity";
         String handInternal = "net/minecraft/world/InteractionHand";
         String handDesc = "L" + handInternal + ";";
+        String syncHolderInternal = "com/astemir/astemirlib/re/common/action/SyncedActionHolder";
+        String actionTypeInternal = "com/astemir/astemirlib/re/common/action/ActionType";
+        String actionTypeDesc = "L" + actionTypeInternal + ";";
+        String actionStateInternal = "com/astemir/astemirlib/re/common/action/ActionState";
+        String levelInternal = "net/minecraft/world/level/Level";
+        String itemStackInternal = "net/minecraft/world/item/ItemStack";
+        String resultHolderInternal = "net/minecraft/world/InteractionResultHolder";
 
-        // 1) LMB attack action ticker: trigger vanilla 3rd-person arm swing on tick 0/1 (1st person hides it via setAttackAnim).
+        // 1) LMB attack action ticker: trigger vanilla 3rd-person arm swing on tick == 10 (exact delay of simulateAttack).
         MethodNode attackTick = owner.methods.stream()
             .filter(m -> m.name.equals("lambda$static$0") && m.desc.equals("(L" + playerInternal + ";I)V"))
             .findFirst()
             .orElseThrow(() -> new IllegalStateException("LushsaurMaceItem.lambda$static$0 not found"));
 
-        InsnList swingPrefix = new InsnList();
-        LabelNode afterSwing = new LabelNode();
-        swingPrefix.add(new VarInsnNode(Opcodes.ILOAD, 1));
-        swingPrefix.add(new InsnNode(Opcodes.ICONST_1));
-        swingPrefix.add(new JumpInsnNode(Opcodes.IF_ICMPGT, afterSwing));
-        swingPrefix.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        swingPrefix.add(new FieldInsnNode(Opcodes.GETFIELD, livingInternal, "f_20911_", "Z"));
-        swingPrefix.add(new JumpInsnNode(Opcodes.IFNE, afterSwing));
-        swingPrefix.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        swingPrefix.add(new FieldInsnNode(Opcodes.GETSTATIC, handInternal, "MAIN_HAND", handDesc));
-        swingPrefix.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, playerInternal, "m_6674_", "(" + handDesc + ")V", false));
-        swingPrefix.add(afterSwing);
-        swingPrefix.add(new FrameNode(Opcodes.F_FULL, 2,
-            new Object[] { playerInternal, Opcodes.INTEGER }, 0, new Object[0]));
-        attackTick.instructions.insertBefore(attackTick.instructions.getFirst(), swingPrefix);
+        MethodInsnNode simulateAttackCall = null;
+        for (AbstractInsnNode insn : attackTick.instructions.toArray()) {
+            if (insn instanceof MethodInsnNode call &&
+                call.owner.equals("com/astemir/astemirlib/re/common/world/item/ItemCombatAction$Handler") &&
+                call.name.equals("simulateAttack")) {
+                simulateAttackCall = call;
+                break;
+            }
+        }
+        if (simulateAttackCall == null) {
+            throw new IllegalStateException("Expected ItemCombatAction$Handler.simulateAttack call in LushsaurMaceItem.lambda$static$0");
+        }
+        InsnList lmbSwing = new InsnList();
+        lmbSwing.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        lmbSwing.add(new FieldInsnNode(Opcodes.GETSTATIC, handInternal, "MAIN_HAND", handDesc));
+        lmbSwing.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, playerInternal, "m_6674_", "(" + handDesc + ")V", false));
+        attackTick.instructions.insert(simulateAttackCall, lmbSwing);
 
-        // 2) RMB use(): trigger vanilla 3rd-person arm swing alongside startUsingItem / ATTACK_SPIN.
+        // 2) RMB spin attack action ticker: trigger vanilla 3rd-person arm swing on tick == 12 (exact delay of executeSpinAttack).
+        MethodNode spinTick = owner.methods.stream()
+            .filter(m -> m.name.equals("lambda$static$3") && m.desc.equals("(L" + playerInternal + ";I)V"))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("LushsaurMaceItem.lambda$static$3 not found"));
+
+        MethodInsnNode executeSpinCall = null;
+        for (AbstractInsnNode insn : spinTick.instructions.toArray()) {
+            if (insn instanceof MethodInsnNode call &&
+                call.owner.equals(owner.name) &&
+                call.name.equals("executeSpinAttack")) {
+                executeSpinCall = call;
+                break;
+            }
+        }
+        if (executeSpinCall == null) {
+            throw new IllegalStateException("Expected executeSpinAttack call in LushsaurMaceItem.lambda$static$3");
+        }
+        InsnList rmbSwing = new InsnList();
+        rmbSwing.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        rmbSwing.add(new FieldInsnNode(Opcodes.GETSTATIC, handInternal, "MAIN_HAND", handDesc));
+        rmbSwing.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, playerInternal, "m_6674_", "(" + handDesc + ")V", false));
+        spinTick.instructions.insert(executeSpinCall, rmbSwing);
+
+        // 3) RMB use(): single-click activation (remove Player.m_6672_ startUsingItem, guard active ATTACK/ATTACK_SPIN).
         MethodNode useMethod = owner.methods.stream()
             .filter(m -> m.name.equals("m_7203_"))
             .findFirst()
             .orElseThrow(() -> new IllegalStateException("LushsaurMaceItem.m_7203_ not found"));
 
-        AbstractInsnNode startUsingCall = null;
+        MethodInsnNode startUsingCall = null;
         for (AbstractInsnNode insn : useMethod.instructions.toArray()) {
             if (insn instanceof MethodInsnNode call &&
                 call.owner.equals(playerInternal) &&
@@ -1765,26 +1797,74 @@ public final class JarPruner {
         if (startUsingCall == null) {
             throw new IllegalStateException("Expected Player.m_6672_ call in LushsaurMaceItem.m_7203_");
         }
-        InsnList rmbSwing = new InsnList();
-        rmbSwing.add(new VarInsnNode(Opcodes.ALOAD, 2));
-        rmbSwing.add(new VarInsnNode(Opcodes.ALOAD, 3));
-        rmbSwing.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, playerInternal, "m_6674_", "(" + handDesc + ")V", false));
-        useMethod.instructions.insert(startUsingCall, rmbSwing);
+        AbstractInsnNode loadHand = previousCodeInstruction(startUsingCall);
+        AbstractInsnNode loadPlayer = previousCodeInstruction(loadHand);
+        if (!(loadHand instanceof VarInsnNode vHand && vHand.getOpcode() == Opcodes.ALOAD && vHand.var == 3) ||
+            !(loadPlayer instanceof VarInsnNode vPlayer && vPlayer.getOpcode() == Opcodes.ALOAD && vPlayer.var == 2)) {
+            throw new IllegalStateException("Unexpected instructions before Player.m_6672_ in LushsaurMaceItem.m_7203_");
+        }
+        InsnList activeGuard = new InsnList();
+        LabelNode returnFail = new LabelNode();
+        LabelNode notActive = new LabelNode();
+        activeGuard.add(new VarInsnNode(Opcodes.ALOAD, 2));
+        activeGuard.add(new TypeInsnNode(Opcodes.INSTANCEOF, syncHolderInternal));
+        activeGuard.add(new JumpInsnNode(Opcodes.IFEQ, notActive));
+        activeGuard.add(new VarInsnNode(Opcodes.ALOAD, 2));
+        activeGuard.add(new TypeInsnNode(Opcodes.CHECKCAST, syncHolderInternal));
+        activeGuard.add(new VarInsnNode(Opcodes.ASTORE, 5));
+        activeGuard.add(new VarInsnNode(Opcodes.ALOAD, 5));
+        activeGuard.add(new FieldInsnNode(Opcodes.GETSTATIC, owner.name, "ATTACK_SPIN", actionTypeDesc));
+        activeGuard.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, syncHolderInternal, "getActionByType",
+            "(" + actionTypeDesc + ")L" + actionStateInternal + ";", true));
+        activeGuard.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, actionStateInternal, "isActive", "()Z", false));
+        activeGuard.add(new JumpInsnNode(Opcodes.IFNE, returnFail));
+        activeGuard.add(new VarInsnNode(Opcodes.ALOAD, 5));
+        activeGuard.add(new FieldInsnNode(Opcodes.GETSTATIC, owner.name, "ATTACK", actionTypeDesc));
+        activeGuard.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, syncHolderInternal, "getActionByType",
+            "(" + actionTypeDesc + ")L" + actionStateInternal + ";", true));
+        activeGuard.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, actionStateInternal, "isActive", "()Z", false));
+        activeGuard.add(new JumpInsnNode(Opcodes.IFEQ, notActive));
+        activeGuard.add(returnFail);
+        activeGuard.add(new FrameNode(Opcodes.F_FULL, 6,
+            new Object[] { owner.name, levelInternal, playerInternal, handInternal, itemStackInternal, syncHolderInternal },
+            0, new Object[0]));
+        activeGuard.add(new VarInsnNode(Opcodes.ALOAD, 4));
+        activeGuard.add(new MethodInsnNode(Opcodes.INVOKESTATIC, resultHolderInternal, "m_19100_",
+            "(Ljava/lang/Object;)L" + resultHolderInternal + ";", false));
+        activeGuard.add(new InsnNode(Opcodes.ARETURN));
+        activeGuard.add(notActive);
+        activeGuard.add(new FrameNode(Opcodes.F_FULL, 5,
+            new Object[] { owner.name, levelInternal, playerInternal, handInternal, itemStackInternal },
+            0, new Object[0]));
+        useMethod.instructions.insertBefore(loadPlayer, activeGuard);
+        useMethod.instructions.remove(loadPlayer);
+        useMethod.instructions.remove(loadHand);
+        useMethod.instructions.remove(startUsingCall);
 
-        // 3) Match ATTACK_SPIN ActionState duration (1.0f) with "attack_first_person" clip length.
+        // 4) Match ATTACK_SPIN ActionState duration (1.0f) with "attack_first_person" clip length,
+        //    and switch requireUsing -> requireHolding so a single RMB click completes the full action.
         MethodNode spinFactory = owner.methods.stream()
             .filter(m -> m.name.equals("lambda$static$5"))
             .findFirst()
             .orElseThrow(() -> new IllegalStateException("LushsaurMaceItem.lambda$static$5 not found"));
         boolean matchedDuration = false;
+        boolean switchedToHolding = false;
         for (AbstractInsnNode insn : spinFactory.instructions.toArray()) {
             if (insn instanceof LdcInsnNode ldc && ldc.cst instanceof Float f && Math.abs(f - 2.2f) < 0.01f) {
                 ldc.cst = Float.valueOf(1.0f);
                 matchedDuration = true;
+            } else if (insn instanceof MethodInsnNode call &&
+                call.owner.equals(actionStateInternal) &&
+                call.name.equals("requireUsing")) {
+                call.name = "requireHolding";
+                switchedToHolding = true;
             }
         }
         if (!matchedDuration) {
             throw new IllegalStateException("Expected 2.2f duration in LushsaurMaceItem.lambda$static$5");
+        }
+        if (!switchedToHolding) {
+            throw new IllegalStateException("Expected ActionState.requireUsing call in LushsaurMaceItem.lambda$static$5");
         }
     }
 

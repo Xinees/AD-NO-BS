@@ -229,6 +229,19 @@ jobs:
             echo "LushsaurMaceItem is missing vanilla Player.m_6674_ swing calls."
             exit 1
           fi
+          if grep -Fq 'm_6672_' <<< "$MACE_ITEM_BYTECODE"; then
+            echo "LushsaurMaceItem still calls Player.m_6672_ (startUsingItem) on RMB."
+            exit 1
+          fi
+          if grep -Fq 'requireUsing' <<< "$MACE_ITEM_BYTECODE"; then
+            echo "LushsaurMaceItem still uses ActionState.requireUsing instead of requireHolding."
+            exit 1
+          fi
+          MACE_ITEM_VERBOSE="$(javap -classpath build/classes-pruned.jar -p -v com.eternal_creations.archies_dino_mod.common.items.weapon.LushsaurMaceItem)"
+          if ! grep -Fq 'StackMapTable' <<< "$MACE_ITEM_VERBOSE"; then
+            echo "LushsaurMaceItem is missing Java 17 StackMapTable."
+            exit 1
+          fi
 
           MACE_ATTACH_BYTECODE="$(javap -classpath build/classes-pruned.jar -p -c 'com.eternal_creations.archies_dino_mod.client.model.attachable.LushsaurMaceAttachable$1')"
           if grep -Fq 'spin_first_person' <<< "$MACE_ATTACH_BYTECODE"; then
