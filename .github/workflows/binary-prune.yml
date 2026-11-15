@@ -212,6 +212,15 @@ jobs:
             echo "PusTippedArrowEntity sculk trail must sample the full one-tick movement segment."
             exit 1
           fi
+          TRAIL_RANDOM_CALLS="$(grep -Fc 'm_188501_' <<< "$PUS_ARROW_TRAIL_BYTECODE" || true)"
+          if [[ "$TRAIL_RANDOM_CALLS" != "1" ]]; then
+            echo "PusTippedArrowEntity sculk particles must have no per-axis positional random offset."
+            exit 1
+          fi
+          if grep -Fq '0.08d' <<< "$PUS_ARROW_TRAIL_BYTECODE"; then
+            echo "PusTippedArrowEntity sculk trail still contains random positional spread."
+            exit 1
+          fi
 
           ARROW_MIXIN_BYTECODE="$(javap -classpath build/classes-pruned.jar -p -v com.eternal_creations.archies_dino_mod.mixin.AbstractArrowMixin)"
           if ! grep -Fq 'StackMapTable' <<< "$ARROW_MIXIN_BYTECODE"; then

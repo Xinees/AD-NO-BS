@@ -1909,15 +1909,6 @@ public final class JarPruner {
         pc.add(new VarInsnNode(Opcodes.DLOAD, 4));
         pc.add(new InsnNode(Opcodes.DMUL));
         pc.add(new InsnNode(Opcodes.DSUB));
-        pc.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        pc.add(new FieldInsnNode(Opcodes.GETFIELD, entityInternal, "f_19796_", "L" + randomInternal + ";"));
-        pc.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, randomInternal, "m_188501_", "()F", true));
-        pc.add(new LdcInsnNode(Float.valueOf(0.5f)));
-        pc.add(new InsnNode(Opcodes.FSUB));
-        pc.add(new InsnNode(Opcodes.F2D));
-        pc.add(new LdcInsnNode(Double.valueOf(0.08d)));
-        pc.add(new InsnNode(Opcodes.DMUL));
-        pc.add(new InsnNode(Opcodes.DADD));
         // py
         pc.add(new VarInsnNode(Opcodes.ALOAD, 0));
         pc.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, owner.name, "m_20186_", "()D", false));
@@ -1926,15 +1917,6 @@ public final class JarPruner {
         pc.add(new VarInsnNode(Opcodes.DLOAD, 4));
         pc.add(new InsnNode(Opcodes.DMUL));
         pc.add(new InsnNode(Opcodes.DSUB));
-        pc.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        pc.add(new FieldInsnNode(Opcodes.GETFIELD, entityInternal, "f_19796_", "L" + randomInternal + ";"));
-        pc.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, randomInternal, "m_188501_", "()F", true));
-        pc.add(new LdcInsnNode(Float.valueOf(0.5f)));
-        pc.add(new InsnNode(Opcodes.FSUB));
-        pc.add(new InsnNode(Opcodes.F2D));
-        pc.add(new LdcInsnNode(Double.valueOf(0.08d)));
-        pc.add(new InsnNode(Opcodes.DMUL));
-        pc.add(new InsnNode(Opcodes.DADD));
         // pz
         pc.add(new VarInsnNode(Opcodes.ALOAD, 0));
         pc.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, owner.name, "m_20189_", "()D", false));
@@ -1943,15 +1925,6 @@ public final class JarPruner {
         pc.add(new VarInsnNode(Opcodes.DLOAD, 4));
         pc.add(new InsnNode(Opcodes.DMUL));
         pc.add(new InsnNode(Opcodes.DSUB));
-        pc.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        pc.add(new FieldInsnNode(Opcodes.GETFIELD, entityInternal, "f_19796_", "L" + randomInternal + ";"));
-        pc.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, randomInternal, "m_188501_", "()F", true));
-        pc.add(new LdcInsnNode(Float.valueOf(0.5f)));
-        pc.add(new InsnNode(Opcodes.FSUB));
-        pc.add(new InsnNode(Opcodes.F2D));
-        pc.add(new LdcInsnNode(Double.valueOf(0.08d)));
-        pc.add(new InsnNode(Opcodes.DMUL));
-        pc.add(new InsnNode(Opcodes.DADD));
         // vx, vy, vz
         pc.add(new VarInsnNode(Opcodes.ALOAD, 2));
         pc.add(new FieldInsnNode(Opcodes.GETFIELD, vec3Internal, "f_82479_", "D"));
