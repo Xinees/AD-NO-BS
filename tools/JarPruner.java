@@ -1881,12 +1881,12 @@ public final class JarPruner {
         pc.add(new FrameNode(Opcodes.F_FULL, 4,
             new Object[] { owner.name, levelInternal, vec3Internal, Opcodes.INTEGER }, 0, new Object[0]));
         pc.add(new VarInsnNode(Opcodes.ILOAD, 3));
-        pc.add(new IntInsnNode(Opcodes.BIPUSH, 36));
+        pc.add(new IntInsnNode(Opcodes.BIPUSH, 28));
         pc.add(new JumpInsnNode(Opcodes.IF_ICMPGE, loopDone));
-        // double t = i / 35.0;
+        // double t = i / 27.0;
         pc.add(new VarInsnNode(Opcodes.ILOAD, 3));
         pc.add(new InsnNode(Opcodes.I2D));
-        pc.add(new LdcInsnNode(Double.valueOf(0.02857142857142857d)));
+        pc.add(new LdcInsnNode(Double.valueOf(0.037037037037037035d)));
         pc.add(new InsnNode(Opcodes.DMUL));
         pc.add(new VarInsnNode(Opcodes.DSTORE, 4));
         // level.m_7106_(new SculkChargeParticleOptions(roll), px, py, pz, vx, vy, vz)
