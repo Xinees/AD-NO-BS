@@ -247,7 +247,6 @@ def key_is_allowed(key):
         f"item.{NEW_NAMESPACE}.sculk_toxin",
         f"item.{NEW_NAMESPACE}.lush_mace",
         f"item.{NEW_NAMESPACE}.ooze_tipped_arrow",
-        f"item.{NEW_NAMESPACE}.desc.lush_mace",
         f"entity.{NEW_NAMESPACE}.pus_tipped_arrow",
         f"subtitles.{NEW_NAMESPACE}.item.lushsaur_mace.attack",
         f"subtitles.{NEW_NAMESPACE}.item.lushsaur_mace.spin",
@@ -761,7 +760,6 @@ with zipfile.ZipFile(target, "r") as check:
         "item.archie_dinosaurs.sculk_toxin",
         "item.archie_dinosaurs.lush_mace",
         "item.archie_dinosaurs.ooze_tipped_arrow",
-        "item.archie_dinosaurs.desc.lush_mace",
         "entity.archie_dinosaurs.pus_tipped_arrow",
         "subtitles.archie_dinosaurs.item.lushsaur_mace.attack",
         "subtitles.archie_dinosaurs.item.lushsaur_mace.spin",
@@ -771,6 +769,8 @@ with zipfile.ZipFile(target, "r") as check:
     for locale in ("en_us", "ru_ru"):
         language_path = f"assets/archie_dinosaurs/lang/{locale}.json"
         language = read_json(check.read(language_path), language_path)
+        if "item.archie_dinosaurs.desc.lush_mace" in language:
+            raise SystemExit(f"Mace description translation should be absent: {language_path}")
         missing_translations = sorted(
             key for key in required_translations
             if not isinstance(language.get(key), str)
