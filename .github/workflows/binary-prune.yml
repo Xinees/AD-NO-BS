@@ -1047,7 +1047,6 @@ jobs:
               allowed_combat_classes = {
                   "com/eternal_creations/archies_dino_mod/common/items/weapon/LushsaurMaceItem.class",
                   "com/eternal_creations/archies_dino_mod/common/entity/projectile/PusTippedArrowEntity.class",
-                  "com/eternal_creations/archies_dino_mod/client/animation/player/attachable/LushsaurMaceAnimations.class",
               }
               leftovers = sorted(
                   name for name in names
