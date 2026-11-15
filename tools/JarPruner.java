@@ -995,12 +995,8 @@ public final class JarPruner {
             .findFirst()
             .orElseThrow(() -> new IllegalStateException("ADPlayerAnimations.init() is missing"));
         clearMethod(init);
-        init.instructions.add(new InsnNode(Opcodes.ICONST_2));
-        init.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
-            ROOT + "client/animation/player/attachable/LushsaurMaceAnimations",
-            "init", "(I)V", false));
         init.instructions.add(new InsnNode(Opcodes.RETURN));
-        init.maxStack = 1;
+        init.maxStack = 0;
         init.maxLocals = 0;
     }
 
@@ -2795,7 +2791,6 @@ public final class JarPruner {
             name.equals(ROOT + "common/entity/projectile/PusTippedArrowEntity") ||
             name.equals(ROOT + "client/CommonClient$1") ||
             name.startsWith(ROOT + "client/model/attachable/LushsaurMaceAttachable") ||
-            name.equals(ROOT + "client/animation/player/attachable/LushsaurMaceAnimations") ||
             name.startsWith(ROOT + "common/entity/base/") ||
             name.startsWith(ROOT + "common/entity/component/") ||
             name.startsWith(ROOT + "common/entity/ai/") ||
