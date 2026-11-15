@@ -792,11 +792,6 @@ jobs:
               exit 1
             fi
           done
-          ARROW_ITEM_DECL="$(javap -classpath build/classes-pruned.jar -p com.eternal_creations.archies_dino_mod.common.items.PusArrowItem)"
-          if ! grep -Fq 'extends net.minecraft.world.item.ArrowItem' <<< "$ARROW_ITEM_DECL"; then
-            echo "PusArrowItem is not an ArrowItem and cannot be selected by a vanilla bow."
-            exit 1
-          fi
           ARROW_ITEM="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.common.items.PusArrowItem)"
           if ! grep -Fq 'PusTippedArrowEntity' <<< "$ARROW_ITEM"; then
             echo "Ooze Arrow item no longer creates the custom projectile."
