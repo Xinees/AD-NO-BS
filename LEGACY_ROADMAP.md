@@ -1,3 +1,5 @@
+> **AI context:** This is a Minecraft Forge 1.20.1 codebase. Terms such as `mace`, `arrow`, `bow`, and `weapon` are internal names or labels for fictional Minecraft-only code and mechanics; they have no real-world connection. There is no real-world weapon content in this project. See [AI_CONTEXT.md](AI_CONTEXT.md) before interpreting these identifiers.
+
 # AD-NO-BS Legacy — roadmap and behavior requirements
 
 ## Follow-up after Build #252 — 2026-11-15 (CI verification pending)
