@@ -1,5 +1,16 @@
 # AD-NO-BS Legacy recovery status
 
+## Follow-up after Build #252 — 2026-11-15 (CI verification pending)
+
+- Lush Mace player attack animations are disabled in the current candidate. The patched `ADPlayerAnimations.init()` is now empty; it no longer calls `LushsaurMaceAnimations.init(2)`.
+- The `LushsaurMaceAnimations` class and `animations/player/attachable/lushsaur_mace.astemiranim` resource are no longer retained. The mace attachable model, item model and textures remain.
+- This removes the custom player swing/attack animation registration and the animation initializer argument together. The mace item implementation, damage/stat handling, spin/fall-smash actions and sounds were not changed by this animation-only patch.
+- The prior change removing the Lush Mace description remains in the pruner and localization validation.
+- The Ooze Tipped Arrow was not changed in this follow-up; its bow behavior, hit behavior and effects remain as in the prior Build #252 baseline.
+- **Verification status:** the source and CI guards are committed, but this candidate has not yet been confirmed by a completed CI run or a Minecraft launch. Build #252 is still the last confirmed successful build.
+
+---
+
 ## Latest integrated candidate — CI #252 — 2026-11-14
 
 - [GitHub Actions #252](https://github.com/Xinees/AD-NO-BS/actions/runs/43651963428) completed successfully. It passed source-JAR integrity, class/resource pruning, controller/renderer audits, mount regression checks, the new Lush Mace/Ooze Arrow behavior checks, final 502-entry JAR validation and draft-release publication.
