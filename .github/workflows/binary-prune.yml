@@ -776,6 +776,15 @@ jobs:
               exit 1
             fi
           done
+          MACE_METHODS="$(javap -classpath build/classes-pruned.jar -p -s com.eternal_creations.archies_dino_mod.common.items.weapon.LushsaurMaceItem)"
+          if ! grep -F -A1 'm_7373_' <<< "$MACE_METHODS" | grep -Fq 'descriptor: (Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/level/Level;Ljava/util/List;Lnet/minecraft/world/item/TooltipFlag;)V'; then
+            echo "Lush Mace tooltip suppression override is missing."
+            exit 1
+          fi
+          if grep -Fq 'desc.lush_mace' <<< "$MACE"; then
+            echo "Lush Mace class still contains the removed description text."
+            exit 1
+          fi
           ARROW="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.common.entity.projectile.PusTippedArrowEntity)"
           for required in 'm_8060_' 'm_5790_' 'm_7761_' 'm_7941_' 'PUS_ARROW_AGGRO' 'ADTags$EntityTypes.SCULK' 'OOZE_TIPPED_ARROW'; do
             if ! grep -Fq "$required" <<< "$ARROW"; then
@@ -783,6 +792,11 @@ jobs:
               exit 1
             fi
           done
+          ARROW_ITEM_DECL="$(javap -classpath build/classes-pruned.jar -p com.eternal_creations.archies_dino_mod.common.items.PusArrowItem)"
+          if ! grep -Fq 'extends net.minecraft.world.item.ArrowItem' <<< "$ARROW_ITEM_DECL"; then
+            echo "PusArrowItem is not an ArrowItem and cannot be selected by a vanilla bow."
+            exit 1
+          fi
           ARROW_ITEM="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.common.items.PusArrowItem)"
           if ! grep -Fq 'PusTippedArrowEntity' <<< "$ARROW_ITEM"; then
             echo "Ooze Arrow item no longer creates the custom projectile."
@@ -945,7 +959,6 @@ jobs:
                   "item.archie_dinosaurs.sculk_toxin",
                   "item.archie_dinosaurs.lush_mace",
                   "item.archie_dinosaurs.ooze_tipped_arrow",
-                  "item.archie_dinosaurs.desc.lush_mace",
                   "entity.archie_dinosaurs.pus_tipped_arrow",
                   "subtitles.archie_dinosaurs.item.lushsaur_mace.attack",
                   "subtitles.archie_dinosaurs.item.lushsaur_mace.spin",
@@ -955,6 +968,8 @@ jobs:
               for locale in ("en_us", "ru_ru"):
                   language_path = f"assets/archie_dinosaurs/lang/{locale}.json"
                   language = json.loads(z.read(language_path))
+                  if "item.archie_dinosaurs.desc.lush_mace" in language:
+                      raise SystemExit(f"Mace description translation should be absent: {language_path}")
                   missing_translations = sorted(
                       key for key in required_translations
                       if not isinstance(language.get(key), str)
