@@ -193,30 +193,30 @@ jobs:
 
           PUS_ARROW_BYTECODE="$(javap -classpath build/classes-pruned.jar -p -v com.eternal_creations.archies_dino_mod.common.entity.projectile.PusTippedArrowEntity)"
           for required_arrow_ref in 'SculkChargeParticleOptions' 'm_7106_' 'EntitySelector.f_20403_' 'StackMapTable'; do
-            if ! printf '%s\n' "$PUS_ARROW_BYTECODE" | grep -Fq "$required_arrow_ref"; then
+            if ! grep -Fq "$required_arrow_ref" <<< "$PUS_ARROW_BYTECODE"; then
               echo "PusTippedArrowEntity is missing expected homing/particle bytecode ($required_arrow_ref)."
               exit 1
             fi
           done
 
           ARROW_MIXIN_BYTECODE="$(javap -classpath build/classes-pruned.jar -p -v com.eternal_creations.archies_dino_mod.mixin.AbstractArrowMixin)"
-          if ! printf '%s\n' "$ARROW_MIXIN_BYTECODE" | grep -Fq 'StackMapTable'; then
+          if ! grep -Fq 'StackMapTable' <<< "$ARROW_MIXIN_BYTECODE"; then
             echo "AbstractArrowMixin.onTick is missing Java 17 StackMapTable."
             exit 1
           fi
 
           MACE_ITEM_BYTECODE="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.common.items.weapon.LushsaurMaceItem)"
-          if ! printf '%s\n' "$MACE_ITEM_BYTECODE" | grep -Fq 'm_6674_'; then
+          if ! grep -Fq 'm_6674_' <<< "$MACE_ITEM_BYTECODE"; then
             echo "LushsaurMaceItem is missing vanilla Player.m_6674_ swing calls."
             exit 1
           fi
 
           MACE_ATTACH_BYTECODE="$(javap -classpath build/classes-pruned.jar -p -c 'com.eternal_creations.archies_dino_mod.client.model.attachable.LushsaurMaceAttachable$1')"
-          if printf '%s\n' "$MACE_ATTACH_BYTECODE" | grep -Fq 'spin_first_person'; then
+          if grep -Fq 'spin_first_person' <<< "$MACE_ATTACH_BYTECODE"; then
             echo "LushsaurMaceAttachable\$1 still references spin_first_person."
             exit 1
           fi
-          if ! printf '%s\n' "$MACE_ATTACH_BYTECODE" | grep -Fq 'attack_first_person'; then
+          if ! grep -Fq 'attack_first_person' <<< "$MACE_ATTACH_BYTECODE"; then
             echo "LushsaurMaceAttachable\$1 is missing attack_first_person."
             exit 1
           fi
@@ -237,7 +237,7 @@ jobs:
 
           LOCAL_PLAYER_SPRINT="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.mixin.client.LocalPlayerMixin)"
           for required_call in 'LushsaurEntity.m_6688_' 'CallbackInfoReturnable.setReturnValue'; do
-            if ! printf '%s\n' "$LOCAL_PLAYER_SPRINT" | grep -Fq "$required_call"; then
+            if ! grep -Fq "$required_call" <<< "$LOCAL_PLAYER_SPRINT"; then
               echo "LocalPlayer sprint gate is missing Lushsaur controller authorization: $required_call"
               printf '%s\n' "$LOCAL_PLAYER_SPRINT"
               exit 1
@@ -252,7 +252,7 @@ jobs:
           BOX_LINE="$(printf '%s\n' "$LOCAL_PLAYER_HANDLER" | grep -nF 'Boolean.TRUE' | cut -d: -f1 || true)"
           SET_LINE="$(printf '%s\n' "$LOCAL_PLAYER_HANDLER" | grep -nF 'CallbackInfoReturnable.setReturnValue' | cut -d: -f1 || true)"
           if [ -z "$BOX_LINE" ] || [ -z "$SET_LINE" ] || [ "$BOX_LINE" -ge "$SET_LINE" ] || \
-             printf '%s\n' "$LOCAL_PLAYER_HANDLER" | grep -Fq 'iconst_1'; then
+             grep -Fq 'iconst_1' <<< "$LOCAL_PLAYER_HANDLER"; then
             echo "Lushsaur sprint callback must pass boxed Boolean.TRUE to CallbackInfoReturnable, never a primitive int."
             printf '%s\n' "$LOCAL_PLAYER_HANDLER"
             exit 1
@@ -269,7 +269,8 @@ jobs:
           for entity_class in \
             com.eternal_creations.archies_dino_mod.common.entity.mob.chorusoatl.ChorusoatlEntity \
             com.eternal_creations.archies_dino_mod.common.entity.mob.sculksaur.SculksaurEntity; do
-            if javap -classpath build/classes-pruned.jar -p "$entity_class" | grep -Fq 'm_264410_('; then
+            ENTITY_METHODS="$(javap -classpath build/classes-pruned.jar -p "$entity_class")"
+            if grep -Fq 'm_264410_(' <<< "$ENTITY_METHODS"; then
               echo "$entity_class unexpectedly received the Lushsaur-only sprint override."
               exit 1
             fi
@@ -282,7 +283,7 @@ jobs:
           LUSH_GAIT="$(javap -classpath build/classes-pruned.jar -p -c "$LUSHSAUR_CLIENT")"
           for required_call in 'LushsaurEntity.m_6688_' 'LivingEntity.m_20142_' \
             'EntityLocomotion.whenRunning' 'Condition.check'; do
-            if ! printf '%s\n' "$LUSH_GAIT" | grep -Fq "$required_call"; then
+            if ! grep -Fq "$required_call" <<< "$LUSH_GAIT"; then
               echo "Lushsaur run animation gate is missing $required_call"
               printf '%s\n' "$LUSH_GAIT"
               exit 1
@@ -547,7 +548,7 @@ jobs:
           LOCAL_INVENTORY="$(javap -classpath build/classes-pruned.jar -p -c "$LOCAL_PLAYER_MIXIN")"
           for required_call in 'LocalPlayer.m_20202_' 'LushsaurEntity' \
             'Minecraft.m_91087_' 'InventoryScreen."<init>"' 'Minecraft.m_91152_' 'CallbackInfo.cancel'; do
-            if ! printf '%s\n' "$LOCAL_INVENTORY" | grep -Fq "$required_call"; then
+            if ! grep -Fq "$required_call" <<< "$LOCAL_INVENTORY"; then
               echo "Lushsaur E-key inventory redirect is missing $required_call"
               printf '%s\n' "$LOCAL_INVENTORY"
               exit 1
@@ -581,7 +582,7 @@ jobs:
             exit 1
           fi
           for preserved_step_sound in 'CHORUSOATL_STEP_LIGHT' 'CHORUSOATL_STEP_HEAVY'; do
-            if ! printf '%s\n' "$CHORUS_WALK" | grep -Fq "$preserved_step_sound"; then
+            if ! grep -Fq "$preserved_step_sound" <<< "$CHORUS_WALK"; then
               echo "Chorusoatl WALK_EFFECTS lost original step sound $preserved_step_sound."
               printf '%s\n' "$CHORUS_WALK"
               exit 1
@@ -599,8 +600,8 @@ jobs:
               exit 1
             fi
           done
-          if ! printf '%s\n' "$SCULK_STEP" | grep -Fq 'SCULKSAUR_STEP' ||
-             ! printf '%s\n' "$SCULK_STEP" | grep -Fq 'ShakeUtil.shakeStep'; then
+          if ! grep -Fq 'SCULKSAUR_STEP' <<< "$SCULK_STEP" ||
+             ! grep -Fq 'ShakeUtil.shakeStep' <<< "$SCULK_STEP"; then
             echo "Sculksaur footstep cleanup unexpectedly removed the original step sound or camera shake."
             printf '%s\n' "$SCULK_STEP"
             exit 1
@@ -745,7 +746,7 @@ jobs:
 
           LUSH_MOUNT_SPEED="$(printf '%s\n' "$LUSH_SPRINT_CONTROL" | sed -n '/lambda[$]createMount[$]21(/,/lambda[$]createMount[$]20(/p')"
           for required_call in 'm_6688_' 'm_20142_' 'getSpeedBoostTicks' 'java/lang/Integer.signum' 'java/lang/Math.max'; do
-            if ! printf '%s\n' "$LUSH_MOUNT_SPEED" | grep -Fq "$required_call"; then
+            if ! grep -Fq "$required_call" <<< "$LUSH_MOUNT_SPEED"; then
               echo "Lushsaur mount speed is missing expected walk/run or feed-boost logic: $required_call"
               printf '%s\n' "$LUSH_MOUNT_SPEED"
               exit 1
@@ -770,7 +771,7 @@ jobs:
           fi
 
           MOUNT_CONTROL="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.networking.serverbound.MountControlMessage)"
-          if ! printf '%s\n' "$MOUNT_CONTROL" | grep -Fq 'Mount.onRiderAttack'; then
+          if ! grep -Fq 'Mount.onRiderAttack' <<< "$MOUNT_CONTROL"; then
             echo "MountControlMessage no longer dispatches rider attacks."
             exit 1
           fi
@@ -822,7 +823,7 @@ jobs:
             exit 1
           fi
           MACE_METHODS="$(javap -classpath build/classes-pruned.jar -p -s com.eternal_creations.archies_dino_mod.common.items.weapon.LushsaurMaceItem)"
-          if ! grep -F -A1 'm_7373_' <<< "$MACE_METHODS" | grep -Fq 'descriptor: (Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/level/Level;Ljava/util/List;Lnet/minecraft/world/item/TooltipFlag;)V'; then
+          if ! grep -F -A1 'm_7373_' <<< "$MACE_METHODS" | grep -F 'descriptor: (Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/level/Level;Ljava/util/List;Lnet/minecraft/world/item/TooltipFlag;)V' >/dev/null; then
             echo "Lush Mace tooltip suppression override is missing."
             exit 1
           fi
