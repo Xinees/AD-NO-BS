@@ -276,8 +276,6 @@ def keep_asset(path):
 
     if low.startswith("animations/player/riding/"):
         return low.endswith("/lushsaur.astemiranim") or low.endswith("/chorusoatl.astemiranim")
-    if low == "animations/player/attachable/lushsaur_mace.astemiranim":
-        return True
     if low.startswith("animations/"):
         return False
 
@@ -815,10 +813,12 @@ with zipfile.ZipFile(target, "r") as check:
         "data/minecraft/tags/game_events/warden_can_listen.json",
         "assets/archie_dinosaurs/textures/entity/projectiles/pus_tipped_arrow.png",
         "assets/archie_dinosaurs/models/attachable/lushsaur_mace.astemirmodel",
-        "assets/archie_dinosaurs/animations/player/attachable/lushsaur_mace.astemiranim",
         "assets/archie_dinosaurs/textures/item/model/lushsaur_mace.png",
         "assets/archie_dinosaurs/sounds/item/lushsaur_mace/spin.ogg",
     }
+    mace_animation = "assets/archie_dinosaurs/animations/player/attachable/lushsaur_mace.astemiranim"
+    if mace_animation in names:
+        raise SystemExit("Lush Mace player attack animation should be removed from Legacy")
     missing_item_resources = sorted(required_item_resources - names)
     if missing_item_resources:
         raise SystemExit(f"Missing retained Lush Mace/Ooze Arrow resources: {missing_item_resources}")
