@@ -204,12 +204,12 @@ jobs:
             echo "PusTippedArrowEntity sculk trail must emit eighteen particles per tick."
             exit 1
           fi
-          if ! grep -Eq 'iconst_3|iconst_3' <<< "$PUS_ARROW_TRAIL_BYTECODE" || ! grep -Fq 'idiv' <<< "$PUS_ARROW_TRAIL_BYTECODE"; then
-            echo "PusTippedArrowEntity sculk trail must emit three particles at each of six trail positions."
+          if grep -Fq 'idiv' <<< "$PUS_ARROW_TRAIL_BYTECODE"; then
+            echo "PusTippedArrowEntity sculk trail must use unique samples, not grouped duplicate positions."
             exit 1
           fi
-          if ! grep -Fq '0.1d' <<< "$PUS_ARROW_TRAIL_BYTECODE"; then
-            echo "PusTippedArrowEntity sculk trail sample spacing must remain 0.1 blocks."
+          if ! grep -Fq '0.0294d' <<< "$PUS_ARROW_TRAIL_BYTECODE"; then
+            echo "PusTippedArrowEntity sculk trail must distribute samples across the full 0.5-block segment."
             exit 1
           fi
 
