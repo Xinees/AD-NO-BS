@@ -1723,6 +1723,8 @@ public final class JarPruner {
         String playerInternal = "net/minecraft/world/entity/player/Player";
         String handInternal = "net/minecraft/world/InteractionHand";
         String handDesc = "L" + handInternal + ";";
+        String itemInternal = "net/minecraft/world/item/Item";
+        String cooldownsInternal = "net/minecraft/world/item/ItemCooldowns";
         String syncHolderInternal = "com/astemir/astemirlib/re/common/action/SyncedActionHolder";
         String actionTypeInternal = "com/astemir/astemirlib/re/common/action/ActionType";
         String actionTypeDesc = "L" + actionTypeInternal + ";";
@@ -1779,7 +1781,8 @@ public final class JarPruner {
         rmbSwing.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, playerInternal, "m_6674_", "(" + handDesc + ")V", false));
         spinTick.instructions.insert(executeSpinCall, rmbSwing);
 
-        // 3) RMB use(): single-click activation (remove Player.m_6672_ startUsingItem, guard active ATTACK/ATTACK_SPIN).
+        // 3) RMB use(): single-click activation (remove Player.m_6672_ startUsingItem, guard active ATTACK,
+        //    and apply 20-tick anti-spam cooldown so server still plays MACE_SPIN sound on first click).
         MethodNode useMethod = owner.methods.stream()
             .filter(m -> m.name.equals("m_7203_"))
             .findFirst()
@@ -1804,30 +1807,17 @@ public final class JarPruner {
             throw new IllegalStateException("Unexpected instructions before Player.m_6672_ in LushsaurMaceItem.m_7203_");
         }
         InsnList activeGuard = new InsnList();
-        LabelNode returnFail = new LabelNode();
         LabelNode notActive = new LabelNode();
         activeGuard.add(new VarInsnNode(Opcodes.ALOAD, 2));
         activeGuard.add(new TypeInsnNode(Opcodes.INSTANCEOF, syncHolderInternal));
         activeGuard.add(new JumpInsnNode(Opcodes.IFEQ, notActive));
         activeGuard.add(new VarInsnNode(Opcodes.ALOAD, 2));
         activeGuard.add(new TypeInsnNode(Opcodes.CHECKCAST, syncHolderInternal));
-        activeGuard.add(new VarInsnNode(Opcodes.ASTORE, 5));
-        activeGuard.add(new VarInsnNode(Opcodes.ALOAD, 5));
-        activeGuard.add(new FieldInsnNode(Opcodes.GETSTATIC, owner.name, "ATTACK_SPIN", actionTypeDesc));
-        activeGuard.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, syncHolderInternal, "getActionByType",
-            "(" + actionTypeDesc + ")L" + actionStateInternal + ";", true));
-        activeGuard.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, actionStateInternal, "isActive", "()Z", false));
-        activeGuard.add(new JumpInsnNode(Opcodes.IFNE, returnFail));
-        activeGuard.add(new VarInsnNode(Opcodes.ALOAD, 5));
         activeGuard.add(new FieldInsnNode(Opcodes.GETSTATIC, owner.name, "ATTACK", actionTypeDesc));
         activeGuard.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, syncHolderInternal, "getActionByType",
             "(" + actionTypeDesc + ")L" + actionStateInternal + ";", true));
         activeGuard.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, actionStateInternal, "isActive", "()Z", false));
         activeGuard.add(new JumpInsnNode(Opcodes.IFEQ, notActive));
-        activeGuard.add(returnFail);
-        activeGuard.add(new FrameNode(Opcodes.F_FULL, 6,
-            new Object[] { owner.name, levelInternal, playerInternal, handInternal, itemStackInternal, syncHolderInternal },
-            0, new Object[0]));
         activeGuard.add(new VarInsnNode(Opcodes.ALOAD, 4));
         activeGuard.add(new MethodInsnNode(Opcodes.INVOKESTATIC, resultHolderInternal, "m_19100_",
             "(Ljava/lang/Object;)L" + resultHolderInternal + ";", false));
@@ -1836,6 +1826,13 @@ public final class JarPruner {
         activeGuard.add(new FrameNode(Opcodes.F_FULL, 5,
             new Object[] { owner.name, levelInternal, playerInternal, handInternal, itemStackInternal },
             0, new Object[0]));
+        activeGuard.add(new VarInsnNode(Opcodes.ALOAD, 2));
+        activeGuard.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, playerInternal, "m_36335_",
+            "()L" + cooldownsInternal + ";", false));
+        activeGuard.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        activeGuard.add(new IntInsnNode(Opcodes.BIPUSH, 20));
+        activeGuard.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, cooldownsInternal, "m_41524_",
+            "(L" + itemInternal + ";I)V", false));
         useMethod.instructions.insertBefore(loadPlayer, activeGuard);
         useMethod.instructions.remove(loadPlayer);
         useMethod.instructions.remove(loadHand);
