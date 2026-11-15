@@ -56,7 +56,14 @@ jobs:
             javap -classpath "$ORIGINAL_JAR" -p -c "$CLASS" || true
           done
           echo "===== ORIGINAL MACE ANIMATION RESOURCE PATH ====="
-          RESOURCE_PATH="$(unzip -Z1 "$ORIGINAL_JAR" | grep -i 'lushsaur_mace.astemiranim
+          RESOURCE_PATH="$(unzip -Z1 "$ORIGINAL_JAR" | grep -i "lushsaur_mace.astemiranim" | head -n 1 || true)"
+          printf "Resource path: %s\n" "$RESOURCE_PATH"
+          if [ -n "$RESOURCE_PATH" ]; then
+            echo "===== ORIGINAL MACE ANIMATION RESOURCE ====="
+            unzip -p "$ORIGINAL_JAR" "$RESOURCE_PATH"
+          fi
+          echo
+
       - name: Download ASM bytecode tools
         shell: bash
         run: |
