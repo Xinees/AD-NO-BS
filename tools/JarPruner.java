@@ -195,6 +195,8 @@ public final class JarPruner {
         patchEntitySettings(nodes.get(ROOT + "server/ServerConfig$EntitySettings"));
         patchServerConfig(nodes.get(ROOT + "server/ServerConfig"));
         patchLushMaceItemFactory(nodes.get(ROOT + "common/items/ADItems"));
+        patchLushMaceTooltip(nodes.get(ROOT + "common/items/weapon/LushsaurMaceItem"));
+        patchPusArrowItemForVanillaBow(nodes.get(ROOT + "common/items/PusArrowItem"));
         patchNetworkHelper(nodes.get(ROOT + "platform/ForgeNetworkHelper"));
         patchKeyMappings(nodes.get(ROOT + "client/ADKeyMappings"));
         patchAbstractArrowMixin(nodes.get(ROOT + "mixin/AbstractArrowMixin"));
@@ -1680,6 +1682,57 @@ public final class JarPruner {
         code.add(new InsnNode(Opcodes.ARETURN));
         factory.maxStack = 4;
         factory.maxLocals = 1;
+    }
+
+    private static void patchLushMaceTooltip(ClassNode owner) {
+        if (owner == null) throw new IllegalStateException("LushsaurMaceItem class is missing");
+
+        String descriptor =
+            "(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/level/Level;Ljava/util/List;Lnet/minecraft/world/item/TooltipFlag;)V";
+        owner.methods.removeIf(method ->
+            method.name.equals("m_7373_") && method.desc.equals(descriptor));
+
+        MethodNode tooltip = new MethodNode(
+            Opcodes.ACC_PUBLIC, "m_7373_", descriptor, null, null);
+        tooltip.instructions.add(new InsnNode(Opcodes.RETURN));
+        tooltip.maxStack = 0;
+        tooltip.maxLocals = 5;
+        owner.methods.add(tooltip);
+    }
+
+    private static void patchPusArrowItemForVanillaBow(ClassNode owner) {
+        if (owner == null) throw new IllegalStateException("PusArrowItem class is missing");
+
+        String arrowItem = "net/minecraft/world/item/ArrowItem";
+        if (!arrowItem.equals(owner.superName)) {
+            String originalSuper = owner.superName;
+            if (!"net/minecraft/world/item/Item".equals(originalSuper)) {
+                throw new IllegalStateException(
+                    "PusArrowItem has unexpected superclass for vanilla-bow support: " + originalSuper);
+            }
+
+            int rewrittenConstructors = 0;
+            for (MethodNode method : owner.methods) {
+                if (!method.name.equals("<init>")) continue;
+                for (AbstractInsnNode instruction : method.instructions.toArray()) {
+                    if (instruction instanceof MethodInsnNode call &&
+                        call.getOpcode() == Opcodes.INVOKESPECIAL &&
+                        call.name.equals("<init>") &&
+                        call.owner.equals(originalSuper)) {
+                        if (!call.desc.equals("(Lnet/minecraft/world/item/Item$Properties;)V")) {
+                            throw new IllegalStateException(
+                                "Unexpected PusArrowItem constructor signature: " + call.desc);
+                        }
+                        call.owner = arrowItem;
+                        rewrittenConstructors++;
+                    }
+                }
+            }
+            if (rewrittenConstructors == 0) {
+                throw new IllegalStateException("PusArrowItem constructor did not call Item.<init>");
+            }
+            owner.superName = arrowItem;
+        }
     }
 
     private static void patchAbstractArrowMixin(ClassNode owner) {
