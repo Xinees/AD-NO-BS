@@ -200,16 +200,16 @@ jobs:
           done
 
           PUS_ARROW_TRAIL_BYTECODE="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.common.entity.projectile.PusTippedArrowEntity | sed -n '/spawnSculkChargeParticles/,/^$/p')"
-          if ! grep -Eq 'bipush[[:space:]]+18' <<< "$PUS_ARROW_TRAIL_BYTECODE"; then
-            echo "PusTippedArrowEntity sculk trail must emit eighteen particles per tick."
+          if ! grep -Eq 'bipush[[:space:]]+36' <<< "$PUS_ARROW_TRAIL_BYTECODE"; then
+            echo "PusTippedArrowEntity sculk trail must emit thirty-six particles per tick."
             exit 1
           fi
           if grep -Fq 'idiv' <<< "$PUS_ARROW_TRAIL_BYTECODE"; then
             echo "PusTippedArrowEntity sculk trail must use unique samples, not grouped duplicate positions."
             exit 1
           fi
-          if ! grep -Fq '0.0294d' <<< "$PUS_ARROW_TRAIL_BYTECODE"; then
-            echo "PusTippedArrowEntity sculk trail must distribute samples across the full 0.5-block segment."
+          if ! grep -Fq '0.02857142857142857d' <<< "$PUS_ARROW_TRAIL_BYTECODE"; then
+            echo "PusTippedArrowEntity sculk trail must sample the full one-tick movement segment."
             exit 1
           fi
 
