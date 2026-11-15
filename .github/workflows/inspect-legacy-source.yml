@@ -22,29 +22,6 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - name: Inspect Lush Mace first-person use and player animations
-        shell: bash
-        run: |
-          set -euo pipefail
-          JAR="ec_ad-forge-1.20.1-1.0.4.jar"
-          for CLASS in \
-            com.eternal_creations.archies_dino_mod.client.animation.player.ADPlayerAnimations \
-            com.eternal_creations.archies_dino_mod.client.animation.player.attachable.LushsaurMaceAnimations \
-            com.eternal_creations.archies_dino_mod.common.items.weapon.LushsaurMaceItem \
-            com.eternal_creations.archies_dino_mod.common.items.util.ADWeaponItem \
-            com.eternal_creations.archies_dino_mod.mixin.forge.ADWeaponItemMixin
-          do
-            echo "===== ORIGINAL BYTECODE: $CLASS ====="
-            javap -classpath "$JAR" -p -c "$CLASS" || true
-          done
-          echo "===== ORIGINAL MACE ANIMATION RESOURCE PATHS ====="
-          jar tf "$JAR" | grep -i "lushsaur_mace.astemiranim" || true
-          RESOURCE_PATH="$(jar tf "$JAR" | grep -i "lushsaur_mace.astemiranim" | head -n 1 || true)"
-          if [ -n "$RESOURCE_PATH" ]; then
-            echo "===== ORIGINAL MACE ANIMATION RESOURCE ====="
-            unzip -p "$JAR" "$RESOURCE_PATH"
-          fi
-
       - name: Inspect vanilla SaddleItem and Saddleable bytecode
         shell: bash
         run: |
