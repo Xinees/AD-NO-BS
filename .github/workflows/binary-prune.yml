@@ -199,6 +199,16 @@ jobs:
             fi
           done
 
+          PUS_ARROW_TRAIL_BYTECODE="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.common.entity.projectile.PusTippedArrowEntity | sed -n '/spawnSculkChargeParticles/,/^$/p')"
+          if ! grep -Eq 'bipush[[:space:]]+6' <<< "$PUS_ARROW_TRAIL_BYTECODE"; then
+            echo "PusTippedArrowEntity sculk trail must emit six particles per tick."
+            exit 1
+          fi
+          if ! grep -Fq '0.1d' <<< "$PUS_ARROW_TRAIL_BYTECODE"; then
+            echo "PusTippedArrowEntity sculk trail sample spacing must remain 0.1 blocks."
+            exit 1
+          fi
+
           ARROW_MIXIN_BYTECODE="$(javap -classpath build/classes-pruned.jar -p -v com.eternal_creations.archies_dino_mod.mixin.AbstractArrowMixin)"
           if ! grep -Fq 'StackMapTable' <<< "$ARROW_MIXIN_BYTECODE"; then
             echo "AbstractArrowMixin.onTick is missing Java 17 StackMapTable."
