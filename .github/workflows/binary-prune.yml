@@ -40,6 +40,23 @@ jobs:
           echo "Immutable original input hash verified."
           echo "Original JAR SHA-256: $ORIGINAL_SHA"
 
+      - name: Inspect original Lush Mace animation bytecode and resource
+        shell: bash
+        run: |
+          set -euo pipefail
+          ORIGINAL_JAR="ec_ad-forge-1.20.1-1.0.4.jar"
+          for CLASS in \
+            com.eternal_creations.archies_dino_mod.client.animation.player.ADPlayerAnimations \
+            com.eternal_creations.archies_dino_mod.client.animation.player.attachable.LushsaurMaceAnimations \
+            com.eternal_creations.archies_dino_mod.common.items.weapon.LushsaurMaceItem
+          do
+            echo "===== ORIGINAL BYTECODE: $CLASS ====="
+            javap -classpath "$ORIGINAL_JAR" -p -c "$CLASS" || true
+          done
+          echo "===== ORIGINAL MACE ANIMATION RESOURCE ====="
+          unzip -p "$ORIGINAL_JAR" assets/archie_dinosaurs/animations/player/attachable/lushsaur_mace.astemiranim || true
+          echo
+
       - name: Download ASM bytecode tools
         shell: bash
         run: |
