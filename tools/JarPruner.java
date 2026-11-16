@@ -1524,7 +1524,7 @@ public final class JarPruner {
         replacement.add(new InsnNode(Opcodes.IMUL));
         addPassenger.instructions.insertBefore(value, replacement);
         addPassenger.instructions.remove(value);
-        addPassenger.maxStack = Math.max(addPassenger.maxStack, 2);
+        addPassenger.maxStack = Math.max(addPassenger.maxStack, 3);
 
         System.out.println("PATCH LUSHS MOUNT passenger input cooldown set to zero; other mounts retain 20 ticks");
     }
