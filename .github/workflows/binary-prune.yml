@@ -1,4 +1,4 @@
-name: Direct Legacy JAR Prune - build 33
+name: Direct Legacy JAR Prune - build 34
 
 on:
   push:
@@ -65,6 +65,7 @@ jobs:
           set -euo pipefail
           mkdir -p build/behavior-hooks
           cat tools/LegacyBehaviorHooks.part1.b64 tools/LegacyBehaviorHooks.part2.b64 tools/LegacyBehaviorHooks.part3.b64 tools/LegacyBehaviorHooks.part4.b64 | base64 -d | gzip -dc > build/LegacyBehaviorHooks.java
+          python3 tools/polish_legacy_hooks.py build/LegacyBehaviorHooks.java
           javac -encoding UTF-8 --release 17 -d build/behavior-hooks build/LegacyBehaviorHooks.java
 
       - name: Prune classes and registrations in the original JAR
@@ -237,11 +238,15 @@ jobs:
               "METHOD_CACHE.computeIfAbsent",
               "FIELD_CACHE.computeIfAbsent",
               "warning == null || !warning.berriesSeen",
-              "if (surfaceY > y || surfaceY < y - 1)",
-              "validPlatform(level, posClass, heightType, px, py, pz)",
+              "if (surfaceY > y)",
+              "validPlatform(mob, level, posClass, heightType, px, py, pz)",
+              'double mobHeight = boxValue(mobBox, "f_82292_") - boxValue(mobBox, "f_82289_");',
+              "int clearHeight = (int)Math.ceil(mobHeight);",
               "now >= state.nextPathUpdate",
               "state.nextPathUpdate = now + 20",
               "m_60783_",
+              "m_82386_",
+              "point[0] - ((Number)currentX).doubleValue()",
           )
           missing = [item for item in required if item not in source]
           if missing:
@@ -250,6 +255,9 @@ jobs:
               raise SystemExit("The inverted allow/suppress flight-phase helper must not return.")
           if "m_60828_" in source:
               raise SystemExit("Landing support must use face-sturdy checks, not suffocation checks.")
+          for forbidden in ("py >= 250", "point[0] - 1.8", "point[1] + 5.2", "up < 6", "surfaceY < y - 1"):
+              if forbidden in source:
+                  raise SystemExit("Unjustified fixed landing constraint remains: " + forbidden)
           PY
 
           if jar tf "$JAR" | grep -E 'data/archie_dinosaurs/(worldgen/structure|worldgen/structure_set|structures)/.*lushsaur|tags/worldgen/biome/spawns_lushsaurs.json'; then
