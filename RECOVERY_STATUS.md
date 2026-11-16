@@ -7,9 +7,10 @@
 - Restored the original Lushsaur passenger offsets: server-side `passengerOffset(0, 0, 1)`, saddled client Z = 0, and unsaddled client Z = -0.6. The requested vanilla passenger pose remains handled by removing the custom rider animation registration, not by shifting the seat or hitbox.
 - Corrected the Chorusoatl flight-phase suppression predicate. A perched wild Chorusoatl now suppresses `PREPARING_TO_FLY`; an approaching one permits `PREPARING_TO_LAND` only within the target arrival bounds. The former predicate had the result inverted.
 - Made weak entity-state maps safe for concurrent access, restricted animation-owner registration to the client side, and cached reflection lookups used by the per-tick hooks.
+- Landing-site validation now uses sturdy upward-facing support checks and accepts stepped 3×3 surfaces with at most one block of height variation; deep holes and unsupported surfaces are rejected. Revalidation is throttled to the existing 20-tick path refresh instead of checking the entire platform every tick.
 - Glowberry feeding grants individual loyalty only after the player has presented glowberries and triggered the waiting reaction. The approach threshold state is preserved while the player holds the berries, preventing the same close approach from immediately consuming a warning after the hand changes.
 - Enabled the existing pruner guard against retained bytecode references to removed registry fields. Updated CI to assert the original mount offsets and the corrected Chorus phase/behavior guards.
-- CI verification for this audit is pending; no in-game runtime test is claimed here.
+- Java 17 helper compilation plus reflection-cache, flight-phase, and landing-geometry regression harnesses passed. Build 32 CI verification is pending; no in-game runtime test is claimed here.
 
 ---
 
