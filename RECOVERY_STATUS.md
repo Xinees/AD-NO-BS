@@ -2,6 +2,13 @@
 
 # AD-NO-BS Legacy recovery status
 
+## Follow-up — cancel vertical-only Chorusoatl animation override — 2026-11-17
+
+- Owner cancelled the vertical-only UP/DOWN animation suppression from behavior-spec section 2 because it interferes with normal Chorusoatl landing.
+- Restore and verify the original `ActionState.isActiveWithoutFadeOut()` method references and the original `ChorusoatlEntity.isFlying()` reference in `ChorusoatlClient.buildLocomotionState()`. Do not replace them with helper predicates or synthetic bridges.
+- Remove the now-unused vertical-animation helpers from the generated Legacy hook source. Leave flight-phase suppression, perched-state transitions, landing-target selection, live bounding-box/platform validation, and navigation/goal changes untouched.
+- Build 37 CI verification is pending. A successful CI run still does not replace an in-game landing test.
+
 ## Post-Build 30 code audit — 2026-11-16
 
 - Restored the original Lushsaur passenger offsets: server-side `passengerOffset(0, 0, 1)`, saddled client Z = 0, and unsaddled client Z = -0.6. The requested vanilla passenger pose is preserved by removing the custom rider animation registration, not by shifting the seat or hitbox.

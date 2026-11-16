@@ -1,4 +1,4 @@
-name: Direct Legacy JAR Prune - build 36
+name: Direct Legacy JAR Prune - build 37
 
 on:
   push:
@@ -219,39 +219,27 @@ jobs:
 
           CHORUS_CLIENT_CLASS='com.eternal_creations.archies_dino_mod.client.model.render.entity.mob.ChorusoatlClient'
           CHORUS_CLIENT="$(javap -classpath "$JAR" -p -c -v "$CHORUS_CLIENT_CLASS")"
-          grep -Fq 'LegacyBehaviorHooks.chorusoatlActionStateAnimationActive' <<< "$CHORUS_CLIENT"
-          grep -Fq 'LegacyBehaviorHooks.chorusoatlAirState' <<< "$CHORUS_CLIENT"
-
-          ACTION_STATE_DESC='(Lcom/astemir/astemirlib/re/common/action/ActionState;)Z'
-          AIR_STATE_DESC='(Lcom/eternal_creations/archies_dino_mod/common/entity/mob/chorusoatl/ChorusoatlEntity;)Z'
-          ACTION_BRIDGE='legacy$chorusoatlActionStateAnimationActive'
-          AIR_BRIDGE='legacy$chorusoatlAirState'
-          ACTION_HANDLE_REF='REF_invokeStatic com/eternal_creations/archies_dino_mod/client/model/render/entity/mob/ChorusoatlClient.legacy$chorusoatlActionStateAnimationActive:(Lcom/astemir/astemirlib/re/common/action/ActionState;)Z'
-          AIR_HANDLE_REF='REF_invokeStatic com/eternal_creations/archies_dino_mod/client/model/render/entity/mob/ChorusoatlClient.legacy$chorusoatlAirState:(Lcom/eternal_creations/archies_dino_mod/common/entity/mob/chorusoatl/ChorusoatlEntity;)Z'
-          if ! grep -Fq "$ACTION_HANDLE_REF" <<< "$CHORUS_CLIENT"; then
-            echo "UP/DOWN animation conditions lost their ActionState-typed invokedynamic receiver."
+          ACTION_STATE_REF='REF_invokeVirtual com/astemir/astemirlib/re/common/action/ActionState.isActiveWithoutFadeOut:()Z'
+          AIR_STATE_REF='REF_invokeVirtual com/eternal_creations/archies_dino_mod/common/entity/mob/chorusoatl/ChorusoatlEntity.isFlying:()Z'
+          if ! grep -Fq "$ACTION_STATE_REF" <<< "$CHORUS_CLIENT"; then
+            echo "Original UP/DOWN ActionState animation conditions were changed."
             exit 1
           fi
-          if ! grep -Fq "$AIR_HANDLE_REF" <<< "$CHORUS_CLIENT"; then
-            echo "Chorusoatl flying condition lost its entity-typed invokedynamic receiver."
+          if ! grep -Fq "$AIR_STATE_REF" <<< "$CHORUS_CLIENT"; then
+            echo "Original Chorusoatl isFlying animation condition was changed."
             exit 1
           fi
-
+          if grep -Fq 'legacy$chorusoatlActionStateAnimationActive' <<< "$CHORUS_CLIENT" ||
+             grep -Fq 'legacy$chorusoatlAirState' <<< "$CHORUS_CLIENT"; then
+            echo "Obsolete vertical-animation bridge remains in ChorusoatlClient."
+            exit 1
+          fi
           CHORUS_CLIENT_METHODS="$(javap -classpath "$JAR" -p -s "$CHORUS_CLIENT_CLASS")"
-          if ! grep -F -A1 "$ACTION_BRIDGE(" <<< "$CHORUS_CLIENT_METHODS" | grep -Fq "descriptor: $ACTION_STATE_DESC"; then
-            echo "ActionState animation bridge has the wrong JVM descriptor."
+          if grep -Fq 'legacy$chorusoatlActionStateAnimationActive' <<< "$CHORUS_CLIENT_METHODS" ||
+             grep -Fq 'legacy$chorusoatlAirState' <<< "$CHORUS_CLIENT_METHODS"; then
+            echo "Synthetic vertical-animation bridge method remains in ChorusoatlClient."
             exit 1
           fi
-          if ! grep -F -A1 "$AIR_BRIDGE(" <<< "$CHORUS_CLIENT_METHODS" | grep -Fq "descriptor: $AIR_STATE_DESC"; then
-            echo "Chorusoatl flying bridge has the wrong JVM descriptor."
-            exit 1
-          fi
-
-          CHORUS_CLIENT_CODE="$(javap -classpath "$JAR" -p -c "$CHORUS_CLIENT_CLASS")"
-          ACTION_BRIDGE_BODY="$(awk -v method="$ACTION_BRIDGE" 'index($0, "private static boolean " method "(") { capture=1 } capture { print } capture && NF == 0 { exit }' <<< "$CHORUS_CLIENT_CODE")"
-          AIR_BRIDGE_BODY="$(awk -v method="$AIR_BRIDGE" 'index($0, "private static boolean " method "(") { capture=1 } capture { print } capture && NF == 0 { exit }' <<< "$CHORUS_CLIENT_CODE")"
-          grep -Fq 'LegacyBehaviorHooks.chorusoatlActionStateAnimationActive' <<< "$ACTION_BRIDGE_BODY"
-          grep -Fq 'LegacyBehaviorHooks.chorusoatlAirState' <<< "$AIR_BRIDGE_BODY"
 
           STROLL="$(javap -classpath "$JAR" -p -c com.eternal_creations.archies_dino_mod.common.entity.ai.goal.GoalStrollLandAndAir)"
           grep -Fq 'LegacyBehaviorHooks.shouldSuppressChorusStroll' <<< "$STROLL"

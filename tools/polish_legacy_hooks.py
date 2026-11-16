@@ -146,6 +146,17 @@ def patch_source(source: str) -> str:
     for token in forbidden:
         if token in source:
             raise RuntimeError(f"legacy landing constraint remains: {token}")
+    for signature in (
+        "public static boolean chorusoatlActionStateAnimationActive(",
+        "public static boolean chorusoatlAirState(",
+    ):
+        if source.count(signature) != 1:
+            raise RuntimeError(f"expected exactly one obsolete vertical-animation helper: {signature}")
+        source = replace_method(source, signature, "")
+
+    if "chorusoatlActionStateAnimationActive" in source or "chorusoatlAirState" in source:
+        raise RuntimeError("obsolete vertical-only Chorusoatl animation helpers remain")
+
     required = (
         "validPlatform(mob, level, posClass, heightType, px, py, pz)",
         'boxValue(mobBox, "f_82292_") - boxValue(mobBox, "f_82289_")',

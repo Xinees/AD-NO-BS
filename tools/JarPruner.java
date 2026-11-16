@@ -213,7 +213,7 @@ public final class JarPruner {
         ClassNode sculksaurClient = nodes.get(ROOT + "client/model/render/entity/mob/SculksaurClient");
         patchLushsaurRuntimeHooks(lushsaurEntity);
         patchChorusoatlRuntimeHooks(chorusoatlEntity);
-        patchChorusoatlAnimationHooks(nodes.get(ROOT + "client/model/render/entity/mob/ChorusoatlClient"));
+        verifyChorusoatlAnimationHooks(nodes.get(ROOT + "client/model/render/entity/mob/ChorusoatlClient"));
         patchChorusoatlGoalSuppression(nodes.get(ROOT + "common/entity/ai/goal/GoalStrollLandAndAir"), "shouldSuppressChorusStroll");
         patchChorusoatlGoalSuppression(nodes.get(ROOT + "common/entity/mob/chorusoatl/ai/ChorusoatlGoalFollowPack"), "shouldSuppressChorusPackFollow");
         patchLushsaurControllingPassenger(lushsaurEntity);
@@ -2851,26 +2851,19 @@ public final class JarPruner {
         System.out.println("PATCH CHORUS autonomous landing and perched-state hooks installed");
     }
 
-    private static void patchChorusoatlAnimationHooks(ClassNode owner) {
+    private static void verifyChorusoatlAnimationHooks(ClassNode owner) {
         if (owner == null) throw new IllegalStateException("ChorusoatlClient is missing");
         String chorus = ROOT + "common/entity/mob/chorusoatl/ChorusoatlEntity";
         String actionState = "com/astemir/astemirlib/re/common/action/ActionState";
         String condition = "com/astemir/astemirlib/re/core/function/Condition";
         String actionStateCallSite = "(L" + actionState + ";)L" + condition + ";";
         String airStateCallSite = "(L" + chorus + ";)L" + condition + ";";
-        String actionStateBridge = "legacy$chorusoatlActionStateAnimationActive";
-        String airStateBridge = "legacy$chorusoatlAirState";
 
         MethodNode locomotion = owner.methods.stream()
             .filter(method -> method.name.equals("buildLocomotionState") &&
                 method.desc.startsWith("(L" + chorus + ";)"))
             .findFirst()
             .orElseThrow(() -> new IllegalStateException("ChorusoatlClient.buildLocomotionState is missing"));
-
-        addChorusoatlAnimationBridge(owner, actionStateBridge, actionState,
-            "chorusoatlActionStateAnimationActive");
-        addChorusoatlAnimationBridge(owner, airStateBridge, chorus,
-            "chorusoatlAirState");
 
         int actionStateReferences = 0;
         int airMethodReferences = 0;
@@ -2882,8 +2875,7 @@ public final class JarPruner {
             boolean airStateSite = dynamic.desc.equals(airStateCallSite);
             if (!actionStateSite && !airStateSite) continue;
 
-            for (int i = 0; i < dynamic.bsmArgs.length; i++) {
-                Object argument = dynamic.bsmArgs[i];
+            for (Object argument : dynamic.bsmArgs) {
                 if (!(argument instanceof Handle handle) ||
                     handle.getTag() != Opcodes.H_INVOKEVIRTUAL) continue;
 
@@ -2891,55 +2883,32 @@ public final class JarPruner {
                     handle.getOwner().equals(actionState) &&
                     handle.getName().equals("isActiveWithoutFadeOut") &&
                     handle.getDesc().equals("()Z")) {
-                    dynamic.bsmArgs[i] = new Handle(Opcodes.H_INVOKESTATIC, owner.name,
-                        actionStateBridge, "(L" + actionState + ";)Z", false);
                     actionStateReferences++;
-                    continue;
                 }
 
                 if (airStateSite &&
                     handle.getOwner().equals(chorus) &&
                     handle.getName().equals("isFlying") &&
                     handle.getDesc().equals("()Z")) {
-                    dynamic.bsmArgs[i] = new Handle(Opcodes.H_INVOKESTATIC, owner.name,
-                        airStateBridge, "(L" + chorus + ";)Z", false);
                     airMethodReferences++;
                 }
             }
         }
+
         if (actionStateReferences != 2) {
-            throw new IllegalStateException("Expected two typed UP/DOWN ActionState references in " +
-                "Chorusoatl locomotion, found " + actionStateReferences);
+            throw new IllegalStateException("Expected the original two ActionState.isActiveWithoutFadeOut " +
+                "references in Chorusoatl locomotion, found " + actionStateReferences);
         }
         if (airMethodReferences != 1) {
-            throw new IllegalStateException("Expected one typed Chorusoatl isFlying reference in " +
-                "locomotion, found " + airMethodReferences);
+            throw new IllegalStateException("Expected the original ChorusoatlEntity.isFlying " +
+                "reference in locomotion, found " + airMethodReferences);
         }
-        System.out.println("PATCH CHORUS locomotion through receiver-typed animation bridges");
-    }
-
-    private static void addChorusoatlAnimationBridge(
-        ClassNode owner, String methodName, String argumentOwner, String hookName
-    ) {
-        if (owner.methods.stream().anyMatch(method -> method.name.equals(methodName))) {
-            throw new IllegalStateException("Duplicate Chorusoatl animation bridge: " + methodName);
+        if (owner.methods.stream().anyMatch(method ->
+            method.name.equals("legacy$chorusoatlActionStateAnimationActive") ||
+                method.name.equals("legacy$chorusoatlAirState"))) {
+            throw new IllegalStateException("Obsolete vertical-animation bridges remain in ChorusoatlClient");
         }
-
-        String descriptor = "(L" + argumentOwner + ";)Z";
-        MethodNode bridge = new MethodNode(
-            Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC | Opcodes.ACC_SYNTHETIC,
-            methodName,
-            descriptor,
-            null,
-            null
-        );
-        bridge.instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        bridge.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, LEGACY_HOOKS,
-            hookName, "(Ljava/lang/Object;)Z", false));
-        bridge.instructions.add(new InsnNode(Opcodes.IRETURN));
-        bridge.maxStack = 1;
-        bridge.maxLocals = 1;
-        owner.methods.add(bridge);
+        System.out.println("VERIFY CHORUS original UP/DOWN and isFlying animation method references are preserved");
     }
 
     private static void patchChorusoatlGoalSuppression(ClassNode owner, String hookName) {
