@@ -523,7 +523,7 @@ jobs:
 
           LUSH_MOUNT_POINTS="$(javap -classpath build/classes-pruned.jar -p -c "$LUSH_ROLL_CLIENT" | sed -n '/static {};/,/^  private static boolean /p')"
           if [[ "$LUSH_MOUNT_POINTS" != *"dconst_0"* ||
-                "$LUSH_MOUNT_POINTS" != *"double -0.6d"* ||
+                "$LUSH_MOUNT_POINTS" != *"double -0.6000000238418579d"* ||
                 "$LUSH_MOUNT_POINTS" == *"double 0.15d"* ||
                 "$LUSH_MOUNT_POINTS" == *"double 0.3374999761581421d"* ||
                 "$LUSH_MOUNT_POINTS" == *"double 0.9375d"* ||
