@@ -39,6 +39,30 @@ jobs:
           mkdir -p build/ai-audit
           cp -R "$BASE/lushsaur" build/ai-audit/
           cp -R "$BASE/chorusoatl" build/ai-audit/
+          for relative in \
+            common/entity/ai/goal/GoalAvoidEntity.java \
+            common/entity/ai/goal/GoalStrollLandAndAir.java \
+            common/entity/ai/goal/GoalHurtByTarget.java \
+            common/entity/ai/goal/action/GoalRandomAction.java \
+            common/entity/ai/goal/action/GoalActionMeleeAttack.java \
+            common/entity/ai/goal/action/GoalChargeMeleeAttack.java \
+            common/entity/ai/goal/action/GoalFlyMeleeAttack.java \
+            common/entity/base/AbstractComplexMob.java \
+            common/entity/base/AbstractComplexMount.java \
+            common/entity/component/EntityComponentHolder.java \
+            common/entity/component/PetComponent.java \
+            common/entity/component/MountComponent.java \
+            common/entity/ADEntityTypes.java \
+            client/model/render/entity/mob/LushsaurClient.java \
+            client/model/render/entity/mob/ChorusoatlClient.java \
+            common/entity/ai/control/SmoothMoveControl.java \
+            common/entity/ai/control/SmoothLookControl.java; do
+            source="build/decompiled/com/eternal_creations/archies_dino_mod/$relative"
+            if [[ -f "$source" ]]; then
+              mkdir -p "build/ai-audit/$(dirname "$relative")"
+              cp "$source" "build/ai-audit/$relative"
+            fi
+          done
           find build/ai-audit -type f -name '*.java' -print | sort
           tar -czf build/ai-audit-source.tar.gz -C build/ai-audit .
 
