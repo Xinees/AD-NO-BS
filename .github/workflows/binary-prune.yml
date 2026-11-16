@@ -217,7 +217,7 @@ jobs:
           grep -Fq 'LegacyBehaviorHooks.allowChorusoatlFlightPhase' <<< "$CHORUS"
 
           CHORUS_CLIENT="$(javap -classpath "$JAR" -p -c -v com.eternal_creations.archies_dino_mod.client.model.render.entity.mob.ChorusoatlClient)"
-          grep -Fq 'LegacyBehaviorHooks.adjustVerticalActionAnimation' <<< "$CHORUS_CLIENT"
+          grep -Fq 'LegacyBehaviorHooks.chorusoatlActionStateAnimationActive' <<< "$CHORUS_CLIENT"
           grep -Fq 'LegacyBehaviorHooks.chorusoatlAirState' <<< "$CHORUS_CLIENT"
 
           STROLL="$(javap -classpath "$JAR" -p -c com.eternal_creations.archies_dino_mod.common.entity.ai.goal.GoalStrollLandAndAir)"
