@@ -9,7 +9,7 @@
 - Made per-entity state maps safe for concurrent access, restricted animation-owner registration to the client side, and cached reflective method/field lookups used by the hooks. A concurrent reflection harness passed 3,000 calls across eight threads.
 - Hardened landing validation: support blocks must have sturdy upward faces; the mob's real bounding-box height determines required vertical clearance; other Chorusoatl are checked against the mob's actual bounding box translated to the proposed landing position. Missing bounding-box data fails closed rather than silently accepting a potentially overlapping site.
 - Removed unsupported fixed upper-Y, six-block clearance, and guessed collision-box dimensions. Search frequency/radius/chance and some landing geometry thresholds remain provisional because the behavior specification explicitly leaves them for reference-video confirmation.
-- The helper passed Java 17 compilation and focused reflection, flight-phase, landing-geometry, and live-AABB overlap harnesses. Build 34 CI verification is pending; no in-game runtime test is claimed here.
+- The helper passed Java 17 compilation and focused reflection, flight-phase, landing-geometry, and live-AABB overlap harnesses. Build 34 CI completed successfully, including compilation, bytecode/resource pruning, retained-content checks, and draft JAR publication. The final overlap check also fails closed if another entity's bounding box or intersection method cannot be resolved.
 
 
 ---

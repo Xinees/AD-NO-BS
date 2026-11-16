@@ -120,7 +120,14 @@ def patch_source(source: str) -> str:
                     continue;
                 }
                 Object otherBox = call(other, new String[]{"m_20191_"});
-                if (bool(call(otherBox, new String[]{"m_82381_", "intersects"}, box))) {
+                if (otherBox == null) {
+                    return true;
+                }
+                Object intersects = call(otherBox, new String[]{"m_82381_", "intersects"}, box);
+                if (!(intersects instanceof Boolean)) {
+                    return true;
+                }
+                if (((Boolean)intersects).booleanValue()) {
                     return true;
                 }
             }
@@ -145,6 +152,7 @@ def patch_source(source: str) -> str:
         'new String[]{"m_82386_"}',
         'new String[]{"m_82381_", "intersects"}',
         "if (!(result instanceof Collection<?>))",
+        "if (!(intersects instanceof Boolean))",
     )
     for token in required:
         if token not in source:

@@ -1,4 +1,4 @@
-name: Direct Legacy JAR Prune - build 34
+name: Direct Legacy JAR Prune - build 35
 
 on:
   push:
@@ -247,6 +247,7 @@ jobs:
               "m_60783_",
               "m_82386_",
               "point[0] - ((Number)currentX).doubleValue()",
+              "if (!(intersects instanceof Boolean))",
           )
           missing = [item for item in required if item not in source]
           if missing:
