@@ -370,7 +370,7 @@ def keep_data_path(path):
         return any(base == f"{egg}.json" for egg in EGGS)
 
     if low.startswith("forge/biome_modifier/"):
-        return base == "chorusoatl_spawns.json"
+        return base in {"chorusoatl_spawns.json", "lushsaur_spawns.json"}
 
     if low.startswith("recipes/archie_trade/"):
         return False
@@ -398,16 +398,10 @@ def keep_data_path(path):
         return base == "chorusoatl_egg_preferred.json"
 
     if low.startswith("tags/worldgen/biome/"):
-        return base in {"spawns_lushsaurs.json", "spawns_chorusoatls.json"}
+        return base == "spawns_chorusoatls.json"
 
-    if low.startswith("worldgen/structure/"):
-        return base == "lushsaur.json"
-
-    if low.startswith("worldgen/structure_set/"):
-        return base == "lushsaur.json"
-
-    if low.startswith("structures/"):
-        return base in {"lushsaur.nbt", "lushsaur_kid.nbt"}
+    if low.startswith(("worldgen/structure/", "worldgen/structure_set/", "structures/")):
+        return False
 
     if low.startswith("damage_type/"):
         return base == "pus_arrow.json"
@@ -435,10 +429,24 @@ def filter_loot_table(data, name):
     pools = value.get("pools")
     if not isinstance(pools, list):
         raise RuntimeError(f"Loot table {name} has no pools array")
+    strip_lush_core = name == "data/archie_dinosaurs/loot_tables/entities/lushsaur.json"
+
+    def filter_entry(entry):
+        if isinstance(entry, dict):
+            if strip_lush_core and entry.get("type") == "minecraft:item" and entry.get("name") in {
+                "ec_ad:lush_core", "archie_dinosaurs:lush_core"
+            }:
+                return {"type": "minecraft:empty", "weight": entry.get("weight", 1)}
+            return {key: filter_entry(child) for key, child in entry.items()}
+        if isinstance(entry, list):
+            return [filter_entry(child) for child in entry]
+        return entry
+
     for pool in pools:
         if not isinstance(pool, dict) or not isinstance(pool.get("entries"), list):
             raise RuntimeError(f"Loot table {name} has malformed pool entries")
-        pool["entries"] = [filter_loot_entry(entry) for entry in pool["entries"]]
+        filtered = [filter_loot_entry(entry) for entry in pool["entries"]]
+        pool["entries"] = [filter_entry(entry) for entry in filtered]
     return dump_json(value)
 
 
@@ -492,6 +500,17 @@ def validate_loot_tables(entries):
                 for child in node:
                     visit(child)
         visit(value)
+        if name == "data/archie_dinosaurs/loot_tables/entities/lushsaur.json":
+            def has_core(node):
+                if isinstance(node, dict):
+                    if node.get("type") == "minecraft:item" and node.get("name") == "archie_dinosaurs:lush_core":
+                        return True
+                    return any(has_core(child) for child in node.values())
+                if isinstance(node, list):
+                    return any(has_core(child) for child in node)
+                return False
+            if has_core(value):
+                raise RuntimeError("Lushsaur loot table duplicates the single Lush Core drop handled by LushsaurEntity.m_30232_()")
 
 
 def extend_chorusoatl_hatchable(data):
@@ -721,6 +740,17 @@ kept["data/minecraft/tags/items/arrows.json"] = dump_json({
     "values": ["archie_dinosaurs:ooze_tipped_arrow"],
 })
 
+kept["data/archie_dinosaurs/forge/biome_modifier/lushsaur_spawns.json"] = dump_json({
+    "type": "forge:add_spawns",
+    "biomes": "minecraft:lush_caves",
+    "spawners": [{
+        "type": "archie_dinosaurs:lushsaur",
+        "weight": 1,
+        "minCount": 1,
+        "maxCount": 1,
+    }],
+})
+
 with zipfile.ZipFile(target, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as zout:
     for name, data in sorted(kept.items()):
         info = zipfile.ZipInfo(name)
@@ -735,10 +765,38 @@ with zipfile.ZipFile(target, "r") as check:
         "archie_dinosaurs.mixins.json",
         "archie_dinosaurs.forge.mixins.json",
         "pack.mcmeta",
+        "data/archie_dinosaurs/forge/biome_modifier/lushsaur_spawns.json",
     }
     missing = sorted(required - names)
     if missing:
         raise SystemExit(f"Required resources missing from output: {missing}")
+
+    spawn_path = "data/archie_dinosaurs/forge/biome_modifier/lushsaur_spawns.json"
+    spawn_modifier = read_json(check.read(spawn_path), spawn_path)
+    expected_spawn_modifier = {
+        "type": "forge:add_spawns",
+        "biomes": "minecraft:lush_caves",
+        "spawners": [{
+            "type": "archie_dinosaurs:lushsaur",
+            "weight": 1,
+            "minCount": 1,
+            "maxCount": 1,
+        }],
+    }
+    if spawn_modifier != expected_spawn_modifier:
+        raise SystemExit("Lushsaur natural spawn must remain weight 1, group size 1, in minecraft:lush_caves")
+
+    stale_structures = sorted(
+        name for name in names
+        if "lushsaur" in name.lower() and (
+            "/worldgen/structure/" in name.lower()
+            or "/worldgen/structure_set/" in name.lower()
+            or "/structures/" in name.lower()
+            or name.lower().endswith("/spawns_lushsaurs.json")
+        )
+    )
+    if stale_structures:
+        raise SystemExit("Lushsaur structure-based spawning resources remain: " + repr(stale_structures))
 
     stale_names = sorted(name for name in names if OLD_NAMESPACE in name)
     if stale_names:

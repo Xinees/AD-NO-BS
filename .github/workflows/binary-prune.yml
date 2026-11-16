@@ -1,4 +1,4 @@
-name: Direct Legacy JAR Prune - build 28
+name: Direct Legacy JAR Prune - build 29
 
 on:
   push:
@@ -59,6 +59,14 @@ jobs:
           CP="build/tools/asm-9.7.1.jar:build/tools/asm-tree-9.7.1.jar"
           javac -encoding UTF-8 -cp "$CP" -d build/tools tools/JarPruner.java
 
+      - name: Decompress and compile isolated Legacy behavior hooks
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build/behavior-hooks
+          base64 -d tools/LegacyBehaviorHooks.java.gz.b64 | gzip -dc > build/LegacyBehaviorHooks.java
+          javac -encoding UTF-8 --release 17 -d build/behavior-hooks build/LegacyBehaviorHooks.java
+
       - name: Prune classes and registrations in the original JAR
         shell: bash
         run: |
@@ -67,6 +75,7 @@ jobs:
           java -cp "$CP" JarPruner \
             ec_ad-forge-1.20.1-1.0.4.jar \
             build/classes-pruned.jar
+          jar uf build/classes-pruned.jar -C build/behavior-hooks .
 
       - name: Prune resources inside the JAR
         shell: bash
@@ -185,6 +194,54 @@ jobs:
           fi
 
           echo "Verified Lushsaur input is immediate after mounting, other mounts keep the original 20-tick gate, player flee is removed, and Raider hiding remains."
+
+      - name: Verify Legacy mob hooks and Lush Caves spawning
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          JAR="build/libs/archie_dinosaurs-legacy-forge-1.20.1.jar"
+          HOOKS='com/eternal_creations/archies_dino_mod/legacy/LegacyBehaviorHooks.class'
+          jar tf "$JAR" | grep -Fx "$HOOKS"
+
+          LUSH="$(javap -classpath "$JAR" -p -c com.eternal_creations.archies_dino_mod.common.entity.mob.lushsaur.LushsaurEntity)"
+          grep -Fq 'LegacyBehaviorHooks.lushsaurTick' <<< "$LUSH"
+          grep -Fq 'LegacyBehaviorHooks.saveLush' <<< "$LUSH"
+          grep -Fq 'LegacyBehaviorHooks.loadLush' <<< "$LUSH"
+          grep -Fq 'LegacyBehaviorHooks.afterLushFeed' <<< "$LUSH"
+
+          CHORUS="$(javap -classpath "$JAR" -p -c com.eternal_creations.archies_dino_mod.common.entity.mob.chorusoatl.ChorusoatlEntity)"
+          grep -Fq 'LegacyBehaviorHooks.chorusoatlTick' <<< "$CHORUS"
+          grep -Fq 'LegacyBehaviorHooks.saveChorusoatl' <<< "$CHORUS"
+          grep -Fq 'LegacyBehaviorHooks.loadChorusoatl' <<< "$CHORUS"
+          grep -Fq 'LegacyBehaviorHooks.allowChorusoatlFlightPhase' <<< "$CHORUS"
+
+          CHORUS_CLIENT="$(javap -classpath "$JAR" -p -c -v com.eternal_creations.archies_dino_mod.client.model.render.entity.mob.ChorusoatlClient)"
+          grep -Fq 'LegacyBehaviorHooks.adjustVerticalActionAnimation' <<< "$CHORUS_CLIENT"
+          grep -Fq 'LegacyBehaviorHooks.chorusoatlAirState' <<< "$CHORUS_CLIENT"
+
+          STROLL="$(javap -classpath "$JAR" -p -c com.eternal_creations.archies_dino_mod.common.entity.ai.goal.GoalStrollLandAndAir)"
+          grep -Fq 'LegacyBehaviorHooks.shouldSuppressChorusStroll' <<< "$STROLL"
+          PACK="$(javap -classpath "$JAR" -p -c com.eternal_creations.archies_dino_mod.common.entity.mob.chorusoatl.ai.ChorusoatlGoalFollowPack)"
+          grep -Fq 'LegacyBehaviorHooks.shouldSuppressChorusPackFollow' <<< "$PACK"
+
+          if jar tf "$JAR" | grep -E 'data/archie_dinosaurs/(worldgen/structure|worldgen/structure_set|structures)/.*lushsaur|tags/worldgen/biome/spawns_lushsaurs.json'; then
+            echo "Removed Lushsaur structure or structure-spawn resources remain."
+            exit 1
+          fi
+
+          python3 - <<'PY'
+          import json, zipfile
+          path = "build/libs/archie_dinosaurs-legacy-forge-1.20.1.jar"
+          with zipfile.ZipFile(path) as jar:
+              modifier = json.loads(jar.read("data/archie_dinosaurs/forge/biome_modifier/lushsaur_spawns.json"))
+          assert modifier["biomes"] == "minecraft:lush_caves"
+          assert modifier["spawners"] == [{
+              "type": "archie_dinosaurs:lushsaur",
+              "weight": 1, "minCount": 1, "maxCount": 1
+          }]
+          print("Verified rare Lushsaur natural spawning in lush caves and no Lushsaur structure.")
+          PY
 
       - name: Verify framework overrides, mounted attacks, and Lushsaur sprint controls
         shell: bash

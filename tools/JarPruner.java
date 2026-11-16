@@ -9,6 +9,7 @@ import java.util.zip.*;
 
 public final class JarPruner {
     private static final String ROOT = "com/eternal_creations/archies_dino_mod/";
+    private static final String LEGACY_HOOKS = "com/eternal_creations/archies_dino_mod/legacy/LegacyBehaviorHooks";
     private static final Map<String, Set<String>> PROCESSED_METHODS = new HashMap<>();
 
     private static final Map<String, Set<String>> REGISTRY_FIELDS = Map.ofEntries(
@@ -206,9 +207,15 @@ public final class JarPruner {
         patchKeyMappings(nodes.get(ROOT + "client/ADKeyMappings"));
         patchAbstractArrowMixin(nodes.get(ROOT + "mixin/AbstractArrowMixin"));
         ClassNode lushsaurEntity = nodes.get(ROOT + "common/entity/mob/lushsaur/LushsaurEntity");
+        ClassNode chorusoatlEntity = nodes.get(ROOT + "common/entity/mob/chorusoatl/ChorusoatlEntity");
         ClassNode lushsaurClient = nodes.get(ROOT + "client/model/render/entity/mob/LushsaurClient");
         ClassNode chorusoatlClient = nodes.get(ROOT + "client/model/render/entity/mob/ChorusoatlClient");
         ClassNode sculksaurClient = nodes.get(ROOT + "client/model/render/entity/mob/SculksaurClient");
+        patchLushsaurRuntimeHooks(lushsaurEntity);
+        patchChorusoatlRuntimeHooks(chorusoatlEntity);
+        patchChorusoatlAnimationHooks(nodes.get(ROOT + "client/model/render/entity/mob/ChorusoatlClient"));
+        patchChorusoatlGoalSuppression(nodes.get(ROOT + "common/entity/ai/goal/GoalStrollLandAndAir"), "shouldSuppressChorusStroll");
+        patchChorusoatlGoalSuppression(nodes.get(ROOT + "common/entity/mob/chorusoatl/ai/ChorusoatlGoalFollowPack"), "shouldSuppressChorusPackFollow");
         patchLushsaurControllingPassenger(lushsaurEntity);
         patchLushsaurNoInventory(lushsaurEntity);
         patchLushsaurCanSprint(lushsaurEntity);
@@ -2816,6 +2823,195 @@ public final class JarPruner {
             code.add(new InsnNode(Opcodes.RETURN));
             method.maxStack = 2;
             method.maxLocals = 2;
+        }
+    }
+
+
+    private static MethodNode requireMethod(ClassNode owner, String name, String descriptor) {
+        if (owner == null) throw new IllegalStateException("Missing class for method " + name + descriptor);
+        return owner.methods.stream()
+            .filter(method -> method.name.equals(name) && method.desc.equals(descriptor))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("Missing method " + owner.name + "." + name + descriptor));
+    }
+
+    private static void patchVoidMethodReturns(MethodNode method, String hookName, String hookDescriptor, boolean saveTag) {
+        int patched = 0;
+        for (AbstractInsnNode instruction : method.instructions.toArray()) {
+            if (instruction.getOpcode() != Opcodes.RETURN) continue;
+            InsnList hook = new InsnList();
+            hook.add(new VarInsnNode(Opcodes.ALOAD, 0));
+            if (saveTag) hook.add(new VarInsnNode(Opcodes.ALOAD, 1));
+            hook.add(new MethodInsnNode(Opcodes.INVOKESTATIC, LEGACY_HOOKS, hookName, hookDescriptor, false));
+            method.instructions.insertBefore(instruction, hook);
+            patched++;
+        }
+        if (patched == 0) throw new IllegalStateException("No RETURN found in " + method.name + method.desc);
+        method.maxStack = Math.max(method.maxStack, saveTag ? 2 : 1);
+    }
+
+    private static void patchLushsaurRuntimeHooks(ClassNode owner) {
+        if (owner == null) throw new IllegalStateException("LushsaurEntity is missing");
+        MethodNode tick = requireMethod(owner, "m_8119_", "()V");
+        MethodNode save = requireMethod(owner, "m_7380_", "(Lnet/minecraft/nbt/CompoundTag;)V");
+        MethodNode load = requireMethod(owner, "m_7378_", "(Lnet/minecraft/nbt/CompoundTag;)V");
+        patchVoidMethodReturns(tick, "lushsaurTick", "(Ljava/lang/Object;)V", false);
+        patchVoidMethodReturns(save, "saveLush", "(Ljava/lang/Object;Ljava/lang/Object;)V", true);
+        patchVoidMethodReturns(load, "loadLush", "(Ljava/lang/Object;Ljava/lang/Object;)V", true);
+
+        String feedDescriptor =
+            "(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/item/ItemStack;)Lnet/minecraft/world/InteractionResult;";
+        MethodNode feed = requireMethod(owner, "eatFromHand", feedDescriptor);
+        MethodInsnNode superFeed = null;
+        for (AbstractInsnNode instruction : feed.instructions.toArray()) {
+            if (instruction instanceof MethodInsnNode call &&
+                call.getOpcode() == Opcodes.INVOKESPECIAL &&
+                call.name.equals("eatFromHand") && call.desc.equals(feedDescriptor)) {
+                if (superFeed != null) throw new IllegalStateException("Multiple superclass eatFromHand calls");
+                superFeed = call;
+            }
+        }
+        if (superFeed == null) throw new IllegalStateException("Lushsaur eatFromHand superclass call is missing");
+        AbstractInsnNode store = nextCodeInstruction(superFeed);
+        if (!(store instanceof VarInsnNode resultStore) || resultStore.getOpcode() != Opcodes.ASTORE) {
+            throw new IllegalStateException("Unexpected Lushsaur eatFromHand result storage");
+        }
+        InsnList hook = new InsnList();
+        hook.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        hook.add(new VarInsnNode(Opcodes.ALOAD, 1));
+        hook.add(new VarInsnNode(Opcodes.ALOAD, 2));
+        hook.add(new VarInsnNode(Opcodes.ALOAD, resultStore.var));
+        hook.add(new MethodInsnNode(Opcodes.INVOKESTATIC, LEGACY_HOOKS, "afterLushFeed",
+            "(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", false));
+        hook.add(new TypeInsnNode(Opcodes.CHECKCAST, "net/minecraft/world/InteractionResult"));
+        hook.add(new VarInsnNode(Opcodes.ASTORE, resultStore.var));
+        feed.instructions.insert(store, hook);
+        feed.maxStack = Math.max(feed.maxStack, 4);
+        System.out.println("PATCH LUSHS warning, loyalty, feed, and persistence hooks installed");
+    }
+
+    private static void patchChorusoatlRuntimeHooks(ClassNode owner) {
+        if (owner == null) throw new IllegalStateException("ChorusoatlEntity is missing");
+        MethodNode tick = requireMethod(owner, "m_8119_", "()V");
+        MethodNode save = requireMethod(owner, "m_7380_", "(Lnet/minecraft/nbt/CompoundTag;)V");
+        MethodNode load = requireMethod(owner, "m_7378_", "(Lnet/minecraft/nbt/CompoundTag;)V");
+        patchVoidMethodReturns(tick, "chorusoatlTick", "(Ljava/lang/Object;)V", false);
+        patchVoidMethodReturns(save, "saveChorusoatl", "(Ljava/lang/Object;Ljava/lang/Object;)V", true);
+        patchVoidMethodReturns(load, "loadChorusoatl", "(Ljava/lang/Object;Ljava/lang/Object;)V", true);
+
+        String phase = ROOT + "common/entity/base/Flyer$FlightPhase";
+        MethodNode setPhase = requireMethod(owner, "setFlightPhase", "(L" + phase + ";)V");
+        LabelNode proceed = new LabelNode();
+        InsnList guard = new InsnList();
+        guard.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        guard.add(new VarInsnNode(Opcodes.ALOAD, 1));
+        guard.add(new MethodInsnNode(Opcodes.INVOKESTATIC, LEGACY_HOOKS,
+            "allowChorusoatlFlightPhase", "(Ljava/lang/Object;Ljava/lang/Object;)Z", false));
+        guard.add(new JumpInsnNode(Opcodes.IFEQ, proceed));
+        guard.add(new InsnNode(Opcodes.RETURN));
+        guard.add(proceed);
+        guard.add(new FrameNode(Opcodes.F_SAME, 0, null, 0, null));
+        setPhase.instructions.insert(guard);
+        setPhase.maxStack = Math.max(setPhase.maxStack, 2);
+        System.out.println("PATCH CHORUS autonomous landing and perched-state hooks installed");
+    }
+
+    private static void patchChorusoatlAnimationHooks(ClassNode owner) {
+        if (owner == null) throw new IllegalStateException("ChorusoatlClient is missing");
+        String chorus = ROOT + "common/entity/mob/chorusoatl/ChorusoatlEntity";
+        String lambdaDescriptor = "(L" + chorus + ";)Z";
+        int actionLambdas = 0;
+        for (MethodNode method : owner.methods) {
+            if (!method.desc.equals(lambdaDescriptor)) continue;
+            boolean up = false;
+            boolean down = false;
+            boolean hasActiveTest = false;
+            for (AbstractInsnNode instruction : method.instructions) {
+                if (instruction instanceof FieldInsnNode field &&
+                    field.getOpcode() == Opcodes.GETFIELD && field.owner.equals(chorus)) {
+                    if (field.name.equals("actionUp")) up = true;
+                    if (field.name.equals("actionDown")) down = true;
+                }
+                if (instruction instanceof MethodInsnNode call &&
+                    call.name.equals("isActiveWithoutFadeOut") && call.desc.equals("()Z")) {
+                    hasActiveTest = true;
+                }
+            }
+            if (!(hasActiveTest && (up ^ down))) continue;
+            int returns = 0;
+            for (AbstractInsnNode instruction : method.instructions.toArray()) {
+                if (instruction.getOpcode() != Opcodes.IRETURN) continue;
+                InsnList hook = new InsnList();
+                hook.add(new VarInsnNode(Opcodes.ALOAD, 0));
+                hook.add(new MethodInsnNode(Opcodes.INVOKESTATIC, LEGACY_HOOKS,
+                    "adjustVerticalActionAnimation", "(ZLjava/lang/Object;)Z", false));
+                method.instructions.insertBefore(instruction, hook);
+                returns++;
+            }
+            if (returns == 0) throw new IllegalStateException("Chorusoatl action-animation lambda has no IRETURN");
+            method.maxStack = Math.max(method.maxStack, 2);
+            actionLambdas++;
+        }
+        if (actionLambdas != 2) {
+            throw new IllegalStateException("Expected the two Chorusoatl UP/DOWN animation lambdas, found " + actionLambdas);
+        }
+
+        MethodNode locomotion = owner.methods.stream()
+            .filter(method -> method.name.equals("buildLocomotionState") &&
+                method.desc.startsWith("(L" + chorus + ";)"))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("ChorusoatlClient.buildLocomotionState is missing"));
+        int airMethodReferences = 0;
+        for (AbstractInsnNode instruction : locomotion.instructions) {
+            if (!(instruction instanceof InvokeDynamicInsnNode dynamic)) continue;
+            for (int i = 0; i < dynamic.bsmArgs.length; i++) {
+                Object argument = dynamic.bsmArgs[i];
+                if (!(argument instanceof Handle handle) ||
+                    handle.getTag() != Opcodes.H_INVOKEVIRTUAL ||
+                    !handle.getOwner().equals(chorus) ||
+                    !handle.getName().equals("isFlying") ||
+                    !handle.getDesc().equals("()Z")) continue;
+                dynamic.bsmArgs[i] = new Handle(Opcodes.H_INVOKESTATIC, LEGACY_HOOKS,
+                    "chorusoatlAirState", "(Ljava/lang/Object;)Z", false);
+                airMethodReferences++;
+            }
+        }
+        if (airMethodReferences != 1) {
+            throw new IllegalStateException("Expected one Chorusoatl isFlying locomotion method reference, found " + airMethodReferences);
+        }
+        System.out.println("PATCH CHORUS vertical movement keeps flying locomotion");
+    }
+
+    private static void patchChorusoatlGoalSuppression(ClassNode owner, String hookName) {
+        if (owner == null) throw new IllegalStateException("Chorusoatl goal class is missing for " + hookName);
+        FieldNode mobField = owner.fields.stream()
+            .filter(field -> field.name.equals("mob"))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("Missing mob field in " + owner.name));
+        int patchedMethods = 0;
+        for (MethodNode method : owner.methods) {
+            if (!(method.name.equals("m_8036_") || method.name.equals("m_8045_")) ||
+                !method.desc.equals("()Z")) continue;
+            int returns = 0;
+            for (AbstractInsnNode instruction : method.instructions.toArray()) {
+                if (instruction.getOpcode() != Opcodes.IRETURN) continue;
+                InsnList gate = new InsnList();
+                gate.add(new VarInsnNode(Opcodes.ALOAD, 0));
+                gate.add(new FieldInsnNode(Opcodes.GETFIELD, owner.name, mobField.name, mobField.desc));
+                gate.add(new MethodInsnNode(Opcodes.INVOKESTATIC, LEGACY_HOOKS,
+                    hookName, "(Ljava/lang/Object;)Z", false));
+                gate.add(new InsnNode(Opcodes.ICONST_1));
+                gate.add(new InsnNode(Opcodes.IXOR));
+                gate.add(new InsnNode(Opcodes.IAND));
+                method.instructions.insertBefore(instruction, gate);
+                returns++;
+            }
+            if (returns == 0) throw new IllegalStateException("No boolean return in " + owner.name + "." + method.name);
+            method.maxStack = Math.max(method.maxStack, 3);
+            patchedMethods++;
+        }
+        if (patchedMethods != 2) {
+            throw new IllegalStateException("Expected start/continue gates in " + owner.name + ", found " + patchedMethods);
         }
     }
 
