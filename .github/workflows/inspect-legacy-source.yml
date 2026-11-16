@@ -22,6 +22,34 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
+      - name: Decompile original Lushsaur and Chorusoatl AI for source audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          JAR="ec_ad-forge-1.20.1-1.0.4.jar"
+          CFR="build/cfr-0.152.jar"
+          mkdir -p build
+          curl --fail --location --retry 3 \
+            "https://repo.maven.apache.org/maven2/org/benf/cfr/0.152/cfr-0.152.jar" \
+            -o "$CFR"
+          java -jar "$CFR" "$JAR" --outputdir build/decompiled --silent true
+          BASE="build/decompiled/com/eternal_creations/archies_dino_mod/common/entity/mob"
+          test -d "$BASE/lushsaur"
+          test -d "$BASE/chorusoatl"
+          mkdir -p build/ai-audit
+          cp -R "$BASE/lushsaur" build/ai-audit/
+          cp -R "$BASE/chorusoatl" build/ai-audit/
+          find build/ai-audit -type f -name '*.java' -print | sort
+          tar -czf build/ai-audit-source.tar.gz -C build/ai-audit .
+
+      - name: Upload decompiled AI source audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: original-dinosaur-ai-source
+          path: build/ai-audit-source.tar.gz
+          if-no-files-found: error
+          retention-days: 7
+
       - name: Inspect vanilla SaddleItem and Saddleable bytecode
         shell: bash
         run: |
