@@ -1,4 +1,4 @@
-name: Direct Legacy JAR Prune - build 32
+name: Direct Legacy JAR Prune - build 33
 
 on:
   push:
