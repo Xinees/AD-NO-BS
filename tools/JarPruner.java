@@ -2919,55 +2919,32 @@ public final class JarPruner {
     private static void patchChorusoatlAnimationHooks(ClassNode owner) {
         if (owner == null) throw new IllegalStateException("ChorusoatlClient is missing");
         String chorus = ROOT + "common/entity/mob/chorusoatl/ChorusoatlEntity";
-        String lambdaDescriptor = "(L" + chorus + ";)Z";
-        int actionLambdas = 0;
-        for (MethodNode method : owner.methods) {
-            if (!method.desc.equals(lambdaDescriptor)) continue;
-            boolean up = false;
-            boolean down = false;
-            boolean hasActiveTest = false;
-            for (AbstractInsnNode instruction : method.instructions) {
-                if (instruction instanceof FieldInsnNode field &&
-                    field.getOpcode() == Opcodes.GETFIELD && field.owner.equals(chorus)) {
-                    if (field.name.equals("actionUp")) up = true;
-                    if (field.name.equals("actionDown")) down = true;
-                }
-                if (instruction instanceof MethodInsnNode call &&
-                    call.name.equals("isActiveWithoutFadeOut") && call.desc.equals("()Z")) {
-                    hasActiveTest = true;
-                }
-            }
-            if (!(hasActiveTest && (up ^ down))) continue;
-            int returns = 0;
-            for (AbstractInsnNode instruction : method.instructions.toArray()) {
-                if (instruction.getOpcode() != Opcodes.IRETURN) continue;
-                InsnList hook = new InsnList();
-                hook.add(new VarInsnNode(Opcodes.ALOAD, 0));
-                hook.add(new MethodInsnNode(Opcodes.INVOKESTATIC, LEGACY_HOOKS,
-                    "adjustVerticalActionAnimation", "(ZLjava/lang/Object;)Z", false));
-                method.instructions.insertBefore(instruction, hook);
-                returns++;
-            }
-            if (returns == 0) throw new IllegalStateException("Chorusoatl action-animation lambda has no IRETURN");
-            method.maxStack = Math.max(method.maxStack, 2);
-            actionLambdas++;
+        List<MethodNode> actionPredicates = owner.methods.stream()
+            .filter(method -> method.name.startsWith("lambda$buildLocomotionState$") &&
+                method.desc.endsWith(")Z"))
+            .toList();
+        if (actionPredicates.size() != 2) {
+            String found = owner.methods.stream()
+                .filter(method -> method.name.startsWith("lambda$buildLocomotionState$"))
+                .map(method -> method.name + method.desc)
+                .toList().toString();
+            throw new IllegalStateException("Expected two UP/DOWN predicates in Chorusoatl locomotion state, found " +
+                actionPredicates.size() + ": " + found);
         }
-        if (actionLambdas != 2) {
-            System.out.println("DEBUG CHORUS CLIENT ACTION LAMBDAS FOUND=" + actionLambdas);
-            for (MethodNode candidate : owner.methods) {
-                if (candidate.name.toLowerCase().contains("lambda") || candidate.desc.contains("ChorusoatlEntity")) {
-                    System.out.println("DEBUG CHORUS METHOD " + candidate.name + candidate.desc + " access=" + candidate.access);
-                    for (AbstractInsnNode instruction : candidate.instructions) {
-                        if (instruction instanceof FieldInsnNode field &&
-                            (field.name.toLowerCase().contains("actionup") || field.name.toLowerCase().contains("actiondown"))) {
-                            System.out.println("  FIELD " + field.owner + "." + field.name + field.desc);
-                        }
-                        if (instruction instanceof MethodInsnNode call && call.name.contains("isActive")) {
-                            System.out.println("  CALL " + call.owner + "." + call.name + call.desc);
-                        }
-                    }
-                }
+        for (MethodNode predicate : actionPredicates) {
+            Type[] arguments = Type.getArgumentTypes(predicate.desc);
+            if ((predicate.access & Opcodes.ACC_STATIC) == 0 || arguments.length != 1 ||
+                arguments[0].getSort() != Type.OBJECT) {
+                throw new IllegalStateException("Unexpected Chorusoatl action-state predicate descriptor: " + predicate.name + predicate.desc);
             }
+            clearMethod(predicate);
+            InsnList code = predicate.instructions;
+            code.add(new VarInsnNode(Opcodes.ALOAD, 0));
+            code.add(new MethodInsnNode(Opcodes.INVOKESTATIC, LEGACY_HOOKS,
+                "chorusoatlActionStateAnimationActive", "(Ljava/lang/Object;)Z", false));
+            code.add(new InsnNode(Opcodes.IRETURN));
+            predicate.maxStack = 1;
+            predicate.maxLocals = 1;
         }
 
         MethodNode locomotion = owner.methods.stream()
