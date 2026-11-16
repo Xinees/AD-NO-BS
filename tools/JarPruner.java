@@ -2953,7 +2953,21 @@ public final class JarPruner {
             actionLambdas++;
         }
         if (actionLambdas != 2) {
-            throw new IllegalStateException("Expected the two Chorusoatl UP/DOWN animation lambdas, found " + actionLambdas);
+            System.out.println("DEBUG CHORUS CLIENT ACTION LAMBDAS FOUND=" + actionLambdas);
+            for (MethodNode candidate : owner.methods) {
+                if (candidate.name.toLowerCase().contains("lambda") || candidate.desc.contains("ChorusoatlEntity")) {
+                    System.out.println("DEBUG CHORUS METHOD " + candidate.name + candidate.desc + " access=" + candidate.access);
+                    for (AbstractInsnNode instruction : candidate.instructions) {
+                        if (instruction instanceof FieldInsnNode field &&
+                            (field.name.toLowerCase().contains("actionup") || field.name.toLowerCase().contains("actiondown"))) {
+                            System.out.println("  FIELD " + field.owner + "." + field.name + field.desc);
+                        }
+                        if (instruction instanceof MethodInsnNode call && call.name.contains("isActive")) {
+                            System.out.println("  CALL " + call.owner + "." + call.name + call.desc);
+                        }
+                    }
+                }
+            }
         }
 
         MethodNode locomotion = owner.methods.stream()
