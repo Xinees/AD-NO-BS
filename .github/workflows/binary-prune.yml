@@ -225,9 +225,17 @@ jobs:
           grep -Fq 'LegacyBehaviorHooks.chorusoatlAirState' <<< "$CHORUS_CLIENT"
           CHORUS_CLIENT_SIGNATURES="$(javap -classpath "$JAR" -p -s com.eternal_creations.archies_dino_mod.client.model.render.entity.mob.ChorusoatlClient)"
           grep -Fq 'descriptor: (Lcom/astemir/astemirlib/re/common/action/ActionState;)Z' <<< "$CHORUS_CLIENT_SIGNATURES"
+          CHORUS_CLIENT_VERBOSE="$(javap -classpath "$JAR" -p -v com.eternal_creations.archies_dino_mod.client.model.render.entity.mob.ChorusoatlClient)"
+          TYPED_BRIDGE='archiesDinoMod$chorusoatlActionStateAnimationActive:(Lcom/astemir/astemirlib/re/common/action/ActionState;)Z'
+          grep -Fq "$TYPED_BRIDGE" <<< "$CHORUS_CLIENT_VERBOSE"
+          if grep -Fq 'archiesDinoMod$chorusoatlActionStateAnimationActive:(Ljava/lang/Object;)Z' <<< "$CHORUS_CLIENT_VERBOSE"; then
+            echo "Chorusoatl ActionState lambda bridge must retain the concrete ActionState descriptor."
+            exit 1
+          fi
 
           CHARGE_GOAL="$(javap -classpath "$JAR" -p -c com.eternal_creations.archies_dino_mod.common.entity.ai.goal.action.GoalChargeMeleeAttack)"
-          grep -Fq 'LegacyBehaviorHooks.consumeLushsaurChargeWarningSuppression' <<< "$CHARGE_GOAL"
+          CHARGE_SUPPRESSION_CALLS="$(grep -Fc 'LegacyBehaviorHooks.consumeLushsaurChargeWarningSuppression' <<< "$CHARGE_GOAL" || true)"
+          test "$CHARGE_SUPPRESSION_CALLS" -eq 1
 
           STROLL="$(javap -classpath "$JAR" -p -c com.eternal_creations.archies_dino_mod.common.entity.ai.goal.GoalStrollLandAndAir)"
           grep -Fq 'LegacyBehaviorHooks.shouldSuppressChorusStroll' <<< "$STROLL"
