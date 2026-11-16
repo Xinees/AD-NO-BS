@@ -192,6 +192,8 @@ public final class JarPruner {
         patchParticleEmitters(nodes.get(ROOT + "client/particle/ADParticleEmitters"));
         patchTemptItems(nodes.get(ROOT + "common/entity/mob/lushsaur/ai/LushsaurAI"), "LUSH_CORE");
         patchTemptItems(nodes.get(ROOT + "common/entity/mob/chorusoatl/ai/ChorusoatlAI"), "CHORUS_FOSSIL");
+        patchLushsaurPlayerAvoidance(nodes.get(ROOT + "common/entity/mob/lushsaur/ai/LushsaurAI"));
+        patchLargeMobTrackingRanges(nodes.get(ROOT + "common/entity/ADEntityTypes"));
         patchEntitySettings(nodes.get(ROOT + "server/ServerConfig$EntitySettings"));
         patchServerConfig(nodes.get(ROOT + "server/ServerConfig"));
         patchLushMaceItemFactory(nodes.get(ROOT + "common/items/ADItems"));
@@ -730,6 +732,170 @@ public final class JarPruner {
         if (replaced == 0) {
             throw new IllegalStateException("No Amber temptation reference found in " + owner.name);
         }
+    }
+
+    private static void patchLushsaurPlayerAvoidance(ClassNode owner) {
+        if (owner == null) throw new IllegalStateException("LushsaurAI class is missing");
+
+        String goalAvoidEntity = ROOT + "common/entity/ai/goal/GoalAvoidEntity";
+        String factoryDescriptor = "(Ljava/lang/Class;)L" + goalAvoidEntity + "$Builder;";
+        String goalSelector = "net/minecraft/world/entity/ai/goal/GoalSelector";
+        String addGoalDescriptor = "(ILnet/minecraft/world/entity/ai/goal/Goal;)V";
+        MethodNode setup = owner.methods.stream()
+            .filter(method -> method.name.equals("setupAI") &&
+                method.desc.startsWith("(L" + ROOT + "common/entity/mob/lushsaur/LushsaurEntity;"))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("LushsaurAI.setupAI is missing"));
+
+        List<MethodInsnNode> factories = new ArrayList<>();
+        for (AbstractInsnNode instruction : setup.instructions.toArray()) {
+            if (instruction instanceof MethodInsnNode call &&
+                call.getOpcode() == Opcodes.INVOKESTATIC &&
+                call.owner.equals(goalAvoidEntity) &&
+                call.name.equals("of") &&
+                call.desc.equals(factoryDescriptor)) {
+                factories.add(call);
+            }
+        }
+        if (factories.size() != 1) {
+            throw new IllegalStateException("Expected one Lushsaur player-avoidance factory, found " + factories.size());
+        }
+
+        MethodInsnNode factory = factories.get(0);
+        AbstractInsnNode playerClass = previousCodeInstruction(factory);
+        AbstractInsnNode priority = previousCodeInstruction(playerClass);
+        AbstractInsnNode selectorLoad = previousCodeInstruction(priority);
+        if (!(playerClass instanceof LdcInsnNode classLiteral) ||
+            !(classLiteral.cst instanceof Type playerType) ||
+            !playerType.getInternalName().equals("net/minecraft/world/entity/player/Player") ||
+            priority == null || priority.getOpcode() != Opcodes.ICONST_2 ||
+            !(selectorLoad instanceof VarInsnNode load) ||
+            load.getOpcode() != Opcodes.ALOAD || load.var != 1) {
+            throw new IllegalStateException("Lushsaur player-avoidance goal registration shape changed");
+        }
+
+        MethodInsnNode registration = null;
+        for (AbstractInsnNode instruction = factory.getNext(); instruction != null; instruction = instruction.getNext()) {
+            if (instruction instanceof MethodInsnNode call &&
+                call.getOpcode() == Opcodes.INVOKEVIRTUAL &&
+                call.owner.equals(goalSelector) &&
+                call.name.equals("m_25352_") &&
+                call.desc.equals(addGoalDescriptor)) {
+                registration = call;
+                break;
+            }
+        }
+        if (registration == null) {
+            throw new IllegalStateException("Lushsaur player-avoidance goal registration is missing");
+        }
+
+        AbstractInsnNode buildCall = previousCodeInstruction(registration);
+        if (!(buildCall instanceof MethodInsnNode build) || !build.name.equals("build")) {
+            throw new IllegalStateException("Lushsaur player-avoidance builder call is unexpected");
+        }
+
+        removeInclusive(setup.instructions, selectorLoad, registration);
+        for (AbstractInsnNode instruction : setup.instructions.toArray()) {
+            if (instruction instanceof MethodInsnNode call &&
+                call.owner.equals(goalAvoidEntity) && call.name.equals("of")) {
+                throw new IllegalStateException("LushsaurAI still constructs a player-avoidance goal");
+            }
+        }
+        System.out.println("PATCH LUSHS AVOIDANCE removed player flee goal; Raider hide goal retained");
+    }
+
+    private static void patchLargeMobTrackingRanges(ClassNode owner) {
+        if (owner == null) throw new IllegalStateException("ADEntityTypes class is missing");
+
+        String builder = "net/minecraft/world/entity/EntityType$Builder";
+        String sizeDescriptor = "(FF)L" + builder + ";";
+        String trackingName = "m_20702_";
+        String trackingDescriptor = "(I)L" + builder + ";";
+        int lushPatched = 0;
+        int chorusPatched = 0;
+
+        for (MethodNode method : owner.methods) {
+            if (method.name.equals("<clinit>")) continue;
+
+            for (AbstractInsnNode instruction : method.instructions.toArray()) {
+                if (!(instruction instanceof MethodInsnNode sized) ||
+                    sized.getOpcode() != Opcodes.INVOKEVIRTUAL ||
+                    !sized.owner.equals(builder) ||
+                    !sized.name.equals("m_20699_") ||
+                    !sized.desc.equals(sizeDescriptor)) {
+                    continue;
+                }
+
+                AbstractInsnNode heightNode = previousCodeInstruction(sized);
+                AbstractInsnNode widthNode = previousCodeInstruction(heightNode);
+                Float height = heightNode instanceof LdcInsnNode ldc && ldc.cst instanceof Float value
+                    ? value : null;
+                Float width = widthNode instanceof LdcInsnNode ldc && ldc.cst instanceof Float value
+                    ? value : null;
+                if (width == null || height == null) continue;
+
+                boolean lush = Math.abs(width - 3.2f) < 0.0001f &&
+                    Math.abs(height - 3.0f) < 0.0001f &&
+                    method.instructions.toArray().length > 0 &&
+                    !hasBuilderCall(method, builder, "m_20719_");
+                boolean chorus = Math.abs(width - 3.6f) < 0.0001f &&
+                    Math.abs(height - 5.2f) < 0.0001f;
+                if (!lush && !chorus) continue;
+
+                List<MethodInsnNode> trackingCalls = new ArrayList<>();
+                MethodInsnNode lastBuilderCall = sized;
+                for (AbstractInsnNode cursor = sized.getNext(); cursor != null; cursor = cursor.getNext()) {
+                    if (cursor instanceof MethodInsnNode call && call.owner.equals(builder) &&
+                        (call.name.equals("m_20717_") || call.name.equals("m_20719_") ||
+                         call.name.equals(trackingName))) {
+                        lastBuilderCall = call;
+                        if (call.name.equals(trackingName)) trackingCalls.add(call);
+                    }
+                    if (cursor.getOpcode() == Opcodes.ARETURN) break;
+                }
+
+                if (trackingCalls.size() > 1) {
+                    throw new IllegalStateException("Multiple tracking range calls in " + method.name);
+                }
+                if (!trackingCalls.isEmpty()) {
+                    AbstractInsnNode valueNode = previousCodeInstruction(trackingCalls.get(0));
+                    if (!(valueNode instanceof IntInsnNode value) ||
+                        value.getOpcode() != Opcodes.BIPUSH || value.operand != 16 ||
+                        !trackingCalls.get(0).desc.equals(trackingDescriptor)) {
+                        throw new IllegalStateException("Unexpected existing tracking range in " + method.name);
+                    }
+                } else {
+                    if (!trackingDescriptor.equals("(I)L" + builder + ";")) {
+                        throw new IllegalStateException("Unexpected EntityType.Builder tracking range descriptor");
+                    }
+                    InsnList tracking = new InsnList();
+                    tracking.add(new IntInsnNode(Opcodes.BIPUSH, 16));
+                    tracking.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
+                        builder, trackingName, trackingDescriptor, false));
+                    method.instructions.insert(lastBuilderCall, tracking);
+                    method.maxStack = Math.max(method.maxStack, 2);
+                }
+
+                if (lush) lushPatched++;
+                if (chorus) chorusPatched++;
+            }
+        }
+
+        if (lushPatched != 1 || chorusPatched != 1) {
+            throw new IllegalStateException("Expected one Lushsaur and one Chorusoatl tracking range patch; found " +
+                lushPatched + " and " + chorusPatched);
+        }
+        System.out.println("PATCH TRACKING Lushsaur and Chorusoatl client tracking ranges set to 16 chunks (matching Sculksaur)");
+    }
+
+    private static boolean hasBuilderCall(MethodNode method, String owner, String name) {
+        for (AbstractInsnNode instruction : method.instructions.toArray()) {
+            if (instruction instanceof MethodInsnNode call &&
+                call.owner.equals(owner) && call.name.equals(name)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static final String ENTITY_SETTINGS =
