@@ -153,6 +153,39 @@ jobs:
             exit 1
           fi
 
+      - name: Verify Lushsaur-only passenger cooldown and removed player flee goal
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          MOUNT_COMPONENT="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.common.entity.component.MountComponent)"
+          ADD_PASSENGER="$(printf '%s\n' "$MOUNT_COMPONENT" | sed -n '/public void addPassenger(/,/public boolean isNoPassengerCooldown/p')"
+          if ! grep -Fq 'LushsaurEntity' <<< "$ADD_PASSENGER"; then
+            echo "MountComponent.addPassenger does not contain the Lushsaur-only cooldown check."
+            exit 1
+          fi
+          if ! grep -Fq 'ixor' <<< "$ADD_PASSENGER" || ! grep -Fq 'imul' <<< "$ADD_PASSENGER"; then
+            echo "Lushsaur-only cooldown calculation is incomplete."
+            exit 1
+          fi
+          if ! grep -Fq 'bipush        20' <<< "$ADD_PASSENGER"; then
+            echo "The original 20-tick cooldown for other mounts was not retained."
+            exit 1
+          fi
+
+          LUSH_AI="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.common.entity.mob.lushsaur.ai.LushsaurAI)"
+          SETUP_AI="$(printf '%s\n' "$LUSH_AI" | sed -n '/setupAI(/,/^  private /p')"
+          if grep -Fq 'GoalAvoidEntity.of' <<< "$SETUP_AI"; then
+            echo "Lushsaur setupAI still constructs the player-avoidance goal."
+            exit 1
+          fi
+          if ! grep -Fq 'LushsaurGoalHideFromEntities' <<< "$SETUP_AI"; then
+            echo "Lushsaur Raider hide goal was unexpectedly removed."
+            exit 1
+          fi
+
+          echo "Verified Lushsaur input is immediate after mounting, other mounts keep the original 20-tick gate, player flee is removed, and Raider hiding remains."
+
       - name: Verify framework overrides, mounted attacks, and Lushsaur sprint controls
         shell: bash
         run: |
