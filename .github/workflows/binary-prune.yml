@@ -1,9 +1,10 @@
-name: Direct Legacy JAR Prune - build 30
+name: Direct Legacy JAR Prune - build 31
 
 on:
   push:
     branches:
       - binary-prune/legacy
+      - fix/build316-runtime
   workflow_dispatch:
 
 permissions:
@@ -22,7 +23,7 @@ jobs:
       - name: Checkout binary workspace
         uses: actions/checkout@v4
         with:
-          ref: binary-prune/legacy
+          ref: ${{ github.ref }}
 
       - name: Set up Java 17
         uses: actions/setup-java@v4
@@ -66,6 +67,9 @@ jobs:
           mkdir -p build/behavior-hooks
           cat tools/LegacyBehaviorHooks.part1.b64 tools/LegacyBehaviorHooks.part2.b64 tools/LegacyBehaviorHooks.part3.b64 tools/LegacyBehaviorHooks.part4.b64 | base64 -d | gzip -dc > build/LegacyBehaviorHooks.java
           javac -encoding UTF-8 --release 17 -d build/behavior-hooks build/LegacyBehaviorHooks.java
+          grep -Fq 'new String[]{"m_7500_", "isCreative"}' build/LegacyBehaviorHooks.java
+          grep -Fq 'state.suppressNextChargeRoarUntil = now + 200' build/LegacyBehaviorHooks.java
+          grep -Fq 'consumeLushsaurChargeWarningSuppression' build/LegacyBehaviorHooks.java
 
       - name: Prune classes and registrations in the original JAR
         shell: bash
@@ -219,6 +223,11 @@ jobs:
           CHORUS_CLIENT="$(javap -classpath "$JAR" -p -c -v com.eternal_creations.archies_dino_mod.client.model.render.entity.mob.ChorusoatlClient)"
           grep -Fq 'LegacyBehaviorHooks.chorusoatlActionStateAnimationActive' <<< "$CHORUS_CLIENT"
           grep -Fq 'LegacyBehaviorHooks.chorusoatlAirState' <<< "$CHORUS_CLIENT"
+          CHORUS_CLIENT_SIGNATURES="$(javap -classpath "$JAR" -p -s com.eternal_creations.archies_dino_mod.client.model.render.entity.mob.ChorusoatlClient)"
+          grep -Fq 'descriptor: (Lcom/astemir/astemirlib/re/common/action/ActionState;)Z' <<< "$CHORUS_CLIENT_SIGNATURES"
+
+          CHARGE_GOAL="$(javap -classpath "$JAR" -p -c com.eternal_creations.archies_dino_mod.common.entity.ai.goal.action.GoalChargeMeleeAttack)"
+          grep -Fq 'LegacyBehaviorHooks.consumeLushsaurChargeWarningSuppression' <<< "$CHARGE_GOAL"
 
           STROLL="$(javap -classpath "$JAR" -p -c com.eternal_creations.archies_dino_mod.common.entity.ai.goal.GoalStrollLandAndAir)"
           grep -Fq 'LegacyBehaviorHooks.shouldSuppressChorusStroll' <<< "$STROLL"
