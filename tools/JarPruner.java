@@ -217,6 +217,7 @@ public final class JarPruner {
         patchLushsaurVisualPassengerOffset(lushsaurClient);
         patchLushsaurPassengerHitboxOffset(lushsaurEntity);
         patchMountComponentSaddleGate(nodes.get(ROOT + "common/entity/component/MountComponent"));
+        patchLushsaurPassengerInputCooldown(nodes.get(ROOT + "common/entity/component/MountComponent"));
         patchLushsaurNoEquipment(lushsaurEntity);
         patchEntityRegistryNamespace(nodes.get(ROOT + "platform/ForgeCommonHelper"));
         patchSculksaurExplosionEffects(
@@ -1477,6 +1478,55 @@ public final class JarPruner {
         registerEntityType.instructions.remove(oldNameLoad);
         registerEntityType.instructions.remove(oldPrefix);
         registerEntityType.maxStack = Math.max(registerEntityType.maxStack, 4);
+    }
+
+    private static void patchLushsaurPassengerInputCooldown(ClassNode owner) {
+        if (owner == null) throw new IllegalStateException("MountComponent class is missing");
+
+        String descriptor = "(Lnet/minecraft/world/entity/Entity;)V";
+        MethodNode addPassenger = owner.methods.stream()
+            .filter(method -> method.name.equals("addPassenger") && method.desc.equals(descriptor))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("MountComponent.addPassenger is missing"));
+
+        FieldInsnNode cooldownWrite = null;
+        for (AbstractInsnNode instruction : addPassenger.instructions.toArray()) {
+            if (instruction instanceof FieldInsnNode field &&
+                field.getOpcode() == Opcodes.PUTFIELD &&
+                field.owner.equals(owner.name) &&
+                field.name.equals("passengerRideCooldown") &&
+                field.desc.equals("I")) {
+                if (cooldownWrite != null) {
+                    throw new IllegalStateException("Unexpected multiple passenger cooldown writes in addPassenger");
+                }
+                cooldownWrite = field;
+            }
+        }
+        if (cooldownWrite == null) {
+            throw new IllegalStateException("MountComponent.addPassenger passenger cooldown assignment is missing");
+        }
+
+        AbstractInsnNode originalValue = previousCodeInstruction(cooldownWrite);
+        if (!(originalValue instanceof IntInsnNode value) ||
+            value.getOpcode() != Opcodes.BIPUSH || value.operand != 20) {
+            throw new IllegalStateException("Unexpected original passenger cooldown value");
+        }
+
+        InsnList replacement = new InsnList();
+        replacement.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        replacement.add(new FieldInsnNode(Opcodes.GETFIELD, owner.name,
+            "mob", "Lnet/minecraft/world/entity/PathfinderMob;"));
+        replacement.add(new TypeInsnNode(Opcodes.INSTANCEOF,
+            ROOT + "common/entity/mob/lushsaur/LushsaurEntity"));
+        replacement.add(new InsnNode(Opcodes.ICONST_1));
+        replacement.add(new InsnNode(Opcodes.IXOR));
+        replacement.add(new IntInsnNode(Opcodes.BIPUSH, 20));
+        replacement.add(new InsnNode(Opcodes.IMUL));
+        addPassenger.instructions.insertBefore(value, replacement);
+        addPassenger.instructions.remove(value);
+        addPassenger.maxStack = Math.max(addPassenger.maxStack, 2);
+
+        System.out.println("PATCH LUSHS MOUNT passenger input cooldown set to zero; other mounts retain 20 ticks");
     }
 
     private static void patchMountComponentSaddleGate(ClassNode owner) {
