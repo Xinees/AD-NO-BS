@@ -837,7 +837,6 @@ public final class JarPruner {
 
                 boolean lush = Math.abs(width - 3.2f) < 0.0001f &&
                     Math.abs(height - 3.0f) < 0.0001f &&
-                    method.instructions.toArray().length > 0 &&
                     !hasBuilderCall(method, builder, "m_20719_");
                 boolean chorus = Math.abs(width - 3.6f) < 0.0001f &&
                     Math.abs(height - 5.2f) < 0.0001f;
