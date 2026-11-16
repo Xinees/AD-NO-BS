@@ -2980,6 +2980,17 @@ public final class JarPruner {
                     hookName, "(Ljava/lang/Object;)Z", false));
                 gate.add(new InsnNode(Opcodes.ICONST_1));
                 gate.add(new InsnNode(Opcodes.IXOR));
+                if (hookName.equals("shouldSuppressChorusPackFollow") && method.name.equals("m_8045_")) {
+                    gate.add(new VarInsnNode(Opcodes.ALOAD, 0));
+                    gate.add(new FieldInsnNode(Opcodes.GETFIELD, owner.name, mobField.name, mobField.desc));
+                    gate.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
+                        "net/minecraft/world/entity/Mob", "m_21573_",
+                        "()Lnet/minecraft/world/entity/ai/navigation/PathNavigation;", false));
+                    gate.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
+                        "net/minecraft/world/entity/ai/navigation/PathNavigation", "m_26571_", "()Z", false));
+                    gate.add(new InsnNode(Opcodes.ICONST_1));
+                    gate.add(new InsnNode(Opcodes.IXOR));
+                }
                 gate.add(new InsnNode(Opcodes.IAND));
                 method.instructions.insertBefore(instruction, gate);
                 returns++;
