@@ -64,7 +64,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p build/behavior-hooks
-          base64 -d tools/LegacyBehaviorHooks.java.gz.b64 | gzip -dc > build/LegacyBehaviorHooks.java
+          cat tools/LegacyBehaviorHooks.part1.b64 tools/LegacyBehaviorHooks.part2.b64 | base64 -d | gzip -dc > build/LegacyBehaviorHooks.java
           javac -encoding UTF-8 --release 17 -d build/behavior-hooks build/LegacyBehaviorHooks.java
 
       - name: Prune classes and registrations in the original JAR
