@@ -214,6 +214,7 @@ public final class JarPruner {
         patchLushsaurRuntimeHooks(lushsaurEntity);
         patchChorusoatlRuntimeHooks(chorusoatlEntity);
         patchChorusoatlAnimationHooks(nodes.get(ROOT + "client/model/render/entity/mob/ChorusoatlClient"));
+        patchLushsaurChargeWarningSuppression(nodes.get(ROOT + "common/entity/ai/goal/action/GoalChargeMeleeAttack"));
         patchChorusoatlGoalSuppression(nodes.get(ROOT + "common/entity/ai/goal/GoalStrollLandAndAir"), "shouldSuppressChorusStroll");
         patchChorusoatlGoalSuppression(nodes.get(ROOT + "common/entity/mob/chorusoatl/ai/ChorusoatlGoalFollowPack"), "shouldSuppressChorusPackFollow");
         patchLushsaurControllingPassenger(lushsaurEntity);
@@ -2919,6 +2920,20 @@ public final class JarPruner {
     private static void patchChorusoatlAnimationHooks(ClassNode owner) {
         if (owner == null) throw new IllegalStateException("ChorusoatlClient is missing");
         String chorus = ROOT + "common/entity/mob/chorusoatl/ChorusoatlEntity";
+        String actionState = "com/astemir/astemirlib/re/common/action/ActionState";
+        String bridgeName = "archiesDinoMod$chorusoatlActionStateAnimationActive";
+        String bridgeDescriptor = "(L" + actionState + ";)Z";
+        owner.methods.removeIf(method -> method.name.equals(bridgeName) && method.desc.equals(bridgeDescriptor));
+        MethodNode typedBridge = new MethodNode(
+            Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC | Opcodes.ACC_SYNTHETIC,
+            bridgeName, bridgeDescriptor, null, null);
+        typedBridge.instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        typedBridge.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, LEGACY_HOOKS,
+            "chorusoatlActionStateAnimationActive", "(Ljava/lang/Object;)Z", false));
+        typedBridge.instructions.add(new InsnNode(Opcodes.IRETURN));
+        typedBridge.maxStack = 1;
+        typedBridge.maxLocals = 1;
+        owner.methods.add(typedBridge);
         MethodNode locomotion = owner.methods.stream()
             .filter(method -> method.name.equals("buildLocomotionState") &&
                 method.desc.startsWith("(L" + chorus + ";)"))
@@ -2934,8 +2949,8 @@ public final class JarPruner {
                 if (handle.getTag() == Opcodes.H_INVOKEVIRTUAL &&
                     handle.getName().equals("isActiveWithoutFadeOut") &&
                     handle.getDesc().equals("()Z")) {
-                    dynamic.bsmArgs[i] = new Handle(Opcodes.H_INVOKESTATIC, LEGACY_HOOKS,
-                        "chorusoatlActionStateAnimationActive", "(Ljava/lang/Object;)Z", false);
+                    dynamic.bsmArgs[i] = new Handle(Opcodes.H_INVOKESTATIC, owner.name,
+                        bridgeName, bridgeDescriptor, false);
                     actionStateReferences++;
                     continue;
                 }
@@ -2958,6 +2973,52 @@ public final class JarPruner {
                 airMethodReferences);
         }
         System.out.println("PATCH CHORUS vertical movement keeps flying locomotion and suppresses UP/DOWN clips");
+    }
+
+    private static void patchLushsaurChargeWarningSuppression(ClassNode owner) {
+        if (owner == null) throw new IllegalStateException("GoalChargeMeleeAttack is missing");
+        MethodNode transition = requireMethod(owner, "transitionToWarning", "()V");
+        FieldNode mobField = owner.fields.stream()
+            .filter(field -> field.name.equals("mob"))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("GoalChargeMeleeAttack.mob field is missing"));
+        List<JumpInsnNode> warningNullGuards = new ArrayList<>();
+        for (AbstractInsnNode instruction : transition.instructions.toArray()) {
+            if (!(instruction instanceof JumpInsnNode jump) || jump.getOpcode() != Opcodes.IFNULL) continue;
+            AbstractInsnNode testedValue = previousCodeInstruction(jump);
+            if (testedValue instanceof FieldInsnNode field &&
+                field.getOpcode() == Opcodes.GETFIELD &&
+                field.owner.equals(owner.name) &&
+                field.name.equals("warnAction")) {
+                warningNullGuards.add(jump);
+            }
+        }
+        if (warningNullGuards.size() != 1) {
+            throw new IllegalStateException("Expected one GoalChargeMeleeAttack.warnAction null guard, found " +
+                warningNullGuards.size());
+        }
+        JumpInsnNode skipWarning = warningNullGuards.get(0);
+        boolean hasRunBeforeSkip = false;
+        for (AbstractInsnNode instruction = nextCodeInstruction(skipWarning);
+             instruction != null && instruction != skipWarning.label;
+             instruction = instruction.getNext()) {
+            if (instruction instanceof MethodInsnNode call && call.name.equals("run")) {
+                hasRunBeforeSkip = true;
+                break;
+            }
+        }
+        if (!hasRunBeforeSkip) {
+            throw new IllegalStateException("GoalChargeMeleeAttack.warnAction.run call was not found");
+        }
+        InsnList gate = new InsnList();
+        gate.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        gate.add(new FieldInsnNode(Opcodes.GETFIELD, owner.name, mobField.name, mobField.desc));
+        gate.add(new MethodInsnNode(Opcodes.INVOKESTATIC, LEGACY_HOOKS,
+            "consumeLushsaurChargeWarningSuppression", "(Ljava/lang/Object;)Z", false));
+        gate.add(new JumpInsnNode(Opcodes.IFNE, skipWarning.label));
+        transition.instructions.insert(skipWarning, gate);
+        transition.maxStack = Math.max(transition.maxStack, 2);
+        System.out.println("PATCH LUSHS third warning suppresses only the duplicate charge-goal roar");
     }
 
     private static void patchChorusoatlGoalSuppression(ClassNode owner, String hookName) {
