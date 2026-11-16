@@ -40,6 +40,31 @@ jobs:
           cp -R "$BASE/lushsaur" build/ai-audit/
           cp -R "$BASE/chorusoatl" build/ai-audit/
           for relative in \
+            common/entity/base/Mount.java \
+            common/entity/base/Pet.java \
+            common/entity/base/ActionTargetEntity.java \
+            common/entity/base/ActionTargetBlock.java \
+            common/entity/component/EntityComponent.java \
+            common/entity/component/EntityComponentHolder.java \
+            networking \
+            common/networking \
+            mixin \
+            client/animation/player/riding; do
+            source="build/decompiled/com/eternal_creations/archies_dino_mod/$relative"
+            if [[ -d "$source" ]]; then
+              mkdir -p "build/ai-audit/$(dirname "$relative")"
+              cp -R "$source" "build/ai-audit/$(dirname "$relative")/"
+            elif [[ -f "$source" ]]; then
+              mkdir -p "build/ai-audit/$(dirname "$relative")"
+              cp "$source" "build/ai-audit/$relative"
+            fi
+          done
+          grep -R -n --include='*.java' -F 'isNoPassengerCooldown()' build/decompiled/com/eternal_creations/archies_dino_mod \
+            | grep -v '/MountComponent.java:' > build/ai-audit/mount-control-references.txt || true
+          grep -R -n --include='*.java' -E 'isRiddenByOwner|canBeControlledByRider|tickRidden\(' \
+            build/decompiled/com/eternal_creations/archies_dino_mod \
+            > build/ai-audit/rider-control-references.txt || true
+          for relative in \
             common/entity/ai/goal/GoalAvoidEntity.java \
             common/entity/ai/goal/GoalStrollLandAndAir.java \
             common/entity/ai/goal/GoalHurtByTarget.java \
