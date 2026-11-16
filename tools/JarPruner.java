@@ -2919,58 +2919,45 @@ public final class JarPruner {
     private static void patchChorusoatlAnimationHooks(ClassNode owner) {
         if (owner == null) throw new IllegalStateException("ChorusoatlClient is missing");
         String chorus = ROOT + "common/entity/mob/chorusoatl/ChorusoatlEntity";
-        List<MethodNode> actionPredicates = owner.methods.stream()
-            .filter(method -> method.name.startsWith("lambda$buildLocomotionState$") &&
-                method.desc.endsWith(")Z"))
-            .toList();
-        if (actionPredicates.size() != 2) {
-            String found = owner.methods.stream()
-                .filter(method -> method.name.startsWith("lambda$buildLocomotionState$"))
-                .map(method -> method.name + method.desc)
-                .toList().toString();
-            throw new IllegalStateException("Expected two UP/DOWN predicates in Chorusoatl locomotion state, found " +
-                actionPredicates.size() + ": " + found);
-        }
-        for (MethodNode predicate : actionPredicates) {
-            Type[] arguments = Type.getArgumentTypes(predicate.desc);
-            if ((predicate.access & Opcodes.ACC_STATIC) == 0 || arguments.length != 1 ||
-                arguments[0].getSort() != Type.OBJECT) {
-                throw new IllegalStateException("Unexpected Chorusoatl action-state predicate descriptor: " + predicate.name + predicate.desc);
-            }
-            clearMethod(predicate);
-            InsnList code = predicate.instructions;
-            code.add(new VarInsnNode(Opcodes.ALOAD, 0));
-            code.add(new MethodInsnNode(Opcodes.INVOKESTATIC, LEGACY_HOOKS,
-                "chorusoatlActionStateAnimationActive", "(Ljava/lang/Object;)Z", false));
-            code.add(new InsnNode(Opcodes.IRETURN));
-            predicate.maxStack = 1;
-            predicate.maxLocals = 1;
-        }
-
         MethodNode locomotion = owner.methods.stream()
             .filter(method -> method.name.equals("buildLocomotionState") &&
                 method.desc.startsWith("(L" + chorus + ";)"))
             .findFirst()
             .orElseThrow(() -> new IllegalStateException("ChorusoatlClient.buildLocomotionState is missing"));
+        int actionStateReferences = 0;
         int airMethodReferences = 0;
         for (AbstractInsnNode instruction : locomotion.instructions) {
             if (!(instruction instanceof InvokeDynamicInsnNode dynamic)) continue;
             for (int i = 0; i < dynamic.bsmArgs.length; i++) {
                 Object argument = dynamic.bsmArgs[i];
-                if (!(argument instanceof Handle handle) ||
-                    handle.getTag() != Opcodes.H_INVOKEVIRTUAL ||
-                    !handle.getOwner().equals(chorus) ||
-                    !handle.getName().equals("isFlying") ||
-                    !handle.getDesc().equals("()Z")) continue;
-                dynamic.bsmArgs[i] = new Handle(Opcodes.H_INVOKESTATIC, LEGACY_HOOKS,
-                    "chorusoatlAirState", "(Ljava/lang/Object;)Z", false);
-                airMethodReferences++;
+                if (!(argument instanceof Handle handle)) continue;
+                if (handle.getTag() == Opcodes.H_INVOKEVIRTUAL &&
+                    handle.getName().equals("isActiveWithoutFadeOut") &&
+                    handle.getDesc().equals("()Z")) {
+                    dynamic.bsmArgs[i] = new Handle(Opcodes.H_INVOKESTATIC, LEGACY_HOOKS,
+                        "chorusoatlActionStateAnimationActive", "(Ljava/lang/Object;)Z", false);
+                    actionStateReferences++;
+                    continue;
+                }
+                if (handle.getTag() == Opcodes.H_INVOKEVIRTUAL &&
+                    handle.getOwner().equals(chorus) &&
+                    handle.getName().equals("isFlying") &&
+                    handle.getDesc().equals("()Z")) {
+                    dynamic.bsmArgs[i] = new Handle(Opcodes.H_INVOKESTATIC, LEGACY_HOOKS,
+                        "chorusoatlAirState", "(Ljava/lang/Object;)Z", false);
+                    airMethodReferences++;
+                }
             }
         }
-        if (airMethodReferences != 1) {
-            throw new IllegalStateException("Expected one Chorusoatl isFlying locomotion method reference, found " + airMethodReferences);
+        if (actionStateReferences != 2) {
+            throw new IllegalStateException("Expected two UP/DOWN ActionState method references in Chorusoatl locomotion, found " +
+                actionStateReferences);
         }
-        System.out.println("PATCH CHORUS vertical movement keeps flying locomotion");
+        if (airMethodReferences != 1) {
+            throw new IllegalStateException("Expected one Chorusoatl isFlying locomotion method reference, found " +
+                airMethodReferences);
+        }
+        System.out.println("PATCH CHORUS vertical movement keeps flying locomotion and suppresses UP/DOWN clips");
     }
 
     private static void patchChorusoatlGoalSuppression(ClassNode owner, String hookName) {
