@@ -1,4 +1,4 @@
-name: Direct Legacy JAR Prune - build 30
+name: Direct Legacy JAR Prune - build 31
 
 on:
   push:
@@ -214,7 +214,7 @@ jobs:
           grep -Fq 'LegacyBehaviorHooks.chorusoatlTick' <<< "$CHORUS"
           grep -Fq 'LegacyBehaviorHooks.saveChorusoatl' <<< "$CHORUS"
           grep -Fq 'LegacyBehaviorHooks.loadChorusoatl' <<< "$CHORUS"
-          grep -Fq 'LegacyBehaviorHooks.allowChorusoatlFlightPhase' <<< "$CHORUS"
+          grep -Fq 'LegacyBehaviorHooks.shouldSuppressChorusoatlFlightPhase' <<< "$CHORUS"
 
           CHORUS_CLIENT="$(javap -classpath "$JAR" -p -c -v com.eternal_creations.archies_dino_mod.client.model.render.entity.mob.ChorusoatlClient)"
           grep -Fq 'LegacyBehaviorHooks.chorusoatlActionStateAnimationActive' <<< "$CHORUS_CLIENT"
@@ -225,6 +225,25 @@ jobs:
           PACK="$(javap -classpath "$JAR" -p -c com.eternal_creations.archies_dino_mod.common.entity.mob.chorusoatl.ai.ChorusoatlGoalFollowPack)"
           grep -Fq 'LegacyBehaviorHooks.shouldSuppressChorusPackFollow' <<< "$PACK"
           grep -Fq 'PathNavigation.m_26571_' <<< "$PACK"
+          python3 - <<'PY'
+          from pathlib import Path
+          source = Path("build/LegacyBehaviorHooks.java").read_text(encoding="utf-8")
+          required = (
+              "shouldSuppressChorusoatlFlightPhase",
+              'state.mode == 2 && "PREPARING_TO_FLY".equals(name)',
+              'state.mode == 1 && "PREPARING_TO_LAND".equals(name)',
+              "return dx * dx + dz * dz > 36.0 || Math.abs(dy) > 4.0;",
+              "Collections.synchronizedMap(new WeakHashMap<>())",
+              "METHOD_CACHE.computeIfAbsent",
+              "FIELD_CACHE.computeIfAbsent",
+              "warning == null || !warning.berriesSeen",
+          )
+          missing = [item for item in required if item not in source]
+          if missing:
+              raise SystemExit("LegacyBehaviorHooks regression guards failed: " + repr(missing))
+          if "allowChorusoatlFlightPhase" in source:
+              raise SystemExit("The inverted allow/suppress flight-phase helper must not return.")
+          PY
 
           if jar tf "$JAR" | grep -E 'data/archie_dinosaurs/(worldgen/structure|worldgen/structure_set|structures)/.*lushsaur|tags/worldgen/biome/spawns_lushsaurs.json'; then
             echo "Removed Lushsaur structure or structure-spawn resources remain."
@@ -495,25 +514,26 @@ jobs:
           LUSH_ENTITY_BYTECODE="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.common.entity.mob.lushsaur.LushsaurEntity)"
           LUSH_MOUNT_METHOD="$(awk '/ createMount\(/ { capture=1; print; next } capture && /^  (public|private|protected) / { exit } capture { print }' <<< "$LUSH_ENTITY_BYTECODE")"
           if [[ "$LUSH_MOUNT_METHOD" != *"passengerOffset"* ||
-                "$LUSH_MOUNT_METHOD" != *"float 0.0625f"* ||
-                "$LUSH_MOUNT_METHOD" == *"fconst_1"* ]]; then
-            echo "Lushsaur passenger hitbox must move 15 pixels back to passengerOffset(0, 0, 0.0625)."
+                "$LUSH_MOUNT_METHOD" != *"fconst_1"* ||
+                "$LUSH_MOUNT_METHOD" == *"float 0.0625f"* ]]; then
+            echo "Lushsaur server passengerOffset must retain its original Z = 1.0."
             printf '%s\n' "$LUSH_MOUNT_METHOD"
             exit 1
           fi
 
           LUSH_MOUNT_POINTS="$(javap -classpath build/classes-pruned.jar -p -c "$LUSH_ROLL_CLIENT" | sed -n '/static {};/,/^  private static boolean /p')"
           if [[ "$LUSH_MOUNT_POINTS" != *"dconst_0"* ||
-                "$LUSH_MOUNT_POINTS" != *"double 0.15d"* ||
+                "$LUSH_MOUNT_POINTS" != *"double -0.6d"* ||
+                "$LUSH_MOUNT_POINTS" == *"double 0.15d"* ||
                 "$LUSH_MOUNT_POINTS" == *"double 0.3374999761581421d"* ||
                 "$LUSH_MOUNT_POINTS" == *"double 0.9375d"* ||
                 "$LUSH_MOUNT_POINTS" == *"double -0.8125d"* ||
                 "$LUSH_MOUNT_POINTS" == *"double -1.4125d"* ]]; then
-            echo "Only the unsaddled Lushsaur model anchor must move 3 pixels forward from the previous screenshot (Z = +0.15); the unused saddled anchor remains original."
+            echo "Lushsaur client mount points must retain saddled Z = 0 and unsaddled Z = -0.6."
             printf '%s\n' "$LUSH_MOUNT_POINTS"
             exit 1
           fi
-          echo "Verified 15-pixel passenger-hitbox correction and 3-pixel forward visual adjustment."
+          echo "Verified original server and client passenger offsets."
 
           MOUNT_COMPONENT_INTERACT="$(awk '/public net.minecraft.world.InteractionResult mobInteract/ { capture=1; print; next } capture && /^  (public|private|protected) / { exit } capture { print }' <<< "$MOUNT_COMPONENT_BYTECODE")"
           SADDLE_CAPABILITY_LINE="$(grep -nF 'Saddleable.m_6741_:' <<< "$MOUNT_COMPONENT_INTERACT" | head -n 1 | cut -d: -f1 || true)"
@@ -630,7 +650,7 @@ jobs:
             printf '%s\n' "$LUSH_MENU"
             exit 1
           fi
-          echo "Verified original server passenger offset, 15-pixel visual-only rider offset, and vanilla E inventory behavior."
+          echo "Verified original server/client passenger offsets and vanilla E inventory behavior."
 
           FORGE_COMMON_HELPER='com.eternal_creations.archies_dino_mod.platform.ForgeCommonHelper'
           FORGE_COMMON_BYTECODE="$(javap -classpath build/classes-pruned.jar -p -c "$FORGE_COMMON_HELPER")"

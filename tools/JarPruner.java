@@ -221,8 +221,6 @@ public final class JarPruner {
         patchLushsaurCanSprint(lushsaurEntity);
         patchLushsaurMountSpeed(lushsaurEntity);
         patchLushsaurRunAnimation(lushsaurClient);
-        patchLushsaurVisualPassengerOffset(lushsaurClient);
-        patchLushsaurPassengerHitboxOffset(lushsaurEntity);
         patchMountComponentSaddleGate(nodes.get(ROOT + "common/entity/component/MountComponent"));
         patchLushsaurPassengerInputCooldown(nodes.get(ROOT + "common/entity/component/MountComponent"));
         patchLushsaurNoEquipment(lushsaurEntity);
@@ -258,6 +256,7 @@ public final class JarPruner {
 
         Set<String> retained = dependencyClosure(roots, nodes);
         stripUnreferencedMethods(retained, nodes);
+        verifyNoRemovedRegistryReferences(retained, nodes);
         verifyCommonClientRendererCalls(retained, nodes);
         printPruneDiagnostics(retained, nodes);
 
@@ -1330,71 +1329,7 @@ public final class JarPruner {
         }
     }
 
-    private static void patchLushsaurVisualPassengerOffset(ClassNode rendererOwner) {
-        if (rendererOwner == null) throw new IllegalStateException("Lushsaur renderer class is missing");
 
-        MethodNode clinit = rendererOwner.methods.stream()
-            .filter(method -> method.name.equals("<clinit>") && method.desc.equals("()V"))
-            .findFirst()
-            .orElseThrow(() -> new IllegalStateException("LushsaurClient static initializer is missing"));
-
-        List<MethodInsnNode> vec3Constructors = new ArrayList<>();
-        for (AbstractInsnNode instruction : clinit.instructions.toArray()) {
-            if (instruction instanceof MethodInsnNode call &&
-                call.getOpcode() == Opcodes.INVOKESPECIAL &&
-                call.owner.equals("net/minecraft/world/phys/Vec3") &&
-                call.name.equals("<init>") &&
-                call.desc.equals("(DDD)V")) {
-                vec3Constructors.add(call);
-            }
-        }
-        if (vec3Constructors.size() != 2) {
-            throw new IllegalStateException("Expected exactly two original Lushsaur passenger mount points");
-        }
-
-        AbstractInsnNode saddledZ = previousCodeInstruction(vec3Constructors.get(0));
-        AbstractInsnNode unsaddledZ = previousCodeInstruction(vec3Constructors.get(1));
-        if (saddledZ == null || saddledZ.getOpcode() != Opcodes.DCONST_0) {
-            throw new IllegalStateException("Unexpected original saddled Lushsaur mount-point Z offset");
-        }
-        if (!(unsaddledZ instanceof LdcInsnNode constant) ||
-            !(constant.cst instanceof Double value) ||
-            Math.abs(value - (-0.6000000238418579d)) > 0.000001d) {
-            throw new IllegalStateException("Unexpected original unsaddled Lushsaur mount-point Z offset");
-        }
-
-        clinit.instructions.set(unsaddledZ, new LdcInsnNode(0.15d));
-    }
-
-    private static void patchLushsaurPassengerHitboxOffset(ClassNode owner) {
-        if (owner == null) throw new IllegalStateException("Lushsaur entity class is missing");
-        MethodNode createMount = owner.methods.stream()
-            .filter(method -> method.name.equals("createMount") &&
-                method.desc.startsWith("()L" + ROOT + "common/entity/component/MountComponent;"))
-            .findFirst()
-            .orElseThrow(() -> new IllegalStateException("LushsaurEntity.createMount is missing"));
-
-        MethodInsnNode passengerOffset = null;
-        for (AbstractInsnNode instruction : createMount.instructions.toArray()) {
-            if (instruction instanceof MethodInsnNode call &&
-                call.getOpcode() == Opcodes.INVOKEVIRTUAL &&
-                call.owner.equals(ROOT + "common/entity/component/MountComponent$Definition") &&
-                call.name.equals("passengerOffset") &&
-                call.desc.equals("(FFF)L" + ROOT + "common/entity/component/MountComponent$Definition;")) {
-                if (passengerOffset != null) {
-                    throw new IllegalStateException("Unexpected multiple Lushsaur passengerOffset calls");
-                }
-                passengerOffset = call;
-            }
-        }
-        if (passengerOffset == null) throw new IllegalStateException("Lushsaur passengerOffset call is missing");
-
-        AbstractInsnNode originalZ = previousCodeInstruction(passengerOffset);
-        if (originalZ == null || originalZ.getOpcode() != Opcodes.FCONST_1) {
-            throw new IllegalStateException("Unexpected original Lushsaur passenger Z offset");
-        }
-        createMount.instructions.set(originalZ, new LdcInsnNode(0.0625f));
-    }
 
     private static void patchEntityRegistryNamespace(ClassNode owner) {
         if (owner == null) throw new IllegalStateException("ForgeCommonHelper class is missing");
@@ -2906,7 +2841,7 @@ public final class JarPruner {
         guard.add(new VarInsnNode(Opcodes.ALOAD, 0));
         guard.add(new VarInsnNode(Opcodes.ALOAD, 1));
         guard.add(new MethodInsnNode(Opcodes.INVOKESTATIC, LEGACY_HOOKS,
-            "allowChorusoatlFlightPhase", "(Ljava/lang/Object;Ljava/lang/Object;)Z", false));
+            "shouldSuppressChorusoatlFlightPhase", "(Ljava/lang/Object;Ljava/lang/Object;)Z", false));
         guard.add(new JumpInsnNode(Opcodes.IFEQ, proceed));
         guard.add(new InsnNode(Opcodes.RETURN));
         guard.add(proceed);
@@ -3231,41 +3166,6 @@ public final class JarPruner {
         }
     }
 
-    private static void patchLushsaurRiderRunAnimation(ClassNode owner) {
-        if (owner == null) throw new IllegalStateException("OnLushsaurPlayerAnimations class is missing");
-
-        String entityInternal = ROOT + "common/entity/mob/lushsaur/LushsaurEntity";
-        String descriptor = "(L" + entityInternal + ";)Z";
-        MethodNode method = owner.methods.stream()
-            .filter(candidate -> candidate.name.equals("lambda$init$11") &&
-                candidate.desc.equals(descriptor))
-            .findFirst()
-            .orElseThrow(() -> new IllegalStateException("Lushsaur rider run-animation predicate is missing"));
-
-        clearMethod(method);
-        InsnList code = method.instructions;
-        LabelNode noController = new LabelNode();
-
-        code.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        code.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
-            entityInternal, "m_6688_", "()Lnet/minecraft/world/entity/LivingEntity;", false));
-        code.add(new VarInsnNode(Opcodes.ASTORE, 1));
-        code.add(new VarInsnNode(Opcodes.ALOAD, 1));
-        code.add(new JumpInsnNode(Opcodes.IFNULL, noController));
-        code.add(new VarInsnNode(Opcodes.ALOAD, 1));
-        code.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
-            "net/minecraft/world/entity/LivingEntity", "m_20142_", "()Z", false));
-        code.add(new InsnNode(Opcodes.IRETURN));
-        code.add(noController);
-        code.add(new FrameNode(Opcodes.F_FULL, 2,
-            new Object[] { entityInternal, "net/minecraft/world/entity/LivingEntity" },
-            0, new Object[0]));
-        code.add(new InsnNode(Opcodes.ICONST_0));
-        code.add(new InsnNode(Opcodes.IRETURN));
-
-        method.maxStack = 1;
-        method.maxLocals = 2;
-    }
 
     private static void patchSculksaurExplosionEffects(ClassNode owner) {
         if (owner == null) throw new IllegalStateException("SculksaurEffects class is missing");
