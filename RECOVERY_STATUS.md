@@ -2,6 +2,25 @@
 
 # AD-NO-BS Legacy recovery status
 
+## Build316 runtime repair — 2026-11-16
+
+- **Fixed baseline:** Build316, commit `c0d1ddf5e3121b7b46c9ca59e88be5eb66410c7d`. All current fixes are made on temporary branch `fix/build316-runtime` created directly from that exact commit. Later commits on `binary-prune/legacy` were reviewed but not used as a base.
+- **Chorusoatl render crash:** the supplied Build316 crash report shows `BootstrapMethodError` caused by `LambdaConversionException` in `ChorusoatlClient.buildLocomotionState`: the lambda captures `ActionState`, but Build316 rewrote its method handle to accept `Object`. The pruner now adds a private typed bridge method with descriptor `(Lcom/astemir/astemirlib/re/common/action/ActionState;)Z` and points the two UP/DOWN animation predicates to that bridge. The original animation resources and normal flying locomotion are retained.
+- **Lushsaur Creative immunity:** the warning hook now skips Creative players before berry/warning processing, clears their warning-entry/inside state, and clears them as the current target when they were selected by this warning system. It does not rewrite unrelated target selectors or other mobs.
+- **Third warning duplicate roar:** the warning sequence remains roar → tail stomp → attack. The original `GoalChargeMeleeAttack.transitionToWarning()` also invokes its own `warnAction`; the pruner now adds a one-shot gate around that existing call so the charge goal does not play the same warning roar a second time for the third-warning-triggered attack. Normal independent charge warnings are preserved.
+- **Build #325:** [GitHub Actions run #325](https://github.com/Xinees/AD-NO-BS/actions/runs/43959533930) completed successfully from commit `ff4f3d150d7338f477cf1974fd9f5a2ea26685d7`. The immutable original input JAR SHA-256 check passed; hook source compiled under Java 17; bytecode pruning, renderer descriptors, Lushsaur mount/flee checks, runtime hook checks, retained-resource checks and draft release publication passed. Output JAR: 2,551,140 bytes. Draft release: [Legacy CI build #325](https://github.com/Xinees/AD-NO-BS/releases/tag/legacy-auto-325).
+- A follow-up workflow-only commit adds an extra assertion for the invokedynamic bootstrap method handle descriptor and exactly one charge-warning suppression call. It does not change the JAR implementation.
+- **Runtime status:** no claim that the crash or warning sequence has been confirmed fixed in a live Minecraft session. The generated Build #325 JAR must still be tested in-game.
+
+### Review of later commits not included in the Build316-based repair
+
+- Commits `8b3472470a2a` / `a16bf7839ad2` correct the inverted Chorusoatl flight-phase suppression logic, make weak state maps safe for concurrent access, limit owner registration to the client side, cache reflection lookups, use sturdy upward-facing support checks, and throttle landing validation.
+- Commit `98d690222a62` changes landing checks to use live mob bounds instead of only hard-coded dimensions.
+- Commit `9848e79bf924` changes unresolved landing-collision validation to fail closed rather than treating an unknown result as free space.
+- Commits `d094e2c8b7eb` / `af4e5a56955f` restore the original Lushsaur passenger offsets after the Build316 branch changed the hitbox/visual seat offsets.
+- These later changes were reviewed as separate findings and intentionally not copied into this repair branch because the owner explicitly designated Build316 as the base and requested only the listed fixes here. They remain candidates for a separate discussion/review, not silently adopted changes.
+
+
 ## Follow-up after Build #252 — 2026-11-15 (CI verification pending)
 
 - Lush Mace player attack animations are disabled in the current candidate. The patched `ADPlayerAnimations.init()` is now empty; it no longer calls `LushsaurMaceAnimations.init(2)`.
