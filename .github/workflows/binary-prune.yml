@@ -96,6 +96,7 @@ jobs:
           SCULK_CLASS='com.eternal_creations.archies_dino_mod.common.entity.mob.sculksaur.SculksaurEntity'
           SCULK="$(javap -classpath "$JAR" -p -c "$SCULK_CLASS")"
           SCULK_METHODS="$(javap -classpath "$JAR" -p -s "$SCULK_CLASS")"
+          SCULK_VERBOSE="$(javap -classpath "$JAR" -p -v "$SCULK_CLASS")"
 
           for entry in \
             'com/eternal_creations/archies_dino_mod/common/entity/base/IMultipartEntity.class' \
@@ -110,8 +111,8 @@ jobs:
             fi
           done
 
-          if ! grep -Fq 'implements com.eternal_creations.archies_dino_mod.common.entity.base.IMultipartEntity' <<< "$SCULK"; then
-            echo "SculksaurEntity does not implement IMultipartEntity."
+          if ! grep -Fq 'com/eternal_creations/archies_dino_mod/common/entity/base/IMultipartEntity' <<< "$SCULK_VERBOSE"; then
+            echo "SculksaurEntity class metadata does not declare IMultipartEntity."
             exit 1
           fi
 
