@@ -2,6 +2,7 @@ package com.eternal_creations.archies_dino_mod.worldgen;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -25,6 +26,10 @@ public final class EndPeaksChorusFeature extends Feature<NoneFeatureConfiguratio
     @Override
     public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> context) {
         WorldGenLevel level = context.level();
+        if (!Level.END.equals(level.getLevel().dimension())) {
+            return false;
+        }
+
         RandomSource random = context.random();
         BlockPos origin = context.origin();
         int chunkMinX = Math.floorDiv(origin.getX(), 16) * 16;
@@ -44,15 +49,6 @@ public final class EndPeaksChorusFeature extends Feature<NoneFeatureConfiguratio
             for (int cellZ = minCellZ; cellZ <= maxCellZ; cellZ++) {
                 EndPeaksWorldgen.Mountain mountain = EndPeaksWorldgen.mountainAt(cellX, cellZ);
                 if (mountain == null) {
-                    continue;
-                }
-
-                int centerY = level.getHeight(
-                    Heightmap.Types.WORLD_SURFACE_WG,
-                    mountain.centerX(),
-                    mountain.centerZ()
-                );
-                if (centerY <= level.getMinBuildHeight()) {
                     continue;
                 }
 
@@ -82,12 +78,9 @@ public final class EndPeaksChorusFeature extends Feature<NoneFeatureConfiguratio
                             continue;
                         }
 
-                        if (!level.getBiome(new BlockPos(x, centerY, z)).is(EndPeaksWorldgen.BIOME)) {
-                            continue;
-                        }
-
                         int y = level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x, z);
                         if (y <= level.getMinBuildHeight() + 1
+                            || !level.getBiome(new BlockPos(x, y, z)).is(EndPeaksWorldgen.BIOME)
                             || !level.getBlockState(new BlockPos(x, y - 1, z)).is(Blocks.END_STONE)
                             || !level.getBlockState(new BlockPos(x, y, z)).isAir()) {
                             continue;
@@ -110,20 +103,19 @@ public final class EndPeaksChorusFeature extends Feature<NoneFeatureConfiguratio
         if (random.nextInt(16) == 0) {
             int x = chunkMinX + 6 + random.nextInt(4);
             int z = chunkMinZ + 6 + random.nextInt(4);
-            if (level.getBiome(new BlockPos(x, origin.getY(), z)).is(EndPeaksWorldgen.BIOME)) {
-                int y = level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x, z);
-                if (y > level.getMinBuildHeight() + 1
-                    && level.getBlockState(new BlockPos(x, y - 1, z)).is(Blocks.END_STONE)
-                    && level.getBlockState(new BlockPos(x, y, z)).isAir()) {
-                    placed |= Feature.CHORUS_PLANT.place(new FeaturePlaceContext<>(
-                        Optional.empty(),
-                        level,
-                        context.chunkGenerator(),
-                        random,
-                        new BlockPos(x, y, z),
-                        NoneFeatureConfiguration.INSTANCE
-                    ));
-                }
+            int y = level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x, z);
+            if (y > level.getMinBuildHeight() + 1
+                && level.getBiome(new BlockPos(x, y, z)).is(EndPeaksWorldgen.BIOME)
+                && level.getBlockState(new BlockPos(x, y - 1, z)).is(Blocks.END_STONE)
+                && level.getBlockState(new BlockPos(x, y, z)).isAir()) {
+                placed |= Feature.CHORUS_PLANT.place(new FeaturePlaceContext<>(
+                    Optional.empty(),
+                    level,
+                    context.chunkGenerator(),
+                    random,
+                    new BlockPos(x, y, z),
+                    NoneFeatureConfiguration.INSTANCE
+                ));
             }
         }
 
