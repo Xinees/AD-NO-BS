@@ -1,4 +1,4 @@
-name: Direct Legacy JAR Prune - build 39
+name: Direct Legacy JAR Prune - build 40
 
 on:
   push:
@@ -160,6 +160,30 @@ jobs:
           SIMPLE_PART="$(javap -classpath "$JAR" -p -c com.eternal_creations.archies_dino_mod.common.entity.base.SimplePart)"
           if ! grep -Fq 'ICommonHelper.makePartEntity' <<< "$SIMPLE_PART"; then
             echo "SimplePart is not creating the Forge part entities through ICommonHelper."
+            exit 1
+          fi
+
+
+          FORGE_PART="$(javap -classpath "$JAR" -p -c com.eternal_creations.archies_dino_mod.entity.ForgeEntityPart)"
+          if ! grep -Fq 'IMultipartEntity.hurtFromPart' <<< "$FORGE_PART"; then
+            echo "ForgeEntityPart does not forward player/entity damage to the multipart parent."
+            exit 1
+          fi
+          if ! grep -Fq 'IMultipartEntity.interactFromPart' <<< "$FORGE_PART"; then
+            echo "ForgeEntityPart does not forward player interaction to the multipart parent."
+            exit 1
+          fi
+
+          FORGE_MULTIPART="$(javap -classpath "$JAR" -p -c com.eternal_creations.archies_dino_mod.mixin.forge.ForgeEntityMultipartMixin)"
+          if ! grep -Fq 'IMultipartEntity.getIParts' <<< "$FORGE_MULTIPART" ||
+             ! grep -Fq 'PartEntity' <<< "$FORGE_MULTIPART"; then
+            echo "Forge multipart mixin does not expose the hit parts to Forge's player hit-testing."
+            exit 1
+          fi
+
+          ENTITY_ACCESSOR="$(javap -classpath "$JAR" -p -c com.eternal_creations.archies_dino_mod.mixin.EntityAccessor)"
+          if ! grep -Fq 'getENTITY_COUNTER' <<< "$ENTITY_ACCESSOR"; then
+            echo "Official part ID allocator accessor is missing."
             exit 1
           fi
 

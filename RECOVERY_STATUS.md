@@ -2,6 +2,14 @@
 
 # AD-NO-BS Legacy recovery status
 
+## Official player-hit multipart layer — 2026-11-17
+
+- Build 39 had imported the official `ForgeEntityMultipartMixin`, but still reused the older 1.0.4 `SimplePart`, `ForgeEntityPart`, and multipart interface bytecode. That was only a partial port of the player-hit path.
+- Replace the shared multipart support classes with the exact SHA-verified 1.0.5 classes: `IMultipartEntity`, `IPartEntity`, `SimplePart`, `ForgeEntityPart`, `EntityAccessor`, and `ForgeEntityMultipartMixin`.
+- This restores the official path where Forge receives the `PartEntity[]` from `getParts()`, and the part adapter forwards player hits/interactions to the parent through `hurtFromPart` and `interactFromPart`.
+- Keep the two Legacy-specific tail Y offsets (`tail1` = 2.5, `tail2` = 3.5); neck positions, part dimensions, and other Sculksaur behavior remain unchanged.
+- CI verifies the Forge part adapter, player interaction forwarding, multipart ID accessor, and Forge mixin registration. A successful build still needs an in-game player hit/interact test.
+
 ## Sculksaur Legacy multipart height adjustment — 2026-11-17
 
 - After comparing the Build 38 hitboxes against the Legacy model, raise only the two tail parts to match the marked positions.

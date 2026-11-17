@@ -177,7 +177,7 @@ public final class JarPruner {
             nodes.put(entry.getKey(), node);
         }
 
-        importBundledForgeMultipartMixin(classBytes, nodes);
+        importBundledOfficialMultipartClasses(classBytes, nodes);
 
         for (Map.Entry<String, Set<String>> registry : REGISTRY_FIELDS.entrySet()) {
             ClassNode node = nodes.get(registry.getKey());
@@ -334,33 +334,126 @@ public final class JarPruner {
     }
 
 
-    private static void importBundledForgeMultipartMixin(
+
+    private static void importBundledOfficialMultipartClasses(
         Map<String, byte[]> classBytes, Map<String, ClassNode> nodes
     ) throws Exception {
-        String internalName = ROOT + "mixin/forge/ForgeEntityMultipartMixin";
-        Path bundle = Paths.get("tools/ForgeEntityMultipartMixin.class.b64");
+        Path bundle = Paths.get("tools/official-multipart-1.0.5.zip.b64");
         if (!Files.isRegularFile(bundle)) {
-            throw new FileNotFoundException("Bundled official Forge multipart mixin is missing: " + bundle);
-        }
-        String encoded = Files.readString(bundle, java.nio.charset.StandardCharsets.UTF_8)
-            .replaceAll("\\s+", "");
-        byte[] bytecode = Base64.getDecoder().decode(encoded);
-        String sha256 = HexFormat.of().formatHex(
-            java.security.MessageDigest.getInstance("SHA-256").digest(bytecode));
-        if (!sha256.equals("161ab5bd12cd151daae2a01229b428b72979ccc26019e3d908d9c600f3a207f3")) {
-            throw new IllegalStateException("Bundled Forge multipart mixin hash does not match official 1.0.5 reference");
+            throw new FileNotFoundException("Official 1.0.5 multipart support bundle is missing: " + bundle);
         }
 
-        ClassNode node = new ClassNode(Opcodes.ASM9);
-        new ClassReader(bytecode).accept(node, 0);
-        if (!internalName.equals(node.name)) {
-            throw new IllegalStateException("Bundled Forge multipart mixin has unexpected class name: " + node.name);
+        Map<String, String> expectedHashes = Map.of(
+            ROOT + "common/entity/base/IMultipartEntity",
+            "4d3a057ec3ee07c77399c5a26eac0bcb7277bf0c7ac4e9c7a002a97f9c9130f2",
+            ROOT + "common/entity/base/IPartEntity",
+            "68a38b55fac6baa94bd875e1e30f9adb632ccfd8f81fa17471e5f0e56c2f8cee",
+            ROOT + "common/entity/base/SimplePart",
+            "3f0b717d0e341444335ba7706ce43b9fb7026b81ca1559a99364f742db84783f",
+            ROOT + "entity/ForgeEntityPart",
+            "fa8117dfc30d12f5762681a00592c0770c3a55ef50d4f9e679b0845817566efe",
+            ROOT + "mixin/EntityAccessor",
+            "79be89636dd7eb8fc95b418bf9ab75c1a6954502dbcf3ab5ad99e4a1cb0b3395",
+            ROOT + "mixin/forge/ForgeEntityMultipartMixin",
+            "161ab5bd12cd151daae2a01229b428b72979ccc26019e3d908d9c600f3a207f3"
+        );
+
+        String encoded = Files.readString(bundle, java.nio.charset.StandardCharsets.UTF_8)
+            .replaceAll("\\s+", "");
+        byte[] archive = Base64.getDecoder().decode(encoded);
+        Set<String> imported = new HashSet<>();
+
+        try (ZipInputStream input = new ZipInputStream(new ByteArrayInputStream(archive))) {
+            ZipEntry entry;
+            while ((entry = input.getNextEntry()) != null) {
+                if (entry.isDirectory()) continue;
+                if (!entry.getName().endsWith(".class")) {
+                    throw new IllegalStateException("Unexpected non-class entry in official multipart bundle: " + entry.getName());
+                }
+
+                String internalName = entry.getName().substring(0, entry.getName().length() - 6);
+                String expectedHash = expectedHashes.get(internalName);
+                if (expectedHash == null) {
+                    throw new IllegalStateException("Unexpected class in official multipart bundle: " + internalName);
+                }
+
+                byte[] bytecode = input.readAllBytes();
+                String actualHash = HexFormat.of().formatHex(
+                    java.security.MessageDigest.getInstance("SHA-256").digest(bytecode));
+                if (!expectedHash.equals(actualHash)) {
+                    throw new IllegalStateException("Official 1.0.5 multipart class hash mismatch: " + internalName);
+                }
+                if (bytecode.length < 8 ||
+                    ((bytecode[6] & 0xFF) << 8 | (bytecode[7] & 0xFF)) != 61) {
+                    throw new IllegalStateException("Official multipart class is not Java 17 bytecode: " + internalName);
+                }
+
+                ClassNode node = new ClassNode(Opcodes.ASM9);
+                new ClassReader(bytecode).accept(node, 0);
+                if (!internalName.equals(node.name)) {
+                    throw new IllegalStateException("Multipart class path/name mismatch: " +
+                        entry.getName() + " -> " + node.name);
+                }
+
+                boolean existedInPinnedInput = classBytes.containsKey(internalName);
+                boolean expectedInPinnedInput =
+                    !internalName.equals(ROOT + "mixin/forge/ForgeEntityMultipartMixin");
+                if (existedInPinnedInput != expectedInPinnedInput) {
+                    throw new IllegalStateException("Unexpected 1.0.4 multipart class presence: " + internalName);
+                }
+
+                nodes.put(internalName, node);
+                classBytes.put(internalName, bytecode);
+                imported.add(internalName);
+            }
         }
-        if (nodes.putIfAbsent(internalName, node) != null ||
-            classBytes.putIfAbsent(internalName, bytecode) != null) {
-            throw new IllegalStateException("Forge multipart mixin unexpectedly already exists in the pinned source JAR");
+
+        if (!imported.equals(expectedHashes.keySet())) {
+            Set<String> missing = new TreeSet<>(expectedHashes.keySet());
+            missing.removeAll(imported);
+            throw new IllegalStateException("Official multipart bundle is incomplete: " + missing);
         }
-        System.out.println("IMPORT official 1.0.5 ForgeEntityMultipartMixin into immutable 1.0.4 Legacy input");
+
+        String part = ROOT + "common/entity/base/IPartEntity";
+        String parts = ROOT + "common/entity/base/IMultipartEntity";
+        String simple = ROOT + "common/entity/base/SimplePart";
+        String forgePart = ROOT + "entity/ForgeEntityPart";
+        String accessor = ROOT + "mixin/EntityAccessor";
+        String forgeMixin = ROOT + "mixin/forge/ForgeEntityMultipartMixin";
+
+        requireMethod(nodes.get(simple), "<init>",
+            "(Lnet/minecraft/world/entity/LivingEntity;FFDDD)V");
+        requireMethod(nodes.get(simple), "tick", "()V");
+        requireMethod(nodes.get(simple), "tick", "(FFF)V");
+        requireMethod(nodes.get(simple), "collectEntities",
+            "(Lnet/minecraft/world/entity/Entity;[L" + simple + ";)[" + part + ";");
+        requireMethod(nodes.get(forgePart), "<init>",
+            "(Lnet/minecraft/world/entity/Entity;FF)V");
+        requireMethod(nodes.get(forgePart), "m_6469_",
+            "(Lnet/minecraft/world/damagesource/DamageSource;F)Z");
+        requireMethod(nodes.get(forgePart), "m_6096_",
+            "(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;");
+        requireMethod(nodes.get(forgePart), "setPartPos", "(DDD)V");
+        requireMethod(nodes.get(parts), "shouldSyncPartsWithXRot", "()Z");
+        requireMethod(nodes.get(parts), "getIParts", "()[" + part + ";");
+        requireMethod(nodes.get(parts), "hurtFromPart",
+            "(" + "L" + part + ";Lnet/minecraft/world/damagesource/DamageSource;F)Z");
+        requireMethod(nodes.get(parts), "interactFromPart",
+            "(L" + part + ";Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;");
+        requireMethod(nodes.get(parts), "isPartOfMe", "(Lnet/minecraft/world/entity/Entity;)Z");
+        requireMethod(nodes.get(part), "getPartId", "()I");
+        requireMethod(nodes.get(part), "setPartId", "(I)V");
+        requireMethod(nodes.get(part), "setPartPos", "(DDD)V");
+        requireMethod(nodes.get(part), "resize", "(FF)V");
+        requireMethod(nodes.get(accessor), "getENTITY_COUNTER", "()Ljava/util/concurrent/atomic/AtomicInteger;");
+        requireMethod(nodes.get(forgeMixin), "getParts", "()[Lnet/minecraftforge/entity/PartEntity;");
+        requireMethod(nodes.get(forgeMixin), "isMultipartEntity", "()Z");
+
+        requireMethod(nodes.get(ROOT + "platform/ForgeCommonHelper"), "makePartEntity",
+            "(Lnet/minecraft/world/entity/Entity;FF)L" + part + ";");
+
+        System.out.println("IMPORT official 1.0.5 multipart player-hit layer: " + imported.size() +
+            " classes (interfaces, SimplePart, ForgeEntityPart, EntityAccessor, ForgeEntityMultipartMixin)");
     }
 
     private static byte[] rewriteClassUtf8Namespace(byte[] classBytes) {
