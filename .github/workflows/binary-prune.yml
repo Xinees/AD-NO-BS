@@ -552,6 +552,49 @@ jobs:
           print("Verified rare Lushsaur natural spawning in lush caves and no Lushsaur structure.")
           PY
 
+      - name: Verify Lushsaur feeding animation does not block mounted movement
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          LUSH_MOVEMENT_BLOCKED="$(javap -classpath build/libs/archie_dinosaurs-legacy-forge-1.20.1.jar -p -c com.eternal_creations.archies_dino_mod.common.entity.mob.lushsaur.LushsaurEntity | sed -n '/protected boolean isMovementBlocked();/,/^  public /p')"
+          if [[ -z "$LUSH_MOVEMENT_BLOCKED" ]]; then
+            echo "LushsaurEntity.isMovementBlocked was not found."
+            exit 1
+          fi
+
+          python3 - "$LUSH_MOVEMENT_BLOCKED" <<'PY'
+          import sys
+          body = sys.argv[1]
+          required_order = (
+              "Field actionEat:",
+              "ActionState.isActive:()Z",
+              "LushsaurEntity.m_6688_:()Lnet/minecraft/world/entity/LivingEntity;",
+              "java.util.Objects.isNull:(Ljava/lang/Object;)Z",
+              "iand",
+              "ifne",
+          )
+          positions = [body.find(item) for item in required_order]
+          if any(position < 0 for position in positions) or positions != sorted(positions):
+              raise SystemExit("Ridden eating must gate the actionEat movement blocker on the absence of a controlling passenger.")
+          preserved = (
+              "Field actionEmerge:",
+              "Field actionBury:",
+              "Field actionDeath:",
+              "Field actionAttackTail:",
+              "Field actionAttackTailStomp:",
+              "Field actionRoar:",
+              "Field actionDown:",
+              "Field actionUp:",
+              "LushsaurEntity.isBuried:()Z",
+              "LushsaurEntity.isSitting:()Z",
+          )
+          missing = [item for item in preserved if item not in body]
+          if missing:
+              raise SystemExit("Unrelated Lushsaur movement blockers were changed: " + repr(missing))
+          print("Verified only actionEat is bypassed while Lushsaur has a controlling passenger; all other movement blockers remain.")
+          PY
+
       - name: Verify framework overrides, mounted attacks, and Lushsaur sprint controls
         shell: bash
         run: |

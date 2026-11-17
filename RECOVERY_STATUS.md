@@ -1,3 +1,11 @@
+## Follow-up — Allow Lushsaur movement while eating under rider control — 2026-11-17
+
+- The original `LushsaurEntity.isMovementBlocked()` treated the active `actionEat` animation as a full movement lock, including when the Lushsaur had a controlling passenger.
+- Legacy now applies the `actionEat` movement block only when there is no controlling passenger. A ridden, tamed Lushsaur can therefore respond to rider movement immediately after being fed while its eating animation continues.
+- All other movement blockers remain intact: emergence, burying, death, tail attack, tail stomp, roar, up/down actions, buried state, and sitting.
+- CI verifies the bytecode gate and the preservation of the other movement blockers. In-game verification remains required.
+
+---
 ## Follow-up — Exclude creative-mode players from Lushsaur warnings — 2026-11-17
 
 - The server-side Lushsaur warning tick now checks each nearby player's creative mode before evaluating warning distance, berries, or warning-stage progression.
