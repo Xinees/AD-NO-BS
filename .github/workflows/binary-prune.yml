@@ -1,4 +1,4 @@
-name: Direct Legacy JAR Prune - build 45
+name: Direct Legacy JAR Prune - build 46
 
 on:
   push:
@@ -183,7 +183,7 @@ jobs:
                   "LushsaurEntity", "LushsaurAI", "FlyNavigation",
                   "SmoothPathNavigation", "SmartPathFinder"
               )))
-              print("\\n".join(relevant))
+              print("\n".join(relevant))
               print("===== ACTION STRING REFERENCES =====")
               for name in archive.namelist():
                   if not name.endswith(".class"):
@@ -207,7 +207,7 @@ jobs:
       - name: Upload temporary AI diagnostics
         uses: actions/upload-artifact@v4
         with:
-          name: legacy-ai-diagnostics-build45
+          name: legacy-ai-diagnostics-build46
           path: |
             build/chorusoatl-lush-warning-diagnostics.txt
             build/original-lush-navigation-javap.txt
