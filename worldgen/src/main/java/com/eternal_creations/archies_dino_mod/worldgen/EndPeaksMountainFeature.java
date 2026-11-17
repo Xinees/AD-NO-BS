@@ -2,6 +2,7 @@ package com.eternal_creations.archies_dino_mod.worldgen;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.BlockPos.MutableBlockPos;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -17,6 +18,10 @@ public final class EndPeaksMountainFeature extends Feature<NoneFeatureConfigurat
     @Override
     public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> context) {
         WorldGenLevel level = context.level();
+        if (!Level.END.equals(level.getLevel().dimension())) {
+            return false;
+        }
+
         BlockPos origin = context.origin();
         int chunkMinX = Math.floorDiv(origin.getX(), 16) * 16;
         int chunkMinZ = Math.floorDiv(origin.getZ(), 16) * 16;
@@ -39,21 +44,12 @@ public final class EndPeaksMountainFeature extends Feature<NoneFeatureConfigurat
                     continue;
                 }
 
-                int centerY = level.getHeight(
-                    Heightmap.Types.WORLD_SURFACE_WG,
-                    mountain.centerX(),
-                    mountain.centerZ()
-                );
-                if (centerY <= level.getMinBuildHeight()
-                    || centerY >= level.getMaxBuildHeight() - mountain.height() - 2) {
-                    continue;
-                }
-
-                int summitY = centerY + mountain.height();
-
                 for (int x = chunkMinX; x < chunkMinX + 16; x++) {
                     for (int z = chunkMinZ; z < chunkMinZ + 16; z++) {
-                        if (!level.getBiome(new BlockPos(x, centerY, z)).is(EndPeaksWorldgen.BIOME)) {
+                        int groundY = level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x, z);
+                        if (groundY <= level.getMinBuildHeight() + 1
+                            || !level.getBlockState(new BlockPos(x, groundY - 1, z)).is(Blocks.END_STONE)
+                            || !level.getBiome(new BlockPos(x, groundY, z)).is(EndPeaksWorldgen.BIOME)) {
                             continue;
                         }
 
@@ -64,21 +60,13 @@ public final class EndPeaksMountainFeature extends Feature<NoneFeatureConfigurat
                             continue;
                         }
 
-                        int groundY = level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x, z);
-                        if (groundY <= level.getMinBuildHeight() + 1
-                            || groundY >= summitY
-                            || !level.getBlockState(new BlockPos(x, groundY - 1, z)).is(Blocks.END_STONE)) {
-                            continue;
-                        }
-
                         double profile = 1.0D;
                         if (distance > mountain.plateauRadius()) {
                             double slope = (1.0D - distance) / (1.0D - mountain.plateauRadius());
                             profile = Math.pow(slope, 0.72D);
                         }
 
-                        int availableHeight = summitY - groundY;
-                        int rise = (int) Math.floor(availableHeight * profile / 2.0D) * 2;
+                        int rise = (int) Math.floor(mountain.height() * profile / 2.0D) * 2;
                         if (rise < 2) {
                             continue;
                         }
