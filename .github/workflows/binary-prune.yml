@@ -39,8 +39,21 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          gradle --no-daemon -p worldgen compileJava processResources
+          gradle --no-daemon -p worldgen jar
+          WORLDGEN_JAR="worldgen/build/libs/legacy-worldgen-1.0.0.jar"
+          test -s "$WORLDGEN_JAR"
           test -s worldgen/build/classes/java/main/com/eternal_creations/archies_dino_mod/mixin/EndPeaksBiomeSourceMixin.class
+          javap -classpath "$WORLDGEN_JAR" -v com.eternal_creations.archies_dino_mod.worldgen.EndPeaksFeatureRegistry > build/end-peaks-registry-reobf.txt
+          if ! grep -Fq 'ForgeRegistries$Keys.FEATURES' build/end-peaks-registry-reobf.txt; then
+            echo "Reobfuscated End Peaks registry does not reference ForgeRegistries.Keys.FEATURES."
+            cat build/end-peaks-registry-reobf.txt
+            exit 1
+          fi
+          if grep -Fq 'Registries.FEATURE' build/end-peaks-registry-reobf.txt; then
+            echo "End Peaks registry still contains the unmapped vanilla FEATURE field reference."
+            cat build/end-peaks-registry-reobf.txt
+            exit 1
+          fi
           test -s worldgen/build/classes/java/main/com/eternal_creations/archies_dino_mod/worldgen/EndPeaksWorldgen.class
           test -s worldgen/build/classes/java/main/com/eternal_creations/archies_dino_mod/worldgen/EndPeaksMountainFeature.class
           test -s worldgen/build/classes/java/main/com/eternal_creations/archies_dino_mod/worldgen/EndPeaksChorusFeature.class
@@ -253,7 +266,37 @@ jobs:
             ec_ad-forge-1.20.1-1.0.4.jar \
             build/classes-pruned.jar
           jar uf build/classes-pruned.jar -C build/behavior-hooks .
-          jar uf build/classes-pruned.jar -C worldgen/build/classes/java/main . -C worldgen/build/resources/main .
+          mkdir -p build/worldgen-reobfuscated
+          python3 - "worldgen/build/libs/legacy-worldgen-1.0.0.jar" build/worldgen-reobfuscated <<'PY'
+          import pathlib
+          import sys
+          import zipfile
+
+          source = pathlib.Path(sys.argv[1])
+          target = pathlib.Path(sys.argv[2])
+          required = {
+              "end_peaks.mixins.json",
+              "end_peaks.refmap.json",
+          }
+          copied = set()
+          with zipfile.ZipFile(source) as archive:
+              for name in archive.namelist():
+                  if not (name.endswith(".class") or name in required):
+                      continue
+                  if name.startswith("META-INF/"):
+                      continue
+                  destination = target / name
+                  destination.parent.mkdir(parents=True, exist_ok=True)
+                  destination.write_bytes(archive.read(name))
+                  copied.add(name)
+          missing = sorted(required - copied)
+          if missing:
+              raise SystemExit("Reobfuscated worldgen JAR is missing Mixin resources: " + repr(missing))
+          if not any(name.endswith("EndPeaksFeatureRegistry.class") for name in copied):
+              raise SystemExit("Reobfuscated worldgen JAR contains no EndPeaksFeatureRegistry class.")
+          print("Merged %d reobfuscated worldgen classes/resources." % len(copied))
+          PY
+          jar uf build/classes-pruned.jar -C build/worldgen-reobfuscated .
 
       - name: Prune resources inside the JAR
         shell: bash
@@ -327,7 +370,11 @@ jobs:
           PY
 
           CHORUS_LIMITER="$(javap -classpath "$JAR" -p -c com.eternal_creations.archies_dino_mod.worldgen.EndPeaksChorusoatlSpawnLimiter)"
-          for required in 'MAX_ACTIVE_GROUPS' 'MobSpawnType.NATURAL' 'setSpawnCancelled' 'setSpawnData'; do
+          if ! grep -Fq 'MobSpawnType.NATURAL' worldgen/src/main/java/com/eternal_creations/archies_dino_mod/worldgen/EndPeaksChorusoatlSpawnLimiter.java; then
+            echo "Chorusoatl population limiter must only gate MobSpawnType.NATURAL."
+            exit 1
+          fi
+          for required in 'MAX_ACTIVE_GROUPS' 'setSpawnCancelled' 'setSpawnData'; do
             if ! grep -Fq "$required" <<< "$CHORUS_LIMITER"; then
               echo "Chorusoatl natural group limiter is missing required behavior: $required"
               printf '%s\n' "$CHORUS_LIMITER"

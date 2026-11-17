@@ -1,3 +1,13 @@
+## End Peaks runtime mapping fix — 2026-11-17
+
+- The runtime log from Legacy build #358 showed repeated NoSuchFieldError: FEATURE failures during the Forge RegisterEvent for End Peaks. This was not a separate second random field mismatch: the worldgen subproject's Mojang-mapped class files had been copied directly into the production JAR without ForgeGradle reobfuscation.
+- The same packaging defect explains the earlier NoSuchMethodError: RandomSource.create(long) from the Mixin static initializer. New worldgen code must be remapped from Mojang official names to Forge's production SRG names before it is merged into the pinned binary.
+- The worldgen build now runs the jar task with reobfJar as its finalizer and merges only the reobfuscated class files and the End Peaks Mixin config/refmap into the binary-prune JAR.
+- Feature registration now uses ForgeRegistries.Keys.FEATURES, the Forge registry key, rather than the vanilla registry key.
+- CI must inspect the reobfuscated registry class and validate both the production mapping and the final JAR structure before publishing another test build.
+
+---
+
 ## End Peaks biome — 2026-11-17
 
 - Added the custom biome `archie_dinosaurs:end_peaks` to the outer End by replacing selected End Highlands regions with the new biome using a deterministic, low-frequency noise mask.

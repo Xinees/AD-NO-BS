@@ -33,6 +33,10 @@ mixin {
     config 'end_peaks.mixins.json'
 }
 
+tasks.named('jar', Jar).configure {
+    finalizedBy 'reobfJar'
+}
+
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
