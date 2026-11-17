@@ -1,4 +1,4 @@
-name: Direct Legacy JAR Prune - build 41
+name: Direct Legacy JAR Prune - build 42
 
 on:
   push:
@@ -68,7 +68,7 @@ jobs:
           python3 tools/polish_legacy_hooks.py build/LegacyBehaviorHooks.java
           javac -encoding UTF-8 --release 17 -d build/behavior-hooks build/LegacyBehaviorHooks.java
 
-      - name: Inspect existing Chorusoatl landing route implementation
+      - name: Inspect Chorusoatl landing and Lushsaur warning hooks
         shell: bash
         run: |
           set -euo pipefail
@@ -77,19 +77,30 @@ jobs:
           import re
 
           source = Path("build/LegacyBehaviorHooks.java").read_text(encoding="utf-8")
-          declarations = list(re.finditer(
-              r"(?m)^    (?:public|private|protected)\\s+(?:static\\s+)?[^;{}\\n]+\\([^;{}]*\\)(?:\\s*throws\\s+[^{}]+)?\\s*\\{",
-              source
-          ))
+          lines = source.splitlines()
+          declarations = []
+          for index, line in enumerate(lines):
+              if not re.match(r"^    (?:public|private|protected)\\s+", line):
+                  continue
+              if "(" not in line:
+                  continue
+              signature_lines = [line]
+              cursor = index
+              while "{" not in "\\n".join(signature_lines) and cursor + 1 < len(lines):
+                  cursor += 1
+                  signature_lines.append(lines[cursor])
+              signature = "\\n".join(signature_lines)
+              if "{" not in signature or ";" in signature.split("{", 1)[0]:
+                  continue
+              declarations.append((index, signature.split("{", 1)[0].strip()))
 
-          def block_for(match):
-              start = match.start()
-              opening = source.find("{", match.start(), match.end())
+          def extract_block(start):
+              opening = source.find("{", sum(len(x) + 1 for x in lines[:start]))
               depth = 0
               in_string = False
               escape = False
-              for index in range(opening, len(source)):
-                  ch = source[index]
+              for pos in range(opening, len(source)):
+                  ch = source[pos]
                   if in_string:
                       if escape:
                           escape = False
@@ -105,26 +116,32 @@ jobs:
                   elif ch == "}":
                       depth -= 1
                       if depth == 0:
-                          return source[start:index + 1]
-              raise RuntimeError("Unclosed Java method in LegacyBehaviorHooks")
+                          return source[sum(len(x) + 1 for x in lines[:start]):pos + 1]
+              raise RuntimeError("Unclosed Java method beginning at line %d" % (start + 1))
 
-          tokens = (
-              "chorusoatlTick", "PREPARING_TO_LAND", "PREPARING_TO_FLY",
-              "validPlatform(", "overlapsOtherChorusoatl(",
-              "landing", "Landing", "moveTo(", "m_26519_", "m_5624_",
-              "PathNavigation", "navigation", "pathfind"
-          )
-          matches = []
-          for declaration in declarations:
-              block = block_for(declaration)
-              if any(token in block for token in tokens):
-                  signature = block.split("{", 1)[0].strip().replace("\\n", " ")
-                  if not any(signature == prior[0] for prior in matches):
-                      matches.append((signature, block))
-          print("Matched %d Chorusoatl/landing/navigation methods" % len(matches))
-          for signature, block in matches:
-              print("\\n===== %s =====" % signature)
-              print(block)
+          topics = {
+              "LUSHS warning/reaction": (
+                  "warning", "Warning", "berriesSeen", "territor", "roar", "Roar",
+                  "tail", "Tail", "anger", "aggress", "warningCount", "warningLevel"
+              ),
+              "CHORUS landing/route": (
+                  "chorusoatlTick", "PREPARING_TO_LAND", "validPlatform",
+                  "overlapsOtherChorusoatl", "nextPathUpdate", "FlyNavigation",
+                  "SmoothPathNavigation", "moveTo(", "m_26519_", "navigation"
+              ),
+          }
+          blocks = []
+          for line_no, signature in declarations:
+              block = extract_block(line_no)
+              for topic, tokens in topics.items():
+                  if any(token in block for token in tokens):
+                      blocks.append((topic, line_no + 1, signature, block))
+          for topic in topics:
+              selected = [item for item in blocks if item[0] == topic]
+              print("\\n===== %s: %d methods =====" % (topic, len(selected)))
+              for _, line_no, signature, block in selected:
+                  print("\\n--- line %d: %s ---" % (line_no, signature))
+                  print(block)
           PY
 
       - name: Prune classes and registrations in the original JAR
