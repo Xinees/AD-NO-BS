@@ -2968,21 +2968,20 @@ public final class JarPruner {
             .findFirst()
             .orElseThrow(() -> new IllegalStateException("GoalChargeMeleeAttack.mob field is missing"));
         MethodNode warning = requireMethod(chargeGoal, "transitionToWarning", "()V");
-        FieldInsnNode warnActionField = null;
+        List<FieldInsnNode> warnActionReads = new ArrayList<>();
         for (AbstractInsnNode instruction : warning.instructions.toArray()) {
             if (instruction instanceof FieldInsnNode field &&
                 field.getOpcode() == Opcodes.GETFIELD &&
                 field.owner.equals(chargeGoal.name) &&
                 field.name.equals("warnAction")) {
-                if (warnActionField != null) {
-                    throw new IllegalStateException("GoalChargeMeleeAttack.transitionToWarning has multiple warnAction reads");
-                }
-                warnActionField = field;
+                warnActionReads.add(field);
             }
         }
-        if (warnActionField == null) {
-            throw new IllegalStateException("GoalChargeMeleeAttack.transitionToWarning warnAction read is missing");
+        if (warnActionReads.size() != 2) {
+            throw new IllegalStateException(
+                "Expected null-check and invocation warnAction reads, found " + warnActionReads.size());
         }
+        FieldInsnNode warnActionField = warnActionReads.get(0);
         AbstractInsnNode loadThis = previousCodeInstruction(warnActionField);
         AbstractInsnNode nullCheck = nextCodeInstruction(warnActionField);
         if (!(loadThis instanceof VarInsnNode load) ||
