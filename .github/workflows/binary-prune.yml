@@ -1,4 +1,4 @@
-name: Direct Legacy JAR Prune - build 44
+name: Direct Legacy JAR Prune - build 45
 
 on:
   push:
@@ -167,11 +167,51 @@ jobs:
           print(report)
           PY
 
+      - name: Inspect original Lushsaur actions and path navigation
+        shell: bash
+        run: |
+          set -euo pipefail
+          JAR="ec_ad-forge-1.20.1-1.0.4.jar"
+          python3 - "$JAR" > build/inspect-classes.txt <<'PY'
+          import sys
+          import zipfile
+
+          jar = sys.argv[1]
+          with zipfile.ZipFile(jar) as archive:
+              names = [name[:-6].replace("/", ".") for name in archive.namelist() if name.endswith(".class")]
+              relevant = sorted(name for name in names if any(term in name for term in (
+                  "LushsaurEntity", "LushsaurAI", "FlyNavigation",
+                  "SmoothPathNavigation", "SmartPathFinder"
+              )))
+              print("\\n".join(relevant))
+              print("===== ACTION STRING REFERENCES =====")
+              for name in archive.namelist():
+                  if not name.endswith(".class"):
+                      continue
+                  data = archive.read(name)
+                  if b"actionRoar" in data or b"actionAttackTailStomp" in data:
+                      print(name + " roar=" + str(b"actionRoar" in data) +
+                            " tailStomp=" + str(b"actionAttackTailStomp" in data))
+          PY
+          while IFS= read -r class_name; do
+            case "$class_name" in
+              com.*)
+                echo "===== JAVAP $class_name ====="
+                javap -classpath "$JAR" -p -c -s "$class_name" || true
+                ;;
+            esac
+          done < build/inspect-classes.txt > build/original-lush-navigation-javap.txt
+          cat build/original-lush-navigation-javap.txt
+          cat build/inspect-classes.txt
+
       - name: Upload temporary AI diagnostics
         uses: actions/upload-artifact@v4
         with:
-          name: legacy-ai-diagnostics-build44
-          path: build/chorusoatl-lush-warning-diagnostics.txt
+          name: legacy-ai-diagnostics-build45
+                    path: |
+            build/chorusoatl-lush-warning-diagnostics.txt
+            build/original-lush-navigation-javap.txt
+            build/inspect-classes.txt
           if-no-files-found: error
           retention-days: 1
 
