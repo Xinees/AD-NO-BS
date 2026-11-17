@@ -106,14 +106,23 @@ def rewrite_manifest(data):
         else:
             logical_lines.append(line)
 
+    mixin_configs_index = next(
+        (index for index, line in enumerate(logical_lines) if line.startswith("MixinConfigs:")),
+        None,
+    )
+    if mixin_configs_index is None:
+        main_section_end = next(
+            (index for index, line in enumerate(logical_lines) if not line),
+            len(logical_lines),
+        )
+        logical_lines.insert(main_section_end, "MixinConfigs: end_peaks.mixins.json")
+
     output_lines = []
-    mixin_configs_found = False
     for line in logical_lines:
         if not line:
             output_lines.append("")
             continue
         if line.startswith("MixinConfigs:"):
-            mixin_configs_found = True
             configs = [item.strip() for item in line.split(":", 1)[1].split(",") if item.strip()]
             if "end_peaks.mixins.json" not in configs:
                 configs.append("end_peaks.mixins.json")
@@ -131,9 +140,6 @@ def rewrite_manifest(data):
             output_lines.append(piece if first_line else " " + piece)
             remaining = remaining[end:]
             first_line = False
-
-    if not mixin_configs_found:
-        output_lines.append("MixinConfigs: end_peaks.mixins.json")
 
     return ("\r\n".join(output_lines).rstrip("\r\n") + "\r\n").encode("utf-8")
 
@@ -985,9 +991,21 @@ with zipfile.ZipFile(target, "r") as check:
         raise SystemExit("Lushsaur structure-based spawning resources remain: " + repr(stale_structures))
 
     manifest = check.read("META-INF/MANIFEST.MF").decode("utf-8")
-    logical_manifest = re.sub(r"\r?\n ", "", manifest)
-    if "end_peaks.mixins.json" not in logical_manifest:
-        raise SystemExit("End Peaks biome source mixin is not registered in the mod manifest.")
+    logical_manifest = re.sub(r"\r?\n ", "", manifest).replace("\r\n", "\n")
+    main_manifest_section = logical_manifest.split("\n\n", 1)[0]
+    mixin_configs_line = next(
+        (line for line in main_manifest_section.splitlines() if line.startswith("MixinConfigs:")),
+        None,
+    )
+    if mixin_configs_line is None:
+        raise SystemExit("The mod manifest has no main-section MixinConfigs attribute.")
+    mixin_configs = [
+        item.strip()
+        for item in mixin_configs_line.split(":", 1)[1].split(",")
+        if item.strip()
+    ]
+    if "end_peaks.mixins.json" not in mixin_configs:
+        raise SystemExit("End Peaks biome source mixin is not registered in the main manifest section.")
     mixin_config = read_json(check.read("end_peaks.mixins.json"), "end_peaks.mixins.json")
     if "EndPeaksBiomeSourceMixin" not in mixin_config.get("mixins", []):
         raise SystemExit("End Peaks biome source mixin is missing from its config.")
