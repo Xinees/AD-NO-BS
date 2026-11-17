@@ -574,9 +574,12 @@ jobs:
               "iand",
               "ifne",
           )
-          positions = [body.find(item) for item in required_order]
-          if any(position < 0 for position in positions) or positions != sorted(positions):
-              raise SystemExit("Ridden eating must gate the actionEat movement blocker on the absence of a controlling passenger.")
+          cursor = 0
+          for item in required_order:
+              position = body.find(item, cursor)
+              if position < 0:
+                  raise SystemExit("Missing or out-of-order Lushsaur eating movement instruction: " + item + "\\n" + body)
+              cursor = position + len(item)
           preserved = (
               "Field actionEmerge:",
               "Field actionBury:",
