@@ -348,6 +348,13 @@ jobs:
               assert spawn_tag == {"replace": True, "values": ["archie_dinosaurs:end_peaks"]}
 
               biome = json.loads(jar.read("data/archie_dinosaurs/worldgen/biome/end_peaks.json"))
+              assert biome["carvers"] == {}
+              assert biome["effects"] == {
+                  "fog_color": 10518688,
+                  "sky_color": 0,
+                  "water_color": 4159204,
+                  "water_fog_color": 329011,
+              }
               assert "archie_dinosaurs:end_peaks_mountains" in biome["features"][4]
               assert "minecraft:end_gateway_return" in biome["features"][4]
               assert biome["features"][9] == ["archie_dinosaurs:end_peaks_chorus"]

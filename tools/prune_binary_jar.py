@@ -814,12 +814,13 @@ kept["data/minecraft/tags/worldgen/biome/has_structure/end_city.json"] = dump_js
 })
 
 kept["data/archie_dinosaurs/worldgen/biome/end_peaks.json"] = dump_json({
-    "carvers": [],
+    "carvers": {},
     "downfall": 0.5,
     "effects": {
         "fog_color": 10518688,
         "sky_color": 0,
         "water_color": 4159204,
+        "water_fog_color": 329011,
     },
     "features": [
         [],
@@ -940,6 +941,16 @@ with zipfile.ZipFile(target, "r") as check:
     end_biome = read_json(check.read(end_biome_path), end_biome_path)
     if end_biome.get("has_precipitation") is not False or end_biome.get("temperature") != 0.5:
         raise SystemExit("End Peaks climate must match the End.")
+    if end_biome.get("carvers") != {}:
+        raise SystemExit("End Peaks carvers must use the vanilla biome object format.")
+    effects = end_biome.get("effects")
+    if not isinstance(effects, dict) or any(effects.get(key) != value for key, value in {
+        "fog_color": 10518688,
+        "sky_color": 0,
+        "water_color": 4159204,
+        "water_fog_color": 329011,
+    }.items()):
+        raise SystemExit("End Peaks effects must contain all vanilla End biome color fields.")
     if "minecraft:end_gateway_return" not in end_biome["features"][4]:
         raise SystemExit("End Peaks must retain the vanilla End gateway feature.")
     if "archie_dinosaurs:end_peaks_mountains" not in end_biome["features"][4]:
