@@ -52,9 +52,7 @@ public final class EndPeaksChorusFeature extends Feature<NoneFeatureConfiguratio
                     mountain.centerX(),
                     mountain.centerZ()
                 );
-                if (centerY <= level.getMinBuildHeight()
-                    || !level.getBiome(new BlockPos(mountain.centerX(), centerY, mountain.centerZ()))
-                        .is(EndPeaksWorldgen.BIOME)) {
+                if (centerY <= level.getMinBuildHeight()) {
                     continue;
                 }
 
