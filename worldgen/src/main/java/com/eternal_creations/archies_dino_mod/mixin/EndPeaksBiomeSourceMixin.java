@@ -44,9 +44,16 @@ public abstract class EndPeaksBiomeSourceMixin {
         Climate.Sampler sampler,
         CallbackInfoReturnable<Holder<Biome>> cir
     ) {
-        if (this.archie$endPeaks != null
-            && cir.getReturnValue().is(Biomes.END_HIGHLANDS)
-            && archie$isEndPeaksRegion(quartX, quartZ)) {
+        if (this.archie$endPeaks == null) {
+            return;
+        }
+
+        Holder<Biome> vanillaBiome = cir.getReturnValue();
+        boolean highlandsRegion = vanillaBiome.is(Biomes.END_HIGHLANDS)
+            && archie$isEndPeaksRegion(quartX, quartZ);
+        boolean midlandsRegion = vanillaBiome.is(Biomes.END_MIDLANDS)
+            && archie$isEndPeaksMidlandsRegion(quartX, quartZ);
+        if (highlandsRegion || midlandsRegion) {
             cir.setReturnValue(this.archie$endPeaks);
         }
     }
@@ -54,5 +61,10 @@ public abstract class EndPeaksBiomeSourceMixin {
     @Unique
     private static boolean archie$isEndPeaksRegion(int quartX, int quartZ) {
         return EndPeaksWorldgen.isEndPeaksRegion(quartX, quartZ);
+    }
+
+    @Unique
+    private static boolean archie$isEndPeaksMidlandsRegion(int quartX, int quartZ) {
+        return EndPeaksWorldgen.isEndPeaksMidlandsRegion(quartX, quartZ);
     }
 }
