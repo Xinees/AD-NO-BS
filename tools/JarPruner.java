@@ -3029,8 +3029,8 @@ public final class JarPruner {
             AbstractInsnNode receiver = previousCodeInstruction(ticks);
             if (!(ticks instanceof IntInsnNode amount) || amount.getOpcode() != Opcodes.SIPUSH ||
                 amount.operand != 1200 ||
-                !(receiver instanceof VarInsnNode load) ||
-                load.getOpcode() != Opcodes.ALOAD || load.var != 0) {
+                !(receiver instanceof VarInsnNode feedReceiver) ||
+                feedReceiver.getOpcode() != Opcodes.ALOAD || feedReceiver.var != 0) {
                 throw new IllegalStateException("Unexpected Lushsaur feed speed-boost setter shape");
             }
             feed.instructions.set(instruction, new InsnNode(Opcodes.POP2));
