@@ -437,7 +437,18 @@ def patch_source(source: str) -> str:
         try {
             Object result = call(navigation, new String[]{"m_26519_"},
                 point[0], point[1], point[2], 2.0);
-            return result instanceof Boolean && ((Boolean)result).booleanValue();
+            if (!(result instanceof Boolean) || !((Boolean)result).booleanValue()) {
+                call(navigation, new String[]{"m_26573_"});
+                return false;
+            }
+            Object path = call(navigation, new String[]{"m_26570_"});
+            Object reachesTarget = path == null ? null :
+                call(path, new String[]{"m_77403_", "canReach"});
+            if (!(reachesTarget instanceof Boolean) || !((Boolean)reachesTarget).booleanValue()) {
+                call(navigation, new String[]{"m_26573_"});
+                return false;
+            }
+            return true;
         } catch (Throwable ignored) {
             return false;
         }
@@ -477,6 +488,9 @@ def patch_source(source: str) -> str:
         'new String[]{"m_82381_", "intersects"}',
         "if (!(result instanceof Collection<?>))",
         "if (!(intersects instanceof Boolean))",
+        'Object path = call(navigation, new String[]{"m_26570_"})',
+        'call(path, new String[]{"m_77403_", "canReach"})',
+        'call(navigation, new String[]{"m_26573_"})',
     )
     for token in required:
         if token not in source:
@@ -491,7 +505,7 @@ def main() -> None:
     original = args.source.read_text(encoding="utf-8")
     patched = patch_source(original)
     args.source.write_text(patched, encoding="utf-8")
-    print("Applied and verified live-hitbox Chorusoatl landing geometry polish.")
+    print("Applied and verified live-hitbox landing geometry and reachable-path validation polish.")
 
 
 if __name__ == "__main__":

@@ -1,3 +1,13 @@
+## Follow-up — reachable Chorusoatl landing paths and Build #348 CI guard — 2026-11-17
+
+- The #348 failure was a stale CI assertion that still required the removed Lushsaur feed-speed multiplier. The mount-speed check now requires only the existing controlling-passenger sprint formula and explicitly rejects the old boost terms.
+- The Lushsaur implementation remains Legacy-specific: warning stages 1 and 2 each queue one roar; stage 3 queues roar followed by ground tail stomp; repeat warnings use 180–240 ticks while the player remains in range; the four-minute timer remains the count-reset window. Other roar/tail-stomp triggers, feed speed boost, and shearing are removed by the existing bytecode patch.
+- Chorusoatl's landing route hand-off now checks the actual path returned by the existing FlyNavigation/SmoothPathNavigation. A route is accepted only when its Path reports that it reaches the selected target; partial/unreachable paths are stopped and rejected so the existing retry loop can choose another validated platform.
+- No new navigator, pathfinder, search radius, landing geometry, animation rule, or multipart implementation is introduced. Sculksaur multipart remains at the Build #334 baseline.
+- CI/runtime verification for this follow-up is pending.
+
+---
+
 ## Owner clarification — Lushsaur strict warning cadence and disabled features — 2026-11-17
 
 - Repeat territorial warnings while the player remains inside the warning radius, using a fresh randomized interval of 180–240 ticks (9–12 seconds) after each warning.

@@ -1164,13 +1164,21 @@ jobs:
           echo "Verified original bounded movement yaw, body/head stabilization and XYZ look interpolation are retained."
 
           LUSH_MOUNT_SPEED="$(printf '%s\n' "$LUSH_SPRINT_CONTROL" | sed -n '/lambda[$]createMount[$]21(/,/lambda[$]createMount[$]20(/p')"
-          for required_call in 'm_6688_' 'm_20142_' 'getSpeedBoostTicks' 'java/lang/Integer.signum' 'java/lang/Math.max'; do
+          for required_call in 'm_6688_' 'm_20142_' 'i2f' 'fmul' 'fadd' 'freturn'; do
             if ! grep -Fq "$required_call" <<< "$LUSH_MOUNT_SPEED"; then
-              echo "Lushsaur mount speed is missing expected walk/run or feed-boost logic: $required_call"
+              echo "Lushsaur mount speed lost ordinary controlling-passenger sprint handling: $required_call"
               printf '%s\n' "$LUSH_MOUNT_SPEED"
               exit 1
             fi
           done
+          for forbidden_call in 'getSpeedBoostTicks' 'java/lang/Integer.signum' 'java/lang/Math.max'; do
+            if grep -Fq "$forbidden_call" <<< "$LUSH_MOUNT_SPEED"; then
+              echo "Removed Lushsaur feed speed-boost logic unexpectedly remains in mount speed: $forbidden_call"
+              printf '%s\n' "$LUSH_MOUNT_SPEED"
+              exit 1
+            fi
+          done
+          echo "Verified ordinary rider sprint handling remains without the removed feed speed boost."
 
           LUSH_CONTROL="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.common.entity.mob.lushsaur.LushsaurEntity)"
           for required_call in 'm_6254_' 'm_6688_' 'm_146895_' 'isAdult' 'isSitting' 'isOwnedBy'; do
