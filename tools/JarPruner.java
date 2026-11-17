@@ -177,6 +177,8 @@ public final class JarPruner {
             nodes.put(entry.getKey(), node);
         }
 
+        importBundledForgeMultipartMixin(classBytes, nodes);
+
         for (Map.Entry<String, Set<String>> registry : REGISTRY_FIELDS.entrySet()) {
             ClassNode node = nodes.get(registry.getKey());
             if (node != null) pruneRegistryInitializer(node, registry.getValue());
@@ -329,6 +331,36 @@ public final class JarPruner {
         System.out.println("Retained classes: " + keptCount);
         System.out.println("Removed classes: " + removedCount);
         System.out.println("Output: " + output);
+    }
+
+
+    private static void importBundledForgeMultipartMixin(
+        Map<String, byte[]> classBytes, Map<String, ClassNode> nodes
+    ) throws Exception {
+        String internalName = ROOT + "mixin/forge/ForgeEntityMultipartMixin";
+        Path bundle = Paths.get("tools/ForgeEntityMultipartMixin.class.b64");
+        if (!Files.isRegularFile(bundle)) {
+            throw new FileNotFoundException("Bundled official Forge multipart mixin is missing: " + bundle);
+        }
+        String encoded = Files.readString(bundle, java.nio.charset.StandardCharsets.UTF_8)
+            .replaceAll("\\s+", "");
+        byte[] bytecode = Base64.getDecoder().decode(encoded);
+        String sha256 = HexFormat.of().formatHex(
+            java.security.MessageDigest.getInstance("SHA-256").digest(bytecode));
+        if (!sha256.equals("161ab5bd12cd151daae2a01229b428b72979ccc26019e3d908d9c600f3a207f3")) {
+            throw new IllegalStateException("Bundled Forge multipart mixin hash does not match official 1.0.5 reference");
+        }
+
+        ClassNode node = new ClassNode(Opcodes.ASM9);
+        new ClassReader(bytecode).accept(node, 0);
+        if (!internalName.equals(node.name)) {
+            throw new IllegalStateException("Bundled Forge multipart mixin has unexpected class name: " + node.name);
+        }
+        if (nodes.putIfAbsent(internalName, node) != null ||
+            classBytes.putIfAbsent(internalName, bytecode) != null) {
+            throw new IllegalStateException("Forge multipart mixin unexpectedly already exists in the pinned source JAR");
+        }
+        System.out.println("IMPORT official 1.0.5 ForgeEntityMultipartMixin into immutable 1.0.4 Legacy input");
     }
 
     private static byte[] rewriteClassUtf8Namespace(byte[] classBytes) {
