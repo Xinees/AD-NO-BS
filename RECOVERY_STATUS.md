@@ -2,12 +2,20 @@
 
 # AD-NO-BS Legacy recovery status
 
+## Sculksaur multipart hitboxes — 2026-11-17
+
+- Port the official 1.0.5 Sculksaur multipart layout into the Legacy 1.0.4-based build without changing the pinned input JAR or the separate Astemir RE dependency.
+- Add four Forge part hitboxes: `neck1` (2.0 × 2.5), `neck2` (2.0 × 2.0), `tail1` (1.5 × 2.0), and `tail2` (1.0 × 1.0), preserving the official offsets and `SimplePart` positioning behavior.
+- Retain the multipart interfaces, `SimplePart`, `ForgeEntityPart`, ID allocation via `EntityAccessor`, and `ForgeEntityMultipartMixin` registration. Part damage and interaction are delegated to the parent Sculksaur.
+- CI adds bytecode and Forge mixin-config checks. A successful build does not replace an in-game check of the four hitboxes, collision, damage, and interaction.
+
+
 ## Follow-up — cancel vertical-only Chorusoatl animation override — 2026-11-17
 
 - Owner cancelled the vertical-only UP/DOWN animation suppression from behavior-spec section 2 because it interferes with normal Chorusoatl landing.
 - Restore and verify the original `ActionState.isActiveWithoutFadeOut()` method references and the original `ChorusoatlEntity.isFlying()` reference in `ChorusoatlClient.buildLocomotionState()`. Do not replace them with helper predicates or synthetic bridges.
 - Remove the now-unused vertical-animation helpers from the generated Legacy hook source. Leave flight-phase suppression, perched-state transitions, landing-target selection, live bounding-box/platform validation, and navigation/goal changes untouched.
-- Build 37 CI verification is pending. A successful CI run still does not replace an in-game landing test.
+- Build 37 CI verification passed in [Actions #329](https://github.com/Xinees/AD-NO-BS/actions/runs/43964873365). A successful CI run still does not replace an in-game landing test.
 
 ## Post-Build 30 code audit — 2026-11-16
 

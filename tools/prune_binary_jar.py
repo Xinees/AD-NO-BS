@@ -68,6 +68,7 @@ KEEP_FORGE_MIXINS = {
     "mixins": [
         "PlayerAttackDamageBonusMixin",
         "forge.ADWeaponItemMixin",
+        "forge.ForgeEntityMultipartMixin",
     ],
     "client": [],
 }
@@ -87,6 +88,11 @@ def filter_mixin_config(data, template, name):
         if section in value:
             allowed = set(template.get(section, []))
             value[section] = [item for item in value[section] if item in allowed]
+    if name == "archie_dinosaurs.forge.mixins.json":
+        mixins = value.setdefault("mixins", [])
+        multipart_mixin = "forge.ForgeEntityMultipartMixin"
+        if multipart_mixin not in mixins:
+            mixins.append(multipart_mixin)
     return dump_json(value)
 
 

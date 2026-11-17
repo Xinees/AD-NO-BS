@@ -126,6 +126,7 @@ public final class JarPruner {
         ROOT + "mixin/ServerPlayerInterfaceMixin",
         ROOT + "mixin/PlayerAttackDamageBonusMixin",
         ROOT + "mixin/forge/ADWeaponItemMixin",
+        ROOT + "mixin/forge/ForgeEntityMultipartMixin",
         ROOT + "mixin/BreedGoalAccessor",
         ROOT + "mixin/CriteriaTriggersAccessor",
         ROOT + "mixin/EntityAccessor",
@@ -211,6 +212,7 @@ public final class JarPruner {
         ClassNode lushsaurClient = nodes.get(ROOT + "client/model/render/entity/mob/LushsaurClient");
         ClassNode chorusoatlClient = nodes.get(ROOT + "client/model/render/entity/mob/ChorusoatlClient");
         ClassNode sculksaurClient = nodes.get(ROOT + "client/model/render/entity/mob/SculksaurClient");
+        ClassNode sculksaurEntity = nodes.get(ROOT + "common/entity/mob/sculksaur/SculksaurEntity");
         patchLushsaurRuntimeHooks(lushsaurEntity);
         patchChorusoatlRuntimeHooks(chorusoatlEntity);
         verifyChorusoatlAnimationHooks(nodes.get(ROOT + "client/model/render/entity/mob/ChorusoatlClient"));
@@ -225,6 +227,7 @@ public final class JarPruner {
         patchLushsaurPassengerInputCooldown(nodes.get(ROOT + "common/entity/component/MountComponent"));
         patchLushsaurNoEquipment(lushsaurEntity);
         patchEntityRegistryNamespace(nodes.get(ROOT + "platform/ForgeCommonHelper"));
+        patchSculksaurMultipart(sculksaurEntity, nodes);
         patchSculksaurExplosionEffects(
             nodes.get(ROOT + "client/particle/effect/SculksaurEffects"));
         patchLushsaurRestParticles(
@@ -3182,6 +3185,235 @@ public final class JarPruner {
         }
     }
 
+
+
+    private static void patchSculksaurMultipart(ClassNode owner, Map<String, ClassNode> nodes) {
+        if (owner == null) throw new IllegalStateException("SculksaurEntity class is missing");
+
+        String partBase = ROOT + "common/entity/base/";
+        String simplePart = partBase + "SimplePart";
+        String partInterface = partBase + "IPartEntity";
+        String multipartInterface = partBase + "IMultipartEntity";
+        String forgePart = ROOT + "entity/ForgeEntityPart";
+        String forgeMultipartMixin = ROOT + "mixin/forge/ForgeEntityMultipartMixin";
+        String entityAccessor = ROOT + "mixin/EntityAccessor";
+        String simplePartDescriptor = "L" + simplePart + ";";
+        String partDescriptor = "L" + partInterface + ";";
+        String partsDescriptor = "[" + partDescriptor;
+
+        for (String required : List.of(
+            simplePart, partInterface, multipartInterface, forgePart,
+            forgeMultipartMixin, entityAccessor,
+            ROOT + "platform/Services",
+            ROOT + "platform/services/ICommonHelper",
+            ROOT + "platform/ForgeCommonHelper"
+        )) {
+            if (!nodes.containsKey(required)) {
+                throw new IllegalStateException("Sculksaur multipart dependency is missing: " + required);
+            }
+        }
+
+        ClassNode simplePartNode = nodes.get(simplePart);
+        requireMethod(simplePartNode, "<init>",
+            "(Lnet/minecraft/world/entity/LivingEntity;FFDDD)V");
+        requireMethod(simplePartNode, "tick", "()V");
+        requireMethod(simplePartNode, "collectEntities",
+            "(Lnet/minecraft/world/entity/Entity;[L" + simplePart + ";)[" + partDescriptor);
+
+        requireMethod(nodes.get(ROOT + "platform/ForgeCommonHelper"), "makePartEntity",
+            "(Lnet/minecraft/world/entity/Entity;FF)" + partDescriptor);
+
+        ClassNode forgePartNode = nodes.get(forgePart);
+        if (!"net/minecraftforge/entity/PartEntity".equals(forgePartNode.superName) ||
+            forgePartNode.interfaces == null || !forgePartNode.interfaces.contains(partInterface)) {
+            throw new IllegalStateException("ForgeEntityPart is not the expected Forge PartEntity adapter");
+        }
+
+        ClassNode mixinNode = nodes.get(forgeMultipartMixin);
+        requireMethod(mixinNode, "getParts", "()[Lnet/minecraftforge/entity/PartEntity;");
+        requireMethod(mixinNode, "isMultipartEntity", "()Z");
+
+        boolean hasMultipartInterface = owner.interfaces != null && owner.interfaces.contains(multipartInterface);
+        boolean hasMultipartFields = owner.fields.stream().anyMatch(field ->
+            Set.of("neck1", "neck2", "tail1", "tail2", "parts").contains(field.name));
+        boolean hasMultipartMethods = owner.methods.stream().anyMatch(method ->
+            method.name.equals("getIParts") ||
+            method.name.equals("hurtFromPart") ||
+            method.name.equals("interactFromPart"));
+        if (hasMultipartInterface || hasMultipartFields || hasMultipartMethods) {
+            throw new IllegalStateException("Sculksaur multipart implementation is already partly present; refusing to double-patch");
+        }
+
+        if (owner.interfaces == null) owner.interfaces = new ArrayList<>();
+        owner.interfaces.add(multipartInterface);
+
+        for (String fieldName : List.of("neck1", "neck2", "tail1", "tail2")) {
+            owner.fields.add(new FieldNode(
+                Opcodes.ACC_PRIVATE | Opcodes.ACC_FINAL,
+                fieldName, simplePartDescriptor, null, null));
+        }
+        owner.fields.add(new FieldNode(
+            Opcodes.ACC_PRIVATE | Opcodes.ACC_FINAL,
+            "parts", partsDescriptor, null, null));
+
+        String constructorDescriptor =
+            "(Lnet/minecraft/world/entity/EntityType;Lnet/minecraft/world/level/Level;)V";
+        MethodNode constructor = findUniqueMethod(owner, "<init>", constructorDescriptor);
+        AbstractInsnNode constructorReturn = null;
+        int returnCount = 0;
+        for (AbstractInsnNode instruction : constructor.instructions.toArray()) {
+            if (instruction.getOpcode() == Opcodes.RETURN) {
+                constructorReturn = instruction;
+                returnCount++;
+            }
+        }
+        if (returnCount != 1 || constructorReturn == null) {
+            throw new IllegalStateException("Sculksaur constructor does not have exactly one RETURN");
+        }
+
+        InsnList initializeParts = new InsnList();
+        addSculksaurSimplePart(initializeParts, owner.name, simplePart,
+            "neck1", 2.0f, 2.5f, 0.0d, 2.0999999046325684d, 2.200000047683716d);
+        addSculksaurSimplePart(initializeParts, owner.name, simplePart,
+            "neck2", 2.0f, 2.0f, 0.0d, 3.5d, 4.099999904632568d);
+        addSculksaurSimplePart(initializeParts, owner.name, simplePart,
+            "tail1", 1.5f, 2.0f, 0.0d, 2.0d, -2.200000047683716d);
+        addSculksaurSimplePart(initializeParts, owner.name, simplePart,
+            "tail2", 1.0f, 1.0f, 0.0d, 2.5d, -3.9000000953674316d);
+
+        initializeParts.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        initializeParts.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        initializeParts.add(new InsnNode(Opcodes.ICONST_4));
+        initializeParts.add(new TypeInsnNode(Opcodes.ANEWARRAY, simplePart));
+        String[] partFields = {"neck1", "neck2", "tail1", "tail2"};
+        for (int index = 0; index < partFields.length; index++) {
+            initializeParts.add(new InsnNode(Opcodes.DUP));
+            initializeParts.add(new InsnNode(Opcodes.ICONST_0 + index));
+            initializeParts.add(new VarInsnNode(Opcodes.ALOAD, 0));
+            initializeParts.add(new FieldInsnNode(Opcodes.GETFIELD,
+                owner.name, partFields[index], simplePartDescriptor));
+            initializeParts.add(new InsnNode(Opcodes.AASTORE));
+        }
+        initializeParts.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
+            simplePart, "collectEntities",
+            "(Lnet/minecraft/world/entity/Entity;[L" + simplePart + ";)[" + partDescriptor,
+            false));
+        initializeParts.add(new FieldInsnNode(Opcodes.PUTFIELD,
+            owner.name, "parts", partsDescriptor));
+        constructor.instructions.insertBefore(constructorReturn, initializeParts);
+
+        MethodNode tick = findUniqueMethod(owner, "m_8119_", "()V");
+        MethodInsnNode superTick = null;
+        int superTickCount = 0;
+        String parentClass = ROOT + "common/entity/base/AbstractComplexMonster";
+        for (AbstractInsnNode instruction : tick.instructions.toArray()) {
+            if (instruction instanceof MethodInsnNode call &&
+                call.getOpcode() == Opcodes.INVOKESPECIAL &&
+                call.owner.equals(parentClass) &&
+                call.name.equals("m_8119_") &&
+                call.desc.equals("()V")) {
+                superTick = call;
+                superTickCount++;
+            }
+        }
+        if (superTickCount != 1 || superTick == null) {
+            throw new IllegalStateException("Sculksaur tick does not contain exactly one AbstractComplexMonster tick call");
+        }
+
+        InsnList tickParts = new InsnList();
+        for (String fieldName : partFields) {
+            tickParts.add(new VarInsnNode(Opcodes.ALOAD, 0));
+            tickParts.add(new FieldInsnNode(Opcodes.GETFIELD,
+                owner.name, fieldName, simplePartDescriptor));
+            tickParts.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
+                simplePart, "tick", "()V", false));
+        }
+        tick.instructions.insert(superTick, tickParts);
+
+        MethodNode getParts = new MethodNode(
+            Opcodes.ACC_PUBLIC, "getIParts", "()" + partsDescriptor, null, null);
+        getParts.instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        getParts.instructions.add(new FieldInsnNode(Opcodes.GETFIELD,
+            owner.name, "parts", partsDescriptor));
+        getParts.instructions.add(new InsnNode(Opcodes.ARETURN));
+        getParts.maxStack = 1;
+        getParts.maxLocals = 1;
+        owner.methods.add(getParts);
+
+        String damageSource = "net/minecraft/world/damagesource/DamageSource";
+        String hurtDescriptor =
+            "(" + partDescriptor + "L" + damageSource + ";F)Z";
+        MethodNode hurt = new MethodNode(
+            Opcodes.ACC_PUBLIC, "hurtFromPart", hurtDescriptor, null, null);
+        hurt.instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        hurt.instructions.add(new VarInsnNode(Opcodes.ALOAD, 2));
+        hurt.instructions.add(new VarInsnNode(Opcodes.FLOAD, 3));
+        hurt.instructions.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
+            owner.name, "m_6469_", "(L" + damageSource + ";F)Z", false));
+        hurt.instructions.add(new InsnNode(Opcodes.IRETURN));
+        hurt.maxStack = 3;
+        hurt.maxLocals = 4;
+        owner.methods.add(hurt);
+
+        String player = "net/minecraft/world/entity/player/Player";
+        String interactionHand = "net/minecraft/world/InteractionHand";
+        String interactionResult = "net/minecraft/world/InteractionResult";
+        String interactDescriptor =
+            "(" + partDescriptor + "L" + player + ";L" + interactionHand + ";)L" + interactionResult + ";";
+        MethodNode interact = new MethodNode(
+            Opcodes.ACC_PUBLIC, "interactFromPart", interactDescriptor, null, null);
+        interact.instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        interact.instructions.add(new VarInsnNode(Opcodes.ALOAD, 2));
+        interact.instructions.add(new VarInsnNode(Opcodes.ALOAD, 3));
+        interact.instructions.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
+            owner.name, "m_6071_",
+            "(L" + player + ";L" + interactionHand + ";)L" + interactionResult + ";", false));
+        interact.instructions.add(new InsnNode(Opcodes.ARETURN));
+        interact.maxStack = 3;
+        interact.maxLocals = 4;
+        owner.methods.add(interact);
+
+        System.out.println("PATCH SCULKSAUR multipart: two neck parts, two tail parts, Forge hitbox delegation");
+    }
+
+    private static void addSculksaurSimplePart(
+        InsnList code, String owner, String simplePart, String fieldName,
+        float width, float height, double offsetX, double offsetY, double offsetZ
+    ) {
+        code.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        code.add(new TypeInsnNode(Opcodes.NEW, simplePart));
+        code.add(new InsnNode(Opcodes.DUP));
+        code.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        code.add(new LdcInsnNode(Float.valueOf(width)));
+        code.add(new LdcInsnNode(Float.valueOf(height)));
+        code.add(new LdcInsnNode(Double.valueOf(offsetX)));
+        code.add(new LdcInsnNode(Double.valueOf(offsetY)));
+        code.add(new LdcInsnNode(Double.valueOf(offsetZ)));
+        code.add(new MethodInsnNode(Opcodes.INVOKESPECIAL,
+            simplePart, "<init>",
+            "(Lnet/minecraft/world/entity/LivingEntity;FFDDD)V", false));
+        code.add(new FieldInsnNode(Opcodes.PUTFIELD,
+            owner, fieldName, "L" + simplePart + ";"));
+    }
+
+    private static MethodNode findUniqueMethod(ClassNode owner, String name, String descriptor) {
+        List<MethodNode> matches = owner.methods.stream()
+            .filter(method -> method.name.equals(name) && method.desc.equals(descriptor))
+            .toList();
+        if (matches.size() != 1) {
+            throw new IllegalStateException("Expected exactly one " + owner.name + "." +
+                name + descriptor + ", found " + matches.size());
+        }
+        return matches.get(0);
+    }
+
+    private static void requireMethod(ClassNode owner, String name, String descriptor) {
+        if (owner == null || owner.methods.stream().noneMatch(method ->
+            method.name.equals(name) && method.desc.equals(descriptor))) {
+            throw new IllegalStateException("Required multipart method is missing: " +
+                (owner == null ? "<missing class>" : owner.name) + "." + name + descriptor);
+        }
+    }
 
     private static void patchSculksaurExplosionEffects(ClassNode owner) {
         if (owner == null) throw new IllegalStateException("SculksaurEffects class is missing");

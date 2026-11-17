@@ -1,4 +1,4 @@
-name: Direct Legacy JAR Prune - build 37
+name: Direct Legacy JAR Prune - build 38
 
 on:
   push:
@@ -86,6 +86,96 @@ jobs:
           python3 tools/prune_binary_jar.py \
             build/classes-pruned.jar \
             build/libs/archie_dinosaurs-legacy-forge-1.20.1.jar
+
+      - name: Verify Sculksaur multipart hitboxes
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          JAR="build/libs/archie_dinosaurs-legacy-forge-1.20.1.jar"
+          SCULK_CLASS='com.eternal_creations.archies_dino_mod.common.entity.mob.sculksaur.SculksaurEntity'
+          SCULK="$(javap -classpath "$JAR" -p -c "$SCULK_CLASS")"
+          SCULK_METHODS="$(javap -classpath "$JAR" -p -s "$SCULK_CLASS")"
+
+          for entry in \
+            'com/eternal_creations/archies_dino_mod/common/entity/base/IMultipartEntity.class' \
+            'com/eternal_creations/archies_dino_mod/common/entity/base/IPartEntity.class' \
+            'com/eternal_creations/archies_dino_mod/common/entity/base/SimplePart.class' \
+            'com/eternal_creations/archies_dino_mod/entity/ForgeEntityPart.class' \
+            'com/eternal_creations/archies_dino_mod/mixin/EntityAccessor.class' \
+            'com/eternal_creations/archies_dino_mod/mixin/forge/ForgeEntityMultipartMixin.class'; do
+            if ! jar tf "$JAR" | grep -Fxq "$entry"; then
+              echo "Sculksaur multipart dependency is missing: $entry"
+              exit 1
+            fi
+          done
+
+          if ! grep -Fq 'implements com.eternal_creations.archies_dino_mod.common.entity.base.IMultipartEntity' <<< "$SCULK"; then
+            echo "SculksaurEntity does not implement IMultipartEntity."
+            exit 1
+          fi
+
+          for part in neck1 neck2 tail1 tail2; do
+            if ! grep -Fq " $part;" <<< "$SCULK_METHODS"; then
+              echo "Sculksaur multipart field is missing: $part"
+              exit 1
+            fi
+          done
+          if ! grep -Fq ' parts;' <<< "$SCULK_METHODS"; then
+            echo "Sculksaur IPartEntity array field is missing."
+            exit 1
+          fi
+
+          CONSTRUCTOR_PARTS="$(grep -oF 'SimplePart."<init>"' <<< "$SCULK" | wc -l | tr -d ' ')"
+          if [[ "$CONSTRUCTOR_PARTS" != "4" ]]; then
+            echo "Expected four SimplePart constructor calls, found $CONSTRUCTOR_PARTS"
+            exit 1
+          fi
+          PART_TICKS="$(grep -oF 'SimplePart.tick:()V' <<< "$SCULK" | wc -l | tr -d ' ')"
+          if [[ "$PART_TICKS" != "4" ]]; then
+            echo "Expected four per-tick SimplePart updates, found $PART_TICKS"
+            exit 1
+          fi
+          if ! grep -Fq 'SimplePart.collectEntities:' <<< "$SCULK"; then
+            echo "Sculksaur multipart IDs are not initialized through collectEntities."
+            exit 1
+          fi
+
+          for method in 'getIParts' 'hurtFromPart' 'interactFromPart'; do
+            if ! grep -Fq " $method(" <<< "$SCULK_METHODS"; then
+              echo "Sculksaur multipart callback is missing: $method"
+              exit 1
+            fi
+          done
+          if ! grep -Fq 'SculksaurEntity.m_6469_' <<< "$SCULK"; then
+            echo "Multipart damage is not delegated to SculksaurEntity."
+            exit 1
+          fi
+          if ! grep -Fq 'SculksaurEntity.m_6071_' <<< "$SCULK"; then
+            echo "Multipart interaction is not delegated to SculksaurEntity."
+            exit 1
+          fi
+
+          SIMPLE_PART="$(javap -classpath "$JAR" -p -c com.eternal_creations.archies_dino_mod.common.entity.base.SimplePart)"
+          if ! grep -Fq 'ICommonHelper.makePartEntity' <<< "$SIMPLE_PART"; then
+            echo "SimplePart is not creating the Forge part entities through ICommonHelper."
+            exit 1
+          fi
+
+          python3 - "$JAR" <<'PY'
+          import json
+          import sys
+          import zipfile
+
+          with zipfile.ZipFile(sys.argv[1]) as jar:
+              config = json.loads(jar.read("archie_dinosaurs.forge.mixins.json"))
+          mixins = config.get("mixins", [])
+          if "forge.ForgeEntityMultipartMixin" not in mixins:
+              raise SystemExit("ForgeEntityMultipartMixin is not registered in the Forge mixin config.")
+          print("Verified Forge multipart mixin registration.")
+          PY
+
+          echo "Verified Sculksaur's two neck and two tail hitboxes, update loop, part ID allocation, damage/interact delegation, and Forge integration."
 
       - name: Audit original and retained mob turn controllers
         shell: bash
