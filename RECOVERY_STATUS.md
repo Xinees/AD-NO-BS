@@ -1,3 +1,16 @@
+## End Peaks biome — 2026-11-17
+
+- Added the custom biome `archie_dinosaurs:end_peaks` to the outer End by replacing selected End Highlands regions with the new biome using a deterministic, low-frequency noise mask.
+- Kept the biome inside the existing End Highlands terrain source, preserving the rest of the vanilla End biome layout.
+- Added chunk-local mountain generation: simple stepped end-stone mountains, varied in width and height, with broad nearly flat plateaus. The feature writes only the current chunk's End Peaks columns, so it does not spill into neighbouring biomes or require cross-chunk block writes.
+- Added chorus generation around mountain foothills: usually two or three nearby groups of three trees per mountain, with sparse solitary chorus plants on the open ground.
+- Preserved the End gateway feature and added End Peaks to the vanilla End and End City biome tags.
+- Chorusoatl natural spawning now targets only End Peaks. Its weight is reduced from 2 to 1; the existing group size remains 3–5. A spawn-group limiter allows at most two active natural groups in a 768×128×768 local area. Spawn eggs and non-natural spawn types are unaffected.
+- All generation is implemented inside the existing binary-prune build pipeline. The pinned source JAR and Astemir RE dependency remain unchanged.
+- CI validates compilation, biome resources, mixin registration, the natural-spawn modifier, and the group limiter. The first in-game generation pass still needs visual verification for mountain density, plateau shapes, chorus spacing, End City generation, and actual spawn behavior.
+
+---
+
 ## Follow-up — Restore the Lushsaur eating movement lock — 2026-11-17
 
 - The temporary Legacy exception that allowed mounted movement during `actionEat` is reverted. The original `isMovementBlocked()` check for `actionEat` is retained, so a rider cannot move the Lushsaur until the eating animation completes.

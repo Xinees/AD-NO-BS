@@ -30,6 +30,33 @@ jobs:
           distribution: temurin
           java-version: '17'
 
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.8'
+
+      - name: Compile End Peaks worldgen
+        shell: bash
+        run: |
+          set -euo pipefail
+          gradle --no-daemon -p worldgen compileJava processResources
+          test -s worldgen/build/classes/java/main/com/eternal_creations/archies_dino_mod/mixin/EndPeaksBiomeSourceMixin.class
+          test -s worldgen/build/classes/java/main/com/eternal_creations/archies_dino_mod/worldgen/EndPeaksWorldgen.class
+          test -s worldgen/build/classes/java/main/com/eternal_creations/archies_dino_mod/worldgen/EndPeaksMountainFeature.class
+          test -s worldgen/build/classes/java/main/com/eternal_creations/archies_dino_mod/worldgen/EndPeaksChorusFeature.class
+          test -s worldgen/build/classes/java/main/com/eternal_creations/archies_dino_mod/worldgen/EndPeaksChorusoatlSpawnLimiter.class
+          test -s worldgen/build/classes/java/main/com/eternal_creations/archies_dino_mod/worldgen/EndPeaksFeatureRegistry.class
+          test -s worldgen/build/resources/main/end_peaks.mixins.json
+          REFMAP="$(find worldgen/build -type f -name end_peaks.refmap.json -print -quit)"
+          if [[ -z "$REFMAP" ]]; then
+            echo "Mixin annotation processor did not produce end_peaks.refmap.json."
+            exit 1
+          fi
+          if [[ "$REFMAP" != "worldgen/build/resources/main/end_peaks.refmap.json" ]]; then
+            cp "$REFMAP" worldgen/build/resources/main/end_peaks.refmap.json
+          fi
+          test -s worldgen/build/resources/main/end_peaks.refmap.json
+
       - name: Verify untouched source JAR
         shell: bash
         run: |
@@ -194,22 +221,6 @@ jobs:
                   if b"actionRoar" in data or b"actionAttackTailStomp" in data:
                       print(name + " roar=" + str(b"actionRoar" in data) +
                             " tailStomp=" + str(b"actionAttackTailStomp" in data))
-              print("===== ORIGINAL CHORUSOATL SPAWN RESOURCES =====")
-              for resource in (
-                  "data/ec_ad/forge/biome_modifier/chorusoatl_spawns.json",
-                  "data/ec_ad/tags/worldgen/biome/spawns_chorusoatls.json",
-                  "data/minecraft/tags/worldgen/biome/has_structure/end_city.json",
-                  "data/minecraft/tags/worldgen/biome/is_end.json",
-                  "data/minecraft/tags/worldgen/biome/_all.json",
-              ):
-                  if resource in archive.namelist():
-                      print("===== " + resource + " =====")
-                      print(archive.read(resource).decode("utf-8"))
-                  else:
-                      print("MISSING: " + resource)
-              if "META-INF/MANIFEST.MF" in archive.namelist():
-                  print("===== ORIGINAL MANIFEST =====")
-                  print(archive.read("META-INF/MANIFEST.MF").decode("utf-8", errors="replace"))
           PY
           while IFS= read -r class_name; do
             case "$class_name" in
@@ -242,6 +253,7 @@ jobs:
             ec_ad-forge-1.20.1-1.0.4.jar \
             build/classes-pruned.jar
           jar uf build/classes-pruned.jar -C build/behavior-hooks .
+          jar uf build/classes-pruned.jar -C worldgen/build/classes/java/main . -C worldgen/build/resources/main .
 
       - name: Prune resources inside the JAR
         shell: bash
@@ -252,6 +264,77 @@ jobs:
             build/classes-pruned.jar \
             build/libs/archie_dinosaurs-legacy-forge-1.20.1.jar
 
+      - name: Verify End Peaks biome generation and Chorusoatl population
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          JAR="build/libs/archie_dinosaurs-legacy-forge-1.20.1.jar"
+          for entry in \
+            'com/eternal_creations/archies_dino_mod/mixin/EndPeaksBiomeSourceMixin.class' \
+            'com/eternal_creations/archies_dino_mod/worldgen/EndPeaksWorldgen.class' \
+            'com/eternal_creations/archies_dino_mod/worldgen/EndPeaksMountainFeature.class' \
+            'com/eternal_creations/archies_dino_mod/worldgen/EndPeaksChorusFeature.class' \
+            'com/eternal_creations/archies_dino_mod/worldgen/EndPeaksChorusoatlSpawnLimiter.class' \
+            'com/eternal_creations/archies_dino_mod/worldgen/EndPeaksFeatureRegistry.class' \
+            'end_peaks.mixins.json' \
+            'end_peaks.refmap.json'; do
+            if ! jar tf "$JAR" | grep -Fxq "$entry"; then
+              echo "End Peaks runtime resource is missing: $entry"
+              exit 1
+            fi
+          done
+
+          python3 - <<'PY'
+          import json
+          import zipfile
+
+          path = "build/libs/archie_dinosaurs-legacy-forge-1.20.1.jar"
+          with zipfile.ZipFile(path) as jar:
+              names = set(jar.namelist())
+              modifier = json.loads(jar.read("data/archie_dinosaurs/forge/biome_modifier/chorusoatl_spawns.json"))
+              assert modifier["biomes"] == "archie_dinosaurs:end_peaks"
+              assert modifier["spawners"] == {
+                  "type": "archie_dinosaurs:chorusoatl",
+                  "weight": 1,
+                  "minCount": 3,
+                  "maxCount": 5,
+              }
+
+              spawn_tag = json.loads(jar.read("data/archie_dinosaurs/tags/worldgen/biome/spawns_chorusoatls.json"))
+              assert spawn_tag == {"replace": True, "values": ["archie_dinosaurs:end_peaks"]}
+
+              biome = json.loads(jar.read("data/archie_dinosaurs/worldgen/biome/end_peaks.json"))
+              assert "archie_dinosaurs:end_peaks_mountains" in biome["features"][4]
+              assert "minecraft:end_gateway_return" in biome["features"][4]
+              assert biome["features"][9] == ["archie_dinosaurs:end_peaks_chorus"]
+
+              config = json.loads(jar.read("end_peaks.mixins.json"))
+              assert config["mixins"] == ["EndPeaksBiomeSourceMixin"]
+              refmap = json.loads(jar.read("end_peaks.refmap.json"))
+              manifest = jar.read("META-INF/MANIFEST.MF").decode("utf-8")
+              assert "end_peaks.mixins.json" in manifest
+
+              for tag_path in (
+                  "data/minecraft/tags/worldgen/biome/is_end.json",
+                  "data/minecraft/tags/worldgen/biome/has_structure/end_city.json",
+              ):
+                  tag = json.loads(jar.read(tag_path))
+                  assert tag.get("replace") is False
+                  assert "archie_dinosaurs:end_peaks" in tag.get("values", [])
+
+          print("Verified End Peaks generation resources, End structure tags, and Chorusoatl's 2-group/3-5 population settings.")
+          PY
+
+          CHORUS_LIMITER="$(javap -classpath "$JAR" -p -c com.eternal_creations.archies_dino_mod.worldgen.EndPeaksChorusoatlSpawnLimiter)"
+          for required in 'MAX_ACTIVE_GROUPS' 'MobSpawnType.NATURAL' 'setSpawnCancelled' 'setSpawnData'; do
+            if ! grep -Fq "$required" <<< "$CHORUS_LIMITER"; then
+              echo "Chorusoatl natural group limiter is missing required behavior: $required"
+              printf '%s\n' "$CHORUS_LIMITER"
+              exit 1
+            fi
+          done
+          echo "Verified two active Chorusoatl natural spawn groups per local End Peaks area."
       - name: Verify Sculksaur multipart hitboxes
         shell: bash
         run: |

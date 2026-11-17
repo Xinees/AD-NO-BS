@@ -107,10 +107,17 @@ def rewrite_manifest(data):
             logical_lines.append(line)
 
     output_lines = []
+    mixin_configs_found = False
     for line in logical_lines:
         if not line:
             output_lines.append("")
             continue
+        if line.startswith("MixinConfigs:"):
+            mixin_configs_found = True
+            configs = [item.strip() for item in line.split(":", 1)[1].split(",") if item.strip()]
+            if "end_peaks.mixins.json" not in configs:
+                configs.append("end_peaks.mixins.json")
+            line = "MixinConfigs: " + ",".join(configs)
         remaining = line.replace(OLD_NAMESPACE, NEW_NAMESPACE).encode("utf-8")
         first_line = True
         while remaining:
@@ -124,6 +131,9 @@ def rewrite_manifest(data):
             output_lines.append(piece if first_line else " " + piece)
             remaining = remaining[end:]
             first_line = False
+
+    if not mixin_configs_found:
+        output_lines.append("MixinConfigs: end_peaks.mixins.json")
 
     return ("\r\n".join(output_lines).rstrip("\r\n") + "\r\n").encode("utf-8")
 
@@ -215,6 +225,7 @@ def key_is_allowed(key):
     if key in {
         NEW_NAMESPACE,
         f"category.{NEW_NAMESPACE}.default",
+        f"biome.{NEW_NAMESPACE}.end_peaks",
         f"effect.{NEW_NAMESPACE}.dazed",
         f"item_group.{NEW_NAMESPACE}_items",
         f"item_group.{NEW_NAMESPACE}.items",
@@ -377,6 +388,15 @@ def keep_data_path(path):
 
     if low.startswith("forge/biome_modifier/"):
         return base in {"chorusoatl_spawns.json", "lushsaur_spawns.json"}
+
+    if low.startswith("worldgen/biome/"):
+        return base == "end_peaks.json"
+
+    if low.startswith("worldgen/configured_feature/"):
+        return base in {"end_peaks_mountains.json", "end_peaks_chorus.json"}
+
+    if low.startswith("worldgen/placed_feature/"):
+        return base in {"end_peaks_mountains.json", "end_peaks_chorus.json"}
 
     if low.startswith("recipes/archie_trade/"):
         return False
@@ -664,6 +684,7 @@ with zipfile.ZipFile(source, "r") as zin:
                         "item.archie_dinosaurs.sculk_toxin": "Sculk Toxin",
                         "block.archie_dinosaurs.lushsaur_egg": "Lushsaur Egg",
                         "block.archie_dinosaurs.chorusoatl_egg": "Chorusoatl Egg",
+                        "biome.archie_dinosaurs.end_peaks": "End Peaks",
                     },
                     "ru_ru": {
                         "item_group.archie_dinosaurs_items": "Динозавры Арчи",
@@ -675,6 +696,7 @@ with zipfile.ZipFile(source, "r") as zin:
                         "item.archie_dinosaurs.sculk_toxin": "Токсин Скалкозавра",
                         "block.archie_dinosaurs.lushsaur_egg": "Яйцо Пышнозавра",
                         "block.archie_dinosaurs.chorusoatl_egg": "Яйцо Хоросоатля",
+                        "biome.archie_dinosaurs.end_peaks": "Пики Энда",
                     },
                 }
                 for key, value in translations.get(locale, {}).items():
@@ -710,6 +732,8 @@ with zipfile.ZipFile(source, "r") as zin:
             "data/minecraft/tags/game_events/warden_can_listen.json",
             "data/minecraft/tags/entity_types/arrows.json",
             "data/minecraft/tags/damage_type/is_projectile.json",
+            "data/minecraft/tags/worldgen/biome/is_end.json",
+            "data/minecraft/tags/worldgen/biome/has_structure/end_city.json",
         }:
             data = filter_tag_json(data, name)
 
@@ -757,6 +781,97 @@ kept["data/archie_dinosaurs/forge/biome_modifier/lushsaur_spawns.json"] = dump_j
     }],
 })
 
+chorusoatl_spawn_path = "data/archie_dinosaurs/forge/biome_modifier/chorusoatl_spawns.json"
+if chorusoatl_spawn_path not in kept:
+    raise SystemExit("Original Chorusoatl biome modifier is missing.")
+chorusoatl_modifier = read_json(kept[chorusoatl_spawn_path], chorusoatl_spawn_path)
+if chorusoatl_modifier.get("type") != "forge:add_spawns":
+    raise SystemExit("Unexpected Chorusoatl biome modifier type.")
+chorusoatl_spawner = chorusoatl_modifier.get("spawners")
+if not isinstance(chorusoatl_spawner, dict):
+    raise SystemExit("Original Chorusoatl spawner entry must remain a single group definition.")
+if chorusoatl_spawner.get("type") != "archie_dinosaurs:chorusoatl":
+    raise SystemExit("Unexpected entity in the Chorusoatl biome modifier.")
+chorusoatl_spawner["weight"] = 1
+chorusoatl_spawner["minCount"] = 3
+chorusoatl_spawner["maxCount"] = 5
+chorusoatl_modifier["biomes"] = "archie_dinosaurs:end_peaks"
+kept[chorusoatl_spawn_path] = dump_json(chorusoatl_modifier)
+
+kept["data/archie_dinosaurs/tags/worldgen/biome/spawns_chorusoatls.json"] = dump_json({
+    "replace": True,
+    "values": ["archie_dinosaurs:end_peaks"],
+})
+
+kept["data/minecraft/tags/worldgen/biome/is_end.json"] = dump_json({
+    "replace": False,
+    "values": ["archie_dinosaurs:end_peaks"],
+})
+
+kept["data/minecraft/tags/worldgen/biome/has_structure/end_city.json"] = dump_json({
+    "replace": False,
+    "values": ["archie_dinosaurs:end_peaks"],
+})
+
+kept["data/archie_dinosaurs/worldgen/biome/end_peaks.json"] = dump_json({
+    "carvers": [],
+    "downfall": 0.5,
+    "effects": {
+        "fog_color": 10518688,
+        "sky_color": 0,
+        "water_color": 4159204,
+    },
+    "features": [
+        [],
+        [],
+        [],
+        [],
+        [
+            "minecraft:end_gateway_return",
+            "archie_dinosaurs:end_peaks_mountains",
+        ],
+        [],
+        [],
+        [],
+        [],
+        [
+            "archie_dinosaurs:end_peaks_chorus",
+        ],
+    ],
+    "has_precipitation": False,
+    "spawners": {
+        "ambient": [],
+        "axolotls": [],
+        "creature": [],
+        "misc": [],
+        "monster": [
+            {
+                "type": "minecraft:enderman",
+                "weight": 10,
+                "minCount": 4,
+                "maxCount": 4,
+            }
+        ],
+        "underground_water_creature": [],
+        "water_ambient": [],
+        "water_creature": [],
+    },
+    "spawn_costs": {},
+    "temperature": 0.5,
+})
+
+for feature_name in ("end_peaks_mountains", "end_peaks_chorus"):
+    kept[f"data/archie_dinosaurs/worldgen/configured_feature/{feature_name}.json"] = dump_json({
+        "type": f"archie_dinosaurs:{feature_name}",
+        "config": {},
+    })
+    kept[f"data/archie_dinosaurs/worldgen/placed_feature/{feature_name}.json"] = dump_json({
+        "feature": f"archie_dinosaurs:{feature_name}",
+        "placement": [
+            {"type": "minecraft:in_square"},
+        ],
+    })
+
 with zipfile.ZipFile(target, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as zout:
     for name, data in sorted(kept.items()):
         info = zipfile.ZipInfo(name)
@@ -772,6 +887,15 @@ with zipfile.ZipFile(target, "r") as check:
         "archie_dinosaurs.forge.mixins.json",
         "pack.mcmeta",
         "data/archie_dinosaurs/forge/biome_modifier/lushsaur_spawns.json",
+        "data/archie_dinosaurs/forge/biome_modifier/chorusoatl_spawns.json",
+        "data/archie_dinosaurs/tags/worldgen/biome/spawns_chorusoatls.json",
+        "data/archie_dinosaurs/worldgen/biome/end_peaks.json",
+        "data/archie_dinosaurs/worldgen/configured_feature/end_peaks_mountains.json",
+        "data/archie_dinosaurs/worldgen/configured_feature/end_peaks_chorus.json",
+        "data/archie_dinosaurs/worldgen/placed_feature/end_peaks_mountains.json",
+        "data/archie_dinosaurs/worldgen/placed_feature/end_peaks_chorus.json",
+        "data/minecraft/tags/worldgen/biome/is_end.json",
+        "data/minecraft/tags/worldgen/biome/has_structure/end_city.json",
     }
     missing = sorted(required - names)
     if missing:
@@ -792,6 +916,51 @@ with zipfile.ZipFile(target, "r") as check:
     if spawn_modifier != expected_spawn_modifier:
         raise SystemExit("Lushsaur natural spawn must remain weight 1, group size 1, in minecraft:lush_caves")
 
+    chorus_modifier_path = "data/archie_dinosaurs/forge/biome_modifier/chorusoatl_spawns.json"
+    chorus_modifier = read_json(check.read(chorus_modifier_path), chorus_modifier_path)
+    chorus_spawner = chorus_modifier.get("spawners")
+    if chorus_modifier.get("biomes") != "archie_dinosaurs:end_peaks":
+        raise SystemExit("Chorusoatl natural spawning must be restricted to End Peaks.")
+    if chorus_modifier.get("type") != "forge:add_spawns" or not isinstance(chorus_spawner, dict):
+        raise SystemExit("Chorusoatl biome modifier must retain its single Forge spawner entry.")
+    if chorus_spawner != {
+        "type": "archie_dinosaurs:chorusoatl",
+        "weight": 1,
+        "minCount": 3,
+        "maxCount": 5,
+    }:
+        raise SystemExit("Chorusoatl spawn settings must be weight 1 with the original 3-5 group size.")
+
+    chorus_tag_path = "data/archie_dinosaurs/tags/worldgen/biome/spawns_chorusoatls.json"
+    chorus_tag = read_json(check.read(chorus_tag_path), chorus_tag_path)
+    if chorus_tag != {"replace": True, "values": ["archie_dinosaurs:end_peaks"]}:
+        raise SystemExit("The Chorusoatl spawn biome tag must contain only End Peaks.")
+
+    end_biome_path = "data/archie_dinosaurs/worldgen/biome/end_peaks.json"
+    end_biome = read_json(check.read(end_biome_path), end_biome_path)
+    if end_biome.get("has_precipitation") is not False or end_biome.get("temperature") != 0.5:
+        raise SystemExit("End Peaks climate must match the End.")
+    if "minecraft:end_gateway_return" not in end_biome["features"][4]:
+        raise SystemExit("End Peaks must retain the vanilla End gateway feature.")
+    if "archie_dinosaurs:end_peaks_mountains" not in end_biome["features"][4]:
+        raise SystemExit("End Peaks is missing the mountain terrain feature.")
+    if "archie_dinosaurs:end_peaks_chorus" not in end_biome["features"][9]:
+        raise SystemExit("End Peaks is missing the foot-of-mountain chorus feature.")
+
+    for feature_name in ("end_peaks_mountains", "end_peaks_chorus"):
+        configured = f"data/archie_dinosaurs/worldgen/configured_feature/{feature_name}.json"
+        placed = f"data/archie_dinosaurs/worldgen/placed_feature/{feature_name}.json"
+        read_json(check.read(configured), configured)
+        read_json(check.read(placed), placed)
+
+    for tag_path in (
+        "data/minecraft/tags/worldgen/biome/is_end.json",
+        "data/minecraft/tags/worldgen/biome/has_structure/end_city.json",
+    ):
+        tag = read_json(check.read(tag_path), tag_path)
+        if tag.get("replace") is not False or "archie_dinosaurs:end_peaks" not in tag.get("values", []):
+            raise SystemExit("End Peaks is missing a required vanilla End biome tag: " + tag_path)
+
     stale_structures = sorted(
         name for name in names
         if "lushsaur" in name.lower() and (
@@ -803,6 +972,15 @@ with zipfile.ZipFile(target, "r") as check:
     )
     if stale_structures:
         raise SystemExit("Lushsaur structure-based spawning resources remain: " + repr(stale_structures))
+
+    manifest = check.read("META-INF/MANIFEST.MF").decode("utf-8")
+    logical_manifest = re.sub(r"\r?\n ", "", manifest)
+    if "end_peaks.mixins.json" not in logical_manifest:
+        raise SystemExit("End Peaks biome source mixin is not registered in the mod manifest.")
+    mixin_config = read_json(check.read("end_peaks.mixins.json"), "end_peaks.mixins.json")
+    if "EndPeaksBiomeSourceMixin" not in mixin_config.get("mixins", []):
+        raise SystemExit("End Peaks biome source mixin is missing from its config.")
+    read_json(check.read("end_peaks.refmap.json"), "end_peaks.refmap.json")
 
     stale_names = sorted(name for name in names if OLD_NAMESPACE in name)
     if stale_names:
