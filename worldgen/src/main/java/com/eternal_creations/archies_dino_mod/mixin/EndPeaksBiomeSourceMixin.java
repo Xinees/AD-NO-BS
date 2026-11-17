@@ -7,8 +7,6 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.biome.TheEndBiomeSource;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.levelgen.synth.SimplexNoise;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -19,14 +17,6 @@ import java.util.stream.Stream;
 
 @Mixin(TheEndBiomeSource.class)
 public abstract class EndPeaksBiomeSourceMixin {
-    @Unique
-    private static final SimplexNoise ARCHIE_END_PEAKS_NOISE =
-        new SimplexNoise(RandomSource.create(0x454E445045414B53L));
-
-    @Unique
-    private static final SimplexNoise ARCHIE_END_PEAKS_DETAIL =
-        new SimplexNoise(RandomSource.create(0x454E445045414B44L));
-
     @Unique
     private Holder<Biome> archie$endPeaks;
 
@@ -63,10 +53,6 @@ public abstract class EndPeaksBiomeSourceMixin {
 
     @Unique
     private static boolean archie$isEndPeaksRegion(int quartX, int quartZ) {
-        double blockX = quartX * 4.0D;
-        double blockZ = quartZ * 4.0D;
-        double broad = ARCHIE_END_PEAKS_NOISE.getValue(blockX * 0.0021D, blockZ * 0.0021D);
-        double detail = ARCHIE_END_PEAKS_DETAIL.getValue(blockX * 0.0064D, blockZ * 0.0064D);
-        return broad + detail * 0.22D > 0.17D;
+        return EndPeaksWorldgen.isEndPeaksRegion(quartX, quartZ);
     }
 }

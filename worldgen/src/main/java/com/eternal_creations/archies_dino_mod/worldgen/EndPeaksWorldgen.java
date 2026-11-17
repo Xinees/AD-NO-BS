@@ -4,10 +4,16 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.levelgen.LegacyRandomSource;
+import net.minecraft.world.level.levelgen.synth.SimplexNoise;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.levelgen.synth.SimplexNoise;
 
 public final class EndPeaksWorldgen {
+    private static final SimplexNoise BIOME_NOISE =
+        new SimplexNoise(new LegacyRandomSource(0x454E445045414B53L));
+    private static final SimplexNoise BIOME_DETAIL =
+        new SimplexNoise(new LegacyRandomSource(0x454E445045414B44L));
     public static final ResourceKey<Biome> BIOME = ResourceKey.create(
         Registries.BIOME,
         new ResourceLocation("archie_dinosaurs", "end_peaks")
@@ -45,6 +51,14 @@ public final class EndPeaksWorldgen {
         value = (value ^ (value >>> 30)) * 0xBF58476D1CE4E5B9L;
         value = (value ^ (value >>> 27)) * 0x94D049BB133111EBL;
         return value ^ (value >>> 31);
+    }
+
+    public static boolean isEndPeaksRegion(int quartX, int quartZ) {
+        double blockX = quartX * 4.0D;
+        double blockZ = quartZ * 4.0D;
+        double broad = BIOME_NOISE.getValue(blockX * 0.0021D, blockZ * 0.0021D);
+        double detail = BIOME_DETAIL.getValue(blockX * 0.0064D, blockZ * 0.0064D);
+        return broad + detail * 0.22D > 0.17D;
     }
 
     public static int snapToChunkInterior(int coordinate) {
