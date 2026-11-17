@@ -2,20 +2,20 @@
 
 # AD-NO-BS Legacy recovery status
 
-## Official player-hit multipart layer — 2026-11-17
+## Owner correction — Sculksaur multipart baseline returned to Build #334 — 2026-11-17
 
-- Build 39 had imported the official `ForgeEntityMultipartMixin`, but still reused the older 1.0.4 `SimplePart`, `ForgeEntityPart`, and multipart interface bytecode. That was only a partial port of the player-hit path.
-- Replace the shared multipart support classes with the exact SHA-verified 1.0.5 classes: `IMultipartEntity`, `IPartEntity`, `SimplePart`, `ForgeEntityPart`, `EntityAccessor`, and `ForgeEntityMultipartMixin`.
-- This restores the official path where Forge receives the `PartEntity[]` from `getParts()`, and the part adapter forwards player hits/interactions to the parent through `hurtFromPart` and `interactFromPart`.
-- Keep the two Legacy-specific tail Y offsets (`tail1` = 2.5, `tail2` = 3.5); neck positions, part dimensions, and other Sculksaur behavior remain unchanged.
-- CI verifies the Forge part adapter, player interaction forwarding, multipart ID accessor, and Forge mixin registration. A successful build still needs an in-game player hit/interact test.
+- Use the Sculksaur multipart implementation exactly as it was in Build #334.
+- Do not keep the Build #335 tail-height adjustment: `tail1` Y returns to 2.0 and `tail2` Y returns to 2.5; retain Build #334 dimensions and X/Z offsets.
+- Do not replace the 1.0.4 multipart support layer with the 1.0.5 `SimplePart` / `ForgeEntityPart` / interfaces. The user explicitly selected the Build #334 implementation as the better baseline.
+- The incomplete attempt to port the full 1.0.5 player-hit layer is discarded. The pinned 1.0.4 input JAR remains unchanged.
 
-## Sculksaur Legacy multipart height adjustment — 2026-11-17
+## Chorusoatl high-platform route investigation — 2026-11-17
 
-- After comparing the Build 38 hitboxes against the Legacy model, raise only the two tail parts to match the marked positions.
-- `tail1` keeps its 1.5 × 2.0 size and X/Z offsets; raise its center Y from 2.0 to 2.5 (+0.5 blocks).
-- `tail2` keeps its 1.0 × 1.0 size and X/Z offsets; raise its center Y from 2.5 to 3.5 (+1.0 block).
-- The two neck parts and all other entity behavior remain unchanged. The pruner now guards these Legacy-specific offsets.
+- User reports that wild Chorusoatl selected to land on high terrain can become trapped against corners and continue trying to fly through obstructing blocks.
+- Work within the existing `FlyNavigation` / `SmoothPathNavigation` flow. Do not add a parallel navigator, broad AI rewrite, arbitrary search radii, or unrelated flight/animation changes.
+- First inspect how the landing search validates and hands off a high-platform candidate to navigation. Keep the change narrow and preserve the existing perch/landing lifecycle.
+- Runtime verification remains required; the user cannot currently provide a consistent repro.
+
 
 ## Sculksaur multipart hitboxes — 2026-11-17
 

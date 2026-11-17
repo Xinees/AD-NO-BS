@@ -1,4 +1,4 @@
-name: Direct Legacy JAR Prune - build 40
+name: Direct Legacy JAR Prune - build 41
 
 on:
   push:
@@ -67,6 +67,65 @@ jobs:
           cat tools/LegacyBehaviorHooks.part1.b64 tools/LegacyBehaviorHooks.part2.b64 tools/LegacyBehaviorHooks.part3.b64 tools/LegacyBehaviorHooks.part4.b64 | base64 -d | gzip -dc > build/LegacyBehaviorHooks.java
           python3 tools/polish_legacy_hooks.py build/LegacyBehaviorHooks.java
           javac -encoding UTF-8 --release 17 -d build/behavior-hooks build/LegacyBehaviorHooks.java
+
+      - name: Inspect existing Chorusoatl landing route implementation
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          source = Path("build/LegacyBehaviorHooks.java").read_text(encoding="utf-8")
+          declarations = list(re.finditer(
+              r"(?m)^    (?:public|private|protected)\\s+(?:static\\s+)?[^;{}\\n]+\\([^;{}]*\\)(?:\\s*throws\\s+[^{}]+)?\\s*\\{",
+              source
+          ))
+
+          def block_for(match):
+              start = match.start()
+              opening = source.find("{", match.start(), match.end())
+              depth = 0
+              in_string = False
+              escape = False
+              for index in range(opening, len(source)):
+                  ch = source[index]
+                  if in_string:
+                      if escape:
+                          escape = False
+                      elif ch == "\\\\":
+                          escape = True
+                      elif ch == '"':
+                          in_string = False
+                      continue
+                  if ch == '"':
+                      in_string = True
+                  elif ch == "{":
+                      depth += 1
+                  elif ch == "}":
+                      depth -= 1
+                      if depth == 0:
+                          return source[start:index + 1]
+              raise RuntimeError("Unclosed Java method in LegacyBehaviorHooks")
+
+          tokens = (
+              "chorusoatlTick", "PREPARING_TO_LAND", "PREPARING_TO_FLY",
+              "validPlatform(", "overlapsOtherChorusoatl(",
+              "landing", "Landing", "moveTo(", "m_26519_", "m_5624_",
+              "PathNavigation", "navigation", "pathfind"
+          )
+          matches = []
+          for declaration in declarations:
+              block = block_for(declaration)
+              if any(token in block for token in tokens):
+                  signature = block.split("{", 1)[0].strip().replace("\\n", " ")
+                  if not any(signature == prior[0] for prior in matches):
+                      matches.append((signature, block))
+          print("Matched %d Chorusoatl/landing/navigation methods" % len(matches))
+          for signature, block in matches:
+              print("\\n===== %s =====" % signature)
+              print(block)
+          PY
 
       - name: Prune classes and registrations in the original JAR
         shell: bash
@@ -160,30 +219,6 @@ jobs:
           SIMPLE_PART="$(javap -classpath "$JAR" -p -c com.eternal_creations.archies_dino_mod.common.entity.base.SimplePart)"
           if ! grep -Fq 'ICommonHelper.makePartEntity' <<< "$SIMPLE_PART"; then
             echo "SimplePart is not creating the Forge part entities through ICommonHelper."
-            exit 1
-          fi
-
-
-          FORGE_PART="$(javap -classpath "$JAR" -p -c com.eternal_creations.archies_dino_mod.entity.ForgeEntityPart)"
-          if ! grep -Fq 'IMultipartEntity.hurtFromPart' <<< "$FORGE_PART"; then
-            echo "ForgeEntityPart does not forward player/entity damage to the multipart parent."
-            exit 1
-          fi
-          if ! grep -Fq 'IMultipartEntity.interactFromPart' <<< "$FORGE_PART"; then
-            echo "ForgeEntityPart does not forward player interaction to the multipart parent."
-            exit 1
-          fi
-
-          FORGE_MULTIPART="$(javap -classpath "$JAR" -p -c com.eternal_creations.archies_dino_mod.mixin.forge.ForgeEntityMultipartMixin)"
-          if ! grep -Fq 'IMultipartEntity.getIParts' <<< "$FORGE_MULTIPART" ||
-             ! grep -Fq 'PartEntity' <<< "$FORGE_MULTIPART"; then
-            echo "Forge multipart mixin does not expose the hit parts to Forge's player hit-testing."
-            exit 1
-          fi
-
-          ENTITY_ACCESSOR="$(javap -classpath "$JAR" -p -c com.eternal_creations.archies_dino_mod.mixin.EntityAccessor)"
-          if ! grep -Fq 'getENTITY_COUNTER' <<< "$ENTITY_ACCESSOR"; then
-            echo "Official part ID allocator accessor is missing."
             exit 1
           fi
 
