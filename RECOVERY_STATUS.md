@@ -1,3 +1,11 @@
+## Follow-up — Restore the Lushsaur eating movement lock — 2026-11-17
+
+- The temporary Legacy exception that allowed mounted movement during `actionEat` is reverted. The original `isMovementBlocked()` check for `actionEat` is retained, so a rider cannot move the Lushsaur until the eating animation completes.
+- Inspection of `LushsaurClient.buildActionState()` confirmed that `actionEat` is blended as an action layer over `buildLocomotionState()`. The current Legacy pipeline does not establish a safe per-bone mask that would preserve the eating animation while exposing the walk/run leg channels. No speculative animation rewrite is applied.
+- The separate Lushsaur passenger input cooldown change remains intact, as do the Creative warning exclusion and all unrelated mount controls.
+- CI verifies the original `actionEat` movement block and checks that no rider-specific bypass remains. In-game verification is still required.
+
+---
 ## Follow-up — Allow Lushsaur movement while eating under rider control — 2026-11-17
 
 - The original `LushsaurEntity.isMovementBlocked()` treated the active `actionEat` animation as a full movement lock, including when the Lushsaur had a controlling passenger.

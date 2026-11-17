@@ -552,7 +552,7 @@ jobs:
           print("Verified rare Lushsaur natural spawning in lush caves and no Lushsaur structure.")
           PY
 
-      - name: Verify Lushsaur feeding animation does not block mounted movement
+      - name: Verify Lushsaur eating animation keeps its original movement block
         shell: bash
         run: |
           set -euo pipefail
@@ -569,17 +569,17 @@ jobs:
           required_order = (
               "Field actionEat:",
               "ActionState.isActive:()Z",
-              "Method m_6688_:()Lnet/minecraft/world/entity/LivingEntity;",
-              "java/util/Objects.isNull:(Ljava/lang/Object;)Z",
-              "iand",
               "ifne",
           )
           cursor = 0
           for item in required_order:
               position = body.find(item, cursor)
               if position < 0:
-                  raise SystemExit("Missing or out-of-order Lushsaur eating movement instruction: " + item + "\\n" + body)
+                  raise SystemExit("Original actionEat movement blocker is missing or changed: " + item)
               cursor = position + len(item)
+          eat_position = body.find("Field actionEat:")
+          if "m_6688_" in body[eat_position:] or "Objects.isNull" in body[eat_position:]:
+              raise SystemExit("A rider-specific bypass of the actionEat movement block remains.")
           preserved = (
               "Field actionEmerge:",
               "Field actionBury:",
@@ -594,8 +594,8 @@ jobs:
           )
           missing = [item for item in preserved if item not in body]
           if missing:
-              raise SystemExit("Unrelated Lushsaur movement blockers were changed: " + repr(missing))
-          print("Verified only actionEat is bypassed while Lushsaur has a controlling passenger; all other movement blockers remain.")
+              raise SystemExit("Unrelated Lushsaur movement blockers changed: " + repr(missing))
+          print("Verified actionEat once again blocks mounted movement until its animation ends; all other movement blockers remain.")
           PY
 
       - name: Verify framework overrides, mounted attacks, and Lushsaur sprint controls

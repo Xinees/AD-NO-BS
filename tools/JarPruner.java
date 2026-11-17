@@ -225,7 +225,6 @@ public final class JarPruner {
         patchChorusoatlGoalSuppression(nodes.get(ROOT + "common/entity/ai/goal/GoalStrollLandAndAir"), "shouldSuppressChorusStroll");
         patchChorusoatlGoalSuppression(nodes.get(ROOT + "common/entity/mob/chorusoatl/ai/ChorusoatlGoalFollowPack"), "shouldSuppressChorusPackFollow");
         patchLushsaurControllingPassenger(lushsaurEntity);
-        patchLushsaurEatingMovementGate(lushsaurEntity);
         patchLushsaurNoInventory(lushsaurEntity);
         patchLushsaurCanSprint(lushsaurEntity);
         patchLushsaurMountSpeed(lushsaurEntity);
@@ -3264,54 +3263,6 @@ public final class JarPruner {
         owner.methods.add(method);
     }
 
-    private static void patchLushsaurEatingMovementGate(ClassNode owner) {
-        if (owner == null) throw new IllegalStateException("LushsaurEntity class is missing");
-
-        MethodNode movementBlocked = owner.methods.stream()
-            .filter(candidate -> candidate.name.equals("isMovementBlocked") && candidate.desc.equals("()Z"))
-            .findFirst()
-            .orElseThrow(() -> new IllegalStateException("LushsaurEntity.isMovementBlocked is missing"));
-
-        FieldInsnNode eatState = null;
-        for (AbstractInsnNode instruction : movementBlocked.instructions.toArray()) {
-            if (instruction instanceof FieldInsnNode field &&
-                field.getOpcode() == Opcodes.GETFIELD &&
-                field.owner.equals(owner.name) &&
-                field.name.equals("actionEat") &&
-                field.desc.equals("Lcom/astemir/astemirlib/re/common/action/ActionState;")) {
-                if (eatState != null) {
-                    throw new IllegalStateException("Multiple actionEat checks in LushsaurEntity.isMovementBlocked");
-                }
-                eatState = field;
-            }
-        }
-        if (eatState == null) throw new IllegalStateException("Lushsaur actionEat movement gate is missing");
-
-        AbstractInsnNode activeCall = nextCodeInstruction(eatState);
-        if (!(activeCall instanceof MethodInsnNode isActive) ||
-            isActive.getOpcode() != Opcodes.INVOKEVIRTUAL ||
-            !isActive.owner.equals("com/astemir/astemirlib/re/common/action/ActionState") ||
-            !isActive.name.equals("isActive") ||
-            !isActive.desc.equals("()Z")) {
-            throw new IllegalStateException("Unexpected Lushsaur actionEat state check");
-        }
-        AbstractInsnNode originalBranch = nextCodeInstruction(activeCall);
-        if (!(originalBranch instanceof JumpInsnNode branch) || branch.getOpcode() != Opcodes.IFNE) {
-            throw new IllegalStateException("Unexpected Lushsaur actionEat movement branch");
-        }
-
-        InsnList riderGate = new InsnList();
-        riderGate.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        riderGate.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, owner.name, "m_6688_",
-            "()Lnet/minecraft/world/entity/LivingEntity;", false));
-        riderGate.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "java/util/Objects", "isNull",
-            "(Ljava/lang/Object;)Z", false));
-        riderGate.add(new InsnNode(Opcodes.IAND));
-        movementBlocked.instructions.insert(activeCall, riderGate);
-        movementBlocked.maxStack = Math.max(movementBlocked.maxStack, 3);
-
-        System.out.println("PATCH LUSHS eating animation no longer blocks movement while controlled by a rider");
-    }
     private static void patchLushsaurCanSprint(ClassNode owner) {
         if (owner == null) throw new IllegalStateException("LushsaurEntity class is missing");
 
