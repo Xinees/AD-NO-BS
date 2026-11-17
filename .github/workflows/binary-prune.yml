@@ -43,10 +43,10 @@ jobs:
           WORLDGEN_JAR="worldgen/build/libs/legacy-worldgen-1.0.0.jar"
           test -s "$WORLDGEN_JAR"
           test -s worldgen/build/classes/java/main/com/eternal_creations/archies_dino_mod/mixin/EndPeaksBiomeSourceMixin.class
-          javap -classpath "$WORLDGEN_JAR" -v com.eternal_creations.archies_dino_mod.worldgen.EndPeaksFeatureRegistry > build/end-peaks-registry-reobf.txt
-          if ! grep -Fq 'ForgeRegistries$Keys.FEATURES' build/end-peaks-registry-reobf.txt; then
+          javap -classpath "$WORLDGEN_JAR" -v com.eternal_creations.archies_dino_mod.worldgen.EndPeaksFeatureRegistry > worldgen/build/end-peaks-registry-reobf.txt
+          if ! grep -Fq 'ForgeRegistries$Keys.FEATURES' worldgen/build/end-peaks-registry-reobf.txt; then
             echo "Reobfuscated End Peaks registry does not reference ForgeRegistries.Keys.FEATURES."
-            cat build/end-peaks-registry-reobf.txt
+            cat worldgen/build/end-peaks-registry-reobf.txt
             exit 1
           fi
           if grep -Fq 'Registries.FEATURE' build/end-peaks-registry-reobf.txt; then
