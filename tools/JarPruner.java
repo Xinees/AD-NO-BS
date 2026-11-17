@@ -2878,6 +2878,7 @@ public final class JarPruner {
         String actionSequence = "com/astemir/astemirlib/re/common/action/ActionSequence";
         String actionState = "com/astemir/astemirlib/re/common/action/ActionState";
         int removedBuriedStomps = 0;
+        boolean emergeRetained = false;
         for (AbstractInsnNode instruction : hurt.instructions.toArray()) {
             if (!(instruction instanceof MethodInsnNode call) ||
                 call.getOpcode() != Opcodes.INVOKEVIRTUAL ||
@@ -2900,13 +2901,15 @@ public final class JarPruner {
                 removedBuriedStomps++;
             }
         }
-        if (removedBuriedStomps != 1 ||
-            hurt.instructions.toArray().length == 0 ||
-            hurt.instructions.stream().noneMatch(instruction ->
-                instruction instanceof FieldInsnNode field &&
+        for (AbstractInsnNode instruction : hurt.instructions.toArray()) {
+            if (instruction instanceof FieldInsnNode field &&
                 field.getOpcode() == Opcodes.GETFIELD &&
                 field.owner.equals(lushsaur.name) &&
-                field.name.equals("actionEmerge"))) {
+                field.name.equals("actionEmerge")) {
+                emergeRetained = true;
+            }
+        }
+        if (removedBuriedStomps != 1 || !emergeRetained) {
             throw new IllegalStateException("Failed to remove only the buried-hit tail stomp while preserving emergence");
         }
 
@@ -2914,17 +2917,25 @@ public final class JarPruner {
         String setupDescriptor =
             "(L" + lushsaur.name + ";Lnet/minecraft/world/entity/ai/goal/GoalSelector;Lnet/minecraft/world/entity/ai/goal/GoalSelector;)V";
         MethodNode setup = requireMethod(lushsaurAI, "setupAI", setupDescriptor);
-        List<TypeInsnNode> arrays = setup.instructions.stream()
-            .filter(instruction -> instruction instanceof TypeInsnNode type &&
-                type.getOpcode() == Opcodes.ANEWARRAY && type.desc.equals(wrappedAction))
-            .map(instruction -> (TypeInsnNode)instruction)
-            .toList();
-        if (arrays.size() != 1) {
-            throw new IllegalStateException("Expected one Lushsaur melee WrappedAction array, found " + arrays.size());
+        TypeInsnNode meleeArray = null;
+        AbstractInsnNode arraySize = null;
+        for (AbstractInsnNode instruction : setup.instructions.toArray()) {
+            if (!(instruction instanceof TypeInsnNode type) ||
+                type.getOpcode() != Opcodes.ANEWARRAY || !type.desc.equals(wrappedAction)) {
+                continue;
+            }
+            AbstractInsnNode size = previousCodeInstruction(instruction);
+            if (size == null || size.getOpcode() != Opcodes.ICONST_4) {
+                continue;
+            }
+            if (meleeArray != null) {
+                throw new IllegalStateException("Multiple four-entry Lushsaur melee action arrays found");
+            }
+            meleeArray = type;
+            arraySize = size;
         }
-        AbstractInsnNode arraySize = previousCodeInstruction(arrays.get(0));
-        if (arraySize == null || arraySize.getOpcode() != Opcodes.ICONST_4) {
-            throw new IllegalStateException("Lushsaur melee action array is not the expected four-entry array");
+        if (meleeArray == null || arraySize == null) {
+            throw new IllegalStateException("Lushsaur four-entry melee action array is missing");
         }
 
         List<AbstractInsnNode> stompStores = new ArrayList<>();
@@ -2989,7 +3000,74 @@ public final class JarPruner {
         warning.instructions.insertBefore(loadThis, gate);
         warning.maxStack = Math.max(warning.maxStack, 1);
 
-        System.out.println("PATCH LUSHS strict warnings: remove non-warning roar/tail-stomp triggers; preserve charge movement, emergence, and other melee attacks");
+        MethodNode speedGetter = requireMethod(lushsaur, "getSpeedBoostTicks", "()I");
+        clearMethod(speedGetter);
+        speedGetter.instructions.add(new InsnNode(Opcodes.ICONST_0));
+        speedGetter.instructions.add(new InsnNode(Opcodes.IRETURN));
+        speedGetter.maxStack = 1;
+        speedGetter.maxLocals = 1;
+
+        MethodNode speedSetter = requireMethod(lushsaur, "setSpeedBoostTicks", "(I)V");
+        clearMethod(speedSetter);
+        speedSetter.instructions.add(new InsnNode(Opcodes.RETURN));
+        speedSetter.maxStack = 0;
+        speedSetter.maxLocals = 2;
+
+        String feedDescriptor =
+            "(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/item/ItemStack;)Lnet/minecraft/world/InteractionResult;";
+        MethodNode feed = requireMethod(lushsaur, "eatFromHand", feedDescriptor);
+        int removedFeedBoost = 0;
+        for (AbstractInsnNode instruction : feed.instructions.toArray()) {
+            if (!(instruction instanceof MethodInsnNode call) ||
+                call.getOpcode() != Opcodes.INVOKEVIRTUAL ||
+                !call.owner.equals(lushsaur.name) ||
+                !call.name.equals("setSpeedBoostTicks") ||
+                !call.desc.equals("(I)V")) {
+                continue;
+            }
+            AbstractInsnNode ticks = previousCodeInstruction(instruction);
+            AbstractInsnNode receiver = previousCodeInstruction(ticks);
+            if (!(ticks instanceof IntInsnNode amount) || amount.getOpcode() != Opcodes.SIPUSH ||
+                amount.operand != 1200 ||
+                !(receiver instanceof VarInsnNode load) ||
+                load.getOpcode() != Opcodes.ALOAD || load.var != 0) {
+                throw new IllegalStateException("Unexpected Lushsaur feed speed-boost setter shape");
+            }
+            feed.instructions.set(instruction, new InsnNode(Opcodes.POP2));
+            removedFeedBoost++;
+        }
+        if (removedFeedBoost != 1) {
+            throw new IllegalStateException("Expected the single 1200-tick feed speed boost to be removed");
+        }
+
+        MethodNode shearable = requireMethod(lushsaur, "m_6220_", "()Z");
+        clearMethod(shearable);
+        shearable.instructions.add(new InsnNode(Opcodes.ICONST_0));
+        shearable.instructions.add(new InsnNode(Opcodes.IRETURN));
+        shearable.maxStack = 1;
+        shearable.maxLocals = 1;
+
+        MethodNode shear = requireMethod(
+            lushsaur, "m_5851_", "(Lnet/minecraft/sounds/SoundSource;)V");
+        clearMethod(shear);
+        shear.instructions.add(new InsnNode(Opcodes.RETURN));
+        shear.maxStack = 0;
+        shear.maxLocals = 2;
+
+        MethodNode setSheared = requireMethod(lushsaur, "setSheared", "(Z)V");
+        clearMethod(setSheared);
+        setSheared.instructions.add(new InsnNode(Opcodes.RETURN));
+        setSheared.maxStack = 0;
+        setSheared.maxLocals = 2;
+
+        MethodNode isSheared = requireMethod(lushsaur, "isSheared", "()Z");
+        clearMethod(isSheared);
+        isSheared.instructions.add(new InsnNode(Opcodes.ICONST_0));
+        isSheared.instructions.add(new InsnNode(Opcodes.IRETURN));
+        isSheared.maxStack = 1;
+        isSheared.maxLocals = 1;
+
+        System.out.println("PATCH LUSHS warning-only roar/tail stomp; removed feed speed boost and shearing");
     }
 
     private static void patchChorusoatlRuntimeHooks(ClassNode owner) {
@@ -3218,7 +3296,6 @@ public final class JarPruner {
 
         clearMethod(method);
         InsnList code = method.instructions;
-
         code.add(new VarInsnNode(Opcodes.ALOAD, 1));
         code.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
             "net/minecraft/world/entity/PathfinderMob", "m_6688_",
@@ -3230,22 +3307,9 @@ public final class JarPruner {
         code.add(new InsnNode(Opcodes.FMUL));
         code.add(new LdcInsnNode(0.5f));
         code.add(new InsnNode(Opcodes.FADD));
-
-        code.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        code.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, owner.name,
-            "getSpeedBoostTicks", "()I", false));
-        code.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
-            "java/lang/Integer", "signum", "(I)I", false));
-        code.add(new InsnNode(Opcodes.ICONST_0));
-        code.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
-            "java/lang/Math", "max", "(II)I", false));
-        code.add(new InsnNode(Opcodes.I2F));
-        code.add(new InsnNode(Opcodes.FCONST_1));
-        code.add(new InsnNode(Opcodes.FADD));
-        code.add(new InsnNode(Opcodes.FMUL));
         code.add(new InsnNode(Opcodes.FRETURN));
 
-        method.maxStack = 3;
+        method.maxStack = 2;
         method.maxLocals = 3;
     }
 

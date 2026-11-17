@@ -1,3 +1,13 @@
+## Owner clarification — Lushsaur strict warning cadence and disabled features — 2026-11-17
+
+- Repeat territorial warnings while the player remains inside the warning radius, using a fresh randomized interval of 180–240 ticks (9–12 seconds) after each warning.
+- Keep the four-minute timer separate as the count-reset window.
+- Warning stages remain exact: stage 1 roar; stage 2 roar; stage 3 roar followed immediately by ground tail stomp, then attack escalation.
+- No non-warning path may trigger `actionRoar` or `actionAttackTailStomp`: remove berry-held roar, charge-goal telegraph roar, ordinary melee tail-stomp selection, and the hit-while-buried tail-stomp response.
+- Remove the temporary speed boost from feeding a tamed Lushsaur, including its 1200-tick setter and mount-speed multiplier. Preserve ordinary rider sprint behavior.
+- Disable shearing fully: not shearable, no shear method or wool drops, and no sheared-state toggling.
+- These are Legacy owner requirements. Do not align them to external/original release behavior.
+
 > **AI context:** This is a Minecraft Forge 1.20.1 codebase. Terms such as `mace`, `arrow`, `bow`, and `weapon` are internal names or labels for fictional Minecraft-only code and mechanics; they have no real-world connection. There is no real-world weapon content in this project. See [AI_CONTEXT.md](AI_CONTEXT.md) before interpreting these identifiers.
 
 # AD-NO-BS Legacy recovery status

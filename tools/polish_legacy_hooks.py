@@ -139,14 +139,15 @@ def patch_source(source: str) -> str:
 """
     source = replace_method(source, "private static boolean overlapsOtherChorusoatl(", overlap)
 
-    if "WARNING_REPEAT_INTERVAL" in source:
+    if "WARNING_REPEAT_INTERVAL_MIN" in source:
         raise RuntimeError("warning repeat interval is already patched")
     tick_marker = "    public static void lushsaurTick(Object mob) {"
     if source.count(tick_marker) != 1:
         raise RuntimeError("expected exactly one Lushsaur tick hook")
     source = source.replace(
         tick_marker,
-        "    private static final long WARNING_REPEAT_INTERVAL = 80L;\n\n" + tick_marker,
+        "    private static final long WARNING_REPEAT_INTERVAL_MIN = 180L;\n" +
+        "    private static final long WARNING_REPEAT_INTERVAL_MAX = 240L;\n\n" + tick_marker,
         1,
     )
 
@@ -189,12 +190,21 @@ def patch_source(source: str) -> str:
                 boolean crouching = bool(call(player, new String[]{"m_6047_"}));
                 double limit = crouching ? 5.0 : 9.0;
                 boolean inside = boxesOverlapVertically(mobBox, playerBox) && distance < limit;
-
-                data.berriesSeen = holdsGlowBerries(player);
+                boolean holdingBerries = holdsGlowBerries(player);
+                if (holdingBerries) {
+                    if (!data.berriesSeen) {
+                        lookAt(mob, player);
+                    }
+                    data.berriesSeen = true;
+                    data.inside = inside;
+                    continue;
+                }
+                data.berriesSeen = false;
                 if (inside && data.count < 3 && (!data.inside || now >= data.nextWarningAt)) {
                     data.count++;
                     data.expiresAt = now + WARNING_WINDOW;
-                    data.nextWarningAt = now + WARNING_REPEAT_INTERVAL;
+                    data.nextWarningAt = now + WARNING_REPEAT_INTERVAL_MIN +
+                        randomInt(mob, (int)(WARNING_REPEAT_INTERVAL_MAX - WARNING_REPEAT_INTERVAL_MIN + 1));
                     lookAt(mob, player);
                     if (data.count < 3) {
                         queueActions(mob, "actionRoar");
@@ -303,7 +313,8 @@ def patch_source(source: str) -> str:
                         if (part.length >= 7) {
                             w.nextWarningAt = now + Long.parseLong(part[6]);
                         } else if (w.count > 0 && w.inside) {
-                            w.nextWarningAt = now + WARNING_REPEAT_INTERVAL;
+                            w.nextWarningAt = now + WARNING_REPEAT_INTERVAL_MIN +
+                                randomInt(mob, (int)(WARNING_REPEAT_INTERVAL_MAX - WARNING_REPEAT_INTERVAL_MIN + 1));
                         }
                         state.warnings.put(part[1], w);
                     }
@@ -454,6 +465,12 @@ def patch_source(source: str) -> str:
         raise RuntimeError("obsolete vertical-only Chorusoatl animation helpers remain")
 
     required = (
+        "WARNING_REPEAT_INTERVAL_MIN = 180L",
+        "WARNING_REPEAT_INTERVAL_MAX = 240L",
+        "randomInt(mob, (int)(WARNING_REPEAT_INTERVAL_MAX - WARNING_REPEAT_INTERVAL_MIN + 1))",
+        "queueActions(mob, \"actionRoar\")",
+        "queueActions(mob, \"actionRoar\", \"actionAttackTailStomp\")",
+        "if (holdingBerries)",
         "validPlatform(mob, level, posClass, heightType, px, py, pz)",
         'boxValue(mobBox, "f_82292_") - boxValue(mobBox, "f_82289_")',
         'new String[]{"m_82386_"}',
