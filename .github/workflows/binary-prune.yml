@@ -148,12 +148,12 @@ jobs:
               exit 1
             fi
           done
-          if ! grep -Fq 'SculksaurEntity.m_6469_' <<< "$SCULK"; then
-            echo "Multipart damage is not delegated to SculksaurEntity."
+          if ! grep -Fq 'm_6469_:(Lnet/minecraft/world/damagesource/DamageSource;F)Z' <<< "$SCULK"; then
+            echo "Multipart damage is not delegated to the parent Sculksaur."
             exit 1
           fi
-          if ! grep -Fq 'SculksaurEntity.m_6071_' <<< "$SCULK"; then
-            echo "Multipart interaction is not delegated to SculksaurEntity."
+          if ! grep -Fq 'm_6071_:(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;' <<< "$SCULK"; then
+            echo "Multipart interaction is not delegated to the parent Sculksaur."
             exit 1
           fi
 
