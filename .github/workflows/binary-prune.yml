@@ -1,4 +1,4 @@
-name: Direct Legacy JAR Prune - build 42
+name: Direct Legacy JAR Prune - build 43
 
 on:
   push:
@@ -77,49 +77,62 @@ jobs:
           import re
 
           source = Path("build/LegacyBehaviorHooks.java").read_text(encoding="utf-8")
-          lines = source.splitlines()
-          declarations = []
-          for index, line in enumerate(lines):
-              if not re.match(r"^    (?:public|private|protected)\\s+", line):
-                  continue
-              if "(" not in line:
-                  continue
-              signature_lines = [line]
-              cursor = index
-              while "{" not in "\\n".join(signature_lines) and cursor + 1 < len(lines):
-                  cursor += 1
-                  signature_lines.append(lines[cursor])
-              signature = "\\n".join(signature_lines)
-              if "{" not in signature or ";" in signature.split("{", 1)[0]:
-                  continue
-              declarations.append((index, signature.split("{", 1)[0].strip()))
+          signatures = list(re.finditer(
+              r"(?ms)^    (?:public|private|protected)\s+[^;{}]*?\([^;{}]*?\)\s*(?:throws\s+[^{}]+)?\s*\{",
+              source
+          ))
 
-          def extract_block(start):
-              opening = source.find("{", sum(len(x) + 1 for x in lines[:start]))
+          def method_block(match):
+              opening = source.find("{", match.start(), match.end())
               depth = 0
-              in_string = False
+              state = "code"
               escape = False
-              for pos in range(opening, len(source)):
+              pos = opening
+              while pos < len(source):
                   ch = source[pos]
-                  if in_string:
+                  nxt = source[pos + 1] if pos + 1 < len(source) else ""
+                  if state == "string":
                       if escape:
                           escape = False
                       elif ch == "\\\\":
                           escape = True
                       elif ch == '"':
-                          in_string = False
-                      continue
-                  if ch == '"':
-                      in_string = True
-                  elif ch == "{":
-                      depth += 1
-                  elif ch == "}":
-                      depth -= 1
-                      if depth == 0:
-                          return source[sum(len(x) + 1 for x in lines[:start]):pos + 1]
-              raise RuntimeError("Unclosed Java method beginning at line %d" % (start + 1))
+                          state = "code"
+                  elif state == "char":
+                      if escape:
+                          escape = False
+                      elif ch == "\\\\":
+                          escape = True
+                      elif ch == "'":
+                          state = "code"
+                  elif state == "line":
+                      if ch == "\\n":
+                          state = "code"
+                  elif state == "block":
+                      if ch == "*" and nxt == "/":
+                          state = "code"
+                          pos += 1
+                  else:
+                      if ch == '"':
+                          state = "string"
+                      elif ch == "'":
+                          state = "char"
+                      elif ch == "/" and nxt == "/":
+                          state = "line"
+                          pos += 1
+                      elif ch == "/" and nxt == "*":
+                          state = "block"
+                          pos += 1
+                      elif ch == "{":
+                          depth += 1
+                      elif ch == "}":
+                          depth -= 1
+                          if depth == 0:
+                              return source[match.start():pos + 1]
+                  pos += 1
+              raise RuntimeError("Unclosed method body")
 
-          topics = {
+          topic_tokens = {
               "LUSHS warning/reaction": (
                   "warning", "Warning", "berriesSeen", "territor", "roar", "Roar",
                   "tail", "Tail", "anger", "aggress", "warningCount", "warningLevel"
@@ -127,22 +140,34 @@ jobs:
               "CHORUS landing/route": (
                   "chorusoatlTick", "PREPARING_TO_LAND", "validPlatform",
                   "overlapsOtherChorusoatl", "nextPathUpdate", "FlyNavigation",
-                  "SmoothPathNavigation", "moveTo(", "m_26519_", "navigation"
+                  "SmoothPathNavigation", "moveTo(", "m_26519_", "navigation",
+                  "landing", "Landing"
               ),
           }
-          blocks = []
-          for line_no, signature in declarations:
-              block = extract_block(line_no)
-              for topic, tokens in topics.items():
+          found = {topic: [] for topic in topic_tokens}
+          for match in signatures:
+              block = method_block(match)
+              for topic, tokens in topic_tokens.items():
                   if any(token in block for token in tokens):
-                      blocks.append((topic, line_no + 1, signature, block))
-          for topic in topics:
-              selected = [item for item in blocks if item[0] == topic]
-              print("\\n===== %s: %d methods =====" % (topic, len(selected)))
-              for _, line_no, signature, block in selected:
-                  print("\\n--- line %d: %s ---" % (line_no, signature))
-                  print(block)
+                      found[topic].append(block)
+
+          output = []
+          for topic, blocks in found.items():
+              output.append("===== %s: %d methods =====" % (topic, len(blocks)))
+              output.extend(blocks)
+              output.append("")
+          report = "\n\n".join(output)
+          Path("build/chorusoatl-lush-warning-diagnostics.txt").write_text(report, encoding="utf-8")
+          print(report)
           PY
+
+      - name: Upload temporary AI diagnostics
+        uses: actions/upload-artifact@v4
+        with:
+          name: legacy-ai-diagnostics-\${{ github.run_number }}
+          path: build/chorusoatl-lush-warning-diagnostics.txt
+          if-no-files-found: error
+          retention-days: 1
 
       - name: Prune classes and registrations in the original JAR
         shell: bash
