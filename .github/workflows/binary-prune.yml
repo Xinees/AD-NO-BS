@@ -194,6 +194,22 @@ jobs:
                   if b"actionRoar" in data or b"actionAttackTailStomp" in data:
                       print(name + " roar=" + str(b"actionRoar" in data) +
                             " tailStomp=" + str(b"actionAttackTailStomp" in data))
+              print("===== ORIGINAL CHORUSOATL SPAWN RESOURCES =====")
+              for resource in (
+                  "data/ec_ad/forge/biome_modifier/chorusoatl_spawns.json",
+                  "data/ec_ad/tags/worldgen/biome/spawns_chorusoatls.json",
+                  "data/minecraft/tags/worldgen/biome/has_structure/end_city.json",
+                  "data/minecraft/tags/worldgen/biome/is_end.json",
+                  "data/minecraft/tags/worldgen/biome/_all.json",
+              ):
+                  if resource in archive.namelist():
+                      print("===== " + resource + " =====")
+                      print(archive.read(resource).decode("utf-8"))
+                  else:
+                      print("MISSING: " + resource)
+              if "META-INF/MANIFEST.MF" in archive.namelist():
+                  print("===== ORIGINAL MANIFEST =====")
+                  print(archive.read("META-INF/MANIFEST.MF").decode("utf-8", errors="replace"))
           PY
           while IFS= read -r class_name; do
             case "$class_name" in
