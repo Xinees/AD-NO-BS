@@ -216,6 +216,10 @@ public final class JarPruner {
         ClassNode sculksaurClient = nodes.get(ROOT + "client/model/render/entity/mob/SculksaurClient");
         ClassNode sculksaurEntity = nodes.get(ROOT + "common/entity/mob/sculksaur/SculksaurEntity");
         patchLushsaurRuntimeHooks(lushsaurEntity);
+        patchLushsaurStrictWarningActions(
+            lushsaurEntity,
+            nodes.get(ROOT + "common/entity/mob/lushsaur/ai/LushsaurAI"),
+            nodes.get(ROOT + "common/entity/ai/goal/action/GoalChargeMeleeAttack"));
         patchChorusoatlRuntimeHooks(chorusoatlEntity);
         verifyChorusoatlAnimationHooks(nodes.get(ROOT + "client/model/render/entity/mob/ChorusoatlClient"));
         patchChorusoatlGoalSuppression(nodes.get(ROOT + "common/entity/ai/goal/GoalStrollLandAndAir"), "shouldSuppressChorusStroll");
@@ -2858,6 +2862,134 @@ public final class JarPruner {
         feed.instructions.insert(store, hook);
         feed.maxStack = Math.max(feed.maxStack, 4);
         System.out.println("PATCH LUSHS warning, loyalty, feed, and persistence hooks installed");
+    }
+
+
+    private static void patchLushsaurStrictWarningActions(
+        ClassNode lushsaur, ClassNode lushsaurAI, ClassNode chargeGoal
+    ) {
+        if (lushsaur == null || lushsaurAI == null || chargeGoal == null) {
+            throw new IllegalStateException("Lushsaur strict warning action dependency is missing");
+        }
+
+        String damageDescriptor =
+            "(Lnet/minecraft/world/damagesource/DamageSource;F)Z";
+        MethodNode hurt = requireMethod(lushsaur, "m_6469_", damageDescriptor);
+        String actionSequence = "com/astemir/astemirlib/re/common/action/ActionSequence";
+        String actionState = "com/astemir/astemirlib/re/common/action/ActionState";
+        int removedBuriedStomps = 0;
+        for (AbstractInsnNode instruction : hurt.instructions.toArray()) {
+            if (!(instruction instanceof MethodInsnNode call) ||
+                call.getOpcode() != Opcodes.INVOKEVIRTUAL ||
+                !call.owner.equals(actionSequence) ||
+                !call.name.equals("addAction") ||
+                !call.desc.equals("(L" + actionState + ";)L" + actionSequence + ";")) {
+                continue;
+            }
+            AbstractInsnNode fieldInstruction = previousCodeInstruction(instruction);
+            AbstractInsnNode receiverLoad = previousCodeInstruction(fieldInstruction);
+            if (fieldInstruction instanceof FieldInsnNode field &&
+                field.getOpcode() == Opcodes.GETFIELD &&
+                field.owner.equals(lushsaur.name) &&
+                field.name.equals("actionAttackTailStomp") &&
+                receiverLoad instanceof VarInsnNode load &&
+                load.getOpcode() == Opcodes.ALOAD && load.var == 0) {
+                hurt.instructions.remove(receiverLoad);
+                hurt.instructions.remove(fieldInstruction);
+                hurt.instructions.remove(instruction);
+                removedBuriedStomps++;
+            }
+        }
+        if (removedBuriedStomps != 1 ||
+            hurt.instructions.toArray().length == 0 ||
+            hurt.instructions.stream().noneMatch(instruction ->
+                instruction instanceof FieldInsnNode field &&
+                field.getOpcode() == Opcodes.GETFIELD &&
+                field.owner.equals(lushsaur.name) &&
+                field.name.equals("actionEmerge"))) {
+            throw new IllegalStateException("Failed to remove only the buried-hit tail stomp while preserving emergence");
+        }
+
+        String wrappedAction = ROOT + "common/entity/ai/goal/action/WrappedAction";
+        String setupDescriptor =
+            "(L" + lushsaur.name + ";Lnet/minecraft/world/entity/ai/goal/GoalSelector;Lnet/minecraft/world/entity/ai/goal/GoalSelector;)V";
+        MethodNode setup = requireMethod(lushsaurAI, "setupAI", setupDescriptor);
+        List<TypeInsnNode> arrays = setup.instructions.stream()
+            .filter(instruction -> instruction instanceof TypeInsnNode type &&
+                type.getOpcode() == Opcodes.ANEWARRAY && type.desc.equals(wrappedAction))
+            .map(instruction -> (TypeInsnNode)instruction)
+            .toList();
+        if (arrays.size() != 1) {
+            throw new IllegalStateException("Expected one Lushsaur melee WrappedAction array, found " + arrays.size());
+        }
+        AbstractInsnNode arraySize = previousCodeInstruction(arrays.get(0));
+        if (arraySize == null || arraySize.getOpcode() != Opcodes.ICONST_4) {
+            throw new IllegalStateException("Lushsaur melee action array is not the expected four-entry array");
+        }
+
+        List<AbstractInsnNode> stompStores = new ArrayList<>();
+        for (AbstractInsnNode instruction : setup.instructions.toArray()) {
+            if (instruction.getOpcode() != Opcodes.AASTORE) continue;
+            AbstractInsnNode value = previousCodeInstruction(instruction);
+            AbstractInsnNode index = previousCodeInstruction(value);
+            AbstractInsnNode duplicate = previousCodeInstruction(index);
+            if (value instanceof VarInsnNode load &&
+                load.getOpcode() == Opcodes.ALOAD && load.var == 6 &&
+                index != null && index.getOpcode() == Opcodes.ICONST_3 &&
+                duplicate != null && duplicate.getOpcode() == Opcodes.DUP) {
+                stompStores.add(duplicate);
+                stompStores.add(index);
+                stompStores.add(value);
+                stompStores.add(instruction);
+            }
+        }
+        if (stompStores.size() != 4) {
+            throw new IllegalStateException("Expected the fourth Lushsaur melee action (tail stomp) exactly once");
+        }
+        setup.instructions.set(arraySize, new InsnNode(Opcodes.ICONST_3));
+        for (AbstractInsnNode instruction : stompStores) {
+            setup.instructions.remove(instruction);
+        }
+
+        FieldNode mobField = chargeGoal.fields.stream()
+            .filter(field -> field.name.equals("mob") &&
+                field.desc.equals("Lnet/minecraft/world/entity/PathfinderMob;"))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("GoalChargeMeleeAttack.mob field is missing"));
+        MethodNode warning = requireMethod(chargeGoal, "transitionToWarning", "()V");
+        FieldInsnNode warnActionField = null;
+        for (AbstractInsnNode instruction : warning.instructions.toArray()) {
+            if (instruction instanceof FieldInsnNode field &&
+                field.getOpcode() == Opcodes.GETFIELD &&
+                field.owner.equals(chargeGoal.name) &&
+                field.name.equals("warnAction")) {
+                if (warnActionField != null) {
+                    throw new IllegalStateException("GoalChargeMeleeAttack.transitionToWarning has multiple warnAction reads");
+                }
+                warnActionField = field;
+            }
+        }
+        if (warnActionField == null) {
+            throw new IllegalStateException("GoalChargeMeleeAttack.transitionToWarning warnAction read is missing");
+        }
+        AbstractInsnNode loadThis = previousCodeInstruction(warnActionField);
+        AbstractInsnNode nullCheck = nextCodeInstruction(warnActionField);
+        if (!(loadThis instanceof VarInsnNode load) ||
+            load.getOpcode() != Opcodes.ALOAD || load.var != 0 ||
+            !(nullCheck instanceof JumpInsnNode skipNull) ||
+            skipNull.getOpcode() != Opcodes.IFNULL) {
+            throw new IllegalStateException("Unexpected GoalChargeMeleeAttack warning action branch");
+        }
+
+        InsnList gate = new InsnList();
+        gate.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        gate.add(new FieldInsnNode(Opcodes.GETFIELD, chargeGoal.name, mobField.name, mobField.desc));
+        gate.add(new TypeInsnNode(Opcodes.INSTANCEOF, lushsaur.name));
+        gate.add(new JumpInsnNode(Opcodes.IFNE, skipNull.label));
+        warning.instructions.insertBefore(loadThis, gate);
+        warning.maxStack = Math.max(warning.maxStack, 1);
+
+        System.out.println("PATCH LUSHS strict warnings: remove non-warning roar/tail-stomp triggers; preserve charge movement, emergence, and other melee attacks");
     }
 
     private static void patchChorusoatlRuntimeHooks(ClassNode owner) {
