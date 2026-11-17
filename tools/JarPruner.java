@@ -3309,9 +3309,9 @@ public final class JarPruner {
         addSculksaurSimplePart(initializeParts, owner.name, simplePart,
             "neck2", 2.0f, 2.0f, 0.0d, 3.5d, 4.099999904632568d);
         addSculksaurSimplePart(initializeParts, owner.name, simplePart,
-            "tail1", 1.5f, 2.0f, 0.0d, 2.0d, -2.200000047683716d);
+            "tail1", 1.5f, 2.0f, 0.0d, 2.5d, -2.200000047683716d);
         addSculksaurSimplePart(initializeParts, owner.name, simplePart,
-            "tail2", 1.0f, 1.0f, 0.0d, 2.5d, -3.9000000953674316d);
+            "tail2", 1.0f, 1.0f, 0.0d, 3.5d, -3.9000000953674316d);
 
         initializeParts.add(new VarInsnNode(Opcodes.ALOAD, 0));
         initializeParts.add(new VarInsnNode(Opcodes.ALOAD, 0));
@@ -3412,6 +3412,12 @@ public final class JarPruner {
         InsnList code, String owner, String simplePart, String fieldName,
         float width, float height, double offsetX, double offsetY, double offsetZ
     ) {
+        if (fieldName.equals("tail1") && Double.compare(offsetY, 2.5d) != 0) {
+            throw new IllegalStateException("Legacy tail1 hitbox must be raised by 0.5 blocks");
+        }
+        if (fieldName.equals("tail2") && Double.compare(offsetY, 3.5d) != 0) {
+            throw new IllegalStateException("Legacy tail2 hitbox must be raised by 1.0 block");
+        }
         code.add(new VarInsnNode(Opcodes.ALOAD, 0));
         code.add(new TypeInsnNode(Opcodes.NEW, simplePart));
         code.add(new InsnNode(Opcodes.DUP));

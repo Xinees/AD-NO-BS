@@ -2,6 +2,13 @@
 
 # AD-NO-BS Legacy recovery status
 
+## Sculksaur Legacy multipart height adjustment — 2026-11-17
+
+- After comparing the Build 38 hitboxes against the Legacy model, raise only the two tail parts to match the marked positions.
+- `tail1` keeps its 1.5 × 2.0 size and X/Z offsets; raise its center Y from 2.0 to 2.5 (+0.5 blocks).
+- `tail2` keeps its 1.0 × 1.0 size and X/Z offsets; raise its center Y from 2.5 to 3.5 (+1.0 block).
+- The two neck parts and all other entity behavior remain unchanged. The pruner now guards these Legacy-specific offsets.
+
 ## Sculksaur multipart hitboxes — 2026-11-17
 
 - Port the official 1.0.5 Sculksaur multipart layout into the Legacy 1.0.4-based build without changing the pinned input JAR or the separate Astemir RE dependency.
