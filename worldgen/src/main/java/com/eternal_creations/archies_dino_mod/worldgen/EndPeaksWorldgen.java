@@ -52,14 +52,10 @@ public final class EndPeaksWorldgen {
     }
 
     public static boolean isEndPeaksRegion(int quartX, int quartZ) {
-        return getRegionNoise(quartX, quartZ) > 0.08D;
+        return getRegionNoiseValue(quartX, quartZ) > 0.05D;
     }
 
-    public static boolean isEndPeaksMidlandsRegion(int quartX, int quartZ) {
-        return getRegionNoise(quartX, quartZ) > 0.48D;
-    }
-
-    private static double getRegionNoise(int quartX, int quartZ) {
+    public static double getRegionNoiseValue(int quartX, int quartZ) {
         double blockX = quartX * 4.0D;
         double blockZ = quartZ * 4.0D;
         double broad = BIOME_NOISE.getValue(blockX * 0.0021D, blockZ * 0.0021D);
