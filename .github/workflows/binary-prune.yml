@@ -208,7 +208,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: legacy-ai-diagnostics-build45
-                    path: |
+          path: |
             build/chorusoatl-lush-warning-diagnostics.txt
             build/original-lush-navigation-javap.txt
             build/inspect-classes.txt
