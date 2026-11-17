@@ -45,9 +45,7 @@ public final class EndPeaksMountainFeature extends Feature<NoneFeatureConfigurat
                     mountain.centerZ()
                 );
                 if (centerY <= level.getMinBuildHeight()
-                    || centerY >= level.getMaxBuildHeight() - mountain.height() - 2
-                    || !level.getBiome(new BlockPos(mountain.centerX(), centerY, mountain.centerZ()))
-                        .is(EndPeaksWorldgen.BIOME)) {
+                    || centerY >= level.getMaxBuildHeight() - mountain.height() - 2) {
                     continue;
                 }
 
