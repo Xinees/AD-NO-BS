@@ -569,8 +569,8 @@ jobs:
           required_order = (
               "Field actionEat:",
               "ActionState.isActive:()Z",
-              "LushsaurEntity.m_6688_:()Lnet/minecraft/world/entity/LivingEntity;",
-              "java.util.Objects.isNull:(Ljava/lang/Object;)Z",
+              "Method m_6688_:()Lnet/minecraft/world/entity/LivingEntity;",
+              "java/util/Objects.isNull:(Ljava/lang/Object;)Z",
               "iand",
               "ifne",
           )
@@ -589,8 +589,8 @@ jobs:
               "Field actionRoar:",
               "Field actionDown:",
               "Field actionUp:",
-              "LushsaurEntity.isBuried:()Z",
-              "LushsaurEntity.isSitting:()Z",
+              "Method isBuried:()Z",
+              "Method isSitting:()Z",
           )
           missing = [item for item in preserved if item not in body]
           if missing:
