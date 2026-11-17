@@ -3407,14 +3407,6 @@ public final class JarPruner {
         return matches.get(0);
     }
 
-    private static void requireMethod(ClassNode owner, String name, String descriptor) {
-        if (owner == null || owner.methods.stream().noneMatch(method ->
-            method.name.equals(name) && method.desc.equals(descriptor))) {
-            throw new IllegalStateException("Required multipart method is missing: " +
-                (owner == null ? "<missing class>" : owner.name) + "." + name + descriptor);
-        }
-    }
-
     private static void patchSculksaurExplosionEffects(ClassNode owner) {
         if (owner == null) throw new IllegalStateException("SculksaurEffects class is missing");
 
