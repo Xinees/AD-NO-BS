@@ -498,6 +498,7 @@ jobs:
               "METHOD_CACHE.computeIfAbsent",
               "FIELD_CACHE.computeIfAbsent",
               "warning == null || !warning.berriesSeen",
+              'if (bool(call(player, new String[]{"m_7500_", "isCreative"}))) {',
               "if (surfaceY > y)",
               "validPlatform(mob, level, posClass, heightType, px, py, pz)",
               'double mobHeight = boxValue(mobBox, "f_82292_") - boxValue(mobBox, "f_82289_");',
@@ -512,6 +513,18 @@ jobs:
           missing = [item for item in required if item not in source]
           if missing:
               raise SystemExit("LegacyBehaviorHooks regression guards failed: " + repr(missing))
+          creative_guard = (
+              'if (bool(call(player, new String[]{"m_7500_", "isCreative"}))) {\n'
+              "                    data.count = 0;\n"
+              "                    data.expiresAt = 0;\n"
+              "                    data.nextWarningAt = 0;\n"
+              "                    data.inside = false;\n"
+              "                    data.berriesSeen = false;\n"
+              "                    continue;\n"
+              "                }"
+          )
+          if creative_guard not in source:
+              raise SystemExit("Creative-mode Lushsaur warning exclusion or per-player state reset is missing.")
           if "allowChorusoatlFlightPhase" in source:
               raise SystemExit("The inverted allow/suppress flight-phase helper must not return.")
           if "m_60828_" in source:

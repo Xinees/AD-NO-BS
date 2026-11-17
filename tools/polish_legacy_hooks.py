@@ -179,6 +179,14 @@ def patch_source(source: str) -> str:
                     data.expiresAt = 0;
                     data.nextWarningAt = 0;
                 }
+                if (bool(call(player, new String[]{"m_7500_", "isCreative"}))) {
+                    data.count = 0;
+                    data.expiresAt = 0;
+                    data.nextWarningAt = 0;
+                    data.inside = false;
+                    data.berriesSeen = false;
+                    continue;
+                }
                 if (state.loyal.contains(id)) {
                     data.inside = false;
                     data.berriesSeen = false;

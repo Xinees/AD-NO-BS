@@ -1,3 +1,11 @@
+## Follow-up — Exclude creative-mode players from Lushsaur warnings — 2026-11-17
+
+- The server-side Lushsaur warning tick now checks each nearby player's creative mode before evaluating warning distance, berries, or warning-stage progression.
+- Creative players have their stored warning count, four-minute expiry, repeat timer, inside flag, and berries-seen flag cleared, then are skipped. Switching from Creative back to Survival therefore starts a fresh warning sequence rather than inheriting an old stage.
+- The change is limited to the territorial warning system; it does not alter the Lushsaur's separate AI goals or the warning cadence for non-creative players.
+- CI/runtime verification for this follow-up is pending.
+
+---
 ## Follow-up — reachable Chorusoatl landing paths and Build #348 CI guard — 2026-11-17
 
 - The #348 failure was a stale CI assertion that still required the removed Lushsaur feed-speed multiplier. The mount-speed check now requires only the existing controlling-passenger sprint formula and explicitly rejects the old boost terms.
