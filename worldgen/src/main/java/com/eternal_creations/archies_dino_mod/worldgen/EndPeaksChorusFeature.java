@@ -19,12 +19,12 @@ public final class EndPeaksChorusFeature extends Feature<NoneFeatureConfiguratio
     private static final int MAX_GROUPS = 4;
     private static final int GROUP_EDGE_MIN = 8;
     private static final int GROUP_EDGE_RANGE = 7;
-    private static final int GROUP_CENTER_MIN_SPACING = 12;
-    private static final int TREE_ROOT_MIN_SPACING = 6;
-    private static final int TREE_ROOT_GROUP_SPACING = 8;
+    private static final int GROUP_CENTER_MIN_SPACING = 14;
+    private static final int TREE_ROOT_MIN_SPACING = 5;
+    private static final int TREE_ROOT_GROUP_SPACING = 7;
     private static final int TREE_ROOT_MAX_OFFSET = 7;
-    private static final int GROUP_POSITION_ATTEMPTS = 32;
-    private static final int TREE_POSITION_ATTEMPTS = 32;
+    private static final int GROUP_POSITION_ATTEMPTS = 64;
+    private static final int TREE_POSITION_ATTEMPTS = 64;
     private static final int GROUND_PLANT_EXCLUSION_MARGIN = 34;
     private static final int GROUND_PLANT_CHANCE = 4;
     private static final int GROUND_PLANT_ATTEMPTS = 8;
