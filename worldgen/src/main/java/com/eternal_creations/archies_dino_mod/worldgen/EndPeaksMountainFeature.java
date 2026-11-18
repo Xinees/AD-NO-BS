@@ -157,6 +157,10 @@ public final class EndPeaksMountainFeature extends Feature<NoneFeatureConfigurat
         return baseY == Integer.MIN_VALUE ? -1 : baseY;
     }
 
+    private static int getGroundY(WorldGenLevel level, int x, int z) {
+        return level.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, x, z);
+    }
+
     private static boolean isValidMountainColumn(WorldGenLevel level, int x, int z) {
         int groundY = getGroundY(level, x, z);
         if (groundY <= level.getMinBuildHeight() + 1
