@@ -1093,7 +1093,7 @@ jobs:
               "if ((hash & 31L) >= 9L)",
               "int radiusX = 5 + (int) ((hash >>> 19) & 1L);",
               "int radiusZ = 5 + (int) ((hash >>> 23) & 1L);",
-              "int height = 18 + (int) ((hash >>> 27) & 1L) * 2;",
+              "int height = 15 + (int) ((hash >>> 27) % 6L);",
               "REGION_CELL_SIZE = 960;",
               "REGION_BASE_RADIUS = 235;",
               "REGION_JITTER = 80;",
@@ -1113,16 +1113,18 @@ jobs:
               raise SystemExit("Mountain must require a large End Stone island for its full variable chorus grove.")
           for required in (
               "summitBaseY + mountain.height() - 1",
-              "getSummitBaseY",
+              "getMountainBaseY",
               "isSummitCore",
               "Math.abs(offsetX) <= 1 && Math.abs(offsetZ) <= 1",
               "Math.min(mountain.height() - 1, rise)",
               "Math.pow(slope, 0.82D)",
           ):
               if required not in mountain:
-                  raise SystemExit("Mountain must have an exact highest 3x3 plateau and 18–20-block height: " + required)
+                  raise SystemExit("Mountain must have an exact highest 3x3 plateau and 15–20-block height: " + required)
           if "isSummitBlock" in mountain:
               raise SystemExit("Summit protrusions must not expand the exact highest 3x3 plane.")
+          if "groundY >= summitTopY" in mountain or "baseY = Math.min(baseY, groundY)" in mountain:
+              raise SystemExit("Mountain placement must adapt to the local End terrain instead of rejecting raised columns.")
 
           for required in (
               "MIN_GROUPS = 3",
