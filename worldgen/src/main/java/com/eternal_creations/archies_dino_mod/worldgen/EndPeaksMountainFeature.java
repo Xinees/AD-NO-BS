@@ -91,7 +91,7 @@ public final class EndPeaksMountainFeature extends Feature<NoneFeatureConfigurat
                     continue;
                 }
 
-                int topY = Math.min(groundY + maxRise, level.getMaxBuildHeight() - 1);
+                int topY = Math.min(groundY + maxRise - 1, level.getMaxBuildHeight() - 1);
                 for (int y = groundY; y <= topY; y++) {
                     mutable.set(x, y, z);
                     if (level.getBlockState(mutable).isAir()) {

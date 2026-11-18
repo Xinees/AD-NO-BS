@@ -1069,6 +1069,8 @@ jobs:
 
           if mountain.count("level.getHeight(") != 1 or "Math.max(maxRise, rise)" not in mountain:
               raise SystemExit("Mountain feature must sample the heightmap once per column and merge overlapping hills.")
+          if "groundY + maxRise - 1" not in mountain:
+              raise SystemExit("Mountain rise must place at most the exact requested number of blocks.")
           if "((mountain.hash() >>> 5) & 31L) != 0L" not in chorus or "groupCount = 1" not in chorus:
               raise SystemExit("Chorus clusters must remain sparse as mountain-cell density increases.")
           for forbidden in ("SpawnGroupData", "ChorusoatlGroupData", "setSpawnData"):
