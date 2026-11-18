@@ -43,6 +43,7 @@ jobs:
           WORLDGEN_JAR="worldgen/build/libs/legacy-worldgen-1.0.0.jar"
           test -s "$WORLDGEN_JAR"
           test -s worldgen/build/classes/java/main/com/eternal_creations/archies_dino_mod/mixin/EndPeaksBiomeSourceMixin.class
+          test -s worldgen/build/classes/java/main/com/eternal_creations/archies_dino_mod/mixin/EndPeaksHolderReferenceAccessor.class
           javap -classpath "$WORLDGEN_JAR" -v com.eternal_creations.archies_dino_mod.worldgen.EndPeaksFeatureRegistry > worldgen/build/end-peaks-registry-reobf.txt
           if ! grep -Fq 'ForgeRegistries$Keys.FEATURES' worldgen/build/end-peaks-registry-reobf.txt; then
             echo "Reobfuscated End Peaks registry does not reference ForgeRegistries.Keys.FEATURES."
@@ -315,6 +316,7 @@ jobs:
           JAR="build/libs/archie_dinosaurs-legacy-forge-1.20.1.jar"
           for entry in \
             'com/eternal_creations/archies_dino_mod/mixin/EndPeaksBiomeSourceMixin.class' \
+            'com/eternal_creations/archies_dino_mod/mixin/EndPeaksHolderReferenceAccessor.class' \
             'com/eternal_creations/archies_dino_mod/worldgen/EndPeaksWorldgen.class' \
             'com/eternal_creations/archies_dino_mod/worldgen/EndPeaksMountainFeature.class' \
             'com/eternal_creations/archies_dino_mod/worldgen/EndPeaksChorusFeature.class' \
@@ -360,7 +362,7 @@ jobs:
               assert biome["features"][9] == ["archie_dinosaurs:end_peaks_chorus"]
 
               config = json.loads(jar.read("end_peaks.mixins.json"))
-              assert config["mixins"] == ["EndPeaksBiomeSourceMixin"]
+              assert config["mixins"] == ["EndPeaksBiomeSourceMixin", "EndPeaksHolderReferenceAccessor"]
               refmap = json.loads(jar.read("end_peaks.refmap.json"))
               manifest = jar.read("META-INF/MANIFEST.MF").decode("utf-8")
               assert "end_peaks.mixins.json" in manifest
