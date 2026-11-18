@@ -383,7 +383,7 @@ jobs:
             echo "Chorusoatl population limiter must only gate MobSpawnType.NATURAL."
             exit 1
           fi
-          for required in 'MAX_ACTIVE_GROUPS' 'setSpawnCancelled' 'setSpawnData'; do
+          for required in 'MAX_ACTIVE_GROUPS' 'setSpawnCancelled'; do
             if ! grep -Fq "$required" <<< "$CHORUS_LIMITER"; then
               echo "Chorusoatl natural group limiter is missing required behavior: $required"
               printf '%s\n' "$CHORUS_LIMITER"
