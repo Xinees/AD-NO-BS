@@ -123,7 +123,7 @@ public final class EndPeaksMountainFeature extends Feature<NoneFeatureConfigurat
                 int x = mountain.centerX() + offsetX;
                 int z = mountain.centerZ() + offsetZ;
                 if (!isValidMountainColumn(level, x, z)) {
-                    continue;
+                    return -1;
                 }
 
                 baseY = Math.max(baseY, getGroundY(level, x, z));

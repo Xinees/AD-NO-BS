@@ -1116,6 +1116,8 @@ jobs:
           for required in (
               "getSummitBaseY",
               "getMountainBaseY",
+              "if (!isValidMountainColumn(level, x, z)) {\n                    return -1;",
+
               "private static int getGroundY(",
               "private static boolean isValidMountainColumn(",
               "surface.isAir() || surface.canBeReplaced()",
