@@ -10,13 +10,13 @@ import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public final class EndPeaksMountainFeature extends Feature<NoneFeatureConfiguration> {
     private static final int BIOME_SAMPLE_Y = 64;
+    private static final int GROVE_FOOTPRINT_MARGIN = 10;
+    private static final int ISLAND_EDGE_SAMPLE_COUNT = 32;
 
     public EndPeaksMountainFeature() {
         super(NoneFeatureConfiguration.CODEC);
@@ -32,55 +32,61 @@ public final class EndPeaksMountainFeature extends Feature<NoneFeatureConfigurat
         BlockPos origin = context.origin();
         int chunkMinX = Math.floorDiv(origin.getX(), 16) * 16;
         int chunkMinZ = Math.floorDiv(origin.getZ(), 16) * 16;
-        int minCellX = Math.floorDiv(chunkMinX - EndPeaksWorldgen.MAX_RADIUS
-            - EndPeaksWorldgen.MAX_CENTER_OFFSET, EndPeaksWorldgen.CELL_SIZE);
-        int maxCellX = Math.floorDiv(chunkMinX + 15 + EndPeaksWorldgen.MAX_RADIUS
-            + EndPeaksWorldgen.MAX_CENTER_OFFSET, EndPeaksWorldgen.CELL_SIZE);
-        int minCellZ = Math.floorDiv(chunkMinZ - EndPeaksWorldgen.MAX_RADIUS
-            - EndPeaksWorldgen.MAX_CENTER_OFFSET, EndPeaksWorldgen.CELL_SIZE);
-        int maxCellZ = Math.floorDiv(chunkMinZ + 15 + EndPeaksWorldgen.MAX_RADIUS
-            + EndPeaksWorldgen.MAX_CENTER_OFFSET, EndPeaksWorldgen.CELL_SIZE);
+        int chunkMaxX = chunkMinX + 15;
+        int chunkMaxZ = chunkMinZ + 15;
+        int minCellX = EndPeaksWorldgen.minCellForCenterRange(chunkMinX, 0);
+        int maxCellX = EndPeaksWorldgen.maxCellForCenterRange(chunkMaxX, 0);
+        int minCellZ = EndPeaksWorldgen.minCellForCenterRange(chunkMinZ, 0);
+        int maxCellZ = EndPeaksWorldgen.maxCellForCenterRange(chunkMaxZ, 0);
 
-        List<EndPeaksWorldgen.Mountain> mountains = new ArrayList<>();
+        boolean placed = false;
+        MutableBlockPos mutable = new MutableBlockPos();
+
         for (int cellX = minCellX; cellX <= maxCellX; cellX++) {
             for (int cellZ = minCellZ; cellZ <= maxCellZ; cellZ++) {
                 EndPeaksWorldgen.Mountain mountain = EndPeaksWorldgen.mountainAt(cellX, cellZ);
-                if (mountain != null && isMountainContainedInBiome(level, mountain)) {
-                    mountains.add(mountain);
+                if (mountain == null
+                    || Math.floorDiv(mountain.centerX(), 16) != Math.floorDiv(chunkMinX, 16)
+                    || Math.floorDiv(mountain.centerZ(), 16) != Math.floorDiv(chunkMinZ, 16)
+                    || !isMountainContainedInBiome(level, mountain)) {
+                    continue;
                 }
+
+                placed |= placeMountain(level, mountain, mutable);
             }
         }
 
-        if (mountains.isEmpty()) {
-            return false;
-        }
+        return placed;
+    }
 
-        MutableBlockPos mutable = new MutableBlockPos();
+    private static boolean placeMountain(
+        WorldGenLevel level,
+        EndPeaksWorldgen.Mountain mountain,
+        MutableBlockPos mutable
+    ) {
         boolean placed = false;
+        int minX = mountain.centerX() - mountain.radiusX();
+        int maxX = mountain.centerX() + mountain.radiusX();
+        int minZ = mountain.centerZ() - mountain.radiusZ();
+        int maxZ = mountain.centerZ() + mountain.radiusZ();
 
-        for (int x = chunkMinX; x < chunkMinX + 16; x++) {
-            for (int z = chunkMinZ; z < chunkMinZ + 16; z++) {
+        for (int x = minX; x <= maxX; x++) {
+            for (int z = minZ; z <= maxZ; z++) {
+                int rise = getRiseAt(mountain, x, z);
+                if (rise < 1) {
+                    continue;
+                }
+
                 int groundY = level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x, z);
-                if (groundY <= level.getMinBuildHeight() + 1) {
-                    continue;
-                }
-
                 BlockPos surfacePos = new BlockPos(x, groundY, z);
-                if (!level.getBlockState(new BlockPos(x, groundY - 1, z)).is(Blocks.END_STONE)
-                    || !level.getBiome(surfacePos).is(EndPeaksWorldgen.BIOME)) {
+                if (groundY <= level.getMinBuildHeight() + 1
+                    || !level.getBiome(new BlockPos(x, BIOME_SAMPLE_Y, z)).is(EndPeaksWorldgen.BIOME)
+                    || !level.getBlockState(new BlockPos(x, groundY - 1, z)).is(Blocks.END_STONE)
+                    || !level.getBlockState(surfacePos).isAir()) {
                     continue;
                 }
 
-                int maxRise = 0;
-                for (EndPeaksWorldgen.Mountain mountain : mountains) {
-                    maxRise = Math.max(maxRise, getRiseAt(mountain, x, z));
-                }
-
-                if (maxRise < 2) {
-                    continue;
-                }
-
-                int topY = Math.min(groundY + maxRise - 1, level.getMaxBuildHeight() - 1);
+                int topY = Math.min(groundY + rise - 1, level.getMaxBuildHeight() - 1);
                 for (int y = groundY; y <= topY; y++) {
                     mutable.set(x, y, z);
                     if (level.getBlockState(mutable).isAir()) {
@@ -98,15 +104,17 @@ public final class EndPeaksMountainFeature extends Feature<NoneFeatureConfigurat
         WorldGenLevel level,
         EndPeaksWorldgen.Mountain mountain
     ) {
+        int expandedRadiusX = mountain.radiusX() + GROVE_FOOTPRINT_MARGIN;
+        int expandedRadiusZ = mountain.radiusZ() + GROVE_FOOTPRINT_MARGIN;
         Set<Long> checkedQuartCells = new HashSet<>();
         MutableBlockPos samplePos = new MutableBlockPos();
 
-        for (int x = mountain.centerX() - mountain.radiusX();
-             x <= mountain.centerX() + mountain.radiusX(); x++) {
-            for (int z = mountain.centerZ() - mountain.radiusZ();
-                 z <= mountain.centerZ() + mountain.radiusZ(); z++) {
-                double dx = (x - mountain.centerX()) / (double) mountain.radiusX();
-                double dz = (z - mountain.centerZ()) / (double) mountain.radiusZ();
+        for (int x = mountain.centerX() - expandedRadiusX;
+             x <= mountain.centerX() + expandedRadiusX; x++) {
+            for (int z = mountain.centerZ() - expandedRadiusZ;
+                 z <= mountain.centerZ() + expandedRadiusZ; z++) {
+                double dx = (x - mountain.centerX()) / (double) expandedRadiusX;
+                double dz = (z - mountain.centerZ()) / (double) expandedRadiusZ;
                 if (dx * dx + dz * dz >= 1.0D) {
                     continue;
                 }
@@ -122,6 +130,38 @@ public final class EndPeaksMountainFeature extends Feature<NoneFeatureConfigurat
                 if (!level.getBiome(samplePos).is(EndPeaksWorldgen.BIOME)) {
                     return false;
                 }
+            }
+        }
+
+        for (int x = mountain.centerX() - mountain.radiusX();
+             x <= mountain.centerX() + mountain.radiusX(); x++) {
+            for (int z = mountain.centerZ() - mountain.radiusZ();
+                 z <= mountain.centerZ() + mountain.radiusZ(); z++) {
+                double dx = (x - mountain.centerX()) / (double) mountain.radiusX();
+                double dz = (z - mountain.centerZ()) / (double) mountain.radiusZ();
+                if (dx * dx + dz * dz >= 1.0D) {
+                    continue;
+                }
+
+                int groundY = level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x, z);
+                if (groundY <= level.getMinBuildHeight() + 1
+                    || !level.getBlockState(new BlockPos(x, groundY - 1, z)).is(Blocks.END_STONE)) {
+                    return false;
+                }
+            }
+        }
+
+        for (int sample = 0; sample < ISLAND_EDGE_SAMPLE_COUNT; sample++) {
+            double angle = Math.PI * 2.0D * sample / ISLAND_EDGE_SAMPLE_COUNT;
+            int x = mountain.centerX()
+                + (int) Math.round(Math.cos(angle) * expandedRadiusX);
+            int z = mountain.centerZ()
+                + (int) Math.round(Math.sin(angle) * expandedRadiusZ);
+            int groundY = level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x, z);
+            if (groundY <= level.getMinBuildHeight() + 1
+                || !level.getBlockState(new BlockPos(x, groundY - 1, z)).is(Blocks.END_STONE)
+                || !level.getBiome(new BlockPos(x, BIOME_SAMPLE_Y, z)).is(EndPeaksWorldgen.BIOME)) {
+                return false;
             }
         }
 
