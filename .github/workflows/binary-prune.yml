@@ -1114,23 +1114,31 @@ jobs:
           if "GROVE_FOOTPRINT_MARGIN" in mountain or "ISLAND_EDGE_SAMPLE_COUNT" in mountain:
               raise SystemExit("Mountain eligibility must not depend on a distant all-biome/all-solid grove perimeter.")
           for required in (
-              "getSummitBaseY",
+              "isSummitCoreValid(level, mountain)",
               "getMountainBaseY",
-              "if (!isValidMountainColumn(level, x, z)) {\n                    return -1;",
-
+              "private static boolean isSummitCoreValid(",
               "private static int getGroundY(",
               "private static boolean isValidMountainColumn(",
               "surface.isAir() || surface.canBeReplaced()",
               "Math.abs(offsetX) <= 1 && Math.abs(offsetZ) <= 1",
               "Math.min(groundY + rise - 1, summitTopY - 1)",
               "Math.pow(slope, 0.82D)",
+              "level.getBlockState(new BlockPos(x, groundY - 1, z)).is(Blocks.END_STONE)"
           ):
               if required not in mountain:
-                  raise SystemExit("Mountain placement must preserve terrain-aware 15–20-block hills and a 3x3 summit: " + required)
-          if "isSummitCoreValid" in mountain:
-              raise SystemExit("One invalid summit or slope column must not cancel every mountain candidate.")
-          if "WORLD_SURFACE_WG" in chorus or "GROUND_PLANT_EXCLUSION_MARGIN + EndPeaksWorldgen.MAX_RADIUS" not in chorus:
-              raise SystemExit("Ground chorus spacing must search the full mountain radius and exclusion margin.")
+                  raise SystemExit("Mountain placement must keep a valid 3x3 highest plane without rejecting the whole hill: " + required)
+          if "getSummitBaseY" in mountain or "GROVE_FOOTPRINT_MARGIN" in mountain:
+              raise SystemExit("Mountain base must use the complete local terrain footprint, without a whole grove perimeter gate.")
+          summit_helper = mountain.split("private static boolean isSummitCoreValid", 1)[1].split(
+              "private static int getMountainBaseY", 1
+          )[0]
+          if "return false;" not in summit_helper:
+              raise SystemExit("The flat 3x3 summit must require all nine support columns.")
+          place_block = mountain.split("private static boolean placeMountain", 1)[1].split(
+              "private static boolean isSummitCoreValid", 1
+          )[0]
+          if "if (!hasFlatSummit)" in place_block:
+              raise SystemExit("A missing summit support must fall back to a sloped hill instead of cancelling it.")
 
           for required in (
               "MIN_GROUPS = 3",

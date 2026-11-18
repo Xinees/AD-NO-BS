@@ -61,11 +61,9 @@ public final class EndPeaksMountainFeature extends Feature<NoneFeatureConfigurat
         EndPeaksWorldgen.Mountain mountain,
         MutableBlockPos mutable
     ) {
-        int summitBaseY = getSummitBaseY(level, mountain);
-        boolean hasFlatSummit = summitBaseY > level.getMinBuildHeight() + 1;
-        if (!hasFlatSummit) {
-            summitBaseY = getMountainBaseY(level, mountain);
-        }
+        int summitBaseY = getMountainBaseY(level, mountain);
+        boolean hasFlatSummit = summitBaseY > level.getMinBuildHeight() + 1
+            && isSummitCoreValid(level, mountain);
         if (summitBaseY <= level.getMinBuildHeight() + 1
             || summitBaseY + mountain.height() - 1 >= level.getMaxBuildHeight()) {
             return false;
@@ -113,24 +111,23 @@ public final class EndPeaksMountainFeature extends Feature<NoneFeatureConfigurat
         return placed;
     }
 
-    private static int getSummitBaseY(
+    private static boolean isSummitCoreValid(
         WorldGenLevel level,
         EndPeaksWorldgen.Mountain mountain
     ) {
-        int baseY = Integer.MIN_VALUE;
         for (int offsetX = -1; offsetX <= 1; offsetX++) {
             for (int offsetZ = -1; offsetZ <= 1; offsetZ++) {
-                int x = mountain.centerX() + offsetX;
-                int z = mountain.centerZ() + offsetZ;
-                if (!isValidMountainColumn(level, x, z)) {
-                    return -1;
+                if (!isValidMountainColumn(
+                    level,
+                    mountain.centerX() + offsetX,
+                    mountain.centerZ() + offsetZ
+                )) {
+                    return false;
                 }
-
-                baseY = Math.max(baseY, getGroundY(level, x, z));
             }
         }
 
-        return baseY == Integer.MIN_VALUE ? -1 : baseY;
+        return true;
     }
 
     private static int getMountainBaseY(
@@ -145,19 +142,19 @@ public final class EndPeaksMountainFeature extends Feature<NoneFeatureConfigurat
 
         for (int x = minX; x <= maxX; x++) {
             for (int z = minZ; z <= maxZ; z++) {
-                if (getRiseAt(mountain, x, z) < 1 || !isValidMountainColumn(level, x, z)) {
+                if (getRiseAt(mountain, x, z) < 1) {
                     continue;
                 }
 
-                baseY = Math.max(baseY, getGroundY(level, x, z));
+                int groundY = getGroundY(level, x, z);
+                if (groundY > level.getMinBuildHeight() + 1
+                    && level.getBlockState(new BlockPos(x, groundY - 1, z)).is(Blocks.END_STONE)) {
+                    baseY = Math.max(baseY, groundY);
+                }
             }
         }
 
         return baseY == Integer.MIN_VALUE ? -1 : baseY;
-    }
-
-    private static int getGroundY(WorldGenLevel level, int x, int z) {
-        return level.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, x, z);
     }
 
     private static boolean isValidMountainColumn(WorldGenLevel level, int x, int z) {
