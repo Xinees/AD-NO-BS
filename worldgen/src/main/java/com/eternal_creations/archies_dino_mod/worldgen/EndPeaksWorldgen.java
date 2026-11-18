@@ -34,7 +34,7 @@ public final class EndPeaksWorldgen {
             + (int) ((hash >>> 13) % (MAX_CENTER_OFFSET * 2L + 1L)) - MAX_CENTER_OFFSET;
         int radiusX = 5 + (int) ((hash >>> 19) & 1L);
         int radiusZ = 5 + (int) ((hash >>> 23) & 1L);
-        int height = 18 + (int) ((hash >>> 27) & 1L) * 2;
+        int height = 15 + (int) ((hash >>> 27) % 6L);
         double plateauRadius = 0.26D + ((hash >>> 33) & 3L) * 0.02D;
 
         return new Mountain(centerX, centerZ, radiusX, radiusZ, height, plateauRadius, hash);
