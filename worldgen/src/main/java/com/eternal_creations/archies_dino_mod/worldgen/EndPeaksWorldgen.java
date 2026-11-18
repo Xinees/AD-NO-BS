@@ -4,18 +4,12 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.levelgen.LegacyRandomSource;
-import net.minecraft.world.level.levelgen.synth.SimplexNoise;
 
 public final class EndPeaksWorldgen {
-    private static final SimplexNoise BIOME_NOISE =
-        new SimplexNoise(new LegacyRandomSource(0x454E445045414B53L));
-    private static final SimplexNoise BIOME_DETAIL =
-        new SimplexNoise(new LegacyRandomSource(0x454E445045414B44L));
-    private static final double REGION_THRESHOLD = 0.18D;
-    private static final double BIOME_NOISE_SCALE = 0.0016D;
-    private static final double BIOME_DETAIL_SCALE = 0.0048D;
-    private static final double BIOME_DETAIL_WEIGHT = 0.18D;
+    private static final int REGION_CELL_SIZE = 960;
+    private static final int REGION_BASE_RADIUS = 235;
+    private static final int REGION_JITTER = 80;
+
     public static final ResourceKey<Biome> BIOME = ResourceKey.create(
         Registries.BIOME,
         new ResourceLocation("archie_dinosaurs", "end_peaks")
@@ -40,7 +34,7 @@ public final class EndPeaksWorldgen {
             + (int) ((hash >>> 13) % (MAX_CENTER_OFFSET * 2L + 1L)) - MAX_CENTER_OFFSET;
         int radiusX = 5 + (int) ((hash >>> 19) & 1L);
         int radiusZ = 5 + (int) ((hash >>> 23) & 1L);
-        int height = 12 + (int) ((hash >>> 27) % 5L) * 2;
+        int height = 18 + (int) ((hash >>> 27) & 1L) * 2;
         double plateauRadius = 0.26D + ((hash >>> 33) & 3L) * 0.02D;
 
         return new Mountain(centerX, centerZ, radiusX, radiusZ, height, plateauRadius, hash);
@@ -66,21 +60,54 @@ public final class EndPeaksWorldgen {
     }
 
     public static boolean isEndPeaksRegion(int quartX, int quartZ) {
-        return getRegionNoiseValue(quartX, quartZ) > REGION_THRESHOLD;
+        return getRegionNoiseValue(quartX, quartZ) > 0.0D;
     }
 
     public static double getRegionNoiseValue(int quartX, int quartZ) {
-        double blockX = quartX * 4.0D;
-        double blockZ = quartZ * 4.0D;
-        double broad = BIOME_NOISE.getValue(
-            blockX * BIOME_NOISE_SCALE,
-            blockZ * BIOME_NOISE_SCALE
-        );
-        double detail = BIOME_DETAIL.getValue(
-            blockX * BIOME_DETAIL_SCALE,
-            blockZ * BIOME_DETAIL_SCALE
-        );
-        return broad + detail * BIOME_DETAIL_WEIGHT;
+        return containsRegion(quartX * 4, quartZ * 4) ? 1.0D : -1.0D;
+    }
+
+    private static boolean containsRegion(int blockX, int blockZ) {
+        int cellX = Math.floorDiv(blockX, REGION_CELL_SIZE);
+        int cellZ = Math.floorDiv(blockZ, REGION_CELL_SIZE);
+
+        for (int candidateX = cellX - 1; candidateX <= cellX + 1; candidateX++) {
+            for (int candidateZ = cellZ - 1; candidateZ <= cellZ + 1; candidateZ++) {
+                long hash = mix(candidateX ^ 0x51ED270B, candidateZ ^ 0x367CD507);
+                if ((hash & 3L) != 0L) {
+                    continue;
+                }
+
+                int jitterX = (int) Long.remainderUnsigned(hash >>> 8, REGION_JITTER * 2L + 1L)
+                    - REGION_JITTER;
+                int jitterZ = (int) Long.remainderUnsigned(hash >>> 19, REGION_JITTER * 2L + 1L)
+                    - REGION_JITTER;
+                int centerX = candidateX * REGION_CELL_SIZE + REGION_CELL_SIZE / 2 + jitterX;
+                int centerZ = candidateZ * REGION_CELL_SIZE + REGION_CELL_SIZE / 2 + jitterZ;
+
+                double dx = blockX - centerX;
+                double dz = blockZ - centerZ;
+                double distanceSquared = dx * dx + dz * dz;
+                double angle = Math.atan2(dz, dx);
+                double phaseA = phase(hash, 27);
+                double phaseB = phase(hash, 43);
+                double phaseC = phase(hash, 57);
+                double radius = REGION_BASE_RADIUS
+                    + Math.sin(angle * 3.0D + phaseA) * 15.0D
+                    + Math.cos(angle * 5.0D + phaseB) * 10.0D
+                    + Math.sin(angle * 7.0D + phaseC) * 6.0D;
+
+                if (distanceSquared <= radius * radius) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private static double phase(long hash, int shift) {
+        return ((hash >>> shift) & 0xFFFFL) / 65535.0D * Math.PI * 2.0D;
     }
 
     public record Mountain(
