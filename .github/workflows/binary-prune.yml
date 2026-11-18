@@ -1014,7 +1014,7 @@ jobs:
 
           mount = instructions(sys.argv[1])
           offset_calls = [index for index, line in enumerate(mount)
-                          if "passengerOffset(FFF)" in line]
+                          if "passengerOffset:(FFF)" in line]
           if len(offset_calls) != 1:
               raise SystemExit("Expected exactly one Lushsaur passengerOffset call.")
           index = offset_calls[0]
@@ -1041,7 +1041,7 @@ jobs:
           CHORUS_LIMITER_BYTECODE="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.worldgen.EndPeaksChorusoatlSpawnLimiter)"
           if grep -Eq 'SpawnGroupData|ChorusoatlGroupData|setSpawnData' <<< "$CHORUS_LIMITER_BYTECODE"; then
             echo "Chorusoatl limiter must not replace AgeableMob's vanilla spawn data."
-            printf '%s\\n' "$CHORUS_LIMITER_BYTECODE"
+            printf '%s\n' "$CHORUS_LIMITER_BYTECODE"
             exit 1
           fi
           echo "Verified Chorusoatl natural spawn limiting preserves vanilla ageable spawn data."
