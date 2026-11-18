@@ -30,7 +30,7 @@ public final class EndPeaksWorldgen {
 
     public static Mountain mountainAt(int cellX, int cellZ) {
         long hash = mix(cellX, cellZ);
-        if ((hash & 31L) >= 23L) {
+        if ((hash & 31L) >= 9L) {
             return null;
         }
 
