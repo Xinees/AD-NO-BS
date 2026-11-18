@@ -798,7 +798,7 @@ if not isinstance(chorusoatl_spawner, dict):
     raise SystemExit("Original Chorusoatl spawner entry must remain a single group definition.")
 if chorusoatl_spawner.get("type") != "archie_dinosaurs:chorusoatl":
     raise SystemExit("Unexpected entity in the Chorusoatl biome modifier.")
-chorusoatl_spawner["weight"] = 1
+chorusoatl_spawner["weight"] = 2
 chorusoatl_spawner["minCount"] = 3
 chorusoatl_spawner["maxCount"] = 5
 chorusoatl_modifier["biomes"] = "archie_dinosaurs:end_peaks"
@@ -932,11 +932,11 @@ with zipfile.ZipFile(target, "r") as check:
         raise SystemExit("Chorusoatl biome modifier must retain its single Forge spawner entry.")
     if chorus_spawner != {
         "type": "archie_dinosaurs:chorusoatl",
-        "weight": 1,
+        "weight": 2,
         "minCount": 3,
         "maxCount": 5,
     }:
-        raise SystemExit("Chorusoatl spawn settings must be weight 1 with the original 3-5 group size.")
+        raise SystemExit("Chorusoatl spawn settings must be weight 2 with the original 3-5 group size.")
 
     chorus_tag_path = "data/archie_dinosaurs/tags/worldgen/biome/spawns_chorusoatls.json"
     chorus_tag = read_json(check.read(chorus_tag_path), chorus_tag_path)
