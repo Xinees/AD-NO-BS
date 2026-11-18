@@ -5,18 +5,15 @@ import net.minecraft.core.BlockPos.MutableBlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 
-import java.util.HashSet;
-import java.util.Set;
 
 public final class EndPeaksMountainFeature extends Feature<NoneFeatureConfiguration> {
     private static final int BIOME_SAMPLE_Y = 64;
-    private static final int GROVE_FOOTPRINT_MARGIN = 28;
-    private static final int ISLAND_EDGE_SAMPLE_COUNT = 48;
 
     public EndPeaksMountainFeature() {
         super(NoneFeatureConfiguration.CODEC);
@@ -64,18 +61,17 @@ public final class EndPeaksMountainFeature extends Feature<NoneFeatureConfigurat
         EndPeaksWorldgen.Mountain mountain,
         MutableBlockPos mutable
     ) {
-        if (!isSummitCoreValid(level, mountain)) {
-            return false;
+        int summitBaseY = getSummitBaseY(level, mountain);
+        boolean hasFlatSummit = summitBaseY > level.getMinBuildHeight() + 1;
+        if (!hasFlatSummit) {
+            summitBaseY = getMountainBaseY(level, mountain);
         }
-
-        int summitBaseY = getMountainBaseY(level, mountain);
         if (summitBaseY <= level.getMinBuildHeight() + 1
             || summitBaseY + mountain.height() - 1 >= level.getMaxBuildHeight()) {
             return false;
         }
 
         int summitTopY = summitBaseY + mountain.height() - 1;
-
         int minX = mountain.centerX() - mountain.radiusX();
         int maxX = mountain.centerX() + mountain.radiusX();
         int minZ = mountain.centerZ() - mountain.radiusZ();
@@ -89,29 +85,52 @@ public final class EndPeaksMountainFeature extends Feature<NoneFeatureConfigurat
                     continue;
                 }
 
-                boolean summitCore = isSummitCore(
-                    x - mountain.centerX(),
-                    z - mountain.centerZ()
-                );
-                int groundY = level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x, z);
+                int groundY = getGroundY(level, x, z);
+                boolean summitCore = hasFlatSummit
+                    && isSummitCore(x - mountain.centerX(), z - mountain.centerZ());
                 int topY = summitCore
                     ? summitTopY
-                    : Math.min(
-                        Math.max(groundY, summitBaseY + rise - 1),
-                        summitTopY - 1
-                    );
+                    : hasFlatSummit
+                        ? Math.min(groundY + rise - 1, summitTopY - 1)
+                        : groundY + rise - 1;
+                if (topY < groundY) {
+                    continue;
+                }
 
                 for (int y = groundY; y <= topY; y++) {
                     mutable.set(x, y, z);
-                    if (level.getBlockState(mutable).isAir()) {
-                        level.setBlock(mutable, Blocks.END_STONE.defaultBlockState(), 2);
-                        placed = true;
+                    BlockState current = level.getBlockState(mutable);
+                    if (!current.isAir() && !current.canBeReplaced()) {
+                        break;
                     }
+
+                    level.setBlock(mutable, Blocks.END_STONE.defaultBlockState(), 2);
+                    placed = true;
                 }
             }
         }
 
         return placed;
+    }
+
+    private static int getSummitBaseY(
+        WorldGenLevel level,
+        EndPeaksWorldgen.Mountain mountain
+    ) {
+        int baseY = Integer.MIN_VALUE;
+        for (int offsetX = -1; offsetX <= 1; offsetX++) {
+            for (int offsetZ = -1; offsetZ <= 1; offsetZ++) {
+                int x = mountain.centerX() + offsetX;
+                int z = mountain.centerZ() + offsetZ;
+                if (!isValidMountainColumn(level, x, z)) {
+                    continue;
+                }
+
+                baseY = Math.max(baseY, getGroundY(level, x, z));
+            }
+        }
+
+        return baseY == Integer.MIN_VALUE ? -1 : baseY;
     }
 
     private static int getMountainBaseY(
@@ -126,113 +145,63 @@ public final class EndPeaksMountainFeature extends Feature<NoneFeatureConfigurat
 
         for (int x = minX; x <= maxX; x++) {
             for (int z = minZ; z <= maxZ; z++) {
-                if (getRiseAt(mountain, x, z) < 1) {
+                if (getRiseAt(mountain, x, z) < 1 || !isValidMountainColumn(level, x, z)) {
                     continue;
                 }
 
-                int groundY = level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x, z);
-                if (groundY > level.getMinBuildHeight() + 1) {
-                    baseY = Math.max(baseY, groundY);
-                }
+                baseY = Math.max(baseY, getGroundY(level, x, z));
             }
         }
 
         return baseY == Integer.MIN_VALUE ? -1 : baseY;
     }
 
-    private static boolean isSummitCoreValid(
-        WorldGenLevel level,
-        EndPeaksWorldgen.Mountain mountain
-    ) {
-        for (int offsetX = -1; offsetX <= 1; offsetX++) {
-            for (int offsetZ = -1; offsetZ <= 1; offsetZ++) {
-                if (!isValidMountainColumn(
-                    level,
-                    mountain.centerX() + offsetX,
-                    mountain.centerZ() + offsetZ
-                )) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
+    private static int getGroundY(WorldGenLevel level, int x, int z) {
+        return level.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, x, z);
     }
 
     private static boolean isValidMountainColumn(WorldGenLevel level, int x, int z) {
-        int groundY = level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x, z);
-        return groundY > level.getMinBuildHeight() + 1
-            && level.getBiome(new BlockPos(x, BIOME_SAMPLE_Y, z)).is(EndPeaksWorldgen.BIOME)
-            && level.getBlockState(new BlockPos(x, groundY - 1, z)).is(Blocks.END_STONE)
-            && level.getBlockState(new BlockPos(x, groundY, z)).isAir();
+        int groundY = getGroundY(level, x, z);
+        if (groundY <= level.getMinBuildHeight() + 1
+            || groundY >= level.getMaxBuildHeight()
+            || !level.getBiome(new BlockPos(x, BIOME_SAMPLE_Y, z)).is(EndPeaksWorldgen.BIOME)
+            || !level.getBlockState(new BlockPos(x, groundY - 1, z)).is(Blocks.END_STONE)) {
+            return false;
+        }
+
+        BlockState surface = level.getBlockState(new BlockPos(x, groundY, z));
+        return surface.isAir() || surface.canBeReplaced();
     }
 
     static boolean isMountainContainedInBiome(
         WorldGenLevel level,
         EndPeaksWorldgen.Mountain mountain
     ) {
-        int expandedRadiusX = mountain.radiusX() + GROVE_FOOTPRINT_MARGIN;
-        int expandedRadiusZ = mountain.radiusZ() + GROVE_FOOTPRINT_MARGIN;
-        Set<Long> checkedQuartCells = new HashSet<>();
-        MutableBlockPos samplePos = new MutableBlockPos();
+        int radiusX = mountain.radiusX() + 1;
+        int radiusZ = mountain.radiusZ() + 1;
+        int minQuartX = Math.floorDiv(mountain.centerX() - radiusX, 4);
+        int maxQuartX = Math.floorDiv(mountain.centerX() + radiusX, 4);
+        int minQuartZ = Math.floorDiv(mountain.centerZ() - radiusZ, 4);
+        int maxQuartZ = Math.floorDiv(mountain.centerZ() + radiusZ, 4);
 
-        for (int x = mountain.centerX() - expandedRadiusX;
-             x <= mountain.centerX() + expandedRadiusX; x++) {
-            for (int z = mountain.centerZ() - expandedRadiusZ;
-                 z <= mountain.centerZ() + expandedRadiusZ; z++) {
-                double dx = (x - mountain.centerX()) / (double) expandedRadiusX;
-                double dz = (z - mountain.centerZ()) / (double) expandedRadiusZ;
-                if (dx * dx + dz * dz >= 1.0D) {
+        for (int quartX = minQuartX; quartX <= maxQuartX; quartX++) {
+            for (int quartZ = minQuartZ; quartZ <= maxQuartZ; quartZ++) {
+                int sampleX = quartX * 4 + 2;
+                int sampleZ = quartZ * 4 + 2;
+                double dx = (sampleX - mountain.centerX()) / (double) radiusX;
+                double dz = (sampleZ - mountain.centerZ()) / (double) radiusZ;
+                if (dx * dx + dz * dz > 1.0D) {
                     continue;
                 }
 
-                int quartX = Math.floorDiv(x, 4);
-                int quartZ = Math.floorDiv(z, 4);
-                long quartKey = ((long) quartX << 32) | (quartZ & 0xFFFFFFFFL);
-                if (!checkedQuartCells.add(quartKey)) {
-                    continue;
-                }
-
-                samplePos.set(quartX * 4 + 2, BIOME_SAMPLE_Y, quartZ * 4 + 2);
-                if (!level.getBiome(samplePos).is(EndPeaksWorldgen.BIOME)) {
+                if (!level.getBiome(new BlockPos(sampleX, BIOME_SAMPLE_Y, sampleZ))
+                    .is(EndPeaksWorldgen.BIOME)) {
                     return false;
                 }
             }
         }
 
-        for (int x = mountain.centerX() - mountain.radiusX();
-             x <= mountain.centerX() + mountain.radiusX(); x++) {
-            for (int z = mountain.centerZ() - mountain.radiusZ();
-                 z <= mountain.centerZ() + mountain.radiusZ(); z++) {
-                double dx = (x - mountain.centerX()) / (double) mountain.radiusX();
-                double dz = (z - mountain.centerZ()) / (double) mountain.radiusZ();
-                if (dx * dx + dz * dz >= 1.0D) {
-                    continue;
-                }
-
-                int groundY = level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x, z);
-                if (groundY <= level.getMinBuildHeight() + 1
-                    || !level.getBlockState(new BlockPos(x, groundY - 1, z)).is(Blocks.END_STONE)) {
-                    return false;
-                }
-            }
-        }
-
-        for (int sample = 0; sample < ISLAND_EDGE_SAMPLE_COUNT; sample++) {
-            double angle = Math.PI * 2.0D * sample / ISLAND_EDGE_SAMPLE_COUNT;
-            int x = mountain.centerX()
-                + (int) Math.round(Math.cos(angle) * expandedRadiusX);
-            int z = mountain.centerZ()
-                + (int) Math.round(Math.sin(angle) * expandedRadiusZ);
-            int groundY = level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x, z);
-            if (groundY <= level.getMinBuildHeight() + 1
-                || !level.getBlockState(new BlockPos(x, groundY - 1, z)).is(Blocks.END_STONE)
-                || !level.getBiome(new BlockPos(x, BIOME_SAMPLE_Y, z)).is(EndPeaksWorldgen.BIOME)) {
-                return false;
-            }
-        }
-
-        return !checkedQuartCells.isEmpty();
+        return true;
     }
 
     private static int getRiseAt(EndPeaksWorldgen.Mountain mountain, int x, int z) {

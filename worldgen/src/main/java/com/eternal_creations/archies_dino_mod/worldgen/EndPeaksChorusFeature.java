@@ -246,10 +246,12 @@ public final class EndPeaksChorusFeature extends Feature<NoneFeatureConfiguratio
     }
 
     private static boolean isNearPlannedMountain(int x, int z) {
-        int minCellX = EndPeaksWorldgen.minCellForCenterRange(x, GROUND_PLANT_EXCLUSION_MARGIN);
-        int maxCellX = EndPeaksWorldgen.maxCellForCenterRange(x, GROUND_PLANT_EXCLUSION_MARGIN);
-        int minCellZ = EndPeaksWorldgen.minCellForCenterRange(z, GROUND_PLANT_EXCLUSION_MARGIN);
-        int maxCellZ = EndPeaksWorldgen.maxCellForCenterRange(z, GROUND_PLANT_EXCLUSION_MARGIN);
+        int mountainSearchRadius =
+            GROUND_PLANT_EXCLUSION_MARGIN + EndPeaksWorldgen.MAX_RADIUS;
+        int minCellX = EndPeaksWorldgen.minCellForCenterRange(x, mountainSearchRadius);
+        int maxCellX = EndPeaksWorldgen.maxCellForCenterRange(x, mountainSearchRadius);
+        int minCellZ = EndPeaksWorldgen.minCellForCenterRange(z, mountainSearchRadius);
+        int maxCellZ = EndPeaksWorldgen.maxCellForCenterRange(z, mountainSearchRadius);
 
         for (int cellX = minCellX; cellX <= maxCellX; cellX++) {
             for (int cellZ = minCellZ; cellZ <= maxCellZ; cellZ++) {

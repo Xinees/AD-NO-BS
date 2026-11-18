@@ -1108,23 +1108,27 @@ jobs:
           if "containsRegion" not in worldgen or "BIOME_NOISE" in worldgen:
               raise SystemExit("End Peaks must use connected irregular biome blobs, not noisy interior holes.")
           if "minCellForCenterRange" not in mountain or "Math.floorDiv(mountain.centerX(), 16)" not in mountain:
-              raise SystemExit("Each complete mountain must be generated once by its center chunk.")
-          if "GROVE_FOOTPRINT_MARGIN = 28" not in mountain or "ISLAND_EDGE_SAMPLE_COUNT = 48" not in mountain:
-              raise SystemExit("Mountain must require a large End Stone island for its full variable chorus grove.")
+              raise SystemExit("Each deterministic mountain candidate must be owned by exactly one center chunk.")
+          if "Heightmap.Types.OCEAN_FLOOR_WG" not in mountain or "Heightmap.Types.WORLD_SURFACE_WG" in mountain:
+              raise SystemExit("Mountain terrain sampling must use solid terrain, not non-air foliage height.")
+          if "GROVE_FOOTPRINT_MARGIN" in mountain or "ISLAND_EDGE_SAMPLE_COUNT" in mountain:
+              raise SystemExit("Mountain eligibility must not depend on a distant all-biome/all-solid grove perimeter.")
           for required in (
-              "summitBaseY + mountain.height() - 1",
+              "getSummitBaseY",
               "getMountainBaseY",
-              "isSummitCore",
+              "private static int getGroundY(",
+              "private static boolean isValidMountainColumn(",
+              "surface.isAir() || surface.canBeReplaced()",
               "Math.abs(offsetX) <= 1 && Math.abs(offsetZ) <= 1",
-              "Math.min(mountain.height() - 1, rise)",
+              "Math.min(groundY + rise - 1, summitTopY - 1)",
               "Math.pow(slope, 0.82D)",
           ):
               if required not in mountain:
-                  raise SystemExit("Mountain must have an exact highest 3x3 plateau and 15–20-block height: " + required)
-          if "isSummitBlock" in mountain:
-              raise SystemExit("Summit protrusions must not expand the exact highest 3x3 plane.")
-          if "groundY >= summitTopY" in mountain or "baseY = Math.min(baseY, groundY)" in mountain:
-              raise SystemExit("Mountain placement must adapt to the local End terrain instead of rejecting raised columns.")
+                  raise SystemExit("Mountain placement must preserve terrain-aware 15–20-block hills and a 3x3 summit: " + required)
+          if "isSummitCoreValid" in mountain:
+              raise SystemExit("One invalid summit or slope column must not cancel every mountain candidate.")
+          if "WORLD_SURFACE_WG" in chorus or "GROUND_PLANT_EXCLUSION_MARGIN + EndPeaksWorldgen.MAX_RADIUS" not in chorus:
+              raise SystemExit("Ground chorus spacing must search the full mountain radius and exclusion margin.")
 
           for required in (
               "MIN_GROUPS = 3",
