@@ -88,7 +88,8 @@ public final class EndPeaksChorusoatlSpawnLimiter {
         CompoundTag persistentData = entity.getPersistentData();
         persistentData.putUUID(GROUP_ID_KEY, groupId);
 
-        if (entity instanceof AgeableMob && event.getSpawnData() == null) {
+        if (entity instanceof AgeableMob ageable && event.getSpawnData() == null) {
+            ageable.setBaby(entity.getRandom().nextFloat() < BABY_GROUP_CHANCE);
             event.setSpawnData(new AgeableMob.AgeableMobGroupData(BABY_GROUP_CHANCE));
         }
     }
