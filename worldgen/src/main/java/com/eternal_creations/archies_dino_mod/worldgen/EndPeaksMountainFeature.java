@@ -64,38 +64,18 @@ public final class EndPeaksMountainFeature extends Feature<NoneFeatureConfigurat
         EndPeaksWorldgen.Mountain mountain,
         MutableBlockPos mutable
     ) {
-        int summitBaseY = getSummitBaseY(level, mountain);
-        if (summitBaseY <= level.getMinBuildHeight() + 1) {
+        int summitBaseY = getMountainBaseY(level, mountain);
+        if (summitBaseY <= level.getMinBuildHeight() + 1
+            || summitBaseY + mountain.height() - 1 >= level.getMaxBuildHeight()) {
             return false;
         }
 
-        int summitTopY = Math.min(
-            summitBaseY + mountain.height() - 1,
-            level.getMaxBuildHeight() - 1
-        );
+        int summitTopY = summitBaseY + mountain.height() - 1;
 
         int minX = mountain.centerX() - mountain.radiusX();
         int maxX = mountain.centerX() + mountain.radiusX();
         int minZ = mountain.centerZ() - mountain.radiusZ();
         int maxZ = mountain.centerZ() + mountain.radiusZ();
-
-        for (int x = minX; x <= maxX; x++) {
-            for (int z = minZ; z <= maxZ; z++) {
-                int rise = getRiseAt(mountain, x, z);
-                if (rise < 1) {
-                    continue;
-                }
-
-                int groundY = level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x, z);
-                BlockPos surfacePos = new BlockPos(x, groundY, z);
-                if (groundY >= summitTopY
-                    || !level.getBiome(new BlockPos(x, BIOME_SAMPLE_Y, z)).is(EndPeaksWorldgen.BIOME)
-                    || !level.getBlockState(new BlockPos(x, groundY - 1, z)).is(Blocks.END_STONE)
-                    || !level.getBlockState(surfacePos).isAir()) {
-                    return false;
-                }
-            }
-        }
 
         boolean placed = false;
         for (int x = minX; x <= maxX; x++) {
@@ -127,15 +107,22 @@ public final class EndPeaksMountainFeature extends Feature<NoneFeatureConfigurat
         return placed;
     }
 
-    private static int getSummitBaseY(
+    private static int getMountainBaseY(
         WorldGenLevel level,
         EndPeaksWorldgen.Mountain mountain
     ) {
-        int baseY = Integer.MAX_VALUE;
-        for (int offsetX = -1; offsetX <= 1; offsetX++) {
-            for (int offsetZ = -1; offsetZ <= 1; offsetZ++) {
-                int x = mountain.centerX() + offsetX;
-                int z = mountain.centerZ() + offsetZ;
+        int baseY = Integer.MIN_VALUE;
+        int minX = mountain.centerX() - mountain.radiusX();
+        int maxX = mountain.centerX() + mountain.radiusX();
+        int minZ = mountain.centerZ() - mountain.radiusZ();
+        int maxZ = mountain.centerZ() + mountain.radiusZ();
+
+        for (int x = minX; x <= maxX; x++) {
+            for (int z = minZ; z <= maxZ; z++) {
+                if (getRiseAt(mountain, x, z) < 1) {
+                    continue;
+                }
+
                 int groundY = level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x, z);
                 if (groundY <= level.getMinBuildHeight() + 1
                     || !level.getBiome(new BlockPos(x, BIOME_SAMPLE_Y, z)).is(EndPeaksWorldgen.BIOME)
@@ -143,10 +130,12 @@ public final class EndPeaksMountainFeature extends Feature<NoneFeatureConfigurat
                     || !level.getBlockState(new BlockPos(x, groundY, z)).isAir()) {
                     return -1;
                 }
-                baseY = Math.min(baseY, groundY);
+
+                baseY = Math.max(baseY, groundY);
             }
         }
-        return baseY;
+
+        return baseY == Integer.MIN_VALUE ? -1 : baseY;
     }
 
     static boolean isMountainContainedInBiome(
