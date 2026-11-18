@@ -1821,6 +1821,14 @@ jobs:
           print("Verified migrated entity IDs:", ", ".join(sorted(found)))
           PY
 
+      - name: Upload validated Legacy JAR as a directly downloadable Actions artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: archie-dinosaurs-legacy-build-${{ github.run_number }}
+          path: build/libs/archie_dinosaurs-legacy-forge-1.20.1.jar
+          if-no-files-found: error
+          retention-days: 1
+
       - name: Publish validated Legacy JAR as a private draft release
         shell: bash
         env:
