@@ -4,6 +4,8 @@ import com.eternal_creations.archies_dino_mod.worldgen.EndPeaksWorldgen;
 import com.mojang.logging.LogUtils;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
+import net.minecraft.core.HolderOwner;
+import net.minecraft.core.Registry;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.biome.Climate;
@@ -13,6 +15,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Set;
@@ -25,7 +28,7 @@ public abstract class EndPeaksBiomeSourceMixin {
     @Unique
     private static final Logger ARCHIE_LOGGER = LogUtils.getLogger();
     @Unique
-    private static final AtomicBoolean archie$loggedCreate = new AtomicBoolean();
+    private static final AtomicBoolean archie$loggedConstructor = new AtomicBoolean();
     @Unique
     private static final AtomicBoolean archie$loggedCollection = new AtomicBoolean();
     @Unique
@@ -38,17 +41,59 @@ public abstract class EndPeaksBiomeSourceMixin {
     @Unique
     private Holder<Biome> archie$endPeaks;
 
-    @Inject(method = "create", at = @At("RETURN"))
-    private static void archie$captureEndPeaks(
-        HolderGetter<Biome> biomes,
-        CallbackInfoReturnable<TheEndBiomeSource> cir
+    @Inject(method = "<init>", at = @At("TAIL"))
+    private void archie$captureEndPeaks(
+        Holder<Biome> centerBiome,
+        Holder<Biome> highlandsBiome,
+        Holder<Biome> midlandsBiome,
+        Holder<Biome> smallIslandsBiome,
+        Holder<Biome> barrensBiome,
+        CallbackInfo ci
     ) {
-        Holder<Biome> holder = biomes.getOrThrow(EndPeaksWorldgen.BIOME);
-        ((EndPeaksBiomeSourceMixin) (Object) cir.getReturnValue()).archie$endPeaks = holder;
-        if (archie$loggedCreate.compareAndSet(false, true)) {
-            String key = holder.unwrapKey().map(value -> value.location().toString()).orElse("unbound");
-            ARCHIE_LOGGER.info("[End Peaks] TheEndBiomeSource.create hooked; biome holder={}", key);
+        try {
+            this.archie$endPeaks = archie$resolveEndPeaks(highlandsBiome);
+            if (archie$loggedConstructor.compareAndSet(false, true)) {
+                String key = this.archie$endPeaks.unwrapKey()
+                    .map(value -> value.location().toString())
+                    .orElse("unbound");
+                ARCHIE_LOGGER.info(
+                    "[End Peaks] TheEndBiomeSource constructor hooked; biome holder={}",
+                    key
+                );
+            }
+        } catch (RuntimeException exception) {
+            if (archie$loggedMissingHolder.compareAndSet(false, true)) {
+                ARCHIE_LOGGER.error(
+                    "[End Peaks] Failed to resolve the custom biome holder from the End biome registry",
+                    exception
+                );
+            }
         }
+    }
+
+    @Unique
+    @SuppressWarnings("unchecked")
+    private static Holder<Biome> archie$resolveEndPeaks(Holder<Biome> vanillaBiome) {
+        if (!(vanillaBiome instanceof Holder.Reference<?> reference)) {
+            throw new IllegalStateException(
+                "Vanilla End biome holder is not registry-backed: " + vanillaBiome.getClass().getName()
+            );
+        }
+
+        HolderOwner<?> owner =
+            ((EndPeaksHolderReferenceAccessor) (Object) reference).archie$getOwner();
+
+        if (owner instanceof Registry<?> registry) {
+            return ((Registry<Biome>) registry).getHolderOrThrow(EndPeaksWorldgen.BIOME);
+        }
+
+        if (owner instanceof HolderGetter<?> getter) {
+            return ((HolderGetter<Biome>) getter).getOrThrow(EndPeaksWorldgen.BIOME);
+        }
+
+        throw new IllegalStateException(
+            "The End biome holder owner cannot look up registry entries: " + owner.getClass().getName()
+        );
     }
 
     @Inject(method = "collectPossibleBiomes", at = @At("RETURN"), cancellable = true)
@@ -59,7 +104,9 @@ public abstract class EndPeaksBiomeSourceMixin {
                 ARCHIE_LOGGER.info("[End Peaks] Added archie_dinosaurs:end_peaks to possibleBiomes()");
             }
         } else if (archie$loggedMissingHolder.compareAndSet(false, true)) {
-            ARCHIE_LOGGER.warn("[End Peaks] collectPossibleBiomes ran before the custom biome holder was captured");
+            ARCHIE_LOGGER.error(
+                "[End Peaks] collectPossibleBiomes ran without a holder captured by the TheEndBiomeSource constructor"
+            );
         }
     }
 
@@ -73,13 +120,17 @@ public abstract class EndPeaksBiomeSourceMixin {
     ) {
         if (this.archie$endPeaks == null) {
             if (archie$loggedMissingHolder.compareAndSet(false, true)) {
-                ARCHIE_LOGGER.error("[End Peaks] getNoiseBiome is active, but its custom biome holder is null");
+                ARCHIE_LOGGER.error(
+                    "[End Peaks] getNoiseBiome is active, but the constructor did not capture the custom biome holder"
+                );
             }
             return;
         }
 
         Holder<Biome> vanillaBiome = cir.getReturnValue();
-        String vanillaKey = vanillaBiome.unwrapKey().map(value -> value.location().toString()).orElse("unbound");
+        String vanillaKey = vanillaBiome.unwrapKey()
+            .map(value -> value.location().toString())
+            .orElse("unbound");
         double noise = EndPeaksWorldgen.getRegionNoiseValue(quartX, quartZ);
         if (archie$loggedVanillaBiomes.add(vanillaKey)) {
             ARCHIE_LOGGER.info(
