@@ -1064,7 +1064,7 @@ jobs:
               "public static final int CELL_SIZE = 24;",
               "public static final int MAX_RADIUS = 6;",
               "public static final int MAX_CENTER_OFFSET = 2;",
-              "if ((hash & 31L) >= 23L)",
+              "if ((hash & 31L) >= 9L)",
               "int radiusX = 5 + (int) ((hash >>> 19) & 1L);",
               "int radiusZ = 5 + (int) ((hash >>> 23) & 1L);",
               "int height = 12 + (int) ((hash >>> 27) % 5L) * 2;",
