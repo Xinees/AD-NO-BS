@@ -21,8 +21,8 @@ public final class EndPeaksChorusoatlSpawnLimiter {
     private static final ResourceLocation CHORUSOATL_ID =
         new ResourceLocation("archie_dinosaurs", "chorusoatl");
     private static final String GROUP_ID_KEY = "EndPeaksChorusoatlSpawnGroup";
-    private static final int MAX_ACTIVE_GROUPS = 2;
-    private static final double GROUP_REGION_RADIUS = 384.0D;
+    private static final int MAX_ACTIVE_GROUPS = 3;
+    private static final double GROUP_REGION_RADIUS = 512.0D;
     private static final double GROUP_REGION_VERTICAL = 64.0D;
     private static final double GROUP_MEMBER_RADIUS = 16.0D;
 
