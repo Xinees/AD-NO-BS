@@ -145,8 +145,7 @@ public abstract class EndPeaksBiomeSourceMixin {
         boolean outerEndBiome = vanillaBiome.is(Biomes.END_HIGHLANDS)
             || vanillaBiome.is(Biomes.END_MIDLANDS)
             || vanillaBiome.is(Biomes.END_BARRENS)
-            || vanillaBiome.is(Biomes.SMALL_END_ISLANDS);
-        if (outerEndBiome && noise > 0.05D) {
+        if (outerEndBiome && EndPeaksWorldgen.isEndPeaksRegion(quartX, quartZ)) {
             cir.setReturnValue(this.archie$endPeaks);
             if (archie$loggedSelection.compareAndSet(false, true)) {
                 ARCHIE_LOGGER.info(
