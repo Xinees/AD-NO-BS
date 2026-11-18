@@ -61,15 +61,13 @@ public final class EndPeaksMountainFeature extends Feature<NoneFeatureConfigurat
         EndPeaksWorldgen.Mountain mountain,
         MutableBlockPos mutable
     ) {
-        int summitBaseY = getMountainBaseY(level, mountain);
-        boolean hasFlatSummit = summitBaseY > level.getMinBuildHeight() + 1
-            && isSummitCoreValid(level, mountain);
-        if (summitBaseY <= level.getMinBuildHeight() + 1
-            || summitBaseY + mountain.height() - 1 >= level.getMaxBuildHeight()) {
-            return false;
-        }
+        int summitBaseY = getSummitBaseY(level, mountain);
+        boolean flatSummit = summitBaseY > level.getMinBuildHeight() + 1
+            && summitBaseY + mountain.height() - 1 < level.getMaxBuildHeight();
+        int summitTopY = flatSummit
+            ? summitBaseY + mountain.height() - 1
+            : -1;
 
-        int summitTopY = summitBaseY + mountain.height() - 1;
         int minX = mountain.centerX() - mountain.radiusX();
         int maxX = mountain.centerX() + mountain.radiusX();
         int minZ = mountain.centerZ() - mountain.radiusZ();
@@ -79,18 +77,26 @@ public final class EndPeaksMountainFeature extends Feature<NoneFeatureConfigurat
         for (int x = minX; x <= maxX; x++) {
             for (int z = minZ; z <= maxZ; z++) {
                 int rise = getRiseAt(mountain, x, z);
-                if (rise < 1 || !isValidMountainColumn(level, x, z)) {
+                if (rise < 1) {
                     continue;
                 }
 
                 int groundY = getGroundY(level, x, z);
-                boolean summitCore = hasFlatSummit
+                if (!isValidMountainColumn(level, x, z, groundY)) {
+                    continue;
+                }
+
+                boolean summitCore = flatSummit
                     && isSummitCore(x - mountain.centerX(), z - mountain.centerZ());
                 int topY = summitCore
                     ? summitTopY
-                    : hasFlatSummit
-                        ? Math.min(groundY + rise - 1, summitTopY - 1)
-                        : groundY + rise - 1;
+                    : Math.min(
+                        groundY + rise - 1,
+                        level.getMaxBuildHeight() - 1
+                    );
+                if (flatSummit && !summitCore) {
+                    topY = Math.min(topY, summitTopY - 1);
+                }
                 if (topY < groundY) {
                     continue;
                 }
@@ -111,46 +117,21 @@ public final class EndPeaksMountainFeature extends Feature<NoneFeatureConfigurat
         return placed;
     }
 
-    private static boolean isSummitCoreValid(
-        WorldGenLevel level,
-        EndPeaksWorldgen.Mountain mountain
-    ) {
-        for (int offsetX = -1; offsetX <= 1; offsetX++) {
-            for (int offsetZ = -1; offsetZ <= 1; offsetZ++) {
-                if (!isValidMountainColumn(
-                    level,
-                    mountain.centerX() + offsetX,
-                    mountain.centerZ() + offsetZ
-                )) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
-    }
-
-    private static int getMountainBaseY(
+    private static int getSummitBaseY(
         WorldGenLevel level,
         EndPeaksWorldgen.Mountain mountain
     ) {
         int baseY = Integer.MIN_VALUE;
-        int minX = mountain.centerX() - mountain.radiusX();
-        int maxX = mountain.centerX() + mountain.radiusX();
-        int minZ = mountain.centerZ() - mountain.radiusZ();
-        int maxZ = mountain.centerZ() + mountain.radiusZ();
-
-        for (int x = minX; x <= maxX; x++) {
-            for (int z = minZ; z <= maxZ; z++) {
-                if (getRiseAt(mountain, x, z) < 1) {
-                    continue;
-                }
-
+        for (int offsetX = -1; offsetX <= 1; offsetX++) {
+            for (int offsetZ = -1; offsetZ <= 1; offsetZ++) {
+                int x = mountain.centerX() + offsetX;
+                int z = mountain.centerZ() + offsetZ;
                 int groundY = getGroundY(level, x, z);
-                if (groundY > level.getMinBuildHeight() + 1
-                    && level.getBlockState(new BlockPos(x, groundY - 1, z)).is(Blocks.END_STONE)) {
-                    baseY = Math.max(baseY, groundY);
+                if (!isValidMountainColumn(level, x, z, groundY)) {
+                    return -1;
                 }
+
+                baseY = Math.max(baseY, groundY);
             }
         }
 
@@ -158,13 +139,16 @@ public final class EndPeaksMountainFeature extends Feature<NoneFeatureConfigurat
     }
 
     private static int getGroundY(WorldGenLevel level, int x, int z) {
-        return level.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, x, z);
+        return level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x, z);
     }
 
-    private static boolean isValidMountainColumn(WorldGenLevel level, int x, int z) {
-        int groundY = getGroundY(level, x, z);
+    private static boolean isValidMountainColumn(
+        WorldGenLevel level,
+        int x,
+        int z,
+        int groundY
+    ) {
         if (groundY <= level.getMinBuildHeight() + 1
-            || groundY >= level.getMaxBuildHeight()
             || !level.getBiome(new BlockPos(x, BIOME_SAMPLE_Y, z)).is(EndPeaksWorldgen.BIOME)
             || !level.getBlockState(new BlockPos(x, groundY - 1, z)).is(Blocks.END_STONE)) {
             return false;

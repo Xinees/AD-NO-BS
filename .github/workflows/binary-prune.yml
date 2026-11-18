@@ -1109,36 +1109,36 @@ jobs:
               raise SystemExit("End Peaks must use connected irregular biome blobs, not noisy interior holes.")
           if "minCellForCenterRange" not in mountain or "Math.floorDiv(mountain.centerX(), 16)" not in mountain:
               raise SystemExit("Each deterministic mountain candidate must be owned by exactly one center chunk.")
-          if "Heightmap.Types.OCEAN_FLOOR_WG" not in mountain or "Heightmap.Types.WORLD_SURFACE_WG" in mountain:
-              raise SystemExit("Mountain terrain sampling must use solid terrain, not non-air foliage height.")
+          if "Heightmap.Types.WORLD_SURFACE_WG" not in mountain or "Heightmap.Types.OCEAN_FLOOR_WG" in mountain:
+              raise SystemExit("Mountain placement must preserve the proven End surface heightmap used by Build 391.")
           if "GROVE_FOOTPRINT_MARGIN" in mountain or "ISLAND_EDGE_SAMPLE_COUNT" in mountain:
-              raise SystemExit("Mountain eligibility must not depend on a distant all-biome/all-solid grove perimeter.")
+              raise SystemExit("Mountain eligibility must remain local and must not depend on a distant grove perimeter.")
           for required in (
-              "isSummitCoreValid(level, mountain)",
-              "getMountainBaseY",
-              "private static boolean isSummitCoreValid(",
+              "getSummitBaseY",
               "private static int getGroundY(",
               "private static boolean isValidMountainColumn(",
-              "surface.isAir() || surface.canBeReplaced()",
               "Math.abs(offsetX) <= 1 && Math.abs(offsetZ) <= 1",
-              "Math.min(groundY + rise - 1, summitTopY - 1)",
-              "Math.pow(slope, 0.82D)",
-              "level.getBlockState(new BlockPos(x, groundY - 1, z)).is(Blocks.END_STONE)"
+              "groundY + rise - 1",
+              "summitTopY - 1",
+              "current.canBeReplaced()",
+              "level.getMaxBuildHeight() - 1",
           ):
               if required not in mountain:
-                  raise SystemExit("Mountain placement must keep a valid 3x3 highest plane without rejecting the whole hill: " + required)
-          if "getSummitBaseY" in mountain or "GROVE_FOOTPRINT_MARGIN" in mountain:
-              raise SystemExit("Mountain base must use the complete local terrain footprint, without a whole grove perimeter gate.")
-          summit_helper = mountain.split("private static boolean isSummitCoreValid", 1)[1].split(
-              "private static int getMountainBaseY", 1
-          )[0]
-          if "return false;" not in summit_helper:
-              raise SystemExit("The flat 3x3 summit must require all nine support columns.")
+                  raise SystemExit("Mountain placement must preserve local End Stone support, the 3x3 summit and 15–20-block rise: " + required)
+          if "getMountainBaseY" in mountain or "GROVE_FOOTPRINT_MARGIN" in mountain:
+              raise SystemExit("Mountain generation must use local surface sampling rather than an all-footprint base gate.")
           place_block = mountain.split("private static boolean placeMountain", 1)[1].split(
-              "private static boolean isSummitCoreValid", 1
+              "private static int getSummitBaseY", 1
           )[0]
-          if "if (!hasFlatSummit)" in place_block:
-              raise SystemExit("A missing summit support must fall back to a sloped hill instead of cancelling it.")
+          if "return false;" in place_block:
+              raise SystemExit("Mountain placement must never reject the entire hill because the flat summit is unavailable.")
+          summit_helper = mountain.split("private static int getSummitBaseY", 1)[1].split(
+              "private static int getGroundY", 1
+          )[0]
+          if "return -1;" not in summit_helper:
+              raise SystemExit("The flat summit may be disabled when any of its nine support columns are invalid.")
+          if "GROUND_PLANT_EXCLUSION_MARGIN + EndPeaksWorldgen.MAX_RADIUS" not in chorus:
+              raise SystemExit("Ground chorus spacing must search the full mountain radius and exclusion margin.")
 
           for required in (
               "MIN_GROUPS = 3",
