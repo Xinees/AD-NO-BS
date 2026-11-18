@@ -5,7 +5,8 @@
   "compatibilityLevel": "JAVA_17",
   "refmap": "end_peaks.refmap.json",
   "mixins": [
-    "EndPeaksBiomeSourceMixin"
+    "EndPeaksBiomeSourceMixin",
+    "EndPeaksHolderReferenceAccessor"
   ],
   "injectors": {
     "defaultRequire": 1
