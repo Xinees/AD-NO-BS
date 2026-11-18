@@ -1150,6 +1150,7 @@ jobs:
 
           for required in (
               "BABY_GROUP_CHANCE = 0.92F",
+              "ageable.setBaby(entity.getRandom().nextFloat() < BABY_GROUP_CHANCE)",
               "new AgeableMob.AgeableMobGroupData(BABY_GROUP_CHANCE)",
               "event.getSpawnData() == null",
               "MobSpawnEvent.PositionCheck",
