@@ -86,12 +86,36 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p build/tools
-          curl --fail --location --retry 3 \
-            https://repo.maven.apache.org/maven2/org/ow2/asm/asm/9.7.1/asm-9.7.1.jar \
-            -o build/tools/asm-9.7.1.jar
-          curl --fail --location --retry 3 \
-            https://repo.maven.apache.org/maven2/org/ow2/asm/asm-tree/9.7.1/asm-tree-9.7.1.jar \
-            -o build/tools/asm-tree-9.7.1.jar
+          MAVEN_MIRRORS=(
+            "https://maven.fabricmc.net"
+            "https://maven.minecraftforge.net"
+            "https://repo.maven.apache.org/maven2"
+          )
+
+          download_asm_artifact() {
+            local artifact_path="$1"
+            local output_path="$2"
+            local temporary_path="${output_path}.part"
+
+            for mirror in "${MAVEN_MIRRORS[@]}"; do
+              echo "Trying ASM artifact mirror: ${mirror}"
+              rm -f "$temporary_path"
+              if curl --fail --location --silent --show-error --retry 2 --retry-all-errors --retry-delay 1 \
+                "${mirror}/${artifact_path}" -o "$temporary_path"; then
+                if jar tf "$temporary_path" >/dev/null 2>&1; then
+                  mv "$temporary_path" "$output_path"
+                  return 0
+                fi
+                echo "Downloaded ASM artifact is not a valid JAR: ${mirror}"
+              fi
+            done
+
+            echo "Unable to download a valid ASM artifact from any configured Maven mirror: ${artifact_path}"
+            return 1
+          }
+
+          download_asm_artifact "org/ow2/asm/asm/9.7.1/asm-9.7.1.jar" "build/tools/asm-9.7.1.jar"
+          download_asm_artifact "org/ow2/asm/asm-tree/9.7.1/asm-tree-9.7.1.jar" "build/tools/asm-tree-9.7.1.jar"
 
       - name: Compile direct bytecode pruner
         shell: bash
