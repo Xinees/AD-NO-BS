@@ -12,6 +12,10 @@ public final class EndPeaksWorldgen {
         new SimplexNoise(new LegacyRandomSource(0x454E445045414B53L));
     private static final SimplexNoise BIOME_DETAIL =
         new SimplexNoise(new LegacyRandomSource(0x454E445045414B44L));
+    private static final double REGION_THRESHOLD = 0.18D;
+    private static final double BIOME_NOISE_SCALE = 0.0016D;
+    private static final double BIOME_DETAIL_SCALE = 0.0048D;
+    private static final double BIOME_DETAIL_WEIGHT = 0.18D;
     public static final ResourceKey<Biome> BIOME = ResourceKey.create(
         Registries.BIOME,
         new ResourceLocation("archie_dinosaurs", "end_peaks")
@@ -26,7 +30,7 @@ public final class EndPeaksWorldgen {
 
     public static Mountain mountainAt(int cellX, int cellZ) {
         long hash = mix(cellX, cellZ);
-        if ((hash & 3L) != 0L) {
+        if ((hash & 31L) >= 23L) {
             return null;
         }
 
@@ -42,6 +46,16 @@ public final class EndPeaksWorldgen {
         return new Mountain(centerX, centerZ, radiusX, radiusZ, height, plateauRadius, hash);
     }
 
+    public static int minCellForCenterRange(int minBlock, int centerRadius) {
+        int minimumCellCenter = minBlock - centerRadius - CELL_SIZE / 2 - MAX_CENTER_OFFSET;
+        return -Math.floorDiv(-minimumCellCenter, CELL_SIZE);
+    }
+
+    public static int maxCellForCenterRange(int maxBlock, int centerRadius) {
+        int maximumCellCenter = maxBlock + centerRadius - CELL_SIZE / 2 + MAX_CENTER_OFFSET;
+        return Math.floorDiv(maximumCellCenter, CELL_SIZE);
+    }
+
     public static long mix(int x, int z) {
         long value = (long) x * 341873128712L
             + (long) z * 132897987541L
@@ -52,15 +66,21 @@ public final class EndPeaksWorldgen {
     }
 
     public static boolean isEndPeaksRegion(int quartX, int quartZ) {
-        return getRegionNoiseValue(quartX, quartZ) > 0.05D;
+        return getRegionNoiseValue(quartX, quartZ) > REGION_THRESHOLD;
     }
 
     public static double getRegionNoiseValue(int quartX, int quartZ) {
         double blockX = quartX * 4.0D;
         double blockZ = quartZ * 4.0D;
-        double broad = BIOME_NOISE.getValue(blockX * 0.0021D, blockZ * 0.0021D);
-        double detail = BIOME_DETAIL.getValue(blockX * 0.0064D, blockZ * 0.0064D);
-        return broad + detail * 0.22D;
+        double broad = BIOME_NOISE.getValue(
+            blockX * BIOME_NOISE_SCALE,
+            blockZ * BIOME_NOISE_SCALE
+        );
+        double detail = BIOME_DETAIL.getValue(
+            blockX * BIOME_DETAIL_SCALE,
+            blockZ * BIOME_DETAIL_SCALE
+        );
+        return broad + detail * BIOME_DETAIL_WEIGHT;
     }
 
     public record Mountain(
