@@ -17,16 +17,16 @@ public final class EndPeaksWorldgen {
         new ResourceLocation("archie_dinosaurs", "end_peaks")
     );
 
-    public static final int CELL_SIZE = 112;
-    public static final int MAX_RADIUS = 40;
-    public static final int MAX_CENTER_OFFSET = 12;
+    public static final int CELL_SIZE = 12;
+    public static final int MAX_RADIUS = 6;
+    public static final int MAX_CENTER_OFFSET = 1;
 
     private EndPeaksWorldgen() {
     }
 
     public static Mountain mountainAt(int cellX, int cellZ) {
         long hash = mix(cellX, cellZ);
-        if ((hash & 3L) == 0L) {
+        if ((hash & 7L) == 0L) {
             return null;
         }
 
@@ -34,10 +34,10 @@ public final class EndPeaksWorldgen {
             + (int) ((hash >>> 8) % (MAX_CENTER_OFFSET * 2L + 1L)) - MAX_CENTER_OFFSET;
         int centerZ = cellZ * CELL_SIZE + CELL_SIZE / 2
             + (int) ((hash >>> 13) % (MAX_CENTER_OFFSET * 2L + 1L)) - MAX_CENTER_OFFSET;
-        int radiusX = 26 + (int) ((hash >>> 19) & 14L);
-        int radiusZ = 26 + (int) ((hash >>> 23) & 14L);
-        int height = 32 + (int) ((hash >>> 27) & 18L);
-        double plateauRadius = 0.27D + ((hash >>> 33) & 7L) * 0.012D;
+        int radiusX = 5 + (int) ((hash >>> 19) & 1L);
+        int radiusZ = 5 + (int) ((hash >>> 23) & 1L);
+        int height = 10 + (int) ((hash >>> 27) % 6L) * 2;
+        double plateauRadius = 0.18D + ((hash >>> 33) & 3L) * 0.02D;
 
         return new Mountain(centerX, centerZ, radiusX, radiusZ, height, plateauRadius, hash);
     }

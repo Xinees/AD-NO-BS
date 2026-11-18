@@ -1003,27 +1003,79 @@ jobs:
 
           LUSH_ENTITY_BYTECODE="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.common.entity.mob.lushsaur.LushsaurEntity)"
           LUSH_MOUNT_METHOD="$(awk '/ createMount\(/ { capture=1; print; next } capture && /^  (public|private|protected) / { exit } capture { print }' <<< "$LUSH_ENTITY_BYTECODE")"
-          if [[ "$LUSH_MOUNT_METHOD" != *"passengerOffset"* ||
-                "$LUSH_MOUNT_METHOD" != *"fconst_1"* ||
-                "$LUSH_MOUNT_METHOD" == *"float 0.0625f"* ]]; then
-            echo "Lushsaur server passengerOffset must retain its original Z = 1.0."
-            printf '%s\n' "$LUSH_MOUNT_METHOD"
-            exit 1
-          fi
+          LUSH_MOUNT_POINTS="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.client.model.render.entity.mob.LushsaurClient | sed -n '/static {};/,/^  private static boolean /p')"
+          python3 - "$LUSH_MOUNT_METHOD" "$LUSH_MOUNT_POINTS" <<'PY'
+          import re
+          import sys
 
-          LUSH_MOUNT_POINTS="$(javap -classpath build/classes-pruned.jar -p -c "$LUSH_ROLL_CLIENT" | sed -n '/static {};/,/^  private static boolean /p')"
-          if [[ "$LUSH_MOUNT_POINTS" != *"dconst_0"* ||
-                "$LUSH_MOUNT_POINTS" != *"double -0.6000000238418579d"* ||
-                "$LUSH_MOUNT_POINTS" == *"double 0.15d"* ||
-                "$LUSH_MOUNT_POINTS" == *"double 0.3374999761581421d"* ||
-                "$LUSH_MOUNT_POINTS" == *"double 0.9375d"* ||
-                "$LUSH_MOUNT_POINTS" == *"double -0.8125d"* ||
-                "$LUSH_MOUNT_POINTS" == *"double -1.4125d"* ]]; then
-            echo "Lushsaur client mount points must retain saddled Z = 0 and unsaddled Z = -0.6."
-            printf '%s\n' "$LUSH_MOUNT_POINTS"
+          def instructions(section):
+              return [match.group(1) for line in section.splitlines()
+                      if (match := re.match(r"\\s*\\d+:\\s*(.*)", line))]
+
+          mount = instructions(sys.argv[1])
+          offset_calls = [index for index, line in enumerate(mount)
+                          if "passengerOffset(FFF)" in line]
+          if len(offset_calls) != 1:
+              raise SystemExit("Expected exactly one Lushsaur passengerOffset call.")
+          index = offset_calls[0]
+          if index < 3 or [line.split()[0] for line in mount[index - 3:index]] != [
+              "fconst_0", "fconst_0", "fconst_0"
+          ]:
+              raise SystemExit("Lushsaur server passengerOffset must be centered at X/Y/Z = 0.")
+
+          points = instructions(sys.argv[2])
+          constructors = [index for index, line in enumerate(points)
+                          if 'net/minecraft/world/phys/Vec3."<init>":(DDD)V' in line]
+          if len(constructors) != 2:
+              raise SystemExit("Expected the original saddled and unsaddled Lushsaur MountPoint vectors.")
+          for index in constructors:
+              if index < 3 or [line.split()[0] for line in points[index - 3:index]] != [
+                  "dconst_0", "ldc2_w", "dconst_0"
+              ]:
+                  raise SystemExit("Both Lushsaur player model mount points must use centered X/Z coordinates.")
+              if "double -0.699999988079071d" not in points[index - 2]:
+                  raise SystemExit("The original Lushsaur vertical model seat offset must remain -0.7.")
+          print("Verified Lushsaur rider hitbox/model center at X/Z=0 and preserved vertical seat offsets.")
+          PY
+
+          CHORUS_LIMITER_BYTECODE="$(javap -classpath build/classes-pruned.jar -p -c com.eternal_creations.archies_dino_mod.worldgen.EndPeaksChorusoatlSpawnLimiter)"
+          if grep -Eq 'SpawnGroupData|ChorusoatlGroupData|setSpawnData' <<< "$CHORUS_LIMITER_BYTECODE"; then
+            echo "Chorusoatl limiter must not replace AgeableMob's vanilla spawn data."
+            printf '%s\\n' "$CHORUS_LIMITER_BYTECODE"
             exit 1
           fi
-          echo "Verified original server and client passenger offsets."
+          echo "Verified Chorusoatl natural spawn limiting preserves vanilla ageable spawn data."
+
+          python3 - <<'PY'
+          from pathlib import Path
+
+          root = Path("worldgen/src/main/java/com/eternal_creations/archies_dino_mod/worldgen")
+          worldgen = (root / "EndPeaksWorldgen.java").read_text(encoding="utf-8")
+          mountain = (root / "EndPeaksMountainFeature.java").read_text(encoding="utf-8")
+          chorus = (root / "EndPeaksChorusFeature.java").read_text(encoding="utf-8")
+          limiter = (root / "EndPeaksChorusoatlSpawnLimiter.java").read_text(encoding="utf-8")
+
+          for value in (
+              "public static final int CELL_SIZE = 12;",
+              "public static final int MAX_RADIUS = 6;",
+              "public static final int MAX_CENTER_OFFSET = 1;",
+              "if ((hash & 7L) == 0L)",
+              "int radiusX = 5 + (int) ((hash >>> 19) & 1L);",
+              "int radiusZ = 5 + (int) ((hash >>> 23) & 1L);",
+              "int height = 10 + (int) ((hash >>> 27) % 6L) * 2;",
+          ):
+              if value not in worldgen:
+                  raise SystemExit("End Peaks compact terrain setting missing: " + value)
+
+          if mountain.count("level.getHeight(") != 1 or "Math.max(maxRise, rise)" not in mountain:
+              raise SystemExit("Mountain feature must sample the heightmap once per column and merge overlapping hills.")
+          if "((mountain.hash() >>> 5) & 31L) != 0L" not in chorus or "groupCount = 1" not in chorus:
+              raise SystemExit("Chorus clusters must remain sparse as mountain-cell density increases.")
+          for forbidden in ("SpawnGroupData", "ChorusoatlGroupData", "setSpawnData"):
+              if forbidden in limiter:
+                  raise SystemExit("Chorusoatl limiter still overrides vanilla spawn data: " + forbidden)
+          print("Verified End Peaks 10–20-block compact hills, sparse chorus clusters, and ageable spawn-data safety.")
+          PY
 
           MOUNT_COMPONENT_INTERACT="$(awk '/public net.minecraft.world.InteractionResult mobInteract/ { capture=1; print; next } capture && /^  (public|private|protected) / { exit } capture { print }' <<< "$MOUNT_COMPONENT_BYTECODE")"
           SADDLE_CAPABILITY_LINE="$(grep -nF 'Saddleable.m_6741_:' <<< "$MOUNT_COMPONENT_INTERACT" | head -n 1 | cut -d: -f1 || true)"

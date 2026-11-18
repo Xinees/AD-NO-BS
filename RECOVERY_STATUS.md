@@ -1,3 +1,14 @@
+## Owner correction — compact End Peaks and centered Lushsaur rider — 2026-11-18
+
+- Keep the End Peaks biome. The replacement terrain uses a 12-block generation cell, a 5–6 block horizontal radius on each axis (10–12 block overall diameter), and a deterministic rise of 10–20 blocks. Seven of every eight cells can contain a hill; the biome-selection mask itself is unchanged.
+- Overlapping hills are combined by their maximum column rise. The mountain feature gathers nearby hill candidates once, samples the heightmap once per column, and writes only the current chunk's End Peaks columns. This avoids repeating heightmap and block writes once per overlapping hill.
+- Chorus vegetation is deliberately decoupled from hill density: one foothill cluster per 32 candidate hill cells, with the existing sparse per-chunk plants retained. This prevents the compact hill spacing from multiplying the chorus-tree count by the same factor.
+- Fixed the observed End crash: the Chorusoatl natural-spawn limiter no longer passes a custom `SpawnGroupData` implementation through `FinalizeSpawn`. It leaves the vanilla ageable spawn data untouched and tracks its own group UUID only in entity persistent data. Natural-only filtering, End Peaks restriction, and the two-active-group cap remain.
+- Centered the Lushsaur rider's server-side entity position with `passengerOffset(0, 0, 0)`. The unsaddled rendered player model now also has X/Z offset `(0, 0)`; its existing vertical seat offset remains `-0.7`. No other mount's offsets or behavior are changed.
+- CI checks the new terrain dimensions, once-per-column heightmap sampling, sparse chorus placement, safe Chorusoatl spawn-data handling, and server/client passenger-center bytecode. CI cannot replace a fresh in-game terrain-generation and riding test.
+
+---
+
 ## End Peaks runtime mapping fix — 2026-11-17
 
 - The runtime log from Legacy build #358 showed repeated NoSuchFieldError: FEATURE failures during the Forge RegisterEvent for End Peaks. This was not a separate second random field mismatch: the worldgen subproject's Mojang-mapped class files had been copied directly into the production JAR without ForgeGradle reobfuscation.
@@ -101,7 +112,7 @@
 
 ## Post-Build 30 code audit — 2026-11-16
 
-- Restored the original Lushsaur passenger offsets: server-side `passengerOffset(0, 0, 1)`, saddled client Z = 0, and unsaddled client Z = -0.6. The requested vanilla passenger pose is preserved by removing the custom rider animation registration, not by shifting the seat or hitbox.
+- Historical Build30 baseline: the server used `passengerOffset(0, 0, 1)` and the unsaddled client mount point used Z = -0.6. Those coordinates are superseded by the owner correction dated 2026-11-18 above.
 - Corrected the inverted Chorusoatl flight-phase suppression predicate: perched wild Chorusoatl suppresses autonomous takeoff, while landing animation is allowed only near the selected landing target.
 - Made per-entity state maps safe for concurrent access, restricted animation-owner registration to the client side, and cached reflective method/field lookups used by the hooks. A concurrent reflection harness passed 3,000 calls across eight threads.
 - Hardened landing validation: support blocks must have sturdy upward faces; the mob's real bounding-box height determines required vertical clearance; other Chorusoatl are checked against the mob's actual bounding box translated to the proposed landing position. Missing bounding-box data fails closed rather than silently accepting a potentially overlapping site.

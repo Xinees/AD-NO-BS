@@ -225,6 +225,7 @@ public final class JarPruner {
         patchChorusoatlGoalSuppression(nodes.get(ROOT + "common/entity/ai/goal/GoalStrollLandAndAir"), "shouldSuppressChorusStroll");
         patchChorusoatlGoalSuppression(nodes.get(ROOT + "common/entity/mob/chorusoatl/ai/ChorusoatlGoalFollowPack"), "shouldSuppressChorusPackFollow");
         patchLushsaurControllingPassenger(lushsaurEntity);
+        patchLushsaurPassengerCenter(lushsaurEntity, lushsaurClient);
         patchLushsaurNoInventory(lushsaurEntity);
         patchLushsaurCanSprint(lushsaurEntity);
         patchLushsaurMountSpeed(lushsaurEntity);
@@ -1507,6 +1508,94 @@ public final class JarPruner {
         addPassenger.maxStack = Math.max(addPassenger.maxStack, 3);
 
         System.out.println("PATCH LUSHS MOUNT passenger input cooldown set to zero; other mounts retain 20 ticks");
+    }
+
+
+    private static void patchLushsaurPassengerCenter(ClassNode entityOwner, ClassNode clientOwner) {
+        if (entityOwner == null) throw new IllegalStateException("LushsaurEntity class is missing");
+        if (clientOwner == null) throw new IllegalStateException("LushsaurClient class is missing");
+
+        String mountDescriptor = "()L" + ROOT + "common/entity/component/MountComponent;";
+        MethodNode createMount = entityOwner.methods.stream()
+            .filter(method -> method.name.equals("createMount") && method.desc.equals(mountDescriptor))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("LushsaurEntity.createMount is missing"));
+
+        String definitionOwner = ROOT + "common/entity/component/MountComponent$Definition";
+        String passengerOffsetDescriptor = "(FFF)L" + definitionOwner + ";";
+        List<MethodInsnNode> passengerOffsetCalls = new ArrayList<>();
+        for (AbstractInsnNode instruction : createMount.instructions.toArray()) {
+            if (instruction instanceof MethodInsnNode call
+                && call.getOpcode() == Opcodes.INVOKEVIRTUAL
+                && call.owner.equals(definitionOwner)
+                && call.name.equals("passengerOffset")
+                && call.desc.equals(passengerOffsetDescriptor)) {
+                passengerOffsetCalls.add(call);
+            }
+        }
+        if (passengerOffsetCalls.size() != 1) {
+            throw new IllegalStateException(
+                "Expected one Lushsaur passengerOffset call, found " + passengerOffsetCalls.size()
+            );
+        }
+
+        MethodInsnNode passengerOffset = passengerOffsetCalls.get(0);
+        AbstractInsnNode zOffset = previousCodeInstruction(passengerOffset);
+        AbstractInsnNode yOffset = previousCodeInstruction(zOffset);
+        AbstractInsnNode xOffset = previousCodeInstruction(yOffset);
+        if (xOffset == null || yOffset == null || zOffset == null
+            || xOffset.getOpcode() != Opcodes.FCONST_0
+            || yOffset.getOpcode() != Opcodes.FCONST_0
+            || zOffset.getOpcode() != Opcodes.FCONST_1) {
+            throw new IllegalStateException(
+                "Unexpected original Lushsaur passengerOffset; expected (0, 0, 1) before centering"
+            );
+        }
+        createMount.instructions.set(zOffset, new InsnNode(Opcodes.FCONST_0));
+
+        MethodNode clientInitializer = clientOwner.methods.stream()
+            .filter(method -> method.name.equals("<clinit>") && method.desc.equals("()V"))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("LushsaurClient static initializer is missing"));
+
+        List<LdcInsnNode> unsaddledZOffsets = new ArrayList<>();
+        for (AbstractInsnNode instruction : clientInitializer.instructions.toArray()) {
+            if (!(instruction instanceof LdcInsnNode constant)
+                || !(constant.cst instanceof Double value)
+                || Double.compare(value, -0.6000000238418579D) != 0) {
+                continue;
+            }
+
+            AbstractInsnNode vectorConstructor = nextCodeInstruction(constant);
+            AbstractInsnNode yOffsetLoad = previousCodeInstruction(constant);
+            AbstractInsnNode xOffsetLoad = previousCodeInstruction(yOffsetLoad);
+            if (!(vectorConstructor instanceof MethodInsnNode call)
+                || call.getOpcode() != Opcodes.INVOKESPECIAL
+                || !call.owner.equals("net/minecraft/world/phys/Vec3")
+                || !call.name.equals("<init>")
+                || !call.desc.equals("(DDD)V")
+                || xOffsetLoad == null
+                || xOffsetLoad.getOpcode() != Opcodes.DCONST_0
+                || !(yOffsetLoad instanceof LdcInsnNode yConstant)
+                || !(yConstant.cst instanceof Double yValue)
+                || Double.compare(yValue, -0.699999988079071D) != 0) {
+                throw new IllegalStateException(
+                    "Unexpected Lushsaur unsaddled MountPoint; refusing to modify an unverified vector"
+                );
+            }
+            unsaddledZOffsets.add(constant);
+        }
+
+        if (unsaddledZOffsets.size() != 1) {
+            throw new IllegalStateException(
+                "Expected one unsaddled Lushsaur Z offset of -0.6, found " + unsaddledZOffsets.size()
+            );
+        }
+        clientInitializer.instructions.set(unsaddledZOffsets.get(0), new InsnNode(Opcodes.DCONST_0));
+
+        System.out.println(
+            "PATCH LUSHS MOUNT rider hitbox/model centered at X/Z=0; original vertical seat offsets preserved"
+        );
     }
 
     private static void patchMountComponentSaddleGate(ClassNode owner) {

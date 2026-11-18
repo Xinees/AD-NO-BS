@@ -52,16 +52,19 @@ public final class EndPeaksChorusFeature extends Feature<NoneFeatureConfiguratio
                     continue;
                 }
 
-                int groupCount = 2 + (int) ((mountain.hash() >>> 60) & 1L);
+                if (((mountain.hash() >>> 5) & 31L) != 0L) {
+                    continue;
+                }
+                int groupCount = 1;
                 double angleOffset = ((mountain.hash() >>> 40) & 0xFFFFL) / 65536.0D
                     * Math.PI * 2.0D;
 
                 for (int group = 0; group < groupCount; group++) {
                     double angle = angleOffset + Math.PI * 2.0D * group / groupCount;
                     int targetX = mountain.centerX()
-                        + (int) Math.round(Math.cos(angle) * (mountain.radiusX() + 6.0D));
+                        + (int) Math.round(Math.cos(angle) * (mountain.radiusX() + 2.0D));
                     int targetZ = mountain.centerZ()
-                        + (int) Math.round(Math.sin(angle) * (mountain.radiusZ() + 6.0D));
+                        + (int) Math.round(Math.sin(angle) * (mountain.radiusZ() + 2.0D));
                     int clusterX = EndPeaksWorldgen.snapToChunkInterior(targetX);
                     int clusterZ = EndPeaksWorldgen.snapToChunkInterior(targetZ);
 

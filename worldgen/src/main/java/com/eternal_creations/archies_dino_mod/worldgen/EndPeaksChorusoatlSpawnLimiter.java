@@ -7,7 +7,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.event.entity.living.MobSpawnEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -41,14 +40,7 @@ public final class EndPeaksChorusoatlSpawnLimiter {
             return;
         }
 
-        UUID groupId = null;
-        if (event.getSpawnData() instanceof ChorusoatlGroupData data) {
-            groupId = data.groupId();
-        }
-
-        if (groupId == null) {
-            groupId = findNearbyGroup(level, entity);
-        }
+        UUID groupId = findNearbyGroup(level, entity);
 
         if (groupId == null) {
             Set<UUID> activeGroups = findActiveGroups(level, entity);
@@ -61,7 +53,6 @@ public final class EndPeaksChorusoatlSpawnLimiter {
 
         CompoundTag persistentData = entity.getPersistentData();
         persistentData.putUUID(GROUP_ID_KEY, groupId);
-        event.setSpawnData(new ChorusoatlGroupData(groupId));
     }
 
     private static UUID findNearbyGroup(ServerLevel level, Entity entity) {
@@ -111,9 +102,6 @@ public final class EndPeaksChorusoatlSpawnLimiter {
 
     private static boolean isChorusoatl(Entity entity) {
         return entity.getType().builtInRegistryHolder().key().location().equals(CHORUSOATL_ID);
-    }
-
-    private record ChorusoatlGroupData(UUID groupId) implements SpawnGroupData {
     }
 
     private EndPeaksChorusoatlSpawnLimiter() {

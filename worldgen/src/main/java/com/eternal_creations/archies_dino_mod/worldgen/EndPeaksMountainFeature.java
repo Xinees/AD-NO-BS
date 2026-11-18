@@ -10,6 +10,9 @@ import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public final class EndPeaksMountainFeature extends Feature<NoneFeatureConfiguration> {
     public EndPeaksMountainFeature() {
         super(NoneFeatureConfiguration.CODEC);
@@ -34,51 +37,66 @@ public final class EndPeaksMountainFeature extends Feature<NoneFeatureConfigurat
         int maxCellZ = Math.floorDiv(chunkMinZ + 15 + EndPeaksWorldgen.MAX_RADIUS
             + EndPeaksWorldgen.MAX_CENTER_OFFSET, EndPeaksWorldgen.CELL_SIZE);
 
-        MutableBlockPos mutable = new MutableBlockPos();
-        boolean placed = false;
-
+        List<EndPeaksWorldgen.Mountain> mountains = new ArrayList<>();
         for (int cellX = minCellX; cellX <= maxCellX; cellX++) {
             for (int cellZ = minCellZ; cellZ <= maxCellZ; cellZ++) {
                 EndPeaksWorldgen.Mountain mountain = EndPeaksWorldgen.mountainAt(cellX, cellZ);
-                if (mountain == null) {
+                if (mountain != null) {
+                    mountains.add(mountain);
+                }
+            }
+        }
+
+        if (mountains.isEmpty()) {
+            return false;
+        }
+
+        MutableBlockPos mutable = new MutableBlockPos();
+        boolean placed = false;
+
+        for (int x = chunkMinX; x < chunkMinX + 16; x++) {
+            for (int z = chunkMinZ; z < chunkMinZ + 16; z++) {
+                int groundY = level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x, z);
+                if (groundY <= level.getMinBuildHeight() + 1) {
                     continue;
                 }
 
-                for (int x = chunkMinX; x < chunkMinX + 16; x++) {
-                    for (int z = chunkMinZ; z < chunkMinZ + 16; z++) {
-                        int groundY = level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x, z);
-                        if (groundY <= level.getMinBuildHeight() + 1
-                            || !level.getBlockState(new BlockPos(x, groundY - 1, z)).is(Blocks.END_STONE)
-                            || !level.getBiome(new BlockPos(x, groundY, z)).is(EndPeaksWorldgen.BIOME)) {
-                            continue;
-                        }
+                BlockPos surfacePos = new BlockPos(x, groundY, z);
+                if (!level.getBlockState(new BlockPos(x, groundY - 1, z)).is(Blocks.END_STONE)
+                    || !level.getBiome(surfacePos).is(EndPeaksWorldgen.BIOME)) {
+                    continue;
+                }
 
-                        double dx = (x - mountain.centerX()) / (double) mountain.radiusX();
-                        double dz = (z - mountain.centerZ()) / (double) mountain.radiusZ();
-                        double distance = Math.sqrt(dx * dx + dz * dz);
-                        if (distance >= 1.0D) {
-                            continue;
-                        }
+                int maxRise = 0;
+                for (EndPeaksWorldgen.Mountain mountain : mountains) {
+                    double dx = (x - mountain.centerX()) / (double) mountain.radiusX();
+                    double dz = (z - mountain.centerZ()) / (double) mountain.radiusZ();
+                    double distanceSquared = dx * dx + dz * dz;
+                    if (distanceSquared >= 1.0D) {
+                        continue;
+                    }
 
-                        double profile = 1.0D;
-                        if (distance > mountain.plateauRadius()) {
-                            double slope = (1.0D - distance) / (1.0D - mountain.plateauRadius());
-                            profile = Math.pow(slope, 0.72D);
-                        }
+                    double distance = Math.sqrt(distanceSquared);
+                    double profile = 1.0D;
+                    if (distance > mountain.plateauRadius()) {
+                        double slope = (1.0D - distance) / (1.0D - mountain.plateauRadius());
+                        profile = Math.pow(slope, 0.72D);
+                    }
 
-                        int rise = (int) Math.floor(mountain.height() * profile / 2.0D) * 2;
-                        if (rise < 2) {
-                            continue;
-                        }
+                    int rise = (int) Math.floor(mountain.height() * profile / 2.0D) * 2;
+                    maxRise = Math.max(maxRise, rise);
+                }
 
-                        int topY = Math.min(groundY + rise, level.getMaxBuildHeight() - 1);
-                        for (int y = groundY; y <= topY; y++) {
-                            mutable.set(x, y, z);
-                            if (level.getBlockState(mutable).isAir()) {
-                                level.setBlock(mutable, Blocks.END_STONE.defaultBlockState(), 2);
-                                placed = true;
-                            }
-                        }
+                if (maxRise < 2) {
+                    continue;
+                }
+
+                int topY = Math.min(groundY + maxRise, level.getMaxBuildHeight() - 1);
+                for (int y = groundY; y <= topY; y++) {
+                    mutable.set(x, y, z);
+                    if (level.getBlockState(mutable).isAir()) {
+                        level.setBlock(mutable, Blocks.END_STONE.defaultBlockState(), 2);
+                        placed = true;
                     }
                 }
             }
