@@ -1010,7 +1010,7 @@ jobs:
 
           def instructions(section):
               return [match.group(1) for line in section.splitlines()
-                      if (match := re.match(r"\\s*\\d+:\\s*(.*)", line))]
+                      if (match := re.match(r"\s*\d+:\s*(.*)", line))]
 
           mount = instructions(sys.argv[1])
           offset_calls = [index for index, line in enumerate(mount)
