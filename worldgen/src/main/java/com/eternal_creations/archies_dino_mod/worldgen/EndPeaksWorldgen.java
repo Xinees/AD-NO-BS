@@ -74,16 +74,19 @@ public final class EndPeaksWorldgen {
         for (int candidateX = cellX - 1; candidateX <= cellX + 1; candidateX++) {
             for (int candidateZ = cellZ - 1; candidateZ <= cellZ + 1; candidateZ++) {
                 long hash = mix(candidateX ^ 0x51ED270B, candidateZ ^ 0x367CD507);
+                boolean originRegion = candidateX == 0 && candidateZ == 0;
                 if ((hash & 3L) != 0L) {
-                    continue;
+                    if (!originRegion) {
+                        continue;
+                    }
                 }
 
                 int jitterX = (int) Long.remainderUnsigned(hash >>> 8, REGION_JITTER * 2L + 1L)
                     - REGION_JITTER;
                 int jitterZ = (int) Long.remainderUnsigned(hash >>> 19, REGION_JITTER * 2L + 1L)
                     - REGION_JITTER;
-                int centerX = candidateX * REGION_CELL_SIZE + REGION_CELL_SIZE / 2 + jitterX;
-                int centerZ = candidateZ * REGION_CELL_SIZE + REGION_CELL_SIZE / 2 + jitterZ;
+                int centerX = candidateX * REGION_CELL_SIZE + (originRegion ? 0 : jitterX);
+                int centerZ = candidateZ * REGION_CELL_SIZE + (originRegion ? 0 : jitterZ);
 
                 double dx = blockX - centerX;
                 double dz = blockZ - centerZ;
