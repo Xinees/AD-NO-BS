@@ -10,13 +10,18 @@ import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.util.RandomSource;
 
+import java.util.Optional;
+
 public final class EndPeaksChorusFeature extends Feature<NoneFeatureConfiguration> {
     private static final int[][] CLUSTER_OFFSETS = {
         {0, 0},
-        {2, 1},
-        {-2, 2},
+        {0, 6},
+        {0, -6},
     };
-    private static final double GROUP_RADIUS_OFFSET = 1.5D;
+    private static final double GROUP_RADIUS_OFFSET = 4.0D;
+    private static final int GROUND_PLANT_EXCLUSION_MARGIN = 16;
+    private static final int GROUND_PLANT_CHANCE = 4;
+    private static final int GROUND_PLANT_ATTEMPTS = 8;
 
     public EndPeaksChorusFeature() {
         super(NoneFeatureConfiguration.CODEC);
@@ -33,12 +38,12 @@ public final class EndPeaksChorusFeature extends Feature<NoneFeatureConfiguratio
         BlockPos origin = context.origin();
         int chunkMinX = Math.floorDiv(origin.getX(), 16) * 16;
         int chunkMinZ = Math.floorDiv(origin.getZ(), 16) * 16;
-        int featureMargin = EndPeaksWorldgen.MAX_RADIUS
-            + EndPeaksWorldgen.MAX_CENTER_OFFSET + 5;
-        int minCellX = Math.floorDiv(chunkMinX - featureMargin, EndPeaksWorldgen.CELL_SIZE);
-        int maxCellX = Math.floorDiv(chunkMinX + 15 + featureMargin, EndPeaksWorldgen.CELL_SIZE);
-        int minCellZ = Math.floorDiv(chunkMinZ - featureMargin, EndPeaksWorldgen.CELL_SIZE);
-        int maxCellZ = Math.floorDiv(chunkMinZ + 15 + featureMargin, EndPeaksWorldgen.CELL_SIZE);
+        int chunkMaxX = chunkMinX + 15;
+        int chunkMaxZ = chunkMinZ + 15;
+        int minCellX = EndPeaksWorldgen.minCellForCenterRange(chunkMinX, 0);
+        int maxCellX = EndPeaksWorldgen.maxCellForCenterRange(chunkMaxX, 0);
+        int minCellZ = EndPeaksWorldgen.minCellForCenterRange(chunkMinZ, 0);
+        int maxCellZ = EndPeaksWorldgen.maxCellForCenterRange(chunkMaxZ, 0);
 
         boolean placed = false;
 
@@ -46,6 +51,8 @@ public final class EndPeaksChorusFeature extends Feature<NoneFeatureConfiguratio
             for (int cellZ = minCellZ; cellZ <= maxCellZ; cellZ++) {
                 EndPeaksWorldgen.Mountain mountain = EndPeaksWorldgen.mountainAt(cellX, cellZ);
                 if (mountain == null
+                    || Math.floorDiv(mountain.centerX(), 16) != Math.floorDiv(chunkMinX, 16)
+                    || Math.floorDiv(mountain.centerZ(), 16) != Math.floorDiv(chunkMinZ, 16)
                     || !EndPeaksMountainFeature.isMountainContainedInBiome(level, mountain)) {
                     continue;
                 }
@@ -64,47 +71,41 @@ public final class EndPeaksChorusFeature extends Feature<NoneFeatureConfiguratio
                         + (int) Math.round(sin * (mountain.radiusZ() + GROUP_RADIUS_OFFSET));
 
                     BlockPos[] plantPositions = new BlockPos[CLUSTER_OFFSETS.length];
-                    boolean clusterInsideBiome = true;
+                    boolean clusterValid = true;
+
                     for (int i = 0; i < CLUSTER_OFFSETS.length; i++) {
                         int localX = CLUSTER_OFFSETS[i][0];
                         int localZ = CLUSTER_OFFSETS[i][1];
                         int x = clusterX + (int) Math.round(localX * cos - localZ * sin);
                         int z = clusterZ + (int) Math.round(localX * sin + localZ * cos);
                         if (!level.getBiome(new BlockPos(x, 64, z)).is(EndPeaksWorldgen.BIOME)) {
-                            clusterInsideBiome = false;
+                            clusterValid = false;
                             break;
-                        }
-                        plantPositions[i] = new BlockPos(x, 0, z);
-                    }
-
-                    if (!clusterInsideBiome) {
-                        continue;
-                    }
-
-                    for (BlockPos plantPos : plantPositions) {
-                        int x = plantPos.getX();
-                        int z = plantPos.getZ();
-                        if (x < chunkMinX || x >= chunkMinX + 16
-                            || z < chunkMinZ || z >= chunkMinZ + 16) {
-                            continue;
                         }
 
                         int y = level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x, z);
                         BlockPos surfacePos = new BlockPos(x, y, z);
                         if (y <= level.getMinBuildHeight() + 1
-                            || !level.getBiome(surfacePos).is(EndPeaksWorldgen.BIOME)
                             || !level.getBlockState(new BlockPos(x, y - 1, z)).is(Blocks.END_STONE)
-                            || !level.getBlockState(surfacePos).isAir()) {
-                            continue;
+                            || !level.getBlockState(surfacePos).isAir()
+                            || !level.getBiome(surfacePos).is(EndPeaksWorldgen.BIOME)) {
+                            clusterValid = false;
+                            break;
                         }
+                        plantPositions[i] = surfacePos;
+                    }
 
-                        BlockPos plant = new BlockPos(x, y, z);
+                    if (!clusterValid) {
+                        continue;
+                    }
+
+                    for (BlockPos plantPos : plantPositions) {
                         placed |= Feature.CHORUS_PLANT.place(new FeaturePlaceContext<>(
-                            java.util.Optional.empty(),
+                            Optional.empty(),
                             level,
                             context.chunkGenerator(),
                             random,
-                            plant,
+                            plantPos,
                             NoneFeatureConfiguration.INSTANCE
                         ));
                     }
@@ -112,26 +113,62 @@ public final class EndPeaksChorusFeature extends Feature<NoneFeatureConfiguratio
             }
         }
 
-        if (random.nextInt(32) == 0) {
-            int x = chunkMinX + 6 + random.nextInt(4);
-            int z = chunkMinZ + 6 + random.nextInt(4);
-            int y = level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x, z);
-            BlockPos surfacePos = new BlockPos(x, y, z);
-            if (y > level.getMinBuildHeight() + 1
-                && level.getBiome(surfacePos).is(EndPeaksWorldgen.BIOME)
-                && level.getBlockState(new BlockPos(x, y - 1, z)).is(Blocks.END_STONE)
-                && level.getBlockState(surfacePos).isAir()) {
+        if (random.nextInt(GROUND_PLANT_CHANCE) == 0) {
+            for (int attempt = 0; attempt < GROUND_PLANT_ATTEMPTS; attempt++) {
+                int x = chunkMinX + 6 + random.nextInt(4);
+                int z = chunkMinZ + 6 + random.nextInt(4);
+                if (isNearPlannedMountain(x, z)) {
+                    continue;
+                }
+
+                int y = level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x, z);
+                BlockPos surfacePos = new BlockPos(x, y, z);
+                if (y <= level.getMinBuildHeight() + 1
+                    || !level.getBiome(new BlockPos(x, 64, z)).is(EndPeaksWorldgen.BIOME)
+                    || !level.getBlockState(new BlockPos(x, y - 1, z)).is(Blocks.END_STONE)
+                    || !level.getBlockState(surfacePos).isAir()
+                    || !level.getBiome(surfacePos).is(EndPeaksWorldgen.BIOME)) {
+                    continue;
+                }
+
                 placed |= Feature.CHORUS_PLANT.place(new FeaturePlaceContext<>(
-                    java.util.Optional.empty(),
+                    Optional.empty(),
                     level,
                     context.chunkGenerator(),
                     random,
                     surfacePos,
                     NoneFeatureConfiguration.INSTANCE
                 ));
+                break;
             }
         }
 
         return placed;
+    }
+
+    private static boolean isNearPlannedMountain(int x, int z) {
+        int searchRadius = EndPeaksWorldgen.MAX_RADIUS + GROUND_PLANT_EXCLUSION_MARGIN;
+        int minCellX = EndPeaksWorldgen.minCellForCenterRange(x, searchRadius);
+        int maxCellX = EndPeaksWorldgen.maxCellForCenterRange(x, searchRadius);
+        int minCellZ = EndPeaksWorldgen.minCellForCenterRange(z, searchRadius);
+        int maxCellZ = EndPeaksWorldgen.maxCellForCenterRange(z, searchRadius);
+
+        for (int cellX = minCellX; cellX <= maxCellX; cellX++) {
+            for (int cellZ = minCellZ; cellZ <= maxCellZ; cellZ++) {
+                EndPeaksWorldgen.Mountain mountain = EndPeaksWorldgen.mountainAt(cellX, cellZ);
+                if (mountain == null) {
+                    continue;
+                }
+
+                double dx = (x - mountain.centerX())
+                    / (double) (mountain.radiusX() + GROUND_PLANT_EXCLUSION_MARGIN);
+                double dz = (z - mountain.centerZ())
+                    / (double) (mountain.radiusZ() + GROUND_PLANT_EXCLUSION_MARGIN);
+                if (dx * dx + dz * dz < 1.0D) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }
