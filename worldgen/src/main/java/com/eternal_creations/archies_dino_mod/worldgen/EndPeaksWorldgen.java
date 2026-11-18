@@ -17,16 +17,16 @@ public final class EndPeaksWorldgen {
         new ResourceLocation("archie_dinosaurs", "end_peaks")
     );
 
-    public static final int CELL_SIZE = 12;
+    public static final int CELL_SIZE = 24;
     public static final int MAX_RADIUS = 6;
-    public static final int MAX_CENTER_OFFSET = 1;
+    public static final int MAX_CENTER_OFFSET = 2;
 
     private EndPeaksWorldgen() {
     }
 
     public static Mountain mountainAt(int cellX, int cellZ) {
         long hash = mix(cellX, cellZ);
-        if ((hash & 7L) == 0L) {
+        if ((hash & 3L) != 0L) {
             return null;
         }
 
@@ -36,8 +36,8 @@ public final class EndPeaksWorldgen {
             + (int) ((hash >>> 13) % (MAX_CENTER_OFFSET * 2L + 1L)) - MAX_CENTER_OFFSET;
         int radiusX = 5 + (int) ((hash >>> 19) & 1L);
         int radiusZ = 5 + (int) ((hash >>> 23) & 1L);
-        int height = 10 + (int) ((hash >>> 27) % 6L) * 2;
-        double plateauRadius = 0.18D + ((hash >>> 33) & 3L) * 0.02D;
+        int height = 12 + (int) ((hash >>> 27) % 5L) * 2;
+        double plateauRadius = 0.26D + ((hash >>> 33) & 3L) * 0.02D;
 
         return new Mountain(centerX, centerZ, radiusX, radiusZ, height, plateauRadius, hash);
     }
@@ -61,17 +61,6 @@ public final class EndPeaksWorldgen {
         double broad = BIOME_NOISE.getValue(blockX * 0.0021D, blockZ * 0.0021D);
         double detail = BIOME_DETAIL.getValue(blockX * 0.0064D, blockZ * 0.0064D);
         return broad + detail * 0.22D;
-    }
-
-    public static int snapToChunkInterior(int coordinate) {
-        int chunkStart = Math.floorDiv(coordinate, 16) * 16;
-        int local = coordinate - chunkStart;
-        if (local < 6) {
-            local = 6;
-        } else if (local > 9) {
-            local = 9;
-        }
-        return chunkStart + local;
     }
 
     public record Mountain(

@@ -1,3 +1,15 @@
+## Owner correction — End Peaks mountain spacing, summit shape and chorus rings — 2026-11-18
+
+- Reviewed all five End Peaks reference screenshots in the repository's `main` branch against the Build 380 test screenshot. The target is a small number of isolated, steep, stepped End Stone spires, not a dense field of overlapping needle columns.
+- Mountain candidates now use 24-block cells and a one-in-four cell selection rate. Horizontal radii remain 5–6 blocks per axis (10–12 block overall width); height is 12–20 blocks. The End Peaks biome-selection mask is unchanged.
+- The summit keeps a solid 3×3 core with a deterministic handful of one-block edge protrusions. The side profile uses one-block height steps and a small deterministic angular distortion so the spires do not all have identical smooth circular sides.
+- A candidate mountain is placed only when every quart-biome cell touched by its footprint belongs to End Peaks. A mountain crossing the biome boundary is omitted as a whole instead of being sliced off by the biome edge. Per-column End Stone and biome checks remain as final safety guards.
+- Every accepted mountain receives three or four evenly spaced foothill chorus clusters. Each cluster has three trees, is oriented around the mountain, and is not snapped toward a chunk interior. Cluster members are placed only in their own chunk and only if the entire cluster footprint belongs to End Peaks. Sparse solitary chorus plants remain at one per 32 chunks.
+- The mountain feature still queries the heightmap once per current-chunk column and only writes within that chunk. The original input JAR and unrelated mob behavior are untouched.
+- CI now validates the reduced mountain density, 3–4 chorus groups, irregular summit logic, complete biome-contained mountain footprints, and the existing once-per-column heightmap path. A new in-game generation pass is still required to judge the visual result and chorus distribution.
+
+---
+
 ## Owner correction — compact End Peaks and centered Lushsaur rider — 2026-11-18
 
 - Keep the End Peaks biome. The replacement terrain uses a 12-block generation cell, a 5–6 block horizontal radius on each axis (10–12 block overall diameter), and a deterministic rise of 10–20 blocks. Seven of every eight cells can contain a hill; the biome-selection mask itself is unchanged.

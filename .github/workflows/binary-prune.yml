@@ -1056,27 +1056,34 @@ jobs:
           limiter = (root / "EndPeaksChorusoatlSpawnLimiter.java").read_text(encoding="utf-8")
 
           for value in (
-              "public static final int CELL_SIZE = 12;",
+              "public static final int CELL_SIZE = 24;",
               "public static final int MAX_RADIUS = 6;",
-              "public static final int MAX_CENTER_OFFSET = 1;",
-              "if ((hash & 7L) == 0L)",
+              "public static final int MAX_CENTER_OFFSET = 2;",
+              "if ((hash & 3L) != 0L)",
               "int radiusX = 5 + (int) ((hash >>> 19) & 1L);",
               "int radiusZ = 5 + (int) ((hash >>> 23) & 1L);",
-              "int height = 10 + (int) ((hash >>> 27) % 6L) * 2;",
+              "int height = 12 + (int) ((hash >>> 27) % 5L) * 2;",
+              "double plateauRadius = 0.26D + ((hash >>> 33) & 3L) * 0.02D;",
           ):
               if value not in worldgen:
                   raise SystemExit("End Peaks compact terrain setting missing: " + value)
 
-          if mountain.count("level.getHeight(") != 1 or "Math.max(maxRise, rise)" not in mountain:
+          if mountain.count("level.getHeight(") != 1 or "Math.max(maxRise, getRiseAt(mountain, x, z))" not in mountain:
               raise SystemExit("Mountain feature must sample the heightmap once per column and merge overlapping hills.")
           if "groundY + maxRise - 1" not in mountain:
               raise SystemExit("Mountain rise must place at most the exact requested number of blocks.")
-          if "((mountain.hash() >>> 5) & 31L) != 0L" not in chorus or "groupCount = 1" not in chorus:
-              raise SystemExit("Chorus clusters must remain sparse as mountain-cell density increases.")
+          if "isMountainContainedInBiome" not in mountain or "isSummitBlock" not in mountain:
+              raise SystemExit("Mountains must fit inside End Peaks and keep their irregular 3x3 summit.")
+          if "Math.pow(slope, 0.82D)" not in mountain:
+              raise SystemExit("Mountain profile must keep the steeper stepped spire silhouette.")
+          if "groupCount = 3 +" not in chorus or "GROUP_RADIUS_OFFSET = 1.5D" not in chorus:
+              raise SystemExit("Each mountain must receive three or four foothill chorus groups.")
+          if "isMountainContainedInBiome" not in chorus or "snapToChunkInterior" in chorus:
+              raise SystemExit("Chorus groups must follow complete mountains without chunk-edge snapping.")
           for forbidden in ("SpawnGroupData", "ChorusoatlGroupData", "setSpawnData"):
               if forbidden in limiter:
                   raise SystemExit("Chorusoatl limiter still overrides vanilla spawn data: " + forbidden)
-          print("Verified End Peaks 10–20-block compact hills, sparse chorus clusters, and ageable spawn-data safety.")
+          print("Verified End Peaks 12–20-block separated spires, irregular 3x3 summits, complete biome-contained footprints, 3–4 chorus groups, and ageable spawn-data safety.")
           PY
 
           MOUNT_COMPONENT_INTERACT="$(awk '/public net.minecraft.world.InteractionResult mobInteract/ { capture=1; print; next } capture && /^  (public|private|protected) / { exit } capture { print }' <<< "$MOUNT_COMPONENT_BYTECODE")"

@@ -11,9 +11,13 @@ import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public final class EndPeaksMountainFeature extends Feature<NoneFeatureConfiguration> {
+    private static final int BIOME_SAMPLE_Y = 64;
+
     public EndPeaksMountainFeature() {
         super(NoneFeatureConfiguration.CODEC);
     }
@@ -41,7 +45,7 @@ public final class EndPeaksMountainFeature extends Feature<NoneFeatureConfigurat
         for (int cellX = minCellX; cellX <= maxCellX; cellX++) {
             for (int cellZ = minCellZ; cellZ <= maxCellZ; cellZ++) {
                 EndPeaksWorldgen.Mountain mountain = EndPeaksWorldgen.mountainAt(cellX, cellZ);
-                if (mountain != null) {
+                if (mountain != null && isMountainContainedInBiome(level, mountain)) {
                     mountains.add(mountain);
                 }
             }
@@ -69,22 +73,7 @@ public final class EndPeaksMountainFeature extends Feature<NoneFeatureConfigurat
 
                 int maxRise = 0;
                 for (EndPeaksWorldgen.Mountain mountain : mountains) {
-                    double dx = (x - mountain.centerX()) / (double) mountain.radiusX();
-                    double dz = (z - mountain.centerZ()) / (double) mountain.radiusZ();
-                    double distanceSquared = dx * dx + dz * dz;
-                    if (distanceSquared >= 1.0D) {
-                        continue;
-                    }
-
-                    double distance = Math.sqrt(distanceSquared);
-                    double profile = 1.0D;
-                    if (distance > mountain.plateauRadius()) {
-                        double slope = (1.0D - distance) / (1.0D - mountain.plateauRadius());
-                        profile = Math.pow(slope, 0.72D);
-                    }
-
-                    int rise = (int) Math.floor(mountain.height() * profile / 2.0D) * 2;
-                    maxRise = Math.max(maxRise, rise);
+                    maxRise = Math.max(maxRise, getRiseAt(mountain, x, z));
                 }
 
                 if (maxRise < 2) {
@@ -103,5 +92,91 @@ public final class EndPeaksMountainFeature extends Feature<NoneFeatureConfigurat
         }
 
         return placed;
+    }
+
+    static boolean isMountainContainedInBiome(
+        WorldGenLevel level,
+        EndPeaksWorldgen.Mountain mountain
+    ) {
+        Set<Long> checkedQuartCells = new HashSet<>();
+        MutableBlockPos samplePos = new MutableBlockPos();
+
+        for (int x = mountain.centerX() - mountain.radiusX();
+             x <= mountain.centerX() + mountain.radiusX(); x++) {
+            for (int z = mountain.centerZ() - mountain.radiusZ();
+                 z <= mountain.centerZ() + mountain.radiusZ(); z++) {
+                double dx = (x - mountain.centerX()) / (double) mountain.radiusX();
+                double dz = (z - mountain.centerZ()) / (double) mountain.radiusZ();
+                if (dx * dx + dz * dz >= 1.0D) {
+                    continue;
+                }
+
+                int quartX = Math.floorDiv(x, 4);
+                int quartZ = Math.floorDiv(z, 4);
+                long quartKey = ((long) quartX << 32) | (quartZ & 0xFFFFFFFFL);
+                if (!checkedQuartCells.add(quartKey)) {
+                    continue;
+                }
+
+                samplePos.set(quartX * 4 + 2, BIOME_SAMPLE_Y, quartZ * 4 + 2);
+                if (!level.getBiome(samplePos).is(EndPeaksWorldgen.BIOME)) {
+                    return false;
+                }
+            }
+        }
+
+        return !checkedQuartCells.isEmpty();
+    }
+
+    private static int getRiseAt(EndPeaksWorldgen.Mountain mountain, int x, int z) {
+        int offsetX = x - mountain.centerX();
+        int offsetZ = z - mountain.centerZ();
+        if (isSummitBlock(mountain, offsetX, offsetZ)) {
+            return mountain.height();
+        }
+
+        double dx = offsetX / (double) mountain.radiusX();
+        double dz = offsetZ / (double) mountain.radiusZ();
+        double distance = Math.sqrt(dx * dx + dz * dz);
+        double angle = Math.atan2(dz, dx);
+        double phase = ((mountain.hash() >>> 40) & 0xFFFFL) / 65536.0D * Math.PI * 2.0D;
+        double secondaryPhase =
+            ((mountain.hash() >>> 24) & 0xFFFFL) / 65536.0D * Math.PI * 2.0D;
+        double ridgeShape = 1.0D
+            + Math.sin(angle * 3.0D + phase) * 0.055D
+            + Math.cos(angle * 5.0D + secondaryPhase) * 0.025D;
+        distance /= ridgeShape;
+
+        if (distance >= 1.0D) {
+            return 0;
+        }
+
+        double profile = 1.0D;
+        if (distance > mountain.plateauRadius()) {
+            double slope = (1.0D - distance) / (1.0D - mountain.plateauRadius());
+            profile = Math.pow(slope, 0.82D);
+        }
+
+        return (int) Math.floor(mountain.height() * profile);
+    }
+
+    private static boolean isSummitBlock(
+        EndPeaksWorldgen.Mountain mountain,
+        int offsetX,
+        int offsetZ
+    ) {
+        if (Math.abs(offsetX) <= 1 && Math.abs(offsetZ) <= 1) {
+            return true;
+        }
+
+        boolean summitEdge = (Math.abs(offsetX) == 2 && Math.abs(offsetZ) <= 1)
+            || (Math.abs(offsetZ) == 2 && Math.abs(offsetX) <= 1);
+        if (!summitEdge) {
+            return false;
+        }
+
+        int localX = (int) (mountain.hash() >>> 32) + offsetX * 17;
+        int localZ = (int) mountain.hash() + offsetZ * 31;
+        return (EndPeaksWorldgen.mix(localX, localZ) & 3L) == 0L;
     }
 }
