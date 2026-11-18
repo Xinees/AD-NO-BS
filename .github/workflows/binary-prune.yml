@@ -341,7 +341,7 @@ jobs:
               assert modifier["biomes"] == "archie_dinosaurs:end_peaks"
               assert modifier["spawners"] == {
                   "type": "archie_dinosaurs:chorusoatl",
-                  "weight": 1,
+                  "weight": 2,
                   "minCount": 3,
                   "maxCount": 5,
               }
@@ -375,7 +375,7 @@ jobs:
                   assert tag.get("replace") is False
                   assert "archie_dinosaurs:end_peaks" in tag.get("values", [])
 
-          print("Verified End Peaks generation resources, End structure tags, and Chorusoatl's 2-group/3-5 population settings.")
+          print("Verified End Peaks generation resources, End structure tags, and Chorusoatl's 3-group/3-5 population settings.")
           PY
 
           CHORUS_LIMITER="$(javap -classpath "$JAR" -p -c com.eternal_creations.archies_dino_mod.worldgen.EndPeaksChorusoatlSpawnLimiter)"
@@ -390,7 +390,12 @@ jobs:
               exit 1
             fi
           done
-          echo "Verified two active Chorusoatl natural spawn groups per local End Peaks area."
+          if ! grep -Fq 'MAX_ACTIVE_GROUPS = 3' worldgen/src/main/java/com/eternal_creations/archies_dino_mod/worldgen/EndPeaksChorusoatlSpawnLimiter.java ||
+             ! grep -Fq 'GROUP_REGION_RADIUS = 512.0D' worldgen/src/main/java/com/eternal_creations/archies_dino_mod/worldgen/EndPeaksChorusoatlSpawnLimiter.java; then
+            echo "Chorusoatl population must allow three groups per enlarged local End Peaks area."
+            exit 1
+          fi
+          echo "Verified three active Chorusoatl natural spawn groups per enlarged local End Peaks area."
       - name: Verify Sculksaur multipart hitboxes
         shell: bash
         run: |
@@ -1059,31 +1064,48 @@ jobs:
               "public static final int CELL_SIZE = 24;",
               "public static final int MAX_RADIUS = 6;",
               "public static final int MAX_CENTER_OFFSET = 2;",
-              "if ((hash & 3L) != 0L)",
+              "if ((hash & 31L) >= 23L)",
               "int radiusX = 5 + (int) ((hash >>> 19) & 1L);",
               "int radiusZ = 5 + (int) ((hash >>> 23) & 1L);",
               "int height = 12 + (int) ((hash >>> 27) % 5L) * 2;",
               "double plateauRadius = 0.26D + ((hash >>> 33) & 3L) * 0.02D;",
+              "REGION_THRESHOLD = 0.18D;",
+              "BIOME_NOISE_SCALE = 0.0016D;",
+              "BIOME_DETAIL_SCALE = 0.0048D;",
+              "BIOME_DETAIL_WEIGHT = 0.18D;",
           ):
               if value not in worldgen:
-                  raise SystemExit("End Peaks compact terrain setting missing: " + value)
+                  raise SystemExit("End Peaks density/rarity setting missing: " + value)
 
-          if mountain.count("level.getHeight(") != 1 or "Math.max(maxRise, getRiseAt(mountain, x, z))" not in mountain:
-              raise SystemExit("Mountain feature must sample the heightmap once per column and merge overlapping hills.")
-          if "groundY + maxRise - 1" not in mountain:
-              raise SystemExit("Mountain rise must place at most the exact requested number of blocks.")
-          if "isMountainContainedInBiome" not in mountain or "isSummitBlock" not in mountain:
-              raise SystemExit("Mountains must fit inside End Peaks and keep their irregular 3x3 summit.")
-          if "Math.pow(slope, 0.82D)" not in mountain:
-              raise SystemExit("Mountain profile must keep the steeper stepped spire silhouette.")
-          if "groupCount = 3 +" not in chorus or "GROUP_RADIUS_OFFSET = 1.5D" not in chorus:
-              raise SystemExit("Each mountain must receive three or four foothill chorus groups.")
-          if "isMountainContainedInBiome" not in chorus or "snapToChunkInterior" in chorus:
-              raise SystemExit("Chorus groups must follow complete mountains without chunk-edge snapping.")
+          if "minCellForCenterRange" not in mountain or "Math.floorDiv(mountain.centerX(), 16)" not in mountain:
+              raise SystemExit("Each complete mountain must be generated once by its center chunk.")
+          if "GROVE_FOOTPRINT_MARGIN = 10" not in mountain or "ISLAND_EDGE_SAMPLE_COUNT = 32" not in mountain:
+              raise SystemExit("Mountain must have a complete island-supported footprint including its chorus grove.")
+          if "groundY + rise - 1" not in mountain or "isMountainContainedInBiome" not in mountain:
+              raise SystemExit("Mountains must fit wholly on End Stone island surfaces with an exact height cap.")
+          if "isSummitBlock" not in mountain or "Math.pow(slope, 0.82D)" not in mountain:
+              raise SystemExit("Mountain profile must retain the irregular 3x3 summit and stepped spire silhouette.")
+
+          if "groupCount = 3 +" not in chorus or "GROUP_RADIUS_OFFSET = 4.0D" not in chorus:
+              raise SystemExit("Each mountain must receive three or four spaced foothill chorus groups.")
+          if "{0, 6}" not in chorus or "{0, -6}" not in chorus:
+              raise SystemExit("Trees inside each chorus group must have non-overlapping root spacing.")
+          if "Math.floorDiv(mountain.centerX(), 16)" not in chorus:
+              raise SystemExit("A complete chorus ring must be generated by its mountain center chunk.")
+          if "GROUND_PLANT_CHANCE = 4" not in chorus or "isNearPlannedMountain" not in chorus:
+              raise SystemExit("Ordinary ground chorus plants must return outside the mountain/grove clearance area.")
+
+          mixin = Path("worldgen/src/main/java/com/eternal_creations/archies_dino_mod/mixin/EndPeaksBiomeSourceMixin.java").read_text(encoding="utf-8")
+          if "SMALL_END_ISLANDS" in mixin or "isEndPeaksRegion(quartX, quartZ)" not in mixin:
+              raise SystemExit("End Peaks must stay off small islands and use the enlarged, rarer region mask.")
+
           for forbidden in ("SpawnGroupData", "ChorusoatlGroupData", "setSpawnData"):
               if forbidden in limiter:
                   raise SystemExit("Chorusoatl limiter still overrides vanilla spawn data: " + forbidden)
-          print("Verified End Peaks 12–20-block separated spires, irregular 3x3 summits, complete biome-contained footprints, 3–4 chorus groups, and ageable spawn-data safety.")
+          for required in ("MAX_ACTIVE_GROUPS = 3", "GROUP_REGION_RADIUS = 512.0D"):
+              if required not in limiter:
+                  raise SystemExit("Chorusoatl population expansion missing: " + required)
+          print("Verified larger rare End Peaks regions, complete island-supported mountains, 3–4 spaced chorus groves, restored ground plants, and three active Chorusoatl groups.")
           PY
 
           MOUNT_COMPONENT_INTERACT="$(awk '/public net.minecraft.world.InteractionResult mobInteract/ { capture=1; print; next } capture && /^  (public|private|protected) / { exit } capture { print }' <<< "$MOUNT_COMPONENT_BYTECODE")"
