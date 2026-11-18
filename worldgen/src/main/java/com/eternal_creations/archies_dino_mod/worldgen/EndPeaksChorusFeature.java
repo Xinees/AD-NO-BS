@@ -10,16 +10,22 @@ import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.util.RandomSource;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public final class EndPeaksChorusFeature extends Feature<NoneFeatureConfiguration> {
-    private static final int[][] CLUSTER_OFFSETS = {
-        {0, 0},
-        {0, 6},
-        {0, -6},
-    };
-    private static final double GROUP_RADIUS_OFFSET = 4.0D;
-    private static final int GROUND_PLANT_EXCLUSION_MARGIN = 16;
+    private static final int MIN_GROUPS = 3;
+    private static final int MAX_GROUPS = 4;
+    private static final int GROUP_EDGE_MIN = 8;
+    private static final int GROUP_EDGE_RANGE = 7;
+    private static final int GROUP_CENTER_MIN_SPACING = 12;
+    private static final int TREE_ROOT_MIN_SPACING = 6;
+    private static final int TREE_ROOT_GROUP_SPACING = 8;
+    private static final int TREE_ROOT_MAX_OFFSET = 7;
+    private static final int GROUP_POSITION_ATTEMPTS = 32;
+    private static final int TREE_POSITION_ATTEMPTS = 32;
+    private static final int GROUND_PLANT_EXCLUSION_MARGIN = 34;
     private static final int GROUND_PLANT_CHANCE = 4;
     private static final int GROUND_PLANT_ATTEMPTS = 8;
 
@@ -40,10 +46,22 @@ public final class EndPeaksChorusFeature extends Feature<NoneFeatureConfiguratio
         int chunkMinZ = Math.floorDiv(origin.getZ(), 16) * 16;
         int chunkMaxX = chunkMinX + 15;
         int chunkMaxZ = chunkMinZ + 15;
-        int minCellX = EndPeaksWorldgen.minCellForCenterRange(chunkMinX, 0);
-        int maxCellX = EndPeaksWorldgen.maxCellForCenterRange(chunkMaxX, 0);
-        int minCellZ = EndPeaksWorldgen.minCellForCenterRange(chunkMinZ, 0);
-        int maxCellZ = EndPeaksWorldgen.maxCellForCenterRange(chunkMaxZ, 0);
+        int minCellX = EndPeaksWorldgen.minCellForCenterRange(
+            chunkMinX,
+            GROUND_PLANT_EXCLUSION_MARGIN
+        );
+        int maxCellX = EndPeaksWorldgen.maxCellForCenterRange(
+            chunkMaxX,
+            GROUND_PLANT_EXCLUSION_MARGIN
+        );
+        int minCellZ = EndPeaksWorldgen.minCellForCenterRange(
+            chunkMinZ,
+            GROUND_PLANT_EXCLUSION_MARGIN
+        );
+        int maxCellZ = EndPeaksWorldgen.maxCellForCenterRange(
+            chunkMaxZ,
+            GROUND_PLANT_EXCLUSION_MARGIN
+        );
 
         boolean placed = false;
 
@@ -57,45 +75,29 @@ public final class EndPeaksChorusFeature extends Feature<NoneFeatureConfiguratio
                     continue;
                 }
 
-                int groupCount = 3 + (int) ((mountain.hash() >>> 60) & 1L);
-                double angleOffset = ((mountain.hash() >>> 40) & 0xFFFFL) / 65536.0D
-                    * Math.PI * 2.0D;
+                List<List<BlockPos>> groves = createGroves(mountain);
+                for (List<BlockPos> grove : groves) {
+                    BlockPos[] plantPositions = new BlockPos[grove.size()];
+                    boolean groveValid = true;
 
-                for (int group = 0; group < groupCount; group++) {
-                    double angle = angleOffset + Math.PI * 2.0D * group / groupCount;
-                    double cos = Math.cos(angle);
-                    double sin = Math.sin(angle);
-                    int clusterX = mountain.centerX()
-                        + (int) Math.round(cos * (mountain.radiusX() + GROUP_RADIUS_OFFSET));
-                    int clusterZ = mountain.centerZ()
-                        + (int) Math.round(sin * (mountain.radiusZ() + GROUP_RADIUS_OFFSET));
-
-                    BlockPos[] plantPositions = new BlockPos[CLUSTER_OFFSETS.length];
-                    boolean clusterValid = true;
-
-                    for (int i = 0; i < CLUSTER_OFFSETS.length; i++) {
-                        int localX = CLUSTER_OFFSETS[i][0];
-                        int localZ = CLUSTER_OFFSETS[i][1];
-                        int x = clusterX + (int) Math.round(localX * cos - localZ * sin);
-                        int z = clusterZ + (int) Math.round(localX * sin + localZ * cos);
-                        if (!level.getBiome(new BlockPos(x, 64, z)).is(EndPeaksWorldgen.BIOME)) {
-                            clusterValid = false;
-                            break;
-                        }
-
+                    for (int i = 0; i < grove.size(); i++) {
+                        BlockPos root = grove.get(i);
+                        int x = root.getX();
+                        int z = root.getZ();
                         int y = level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x, z);
-                        BlockPos surfacePos = new BlockPos(x, y, z);
+                        BlockPos surface = new BlockPos(x, y, z);
                         if (y <= level.getMinBuildHeight() + 1
+                            || !level.getBiome(new BlockPos(x, 64, z)).is(EndPeaksWorldgen.BIOME)
+                            || !level.getBiome(surface).is(EndPeaksWorldgen.BIOME)
                             || !level.getBlockState(new BlockPos(x, y - 1, z)).is(Blocks.END_STONE)
-                            || !level.getBlockState(surfacePos).isAir()
-                            || !level.getBiome(surfacePos).is(EndPeaksWorldgen.BIOME)) {
-                            clusterValid = false;
+                            || !level.getBlockState(surface).isAir()) {
+                            groveValid = false;
                             break;
                         }
-                        plantPositions[i] = surfacePos;
+                        plantPositions[i] = surface;
                     }
 
-                    if (!clusterValid) {
+                    if (!groveValid) {
                         continue;
                     }
 
@@ -122,12 +124,12 @@ public final class EndPeaksChorusFeature extends Feature<NoneFeatureConfiguratio
                 }
 
                 int y = level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x, z);
-                BlockPos surfacePos = new BlockPos(x, y, z);
+                BlockPos surface = new BlockPos(x, y, z);
                 if (y <= level.getMinBuildHeight() + 1
                     || !level.getBiome(new BlockPos(x, 64, z)).is(EndPeaksWorldgen.BIOME)
+                    || !level.getBiome(surface).is(EndPeaksWorldgen.BIOME)
                     || !level.getBlockState(new BlockPos(x, y - 1, z)).is(Blocks.END_STONE)
-                    || !level.getBlockState(surfacePos).isAir()
-                    || !level.getBiome(surfacePos).is(EndPeaksWorldgen.BIOME)) {
+                    || !level.getBlockState(surface).isAir()) {
                     continue;
                 }
 
@@ -136,7 +138,7 @@ public final class EndPeaksChorusFeature extends Feature<NoneFeatureConfiguratio
                     level,
                     context.chunkGenerator(),
                     random,
-                    surfacePos,
+                    surface,
                     NoneFeatureConfiguration.INSTANCE
                 ));
                 break;
@@ -146,12 +148,108 @@ public final class EndPeaksChorusFeature extends Feature<NoneFeatureConfiguratio
         return placed;
     }
 
+    private static List<List<BlockPos>> createGroves(EndPeaksWorldgen.Mountain mountain) {
+        int groupCount = MIN_GROUPS
+            + (int) Long.remainderUnsigned(mountain.hash() >>> 60, MAX_GROUPS - MIN_GROUPS + 1L);
+        List<BlockPos> groupCenters = new ArrayList<>(groupCount);
+
+        for (int group = 0; group < groupCount; group++) {
+            for (int attempt = 0; attempt < GROUP_POSITION_ATTEMPTS; attempt++) {
+                long hash = positionHash(mountain, group, -1, attempt);
+                double angle = unit(hash >>> 8) * Math.PI * 2.0D;
+                int edgeOffset = GROUP_EDGE_MIN
+                    + (int) Long.remainderUnsigned(hash >>> 24, GROUP_EDGE_RANGE);
+                int radiusX = mountain.radiusX() + edgeOffset;
+                int radiusZ = mountain.radiusZ() + edgeOffset;
+                int x = mountain.centerX() + (int) Math.round(Math.cos(angle) * radiusX);
+                int z = mountain.centerZ() + (int) Math.round(Math.sin(angle) * radiusZ);
+                BlockPos candidate = new BlockPos(x, 0, z);
+
+                if (isSpacedFromAll(candidate, groupCenters, GROUP_CENTER_MIN_SPACING)) {
+                    groupCenters.add(candidate);
+                    break;
+                }
+            }
+        }
+
+        List<List<BlockPos>> groves = new ArrayList<>(groupCenters.size());
+        List<BlockPos> allRoots = new ArrayList<>(groupCenters.size() * 3);
+
+        for (int group = 0; group < groupCenters.size(); group++) {
+            BlockPos center = groupCenters.get(group);
+            List<BlockPos> roots = new ArrayList<>(3);
+
+            for (int tree = 0; tree < 3; tree++) {
+                for (int attempt = 0; attempt < TREE_POSITION_ATTEMPTS; attempt++) {
+                    long hash = positionHash(mountain, group, tree, attempt);
+                    double angle = unit(hash >>> 8) * Math.PI * 2.0D;
+                    int offset = 1
+                        + (int) Long.remainderUnsigned(hash >>> 24, TREE_ROOT_MAX_OFFSET);
+                    int x = center.getX() + (int) Math.round(Math.cos(angle) * offset);
+                    int z = center.getZ() + (int) Math.round(Math.sin(angle) * offset);
+                    BlockPos candidate = new BlockPos(x, 0, z);
+
+                    if (!isSpacedFromAll(candidate, roots, TREE_ROOT_MIN_SPACING)
+                        || !isSpacedFromAll(candidate, allRoots, TREE_ROOT_GROUP_SPACING)) {
+                        continue;
+                    }
+
+                    roots.add(candidate);
+                    break;
+                }
+            }
+
+            if (roots.size() == 3) {
+                groves.add(roots);
+                allRoots.addAll(roots);
+            }
+        }
+
+        return groves;
+    }
+
+    private static long positionHash(
+        EndPeaksWorldgen.Mountain mountain,
+        int group,
+        int tree,
+        int attempt
+    ) {
+        int x = (int) (mountain.hash() >>> 32)
+            + group * 0x9E3779B9
+            + (tree + 2) * 0x85EBCA6B
+            + attempt * 0xC2B2AE35;
+        int z = (int) mountain.hash()
+            ^ group * 0x27D4EB2D
+            ^ (tree + 3) * 0x165667B1
+            ^ attempt * 0xD3A2646C;
+        return EndPeaksWorldgen.mix(x, z);
+    }
+
+    private static double unit(long value) {
+        return Long.remainderUnsigned(value, 1_000_003L) / 1_000_003.0D;
+    }
+
+    private static boolean isSpacedFromAll(
+        BlockPos candidate,
+        List<BlockPos> positions,
+        int minimumDistance
+    ) {
+        int minimumDistanceSquared = minimumDistance * minimumDistance;
+        for (BlockPos position : positions) {
+            int dx = candidate.getX() - position.getX();
+            int dz = candidate.getZ() - position.getZ();
+            if (dx * dx + dz * dz < minimumDistanceSquared) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     private static boolean isNearPlannedMountain(int x, int z) {
-        int searchRadius = EndPeaksWorldgen.MAX_RADIUS + GROUND_PLANT_EXCLUSION_MARGIN;
-        int minCellX = EndPeaksWorldgen.minCellForCenterRange(x, searchRadius);
-        int maxCellX = EndPeaksWorldgen.maxCellForCenterRange(x, searchRadius);
-        int minCellZ = EndPeaksWorldgen.minCellForCenterRange(z, searchRadius);
-        int maxCellZ = EndPeaksWorldgen.maxCellForCenterRange(z, searchRadius);
+        int minCellX = EndPeaksWorldgen.minCellForCenterRange(x, GROUND_PLANT_EXCLUSION_MARGIN);
+        int maxCellX = EndPeaksWorldgen.maxCellForCenterRange(x, GROUND_PLANT_EXCLUSION_MARGIN);
+        int minCellZ = EndPeaksWorldgen.minCellForCenterRange(z, GROUND_PLANT_EXCLUSION_MARGIN);
+        int maxCellZ = EndPeaksWorldgen.maxCellForCenterRange(z, GROUND_PLANT_EXCLUSION_MARGIN);
 
         for (int cellX = minCellX; cellX <= maxCellX; cellX++) {
             for (int cellZ = minCellZ; cellZ <= maxCellZ; cellZ++) {
