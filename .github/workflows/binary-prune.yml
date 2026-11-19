@@ -1111,32 +1111,37 @@ jobs:
               raise SystemExit("Each deterministic mountain candidate must be owned by exactly one center chunk.")
           if "Heightmap.Types.WORLD_SURFACE_WG" not in mountain or "Heightmap.Types.OCEAN_FLOOR_WG" in mountain:
               raise SystemExit("Mountain placement must preserve the proven End surface heightmap used by Build 391.")
-          if "GROVE_FOOTPRINT_MARGIN" in mountain or "ISLAND_EDGE_SAMPLE_COUNT" in mountain:
-              raise SystemExit("Mountain eligibility must remain local and must not depend on a distant grove perimeter.")
           for required in (
+              "GROVE_FOOTPRINT_MARGIN = 10",
+              "ISLAND_EDGE_SAMPLE_COUNT = 32",
+              "expandedRadiusX = mountain.radiusX() + GROVE_FOOTPRINT_MARGIN",
+              "expandedRadiusZ = mountain.radiusZ() + GROVE_FOOTPRINT_MARGIN",
               "getSummitBaseY",
               "private static int getGroundY(",
               "private static boolean isValidMountainColumn(",
-              "Math.abs(offsetX) <= 1 && Math.abs(offsetZ) <= 1",
+              "private static boolean isSummitBlock(",
+              "mountain.plateauRadius()",
+              "Math.pow(slope, 0.72D)",
               "groundY + rise - 1",
-              "summitTopY - 1",
               "current.canBeReplaced()",
-              "level.getMaxBuildHeight() - 1",
+              "forWorldGenRegion(region)",
+              "startsForStructure(",
+              "start.getBoundingBox().intersects(mountainBounds)",
+              "piece.getBoundingBox()",
+              "pieceBounds.minY() <= columnTopY",
           ):
               if required not in mountain:
-                  raise SystemExit("Mountain placement must preserve local End Stone support, the 3x3 summit and 15–20-block rise: " + required)
-          if "getMountainBaseY" in mountain or "GROVE_FOOTPRINT_MARGIN" in mountain:
-              raise SystemExit("Mountain generation must use local surface sampling rather than an all-footprint base gate.")
-          place_block = mountain.split("private static boolean placeMountain", 1)[1].split(
-              "private static int getSummitBaseY", 1
-          )[0]
-          if "return false;" in place_block:
-              raise SystemExit("Mountain placement must never reject the entire hill because the flat summit is unavailable.")
-          summit_helper = mountain.split("private static int getSummitBaseY", 1)[1].split(
-              "private static int getGroundY", 1
-          )[0]
-          if "return -1;" not in summit_helper:
-              raise SystemExit("The flat summit may be disabled when any of its nine support columns are invalid.")
+                  raise SystemExit("Mountain shape, island-edge clearance, or structure collision guard is missing: " + required)
+          if "getMountainBaseY" in mountain or "isSummitCore(" in mountain:
+              raise SystemExit("Mountain placement must not use a whole-footprint base gate or a fixed 3x3-only summit.")
+          if "return false;" in mountain.split("private static boolean placeMountain", 1)[1].split("private static int getSummitBaseY", 1)[0]:
+              raise SystemExit("A failed summit eligibility check must not cancel the entire mountain.")
+          if "int height = 15 + (int) ((hash >>> 27) % 6L);" not in worldgen:
+              raise SystemExit("Mountain height must remain in the requested 15–20-block range.")
+          if "if ((hash & 31L) >= 10L)" not in worldgen:
+              raise SystemExit("Mountain density must be slightly higher than the previous 9/32 selection rate.")
+          if "double plateauRadius = 0.48D + ((hash >>> 33) & 3L) * 0.02D;" not in worldgen:
+              raise SystemExit("Mountain summit footprint must expand beyond the former 3x3-only cap.")
           if "GROUND_PLANT_EXCLUSION_MARGIN + EndPeaksWorldgen.MAX_RADIUS" not in chorus:
               raise SystemExit("Ground chorus spacing must search the full mountain radius and exclusion margin.")
 
