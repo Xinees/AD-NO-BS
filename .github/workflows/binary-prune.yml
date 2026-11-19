@@ -1115,10 +1115,10 @@ jobs:
           if "Heightmap.Types.WORLD_SURFACE_WG" not in mountain or "Heightmap.Types.OCEAN_FLOOR_WG" in mountain:
               raise SystemExit("Mountain placement must preserve the proven End surface heightmap used by Build 391.")
           for required in (
-              "GROVE_FOOTPRINT_MARGIN = 10",
+              "ISLAND_EDGE_MARGIN = 10",
               "ISLAND_EDGE_SAMPLE_COUNT = 32",
-              "expandedRadiusX = mountain.radiusX() + GROVE_FOOTPRINT_MARGIN",
-              "expandedRadiusZ = mountain.radiusZ() + GROVE_FOOTPRINT_MARGIN",
+              "expandedRadiusX = mountain.radiusX() + ISLAND_EDGE_MARGIN",
+              "expandedRadiusZ = mountain.radiusZ() + ISLAND_EDGE_MARGIN",
               "getSummitBaseY",
               "private static int getGroundY(",
               "private static boolean isValidMountainColumn(",
@@ -1127,11 +1127,16 @@ jobs:
               "Math.pow(slope, 0.72D)",
               "groundY + rise - 1",
               "current.canBeReplaced()",
+              "STRUCTURE_START_SEARCH_MARGIN = 4",
               "forWorldGenRegion(region)",
               "startsForStructure(",
               "start.getBoundingBox().intersects(mountainBounds)",
               "piece.getBoundingBox()",
               "pieceBounds.minY() <= columnTopY",
+              "minChunkX - STRUCTURE_START_SEARCH_MARGIN",
+              "maxChunkX + STRUCTURE_START_SEARCH_MARGIN",
+              "minChunkZ - STRUCTURE_START_SEARCH_MARGIN",
+              "maxChunkZ + STRUCTURE_START_SEARCH_MARGIN",
           ):
               if required not in mountain:
                   raise SystemExit("Mountain shape, island-edge clearance, or structure collision guard is missing: " + required)

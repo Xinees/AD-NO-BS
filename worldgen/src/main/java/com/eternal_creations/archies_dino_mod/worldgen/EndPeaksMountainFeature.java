@@ -22,7 +22,8 @@ import java.util.Set;
 
 public final class EndPeaksMountainFeature extends Feature<NoneFeatureConfiguration> {
     private static final int BIOME_SAMPLE_Y = 64;
-    private static final int GROVE_FOOTPRINT_MARGIN = 10;
+    private static final int ISLAND_EDGE_MARGIN = 10;
+    private static final int STRUCTURE_START_SEARCH_MARGIN = 4;
     private static final int ISLAND_EDGE_SAMPLE_COUNT = 32;
 
     public EndPeaksMountainFeature() {
@@ -205,8 +206,8 @@ public final class EndPeaksMountainFeature extends Feature<NoneFeatureConfigurat
         WorldGenLevel level,
         EndPeaksWorldgen.Mountain mountain
     ) {
-        int expandedRadiusX = mountain.radiusX() + GROVE_FOOTPRINT_MARGIN;
-        int expandedRadiusZ = mountain.radiusZ() + GROVE_FOOTPRINT_MARGIN;
+        int expandedRadiusX = mountain.radiusX() + ISLAND_EDGE_MARGIN;
+        int expandedRadiusZ = mountain.radiusZ() + ISLAND_EDGE_MARGIN;
         Set<Long> checkedQuartCells = new HashSet<>();
         MutableBlockPos samplePos = new MutableBlockPos();
 
@@ -343,8 +344,10 @@ public final class EndPeaksMountainFeature extends Feature<NoneFeatureConfigurat
         int minChunkZ = Math.floorDiv(minZ, 16);
         int maxChunkZ = Math.floorDiv(maxZ, 16);
 
-        for (int chunkX = minChunkX; chunkX <= maxChunkX; chunkX++) {
-            for (int chunkZ = minChunkZ; chunkZ <= maxChunkZ; chunkZ++) {
+        for (int chunkX = minChunkX - STRUCTURE_START_SEARCH_MARGIN;
+             chunkX <= maxChunkX + STRUCTURE_START_SEARCH_MARGIN; chunkX++) {
+            for (int chunkZ = minChunkZ - STRUCTURE_START_SEARCH_MARGIN;
+                 chunkZ <= maxChunkZ + STRUCTURE_START_SEARCH_MARGIN; chunkZ++) {
                 for (StructureStart start : structureManager.startsForStructure(
                     new ChunkPos(chunkX, chunkZ),
                     structure -> true
