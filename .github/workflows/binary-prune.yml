@@ -1080,6 +1080,9 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
 
+          settings = Path("worldgen/settings.gradle").read_text(encoding="utf-8")
+          if settings.index("mavenCentral()") > settings.index("gradlePluginPortal()"):
+              raise SystemExit("Maven Central must precede Plugin Portal so plugin transitive dependencies can resolve reliably.")
           root = Path("worldgen/src/main/java/com/eternal_creations/archies_dino_mod/worldgen")
           worldgen = (root / "EndPeaksWorldgen.java").read_text(encoding="utf-8")
           mountain = (root / "EndPeaksMountainFeature.java").read_text(encoding="utf-8")
