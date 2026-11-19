@@ -1093,7 +1093,7 @@ jobs:
               "public static final int CELL_SIZE = 24;",
               "public static final int MAX_RADIUS = 6;",
               "public static final int MAX_CENTER_OFFSET = 2;",
-              "if ((hash & 31L) >= 9L)",
+              "if ((hash & 31L) >= 10L)",
               "int radiusX = 5 + (int) ((hash >>> 19) & 1L);",
               "int radiusZ = 5 + (int) ((hash >>> 23) & 1L);",
               "int height = 15 + (int) ((hash >>> 27) % 6L);",
@@ -1190,7 +1190,7 @@ jobs:
           for required in ("MAX_ACTIVE_GROUPS = 3", "GROUP_REGION_RADIUS = 512.0D"):
               if required not in limiter:
                   raise SystemExit("Chorusoatl population cap setting missing: " + required)
-          print("Verified 500-block organic End Peaks regions, rare adult Chorusoatl groups, adult hitbox clearance, 18–20-block mountains with exact 3x3 summits, irregular chorus groves, and ground plants.")
+          print("Verified 500-block organic End Peaks regions, rare adult Chorusoatl groups, adult hitbox clearance, 15–20-block mountains with expanded irregular summits, island-edge protection, structure collision checks, irregular chorus groves, and ground plants.")
           PY
 
           MOUNT_COMPONENT_INTERACT="$(awk '/public net.minecraft.world.InteractionResult mobInteract/ { capture=1; print; next } capture && /^  (public|private|protected) / { exit } capture { print }' <<< "$MOUNT_COMPONENT_BYTECODE")"
