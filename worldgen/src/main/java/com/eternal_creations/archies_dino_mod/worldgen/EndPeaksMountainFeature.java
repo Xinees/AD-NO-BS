@@ -93,11 +93,6 @@ public final class EndPeaksMountainFeature extends Feature<NoneFeatureConfigurat
         int summitBaseY,
         boolean flatSummit
     ) {
-        if (summitBaseY <= level.getMinBuildHeight() + 1
-            || summitBaseY + mountain.height() - 1 >= level.getMaxBuildHeight()) {
-            return false;
-        }
-
         int summitTopY = flatSummit
             ? summitBaseY + mountain.height() - 1
             : -1;
